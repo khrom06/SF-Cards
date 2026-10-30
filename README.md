@@ -1,10 +1,10 @@
 # SF Cards
 
-**Sci‑fi "HUD" cards for Home Assistant** — a set of 13 Lovelace cards with a glowing, cinematic look: an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… and a **visual editor for every card**, so nobody has to write YAML.
+**Sci‑fi "HUD" cards for Home Assistant** — a set of 15 Lovelace cards with a glowing, cinematic look: an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… and a **visual editor for every card**, so nobody has to write YAML.
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![Languages](https://img.shields.io/badge/languages-EN%20·%20FR%20·%20ES%20·%20DE-00e5ff)
+![Languages](https://img.shields.io/badge/languages-11-00e5ff)
 
 <p align="center">
   <img src="assets/reactor.png" alt="Energy card" width="780">
@@ -20,15 +20,15 @@
 - [Installation](#installation) (HACS or manual)
 - [The cards](#the-cards)
 - [Visual editor](#visual-editor)
-- [Languages](#languages)
-- [Optional theme](#optional-theme)
+- [Languages](#languages) · [Light theme](#light-theme) · [Accessibility](#accessibility) · [Numbers](#numbers)
+- [Optional theme](#optional-theme) · [Requirements](#requirements) · [Security](#security) · [Development](#development)
 - [About HACS and its future](#about-hacs-and-its-future)
 - [Limitations](#limitations)
 - [Credits](#credits) · [License](#license)
 
 ## Features
 
-- **13 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
+- **15 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone or on a wall tablet; idle devices can be hidden automatically and the number of displayed devices is capped.
@@ -76,7 +76,7 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-reactor-card`](#sf-reactor-card) | Energy flow around an animated core: solar, grid, devices |
 | [`sf-climate-card`](#sf-climate-card) | Room dials with target temperature, house mode, extra buttons |
 | [`sf-console-card`](#sf-console-card) | Grouped controls: lights, dimmers, covers, vacuum, scripts, sensors |
-| [`sf-launcher-card`](#sf-launcher-card) | Summary tiles that open any SF card in a popup — made for phones |
+| [`sf-launcher-card`](#sf-launcher-card) | Summary tiles that open any card (SF, standard Home Assistant or custom) in a popup — made for phones |
 | [`sf-alert-card`](#sf-alert-card) | Full‑frame red alert: water leaks, doorbell, alarm, power cut |
 | [`sf-hangar-card`](#sf-hangar-card) | EV(s) + shared charger, charge‑mode selector, energy flows |
 | [`sf-machines-card`](#sf-machines-card) | Status tiles: values with thresholds, on/off, toggles with timers |
@@ -144,6 +144,8 @@ The layout adapts to the number of visible devices and to the width: up to three
 ```yaml
 type: custom:sf-climate-card
 mode: input_select.house_mode              # optional house-mode selector
+min: 15                                    # dial range (defaults 15 – 30 °C)
+max: 30
 rooms:
   - name: Living room
     icon: mdi:sofa
@@ -186,6 +188,8 @@ groups:
 
 Item kinds: `toggle`, `dimmer`, `action`, `sensor`, `cover`, `vacuum`, `stepper`, `select`.
 
+Other options: card `subtitle`; group `span` (1–4 columns); item `color`, `digits`, `unit`; for `action`: `sub` and `confirm: "text"` (asks for a second tap); for `select`: `labels: { option: Label }`.
+
 ### sf-launcher-card
 
 <img src="assets/launcher.png" alt="Launcher card" width="420">
@@ -200,8 +204,10 @@ tiles:
     icon: mdi:thermostat
     color: "#ff7043"
     hash: climate            # deep link: …/dashboard/home#climate
-    summary: climate         # climate | room | vehicles | commands | cameras | energy | machines | text
-    card:                    # any SF card
+    summary: climate         # climate | room | vehicles | commands | cameras | energy | battery | machines | text
+    # sub: "free text"      # shown under the title when summary: text
+    # users: [<user id>]     # optional: tile visible only to these users
+    card:                    # any card: SF, standard Home Assistant (vertical-stack, history-graph…) or custom
       type: custom:sf-climate-card
       rooms: [ … ]
 ```
@@ -289,6 +295,8 @@ tiles:
 
 Tile kinds: `value`, `percent`, `binary`, `text`, `duration`, `timestamp`, `toggle`.
 
+Other tile options: `unit` (force the unit), `invert: true` (alert when the value is LOW), `ok_state` / `bad_text` (kind `binary`), `map` / `ok_values` (kind `text`: translate states / list the normal ones), `timer` / `stop` (kind `toggle`: remaining-time timer, and the entities switched off by a tap while it runs).
+
 ### sf-cells-card
 
 <img src="assets/cells.png" alt="Cells card" width="640">
@@ -300,6 +308,7 @@ crit: 15
 limit: 12
 exclude: [sensor.some_battery]
 include_pattern: ""      # optional regex on the entity id
+exclude_pattern: ""      # optional regex: ignore matching entity ids
 ```
 
 ### sf-battery-card
@@ -310,6 +319,7 @@ Home battery. Everything is optional — only configured entities are shown, and
 
 ```yaml
 type: custom:sf-battery-card
+title: Battery                             # optional
 soc: sensor.battery_level                  # %
 power: sensor.battery_power                # W, positive = discharging (invert: true to flip)
 capacity_kwh: 10                           # enables "full in 3h10 / empty in …"
@@ -376,6 +386,7 @@ cameras:
 ```yaml
 type: custom:sf-setpoints-card
 title: Setpoints
+subtitle: Heating                  # optional
 columns: [{ label: Day, color: "#ffb300" }, { label: Night, color: "#4fc3f7" }]
 rows:
   - { name: Living room, icon: "mdi:sofa", entities: [input_number.living_day, input_number.living_night] }
@@ -467,12 +478,12 @@ Decimals follow the language of your Home Assistant profile (`20,5 °C` in Frenc
 
 ## Security
 
-Text that comes from entities (names, states, units, picture URLs) is always escaped before it is displayed and never interpreted as HTML; image URLs must be relative, `http(s)` or `data:image/…` (never `javascript:`). The charger controls are off unless you set `controls: true`. The cards only call the Home Assistant services you configured (`switch`, `number`, `select`, `scene`, `script`, `climate`, `light`, `cover`…) with the entities you configured. Please report a vulnerability privately through GitHub's *Security → Report a vulnerability*.
+Text that comes from entities (names, states, units, picture URLs) is always escaped before it is displayed and never interpreted as HTML; image URLs must be relative, `http(s)` or `data:image/…` (never `javascript:`). All values from the configuration that end up in HTML attributes are escaped too, and regular expressions (`include_pattern` / `exclude_pattern`) are limited and refused when they could freeze the browser. The charger controls are off unless you set `controls: true`. The cards only call the Home Assistant services you configured (`switch`, `number`, `select`, `scene`, `script`, `climate`, `light`, `cover`…) with the entities you configured. **Treat shared YAML like shared code:** like Home Assistant's own `call-service` tap action, an `action` item or a `switch_script` calls whatever service its configuration says, under whatever label it shows — read a configuration you copied from the internet before pasting it. Please report a vulnerability privately through GitHub's *Security → Report a vulnerability*.
 
 ## Development
 
 ```bash
-./test/run.sh    # syntax + render of every card (4 languages, no-solar and empty scenarios, translations, popups) in headless Chrome
+./test/run.sh    # syntax + render of every card (11 languages, no-solar and empty scenarios, translations, editors, accessibility, themes, popups) in headless Chrome
 ```
 
 See the [changelog](CHANGELOG.md) for what changed in each version.
@@ -490,7 +501,7 @@ Sources: [Matter Alpha — "Home Assistant embraces HACS into core as the market
 - Developed and tested on **Home Assistant 2026.10** (Chrome and the iOS / Android companion apps). Older versions may work but have not been tried.
 - The code comments in `dist/sf-cards.js` are still in French (the UI itself is translated).
 - Screenshots use fictional demo data.
-- No automated test suite yet — the visual editors were exercised with a mock `ha-form` in headless Chrome, and everything else on a real installation.
+- Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. Home Assistant itself is not part of the tests.
 - `sf-radar-card` and the Frigate‑related options are tied to a specific setup and are documented as advanced.
 
 ## Credits
