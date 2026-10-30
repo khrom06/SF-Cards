@@ -104,6 +104,9 @@ internet: binary_sensor.internet
 power_in: sensor.ups_input_voltage         # alert below 200 V
 leaks: [binary_sensor.leak_kitchen, binary_sensor.leak_bathroom]
 doors: [binary_sensor.door_front, binary_sensor.door_garage]
+people:                                    # optional presence row
+  - { name: Alice, entity: person.alice }
+home_states: [home]                        # states counted as "home" — add your custom zone name if it is smaller than the Home zone
 ```
 
 ### sf-reactor-card
