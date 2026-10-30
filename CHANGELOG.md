@@ -14,12 +14,24 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 - **Vehicles card — distance unit**: `distance_unit: auto | km | mi`. `auto` shows the range sensor's own unit; `km` / `mi` converts.
 - **Vehicles card — `select` mode entities**: the charge-mode selector now works with `select` entities as well as `input_select`.
 
+### Security
+- All text coming from entities (names, states, units) and all entity ids placed in attributes are escaped; the vehicle, presence-radar and room labels coming from the configuration are escaped too; an `entity_picture` URL is only used when it is relative, `http(s)` or `data:image/…` (never `javascript:`); the camera refresh URL handles pictures that carry no query string.
+- Keyboard activation ignores key repeat (a held key can no longer get past the *Stop* confirmation) and no longer triggers a parent through a nested button.
+- Tests now include a stored-text injection check on several cards.
+
 ### Fixed
+- An invalid Home Assistant language (`en_US`, empty…) no longer breaks rendering: it is normalised and falls back to English; the same safety covers date formatting.
+- Negative numbers use a plain `-` and no direction marks (copy-paste and templates).
+- Elements with no target entity are no longer announced as buttons; an armed (*Stop?*) button announces the confirmation.
 - A launcher popup could reappear (or stay) after its card was removed from the page, e.g. when leaving the view right after a tap.
 
 ### Changed
+- **Behaviour changes to know about**: the vehicles card's info line, mode selector and figure boxes, the energy card's footer boxes and the battery card's blocks are now **centered** (they were left-aligned or spread); a charger counts as *plugged in* when it is charging, and more status words are recognised (`full`, `finished`, `waiting`…), so a status sensor that used those words may now read as plugged in.
 - **Centered layout** in the vehicles, energy and battery cards: information line, charge-mode selector, figure boxes and the battery ring block are centered. README screenshots refreshed.
 - **Vehicles card — much wider compatibility**: "plugged in" and "charging" now accept `on`/`off` *and* the status words chargers publish (`Charging`, `Connected`, `Plugged in`, `Awaiting start`, `SuspendedEV`, `Charge done`…; case, spaces and dashes ignored), from any entity type (binary sensor, sensor, switch). `connected_states` / `charging_states` override the built-in lists. Without a charging entity, charger power above 50 W counts as charging, and charging implies plugged in. The launcher summary follows the same rules.
+- Charger controls: `switch_invert` for pause-type switches, `current_min` / `current_max` bounds.
+- Light theme popups: the sheet gets a real light look and SF cards switch to light themselves (no double inversion); `--sf-theme` is re-read when the HA theme changes.
+- Device fill is cautious: ambiguous fields are left empty; hidden entities, 12 V batteries, odometers, connectivity sensors and pause/lock/schedule switches are skipped; a notification reports how many fields were filled.
 - Visual editor: the charger entity pickers are no longer limited to binary sensors; two new YAML fields for custom status words (translated in all 11 languages).
 
 ## [1.6.0]

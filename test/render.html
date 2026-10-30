@@ -250,6 +250,10 @@ window.sfTr = (lang, key, vars) => {
     await m("en", "20.5"); await m("fr", "20,5"); await m("de", "20,5"); await m("pt-BR", "20,5"); await m("ru", "20,5"); await m("zh", "20.5"); await m("ar", "20.5");
     const b = mount("sf-battery-card", { soc: "sensor.bat_soc", power: "sensor.p1" }, "fr", st); await wait(40);
     if (!/1,20\s*kW/.test(text(b))) fail("nombres [fr] : « 1,20 kW » attendu dans la carte batterie"); b.remove(); }
+  // 5j-bis. Langue de HA invalide pour Intl (underscore, vide, absurde) : la carte s'affiche quand même (repli, jamais de plantage ni de récursion).
+  for (const bad of ["en_US", "", "xx-INVALID-zz", "!!"]) {
+    const e = mount("sf-machines-card", { tiles: [{ label: "T", entity: "sensor.temp", kind: "value", digits: 1 }] }, bad, base); await wait(40);
+    if (!/20\.5/.test(text(e))) fail(`nombres : langue invalide « ${bad} » : valeur 20.5 attendue en repli, obtenu « ${text(e).slice(0, 40)} »`); e.remove(); }
   // 5k. Accessibilité : boutons clavier (rôle, focus, nom, Entrée / Espace), état des sélecteurs, niveau d'alerte en toutes lettres,
   //     mouvement réduit, dialogue des popups.
   { const calls = []; const st = { ...base, "select.cm": S("Eco", { options: ["Eco", "Fast"] }), "sensor.hot": U(95, "°C") };
@@ -288,11 +292,13 @@ window.sfTr = (lang, key, vars) => {
     tiles[0].click(); await wait(120);
     let pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
     if (!pop || pop.getAttribute("theme") !== "light") fail("thème : le popup doit être clair");
-    const inner = pop && pop.shadowRoot.querySelector("sf-battery-card"); if (inner && inner.getAttribute("theme") !== "dark") fail("thème : une carte SF dans un popup clair ne doit pas s'inverser deux fois");
+    const inner = pop && pop.shadowRoot.querySelector("sf-battery-card"); if (!inner || inner.getAttribute("theme") !== "light") fail("thème : une carte SF dans un popup clair doit être elle-même en thème clair (ni sombre, ni double inversion)");
+    if (pop && /invert/.test(getComputedStyle(pop.shadowRoot.querySelector(".sheet")).filter)) fail("thème : le panneau du popup clair ne doit plus être inversé (double inversion, containing block)");
     if (pop) pop.remove(); l._pop = null;
     tiles[1].click(); await wait(150);
     pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
-    if (!pop || !pop.shadowRoot.querySelector(".std .std-vertical-stack")) fail("thème : une carte non SF dans un popup clair doit être remise à l'endroit (.std)");
+    if (!pop || !pop.shadowRoot.querySelector(".body .std-vertical-stack")) fail("thème : une carte non SF dans un popup clair doit s'afficher telle quelle (sans enveloppe ni filtre)");
+    if (pop && pop.shadowRoot.querySelector(".std")) fail("thème : plus d'enveloppe .std attendue");
     if (pop) pop.remove(); l.remove(); }
   // 5l-bis. Un popup ouvert ne survit jamais à sa carte (même retirée juste après un clic, avant le minuteur de lien direct).
   { const count = () => [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).length;
@@ -362,6 +368,70 @@ window.sfTr = (lang, key, vars) => {
       if (!emitted || emitted.chargers[0].power !== "sensor.wb_power" || emitted.chargers[0].name !== "Garage box") fail("éditeur : la borne doit être préremplie depuis l'appareil");
       if (/_device/.test(JSON.stringify(emitted))) fail("éditeur : le champ technique _device ne doit jamais être enregistré dans la configuration"); }
     ed.remove(); }
+  // 5o. Durcissement (revue contradictoire) : touche maintenue, bouton imbriqué, identifiant vide, interrupteur « pause », bornes d'intensité,
+  //     devinette prudente, URL d'images sûres, relecture de --sf-theme, dates avec une langue invalide.
+  { const calls = []; const spy = (el, st) => { el.hass = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; };
+    const kd = (el, key, repeat) => el.dispatchEvent(new KeyboardEvent("keydown", { key, repeat: !!repeat, bubbles: true, composed: true }));
+    // Touche maintenue : jamais deux appuis comptés, la confirmation d'arrêt n'est pas franchie.
+    const st = { ...base, "switch.sw": S("on"), "sensor.ev": U(0, "W") };
+    let e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", switch: "switch.sw", controls: true } }, "en", st); spy(e, st); await wait(40);
+    const stop = [...e.shadowRoot.querySelectorAll(".ctl .btn")].find((b) => /Stop/.test(b.textContent));
+    kd(stop, "Enter", false); kd(stop, "Enter", true); kd(stop, "Enter", true); await wait(20);
+    if (calls.some((c) => c[1] === "turn_off")) fail("clavier : une touche maintenue ne doit pas franchir la confirmation d'arrêt");
+    kd(stop, "Enter", false); await wait(20); if (!calls.some((c) => c[1] === "turn_off")) fail("clavier : 2 vrais appuis doivent arrêter la charge");
+    e.remove();
+    // Identifiant vide / « undefined » : pas de faux bouton.
+    e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev" } }, "en", st); await wait(40);
+    const dead = [...e.shadowRoot.querySelectorAll("[data-e]")].filter((n) => ["", "undefined"].includes(n.getAttribute("data-e")));
+    if (dead.some((n) => n.getAttribute("role") === "button")) fail("accessibilité : un élément sans entité cible ne doit pas être un bouton"); e.remove();
+    // Interrupteur « pause » : switch_invert inverse l'affichage ET l'action ; l'intensité ne descend jamais sous 0 sans bornes.
+    calls.length = 0; const stp = { ...base, "switch.pause": S("on"), "number.c": S(1, {}), "sensor.ev": U(0, "W") };
+    e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", switch: "switch.pause", switch_invert: true, current: "number.c", controls: true } }, "en", stp); spy(e, stp); await wait(40);
+    const sw = [...e.shadowRoot.querySelectorAll(".ctl .btn")].find((b) => /Start|Stop/.test(b.textContent));
+    if (!sw || !/Start/.test(sw.textContent)) fail("interrupteur inversé : switch ON (= pause) doit proposer « Start »");
+    else { sw.click(); await wait(20); if (!calls.some((c) => c[0] === "switch" && c[1] === "turn_off")) fail("interrupteur inversé : démarrer doit éteindre l'interrupteur de pause"); }
+    const minus = [...e.shadowRoot.querySelectorAll(".ctlrow .btn")][0]; calls.length = 0; if (minus) { minus.click(); await wait(20);
+      if (!calls.some((c) => c[1] === "set_value" && c[2].value === 0)) fail("intensité : sans bornes, la valeur ne doit jamais devenir négative (plancher 0)"); }
+    e.remove();
+    const st3 = { ...base, "number.c": S(10, {}) }; calls.length = 0;
+    e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", current: "number.c", current_min: 6, current_max: 16, controls: true } }, "en", st3); spy(e, st3); await wait(40);
+    const [m3, p3] = [...e.shadowRoot.querySelectorAll(".ctlrow .btn")]; for (let i = 0; i < 1; i++) { m3.click(); } await wait(20);
+    if (!calls.some((c) => c[2].value === 9)) fail("intensité : − doit passer 10 A à 9 A"); e.remove();
+    // Devinette prudente : pas de 12 V, pas d'odomètre, pas de « connectivité », pas d'interrupteur de pause, ambigu = vide.
+    const H = (list, dev) => ({ states: withIds(Object.fromEntries(list.map(([id, st]) => [id, st]))), entities: Object.fromEntries(list.map(([id]) => [id, { entity_id: id, device_id: dev }])), devices: { [dev]: { name: "X" } } });
+    const g1 = sfGuess(H([["sensor.car_12v_battery", S(12, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.car_odometer", S(5000, { unit_of_measurement: "km", device_class: "distance" })]], "d"), "d", "car");
+    if (g1.soc || g1.range) fail(`devinette : batterie 12 V / odomètre ne doivent pas être choisis (${JSON.stringify(g1)})`);
+    const g2 = sfGuess(H([["binary_sensor.wb_online", S("on", { device_class: "connectivity" })], ["switch.wb_pause_session", S("off")], ["switch.wb_smart_charging", S("on")]], "d"), "d", "charger");
+    if (g2.connected || g2.switch) fail(`devinette : connectivité / pause / « smart » ne doivent pas devenir branché / interrupteur (${JSON.stringify(g2)})`);
+    const g3 = sfGuess(H([["sensor.a_soc", S(50, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.b_level", S(60, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.p1", S(1, { unit_of_measurement: "W", device_class: "power" })], ["sensor.p2", S(2, { unit_of_measurement: "W", device_class: "power" })]], "d"), "d", "battery");
+    if (g3.power) fail(`devinette : deux puissances sans préférence = ambigu, rien ne doit être rempli (${JSON.stringify(g3)})`);
+    const g4 = sfGuess({ ...H([["sensor.hid_soc", S(50, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.ok_soc", S(60, { unit_of_measurement: "%", device_class: "battery" })]], "d"), entities: { "sensor.hid_soc": { entity_id: "sensor.hid_soc", device_id: "d", hidden: true }, "sensor.ok_soc": { entity_id: "sensor.ok_soc", device_id: "d" } } }, "d", "battery");
+    if (g4.soc !== "sensor.ok_soc") fail(`devinette : une entité masquée doit être ignorée (${JSON.stringify(g4)})`);
+    // URL d'images : javascript: / data:text refusés, relative acceptée, ? ou & selon l'URL.
+    if (sfSafeUrl("javascript:alert(1)") || sfSafeUrl("data:text/html;base64,AAAA") || sfSafeUrl("//evil.example/x.png")) fail("URL : javascript:, data:text et // doivent être refusés");
+    if (sfSafeUrl("/api/camera_proxy/camera.x?token=1") !== "/api/camera_proxy/camera.x?token=1" || !sfSafeUrl("https://a.example/x.jpg")) fail("URL : une URL relative ou https doit être acceptée");
+    const cam = mount("sf-camera-card", { cameras: [{ entity: "camera.front" }] }, "en", { ...base, "camera.front": S("idle", { entity_picture: "javascript:alert(1)" }) }); await wait(60);
+    if (/javascript:/.test(cam.shadowRoot.innerHTML)) fail("sécurité : une entity_picture javascript: ne doit jamais atteindre le DOM"); cam.remove();
+    // Texte venu d'une entité : jamais interprété comme du HTML (unité, nom, état).
+    const evil = '<img src=x onerror="window.__xss=1">'; window.__xss = 0;
+    const xs = { ...base, "sensor.rx": S(100, { unit_of_measurement: evil }), "sensor.tx": S(evil, { friendly_name: evil }) };
+    const xe = [mount("sf-hangar-card", { cars: [{ name: evil, soc: "sensor.car_soc", range: "sensor.rx" }], charger: { name: evil } }, "en", xs),
+      mount("sf-machines-card", { tiles: [{ label: evil, entity: "sensor.tx", kind: "text" }, { label: "u", entity: "sensor.rx", kind: "value" }] }, "en", xs),
+      mount("sf-battery-card", { batteries: [{ name: evil, soc: "sensor.car_soc" }, { name: "b", soc: "sensor.bat_soc" }] }, "en", xs),
+      mount("sf-cells-card", {}, "en", { ...xs, "sensor.cc": S(10, { device_class: "battery", friendly_name: evil, unit_of_measurement: "%" }) })]; await wait(80);
+    if (window.__xss) fail("SÉCURITÉ : du HTML venu d'un état / d'un nom d'entité a été exécuté (XSS)");
+    if (xe.some((n) => n.shadowRoot && n.shadowRoot.querySelector('img[src="x"]'))) fail("SÉCURITÉ : du HTML venu d'une entité a créé un élément dans le DOM");
+    xe.forEach((n) => n.remove());
+    // Langue invalide : les dates (bandeau, alerte) ne plantent pas non plus.
+    for (const bad of ["en_US", "", "!!"]) { const b = mount("sf-bridge-card", { weather: "weather.home", price: "sensor.price" }, bad, base); await wait(40);
+      if (!text(b).trim()) fail(`bandeau : langue invalide « ${bad} » : rendu vide`); b.remove(); }
+    // --sf-theme : relu quand le thème HA change.
+    document.documentElement.style.setProperty("--sf-theme", "light");
+    const tc = mount("sf-battery-card", { soc: "sensor.bat_soc" }, "en"); tc.hass = { ...HASS(base, "en"), themes: { theme: "A", darkMode: true } }; await wait(40);
+    const t1 = tc.getAttribute("theme"); document.documentElement.style.setProperty("--sf-theme", "dark");
+    tc.hass = { ...HASS(base, "en"), themes: { theme: "B", darkMode: true } }; await wait(450);
+    if (t1 !== "light" || tc.getAttribute("theme") !== "dark") fail(`thème : --sf-theme doit être relue au changement de thème HA (${t1} → ${tc.getAttribute("theme")})`);
+    document.documentElement.style.removeProperty("--sf-theme"); tc.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);

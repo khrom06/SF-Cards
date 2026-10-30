@@ -251,12 +251,15 @@ warn_text: "No sun tonight — the car will not charge in this mode."
 ```yaml
 charger:
   switch: switch.charger_charging        # shows Start / Stop (stopping asks for a second tap)
+  switch_invert: false                   # true if the switch is ON when charging is PAUSED (e.g. "pause session")
   current: number.charger_current        # a number entity: shows − / + (bounded by its min / max)
   current_step: 1                        # optional (defaults to the entity's own step)
+  current_min: 6                         # optional bounds, used when the entity does not expose min / max
+  current_max: 16                        # (the current never goes below 0 without bounds)
   controls: true                         # nothing is shown, and nothing can be triggered, without this
 ```
 
-Without `controls: true` the card stays a display, exactly as before.
+Without `controls: true` the card stays a display, exactly as before. A held-down key never counts as several presses, so it cannot get past the *Stop* confirmation.
 
 **Two chargers (or more)?** Replace `charger:` with a `chargers:` list (up to 4). Each one has its own name, status, power, current, controller decision and, if you like, its own `mode` selector. The cars are shown in a row above, one block per charger below; the header says *charging* as soon as one charger charges, and the launcher tile adds up the power. The single `charger:` syntax keeps working.
 
@@ -414,7 +417,7 @@ Edit a dashboard, open any SF card and switch to the **visual editor**:
 - in the launcher, each tile's popup content is chosen from a menu and edited with the *editor of that card*, nested;
 - rarely used fields (service data, shortcuts…) are YAML boxes inside the form;
 - the editor changes the configuration in place and never drops a field it doesn't know;
-- **Fill from a device** — in the vehicle, charger and battery editors, pick a Home Assistant *device* and the empty fields are filled with its entities, found from their type (`device_class`, unit, name): battery level, range, power, plug, current… It is a best guess — check the result — and it **never overwrites** a field you already filled. Needs Home Assistant's entity registry (any recent version);
+- **Fill from a device** — in the vehicle, charger and battery editors, pick a Home Assistant *device* and the empty fields are filled with its entities, found from their type (`device_class`, unit, name): battery level, range, power, plug, current… It is a **cautious** best guess: a field is only filled when exactly one entity matches or one matches the expected name (several candidates and no clear winner = left empty); it skips hidden entities, 12 V batteries, odometers, connectivity sensors and *pause / lock / schedule* switches; the sign of a battery's power is not guessed (check `invert`). It **never overwrites** a field you already filled, and a Home Assistant notification tells you how many fields were filled — always check the result. Needs Home Assistant's entity registry (`hass.entities`, Home Assistant 2023.3 or newer);
 - every card has a **Theme** field (dark / light / auto).
 
 ## Languages
@@ -441,7 +444,8 @@ theme: light                  # dark (default) | light | auto
 - `auto` follows the Home Assistant theme: light when HA is in light mode, dark otherwise.
 - **Set it once for every card**: add `sf-theme: light` (or `auto`) to your Home Assistant theme — HA turns every theme key into a CSS variable, here `--sf-theme` — then leave `theme` out of the cards (a `theme` set on a card always wins).
 - The light variant is the same card with its brightness inverted, hues kept, images left untouched. It is a convenient alternative to the dark HUD, not a separate design.
-- In a launcher popup, SF cards follow the launcher's theme; other cards (standard Home Assistant cards) keep their own look.
+- In a launcher popup, the sheet gets a light look and SF cards switch to light themselves; other cards (standard Home Assistant cards) keep their own look. Camera snapshots keep their real colours.
+- The light variant keeps animations running through a filter: on a slow wall tablet, prefer the dark theme or turn on *reduce motion*.
 
 ## Accessibility
 
@@ -454,6 +458,16 @@ Decimals follow the language of your Home Assistant profile (`20,5 °C` in Frenc
 ## Optional theme
 
 [`themes/sf_hud.yaml`](themes/sf_hud.yaml) dresses the **native** Home Assistant cards (history graphs, logbook, entities lists…) in the same colours. Copy it to `/config/themes/` (with `frontend: themes: !include_dir_merge_named themes` in `configuration.yaml`), reload themes, then set `theme: SF HUD` on a view.
+
+## Requirements
+
+- **Home Assistant**: any recent version. The *Fill from a device* editor feature needs the entity registry in the frontend (about 2023.3 and newer); everything else only needs the standard card API.
+- **Browser**: Chrome / Edge 111+, Safari 16.2+, Firefox 113+ (the cards use `color-mix`; the Home Assistant mobile apps follow their system web view).
+- No network access, no extra resources: the cards and their fonts are one file.
+
+## Security
+
+Text that comes from entities (names, states, units, picture URLs) is always escaped before it is displayed and never interpreted as HTML; image URLs must be relative, `http(s)` or `data:image/…` (never `javascript:`). The charger controls are off unless you set `controls: true`. The cards only call the Home Assistant services you configured (`switch`, `number`, `select`, `scene`, `script`, `climate`, `light`, `cover`…) with the entities you configured. Please report a vulnerability privately through GitHub's *Security → Report a vulnerability*.
 
 ## Development
 
