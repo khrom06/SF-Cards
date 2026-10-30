@@ -530,7 +530,7 @@ class SfHangarCard extends SfBase {
       .soc { font-family:Orbitron,sans-serif; font-size:20px; fill:#fff; }
       .tick { stroke:rgba(0,229,255,.25); stroke-width:1; }
       .borne { text-align:center; min-width:92px; }
-      .borne .plug { font-size:26px; }
+      .borne .plug { font-size:26px; display:flex; justify-content:center; }
       .flow { width:90px; height:4px; margin:8px auto; border-radius:2px; background:rgba(255,255,255,.08); overflow:hidden; }
       .flow.on::before { content:""; display:block; width:40%; height:100%;
         background: linear-gradient(90deg, transparent, ${SF_C.green}, transparent); animation: run 1.1s linear infinite; }
