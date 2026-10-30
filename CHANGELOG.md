@@ -4,49 +4,47 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 
 ## [1.7.0]
 ### Added
-- **Light theme**: `theme: dark | light | auto` on every card (editor field included), or once for all cards via the `--sf-theme` CSS variable of your HA theme. `auto` follows the HA theme. In a launcher popup the sheet gets a real light look, SF cards switch to light themselves (no double inversion, snapshots keep their colours) and standard HA cards keep their own look; `--sf-theme` is re-read when the HA theme changes.
-- **Accessibility**: clickable elements are real buttons (role, focus ring, Enter / Space, accessible names, `aria-pressed`), popups are dialogs (focus in / back, Esc), alert levels spelled out ("critical" / "warning"), `prefers-reduced-motion` respected, larger touch targets on touch screens.
-- **Locale-aware numbers**: the decimal separator follows the HA profile language (`20,5` in French), Latin digits, no thousands separator. The timestamp tile no longer forces French.
-- **Editor — fill from a device**: vehicle, charger and battery editors can pick a HA device and fill the empty fields from its entities (by `device_class`, unit and name). Never overwrites a filled field; needs the entity registry in the frontend (Home Assistant 2023.3+).
-- **Charger controls (optional)**: `controls: true` shows Start / Stop (`switch`, two taps to stop) and current − / + (`number`, bounded). Options: `switch`, `switch_invert`, `current`, `current_step`, `current_min`, `current_max`. Nothing changes without `controls: true`. Per-car `charging_states` accepts the same status words as the charger.
-- **Vehicles card — several chargers**: `chargers: [{ name, connected, charging, power, current, decision, mode }]` (up to 4) coexist in one card, each with its own state, power and optional mode selector. Header: *charging* if any charger charges. The launcher tile sums the power. The single `charger:` syntax is unchanged.
+- **Light theme**: `theme: dark | light | auto` on every card (editor field included), or once for all cards via the `--sf-theme` CSS variable of your HA theme (re-read when the HA theme changes). `auto` follows the HA theme. In a launcher popup the sheet gets a real light look, SF cards switch to light themselves (no double inversion, snapshots keep their colours) and standard HA cards keep their own look.
+- **Accessibility**: clickable elements are real buttons (role, focus ring, Enter / Space, accessible names with spaces between blocks, `aria-pressed`), popups are dialogs (focus in / back, Esc), alert levels spelled out ("critical" / "warning"), `prefers-reduced-motion` respected, larger touch targets on touch screens.
+- **Locale-aware numbers and dates**: the decimal separator follows the HA profile language (`20,5` in French), Latin digits for numbers *and* dates (even with `ar-SA`), no thousands separator, plain `-` for negatives. The timestamp tile no longer forces French.
+- **Editor — fill from a device**: vehicle, charger and battery editors can pick a HA device and fill the empty fields from its entities (by `device_class`, unit and name). Cautious: ambiguous fields stay empty; hidden entities, 12 V batteries, odometers, connectivity sensors and pause / lock / schedule switches are skipped; it never overwrites a filled field; a notification says how many fields were filled. Needs the entity registry in the frontend (Home Assistant 2023.3+).
+- **Vehicles card — wider compatibility**: "plugged in" and "charging" accept `on` / `off` *and* the status words chargers publish (`Charging`, `Connected`, `Plugged in`, `Awaiting start`, `SuspendedEV`, `Charge done`…; case, spaces and dashes ignored), from any entity type. `connected_states` / `charging_states` override the built-in lists (per charger and per car). Without a charging entity, charger power above 50 W counts as charging, and charging implies plugged in.
+- **Vehicles card — several chargers**: `chargers: [{ name, connected, charging, power, current, decision, mode }]` (up to 4), each with its own state, power and optional mode selector. Header: *charging* if any charger charges; the launcher tile sums the power. The single `charger:` syntax is unchanged.
 - **Vehicles card — up to 3 cars** (was 2), laid out in a row above the chargers.
-- **Vehicles card — distance unit**: `distance_unit: auto | km | mi`. `auto` shows the range sensor's own unit; `km` / `mi` converts.
-- **Vehicles card — `select` mode entities**: the charge-mode selector now works with `select` entities as well as `input_select`.
-
-### Security
-- All text coming from entities (names, states, units) and all entity ids placed in attributes are escaped; the vehicle, presence-radar and room labels coming from the configuration are escaped too; an `entity_picture` URL is only used when it is relative, `http(s)` or `data:image/…` (never `javascript:`); the camera refresh URL handles pictures that carry no query string.
-- Keyboard activation ignores key repeat (a held key can no longer get past the *Stop* confirmation) and no longer triggers a parent through a nested button.
-- Tests now include a stored-text injection check on several cards.
-
-### Security (second review round)
-- **Every value interpolated into an HTML attribute is escaped** (colours, services, spans, ids, SVG attributes…), so a *shared YAML* can no longer break out of an attribute to run code; radar and room labels are escaped too. A fuzz test poisons every text field of every card, one at a time.
-- Regular expressions from the configuration (`include_pattern` / `exclude_pattern`) are length-limited, compiled once, and ignored when invalid or when they nest quantifiers (ReDoS freeze). Very long entity names no longer freeze the cards.
-- Home Assistant services reachable from a card are still chosen by the configuration (like Home Assistant's own `call-service` tap action): **read any YAML you copy from the internet before pasting it** (mentioned in the README).
-
-### Fixed (second review round)
-- Climate card: no more `NaN°` when the room probe is missing and the climate entity has no current temperature.
-- The two-tap confirmation (*Stop?*) now survives a card refresh (a moving power value redraws the card every few seconds).
-- Launcher popups: closing one that was opened by a direct link no longer navigates back out of the dashboard; closing then opening another tile at once no longer closes it.
-- Vehicles card: a charger power in kW or MW is read correctly (it showed `7 W` for 7.2 kW and ignored the charging state).
-- Battery card: estimated time can no longer read `1h60`.
-- Accessibility: names read by screen readers keep spaces between blocks; tiles without an entity are no longer announced as buttons; current − / + only appear when the value is a number.
-- Camera card: `refresh` is bounded (0 no longer loops) and re-read on every config change.
-- Mistyped configurations (a string where a list is expected, empty entries) no longer crash a card; a Home Assistant object without `states` no longer throws.
-
-### Fixed
-- An invalid Home Assistant language (`en_US`, empty…) no longer breaks rendering: it is normalised and falls back to English; the same safety covers date formatting.
-- Negative numbers use a plain `-` and no direction marks (copy-paste and templates).
-- Elements with no target entity are no longer announced as buttons; an armed (*Stop?*) button announces the confirmation.
-- A launcher popup could reappear (or stay) after its card was removed from the page, e.g. when leaving the view right after a tap.
+- **Vehicles card — distance unit**: `distance_unit: auto | km | mi` (`auto` shows the range sensor's own unit; `km` / `mi` converts).
+- **Vehicles card — `select` mode entities**: the charge-mode selector works with `select` entities as well as `input_select`.
+- **Charger controls (optional)**: `controls: true` shows Start / Stop (`switch`, two taps to stop; `switch_invert` for pause-type switches) and current − / + (`number`, bounded by its min / max or by `current_min` / `current_max`, `current_step`). Nothing changes without `controls: true`.
 
 ### Changed
-- Render tests now also cover the editors, locale numbers, accessibility, themes, charger controls, the device guess, injection attempts and the hardening below. README screenshots refreshed.
 - **Behaviour changes to know about**: the vehicles card's info line, mode selector and figure boxes, the energy card's footer boxes and the battery card's blocks are now **centered** (they were left-aligned or spread); a charger counts as *plugged in* when it is charging, and more status words are recognised (`full`, `finished`, `waiting`…), so a status sensor that used those words may now read as plugged in.
-- **Vehicles card — much wider compatibility**: "plugged in" and "charging" now accept `on`/`off` *and* the status words chargers publish (`Charging`, `Connected`, `Plugged in`, `Awaiting start`, `SuspendedEV`, `Charge done`…; case, spaces and dashes ignored), from any entity type (binary sensor, sensor, switch). `connected_states` / `charging_states` override the built-in lists. Without a charging entity, charger power above 50 W counts as charging, and charging implies plugged in. The launcher summary follows the same rules.
-- Charger controls: `switch_invert` for pause-type switches, `current_min` / `current_max` bounds.
-- Device fill is cautious: ambiguous fields are left empty; hidden entities, 12 V batteries, odometers, connectivity sensors and pause/lock/schedule switches are skipped; a notification reports how many fields were filled.
-- Visual editor: the charger entity pickers are no longer limited to binary sensors; two new YAML fields for custom status words (translated in all 11 languages).
+- Visual editor: the charger entity pickers are no longer limited to binary sensors; two YAML fields for custom status words; all new fields translated in 11 languages.
+- Render tests now also cover the editors, locale numbers, accessibility, themes, charger controls, the device guess, injection attempts (attributes, CSS, texts), hostile states and every fix below. README screenshots refreshed.
+
+### Fixed
+- An invalid Home Assistant language (`en_US`, empty…) no longer breaks rendering: it is normalised and falls back to English, for numbers and dates alike.
+- Climate card: no more `NaN°` when the room probe is missing and the climate entity has no current temperature.
+- The two-tap confirmation (*Stop?*) survives a card refresh (a moving power value redraws the card every few seconds); an armed button announces the confirmation.
+- Launcher popups: closing one opened by a direct link no longer navigates back out of the dashboard; closing then opening another tile at once no longer closes it; a popup can no longer reappear (or stay) after its card is removed from the page.
+- Vehicles card: a charger power in kW or MW is read correctly (it showed `7 W` for 7.2 kW and ignored the charging state); the English info line no longer has a French space before the colon.
+- Battery card: the estimated time can no longer read `1h60`.
+- Accessibility: tiles and elements with no target entity are no longer announced as buttons; current − / + only appear when the value is a number.
+- Camera card: `refresh` is bounded (1 – 3600 s, 0 or invalid falls back to 5 s) and re-read on every config change.
+- Launcher: the tile summaries read the card configuration through the same normalisation as the card itself, so a mistyped card inside a tile no longer empties the whole launcher; a tile `hash` with accents or spaces (`énergie`) now works for the URL, the history and direct links; a launcher with an explicit `theme: dark` keeps its popup cards dark even when the HA theme is light; a card rendered before being attached re-reads its theme once it is.
+- Accessibility: icon-only buttons (cover arrows, plug…) get an accessible name; only one confirmation button can be armed at a time.
+- Numbers: a tiny negative value no longer reads `-0.00`; `kw()` handles missing values and rounds `999.6 W` up; a power in `mW` (milliwatt) is no longer read as megawatts.
+- Layout: German, Dutch and Russian labels no longer overflow the summary and footer boxes on narrow screens (columns can shrink, long words wrap).
+- Visual editor: going back to a configuration that was already emitted is no longer ignored, and the emitted YAML no longer gets empty `charger: {}` / `flows: {}` / `chargers: []` entries.
+- Regular expressions: a group repeated a fixed number of times (`(a|b){2}`) is accepted; a refused pattern is reported once in the browser console instead of being ignored silently.
+- Mistyped configurations (a string where a list is expected, empty entries) no longer crash a card; a Home Assistant object without `states` no longer throws; states such as `constructor` or `__proto__` no longer break the climate, bridge, console or radiators cards.
+
+### Security
+- Everything coming from entities (names, states, units, options) and **everything interpolated into an HTML attribute** (ids, services, SVG attributes…) is escaped, as are the vehicle, presence-radar and room labels coming from the configuration. A fuzz test poisons every text field of every card, one at a time.
+- **CSS values from the configuration** (`color`, `accent`, `span`) only accept safe forms (hex, colour name, `rgb()` / `hsl()`, `var(--x)`, 1–4 columns); anything else is dropped, so a shared YAML cannot inject styles, tags or URLs. The climate dial range is bounded.
+- Image URLs from entities (`entity_picture`) must start with `/`, `http://`, `https://` or be a base64 `data:image/` (PNG, JPEG, GIF, WebP) — never `javascript:`.
+- Regular expressions from the configuration (`include_pattern` / `exclude_pattern`) are length-limited, compiled once, and ignored when invalid or when they nest quantifiers (ReDoS freeze). Very long entity names no longer freeze the cards.
+- Keyboard activation ignores key repeat (a held key cannot get past the *Stop* confirmation) and no longer triggers a parent through a nested button.
+- A service called by a card must look like `domain.service`; popups only create directly custom elements with a valid name (everything else goes through Home Assistant's own card helpers).
+- Services reachable from a card are still chosen by the configuration, like Home Assistant's own `call-service` tap action: **read any YAML you copy from the internet before pasting it** (mentioned in the README).
 
 ## [1.6.0]
 ### Added

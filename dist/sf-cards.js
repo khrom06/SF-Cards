@@ -58,6 +58,7 @@ const SF_C = {
 
 const SF_CSS = `
   :host { display:block; }
+  .lbl, .kpi, .foot > div, .stats > div, .fl3 > div, .tile { min-width:0; overflow-wrap:anywhere; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; } }
   [role="button"]:focus-visible, .tile:focus-visible { outline:2px solid ${SF_C.cyan}; outline-offset:2px; border-radius:6px; }
   @media (pointer: coarse) { .btn { min-height:40px; } }
@@ -108,7 +109,29 @@ const SF_CSS = `
 // sont normalisées (chaîne → liste d'un élément, vide / null → liste vide, éléments vides retirés). La configuration d'origine n'est pas modifiée.
 const SF_LIST_KEYS = ["leaks", "doors", "people", "rooms", "cars", "chargers", "devices", "tiles", "rows", "groups", "cameras", "extras", "batteries", "radiators",
   "exclude", "connected_states", "charging_states", "hc_windows", "home_states"];
+// Valeurs CSS venues de la configuration (`color`, `accent`, `span`) : seules les formes sûres passent (hex, nom de couleur, rgb()/hsl(), var(--x),
+// nombre de colonnes) ; sinon la clé est retirée et la carte reprend sa valeur par défaut (pas d'injection de style, de balise ni d'URL).
+const SF_COLOR_OK = /^(#[0-9a-f]{3,8}|[a-z]{3,20}|(?:rgb|hsl)a?\([\d\s.,%\/-]{3,40}\)|var\(--[\w-]{1,40}\))$/i;
+function sfCleanCss(o) {
+  if (Array.isArray(o)) return o.map(sfCleanCss);
+  if (o && typeof o === "object") {
+    const r = Object.create(null);
+    for (const [k, v] of Object.entries(o)) {
+      if (k === "__proto__") continue;
+      if ((k === "color" || k === "accent") && typeof v !== "object") { if (SF_COLOR_OK.test(String(v).trim())) r[k] = String(v).trim(); continue; }
+      if (k === "span") { const n = Math.floor(Number(v)); if (n >= 1 && n <= 4) r[k] = n; continue; }
+      r[k] = sfCleanCss(v);
+    }
+    return r;
+  }
+  return o;
+}
 function sfNormConfig(tag, c) {
+  c = sfCleanCss(c);
+  if (tag === "sf-climate-card") {   // plage du cadran bornée (sinon des millions de graduations SVG gèlent l'onglet)
+    const lo = Number(c.min), hi = Number(c.max);
+    if (!isFinite(lo) || !isFinite(hi) || hi <= lo || hi - lo > 100 || Math.abs(lo) > 1000) { c.min = 15; c.max = 30; }
+  }
   const keys = tag === "sf-setpoints-card" ? [...SF_LIST_KEYS, "columns"] : SF_LIST_KEYS;
   for (const k of keys) if (k in c) { const v = c[k]; c[k] = Array.isArray(v) ? v.filter((x) => x !== null && x !== undefined && x !== "") : (v === null || v === undefined || v === "" ? [] : [v]); }
   for (const k of ["charger", "flows"]) if (k in c && (!c[k] || typeof c[k] !== "object" || Array.isArray(c[k]))) c[k] = {};
@@ -119,13 +142,16 @@ function sfNormConfig(tag, c) {
 // Une URL d'image venue d'une entité (donc d'un tiers) n'est utilisée que si elle est sûre : relative, http(s) ou data:image — jamais javascript:.
 // Expression régulière venue de la configuration : ignorée si trop longue, invalide ou à quantificateurs imbriqués (ex. `(a+)+`, `(.*)*`) qui
 // pourraient figer le navigateur (ReDoS). Compilée une seule fois.
+// #hash de l'URL décodé (« #%C3%A9nergie » = « énergie »), pour le comparer au `hash` des tuiles.
+function sfHash() { const h = location.hash.slice(1); try { return decodeURIComponent(h); } catch (e) { return h; } }
 const _sfRe = {};
 function sfRegex(src) {
   if (!src) return null;
   src = String(src);
   if (!(src in _sfRe)) {
     let re = null;
-    if (src.length <= 100 && !/\((?:[^()\\]|\\.)*[+*](?:[^()\\]|\\.)*\)[+*{]/.test(src) && !/\([^()]*\|[^()]*\)[+*{]/.test(src)) { try { re = new RegExp(src); } catch (e) { re = null; } }
+    if (src.length <= 100 && !/\((?:[^()\\]|\\.)*[+*](?:[^()\\]|\\.)*\)(?:[+*]|\{\d+,)/.test(src) && !/\([^()]*\|[^()]*\)(?:[+*]|\{\d+,)/.test(src)) { try { re = new RegExp(src); } catch (e) { re = null; } }
+    if (!re) try { console.warn(`SF Cards: pattern ignored (too long, invalid or risky): ${src.slice(0, 60)}`); } catch (e) {}
     _sfRe[src] = re;
   }
   return _sfRe[src];
@@ -182,7 +208,12 @@ class SfBase extends HTMLElement {
         // Texte des blocs séparé par des espaces (sinon « Alarmdisarmed », « 62%LEVEL » dans un lecteur d'écran).
         const parts = [], w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let tn;
         while ((tn = w.nextNode())) { const v = tn.nodeValue.trim(); if (v) parts.push(v); }
-        const lab = (el.getAttribute("title") || parts.join(" ")).replace(/\s+/g, " ").trim().slice(0, 90);
+        let lab = (el.getAttribute("title") || parts.join(" ")).replace(/\s+/g, " ").trim().slice(0, 90);
+        if (!lab) {   // bouton d'icône seule : le nom de l'icône (« arrow up », « stop ») ou, à défaut, le libellé de sa ligne
+          const ic = el.querySelector("ha-icon[icon]"), row = el.closest(".it, .rad, .room, .borne");
+          const nm = row && row.querySelector(".nm, .name, .lbl");
+          lab = [nm && nm.textContent.trim(), ic && ic.getAttribute("icon").replace(/^[a-z]+:/, "").replace(/[-_]+/g, " ")].filter(Boolean).join(" ").slice(0, 90);
+        }
         if (lab) el.setAttribute("aria-label", lab);
       }
       if (el.matches(".seg .btn")) el.setAttribute("aria-pressed", el.classList.contains("on") ? "true" : "false");
@@ -211,6 +242,7 @@ class SfBase extends HTMLElement {
   }
   _onCall(el) {
     if (el.dataset.confirm && !el.classList.contains("armed")) {
+      this.shadowRoot.querySelectorAll("[data-confirm].armed").forEach((o) => { o.classList.remove("armed"); o.innerHTML = o.dataset.label; o.setAttribute("aria-label", o.dataset.aria || ""); });
       this._armed = { key: `${el.dataset.call}|${el.dataset.d || ""}`, until: Date.now() + 4000 };
       this._arm(el, 4000);
       return;
@@ -230,6 +262,7 @@ class SfBase extends HTMLElement {
   }
   // Attributs d'un bouton de pilotage, à insérer dans une balise.
   call(service, data, confirm) {
+    if (!/^[a-z0-9_]+\.[a-z0-9_]+$/i.test(String(service))) return "";   // service mal formé (config) : aucun bouton actif
     return `data-call="${this.esc(service)}" data-d="${this.esc(JSON.stringify(data || {}))}"${confirm ? ` data-confirm="${this.esc(confirm)}"` : ""}`;
   }
   // Basculer une entité selon son domaine (script : lancer).
@@ -244,10 +277,11 @@ class SfBase extends HTMLElement {
   // Puissance en W quelle que soit l'unité déclarée (certains compteurs publient en kW).
   watts(id) {
     const n = this.num(id); if (n === null) return null;
-    const u = this.unit(id).toLowerCase();
+    const raw = this.unit(id), u = raw.toLowerCase();
+    if (raw === "mW") return n / 1000;   // milliwatt
     return u === "kw" ? n * 1000 : u === "mw" ? n * 1e6 : n;
   }
-  kw(w) { return w === null ? "—" : Math.abs(w) >= 1000 ? `${this.nf(w / 1000, 2)} kW` : `${Math.round(w)} W`; }
+  kw(w) { return w === null || w === undefined || !isFinite(w) ? "—" : Math.abs(w) >= 999.5 ? `${this.nf(w / 1000, 2)} kW` : `${Math.round(w)} W`; }
   icon(name, size = 20, color) { return `<ha-icon icon="${this.esc(name)}" style="--mdc-icon-size:${this.esc(size)}px${this.esc(color ? `;color:${color}` : "")}"></ha-icon>`; }
   _moreInfo(entityId) {
     if (!entityId || entityId === "undefined" || entityId === "null") return;
@@ -267,10 +301,11 @@ class SfBase extends HTMLElement {
   unit(id) { const s = this.st(id); return (s && s.attributes.unit_of_measurement) || ""; }
   // Nombre affiché selon la langue du profil HA (virgule ou point décimal), chiffres latins, sans séparateur de milliers.
   nf(v, d = 0) {
-    const n = Number(v); if (!isFinite(n)) return String(v);
+    let n = Number(v); if (!isFinite(n)) return String(v);
+    if (Math.abs(n) < 0.5 * Math.pow(10, -(Math.min(20, Math.max(0, d | 0))))) n = 0;   // jamais « -0.00 »
     try {
       const cache = (SfBase._nf = SfBase._nf || {}), key = `${this.loc}|${d}`;
-      const f = cache[key] || (cache[key] = new Intl.NumberFormat(`${this.loc}-u-nu-latn`, { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: false }));
+      const f = cache[key] || (cache[key] = new Intl.NumberFormat(this.locLatn, { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: false }));
       return f.format(n).replace(/\u2212/g, "-").replace(/[\u200e\u200f\u061c]/g, "");
     } catch (e) { return n.toFixed(Math.max(0, Math.min(20, d | 0))); }   // langue inconnue d'Intl ou décimales invalides : repli simple
   }
@@ -284,18 +319,26 @@ class SfBase extends HTMLElement {
     let t = (this._config || {}).theme;
     if (!t) {
       const th = this._hass && this._hass.themes, key = th ? `${th.theme}|${th.darkMode}` : "";
-      if (!this._cssRead || this._cssThemeKey !== key) {
+      if (!this.isConnected) { try { t = getComputedStyle(this).getPropertyValue("--sf-theme").trim().replace(/['"]/g, ""); } catch (e) { t = ""; } }   // hors du DOM : lecture sans cache
+      else if (!this._cssRead || this._cssThemeKey !== key) {
         const first = !this._cssRead;
         this._cssRead = true; this._cssThemeKey = key;
         try { this._cssTheme = getComputedStyle(this).getPropertyValue("--sf-theme").trim().replace(/['"]/g, ""); } catch (e) { this._cssTheme = ""; }
         // HA applique les variables du thème un instant après avoir publié le changement : on relit une fois, un peu plus tard.
         if (!first) setTimeout(() => { this._cssRead = false; this._lastHtml = null; this._schedule(); }, 300);
       }
-      t = this._cssTheme;
+      if (this.isConnected) t = this._cssTheme;
     }
     if (t === "auto") t = this._hass && this._hass.themes && this._hass.themes.darkMode === false ? "light" : "dark";
     return t === "light" ? "light" : "dark";
   }
+  // Langue pour les nombres et les dates : chiffres latins partout, même avec une langue comme ar-SA.
+  get locLatn() {
+    if (this._ll !== this.loc) { this._ll = this.loc; try { this._llv = new Intl.Locale(this.loc, { numberingSystem: "latn" }).toString(); } catch (e) { this._llv = "en"; } }
+    return this._llv;
+  }
+  // Une carte rendue avant d'être attachée relit son thème dès qu'elle l'est (les variables CSS n'existent pas hors du DOM).
+  connectedCallback() { this._cssRead = false; this._lastHtml = null; this._schedule(); }
   get lang() { return sfLang(this._hass); }
   // Langue du profil HA, normalisée (« en_US » → « en-US ») et validée : une valeur que les API Intl refusent retombe sur « en », jamais d'exception.
   get loc() {
@@ -387,11 +430,11 @@ class SfAlertCard extends SfBase {
       if (leaksOn.length) { title = this.t("FUITE D'EAU"); what = leaksOn.map((i) => this._name(i)).join(" · "); }
       if (alarmTriggered) { title = this.t("INTRUSION"); what = this.t("Alarme déclenchée"); }
       if (ring) { title = this.t("SONNETTE"); what = sim ? this.t("simulation locale — rien n'est envoyé")
-        : this.t("à {t}", { t: new Date(this.st(c.ring).last_changed).toLocaleTimeString(this.loc, { hour: "2-digit", minute: "2-digit" }) }); }
+        : this.t("à {t}", { t: new Date(this.st(c.ring).last_changed).toLocaleTimeString(this.locLatn, { hour: "2-digit", minute: "2-digit" }) }); }
       const snapState = this.st(c.snapshot);
       const snapUrl = snapState ? sfSafeUrl(snapState.attributes.entity_picture) : "";
       const img = ring && snapUrl ? `<img class="snap click" data-e="${this.esc(c.snapshot)}" src="${this.esc(snapUrl)}">` : "";
-      return this.frame(this.t("Alerte"), new Date().toLocaleTimeString(this.loc),
+      return this.frame(this.t("Alerte"), new Date().toLocaleTimeString(this.locLatn),
         `<div class="big">${title}</div><div>${what}</div>${img}`, "alert");
     }
 
@@ -525,7 +568,7 @@ class SfHangarCard extends SfBase {
   _target(car) {
     const t = this.num(car.target); if (t === null) return "";
     const a = (t / 100) * 2 * Math.PI - Math.PI / 2;
-    return `<line class="tgt" x1="${this.esc(55 + 36 * Math.cos(a))}" y1="${this.esc(55 + 36 * Math.sin(a))}" x2="${this.esc(55 + 48 * Math.cos(a))}" y2="${this.esc(55 + 48 * Math.sin(a))}"><title>cible ${Math.round(t)} %</title></line>`;
+    return `<line class="tgt" x1="${this.esc(55 + 36 * Math.cos(a))}" y1="${this.esc(55 + 36 * Math.sin(a))}" x2="${this.esc(55 + 48 * Math.cos(a))}" y2="${this.esc(55 + 48 * Math.sin(a))}"><title>${this.esc(this.t("CIBLE"))} ${Math.round(t)} %</title></line>`;
   }
   // Autonomie : `distance_unit: auto` (défaut) affiche la valeur et l'unité du capteur (km ou mi) ; `km` / `mi` convertit si besoin.
   _range(car) {
@@ -592,9 +635,9 @@ class SfHangarCard extends SfBase {
     const carsHtml = cars.map((k) => this._car(k)).join("");
     const bay = !multi && cars.length <= 2
       ? `<div class="bay">${cars[0] ? this._car(cars[0]) : "<div></div>"}${bornes[0]}${cars[1] ? this._car(cars[1]) : "<div></div>"}</div>`
-      : `<div class="bay stack">${cars.length ? `<div class="cars" style="grid-template-columns:repeat(${this.esc(cars.length)},1fr)">${carsHtml}</div>` : ""}<div class="bornes">${bornes.join("")}</div></div>`;
+      : `<div class="bay stack">${cars.length ? `<div class="cars" style="grid-template-columns:repeat(${this.esc(cars.length)},minmax(0,1fr))">${carsHtml}</div>` : ""}<div class="bornes">${bornes.join("")}</div></div>`;
     // Ligne d'information : une borne = message habituel ; plusieurs = une ligne par borne.
-    const decOf = (ch) => ch.decision ? `<span class="click" data-e="${this.esc(ch.decision)}">${this.t("Pilote")} : <b style="color:${SF_C.cyan}">${this.fmt(ch.decision)}</b></span>` : "";
+    const decOf = (ch) => ch.decision ? `<span class="click" data-e="${this.esc(ch.decision)}">${this.t("Pilote")}${this.lang === "fr" ? " " : ""}: <b style="color:${SF_C.cyan}">${this.fmt(ch.decision)}</b></span>` : "";
     const note = !multi
       ? `<span>${sts[0].connected ? `${this.t("Câble branché")} · <span style="color:${SF_C.amber}">${this.t("voiture non identifiée par HA")}</span>` : `<span class="muted">${this.t("Aucun véhicule branché")}</span>`}</span>${decOf(chs[0])}`
       : chs.map((ch, k) => `<span style="flex:1 1 100%"><b style="color:${this.esc(sts[k].charging ? SF_C.green : sts[k].connected ? SF_C.amber : SF_C.dim)}">${this.esc(label(ch, k))}</b> · ${sts[k].charging ? this.t("charge en cours") : sts[k].connected ? this.t("en attente") : this.t("au repos")}${ch.decision ? ` · ${decOf(ch)}` : ""}</span>`).join("");
@@ -620,7 +663,7 @@ class SfHangarCard extends SfBase {
     const cell = (lbl, id, col) => { const w = this.watts(id); return `<div class="click" data-e="${this.esc(id)}"><div class="lbl">${lbl}</div><div class="val" style="color:${this.esc(col)}">${this.kw(w)}</div></div>`; };
     const cells = [f.solar && cell(this.t("Solaire"), f.solar, SF_C.amber), f.home && cell(this.t("Maison hors VE"), f.home, SF_C.cyan),
       f.surplus && cell(this.t("Surplus"), f.surplus, (this.watts(f.surplus) ?? 0) >= 0 ? SF_C.green : "#ff7a45")].filter(Boolean);
-    return cells.length ? `<div class="fl3" style="grid-template-columns:repeat(${this.esc(cells.length)},1fr)">${cells.join("")}</div>` : "";
+    return cells.length ? `<div class="fl3" style="grid-template-columns:repeat(${this.esc(cells.length)},minmax(0,1fr))">${cells.join("")}</div>` : "";
   }
 }
 
@@ -771,10 +814,10 @@ class SfMachinesCard extends SfBase {
         if (t.warn !== undefined && n < t.warn) col = SF_C.amber;
       } else if (kind === "timestamp") {
         const d = new Date(s.state);
-        v = isNaN(d) ? s.state : d.toLocaleString(this.loc, { weekday: "short", hour: "2-digit", minute: "2-digit" });
+        v = isNaN(d) ? s.state : d.toLocaleString(this.locLatn, { weekday: "short", hour: "2-digit", minute: "2-digit" });
         col = SF_C.cyan;
       } else if (kind === "text" || n === null) {
-        v = t.map && t.map[s.state] ? t.map[s.state] : s.state;
+        v = t.map && Object.prototype.hasOwnProperty.call(t.map, s.state) && t.map[s.state] ? t.map[s.state] : s.state;
         col = t.ok_values && !t.ok_values.includes(s.state) ? SF_C.amber : SF_C.cyan;
       } else {
         v = this.nf(n, t.digits ?? (Math.abs(n) < 10 ? 1 : 0)); u = t.unit ?? this.unit(id);
@@ -816,7 +859,7 @@ class SfMachinesCard extends SfBase {
  * power_in: sensor.x (tension secteur, < 200 V = coupure)  internet: binary_sensor.x
  * leaks: [..]  doors: [..]
  */
-const SF_WEATHER = {
+const SF_WEATHER = Object.assign(Object.create(null), {
   "clear-night": ["Nuit claire", "mdi:weather-night"], sunny: ["Ensoleillé", "mdi:weather-sunny"],
   partlycloudy: ["Éclaircies", "mdi:weather-partly-cloudy"], cloudy: ["Nuageux", "mdi:weather-cloudy"],
   rainy: ["Pluie", "mdi:weather-rainy"], pouring: ["Averses", "mdi:weather-pouring"],
@@ -825,10 +868,11 @@ const SF_WEATHER = {
   "windy-variant": ["Venteux", "mdi:weather-windy-variant"], lightning: ["Orage", "mdi:weather-lightning"],
   "lightning-rainy": ["Orage", "mdi:weather-lightning-rainy"], hail: ["Grêle", "mdi:weather-hail"],
   exceptional: ["Alerte météo", "mdi:alert"],
-};
+});
 class SfBridgeCard extends SfBase {
   defaults() { return { people: [], leaks: [], doors: [], home_states: ["home"] }; }
   connectedCallback() {
+    super.connectedCallback();
     this._tick = setInterval(() => {
       const el = this.shadowRoot && this.shadowRoot.querySelector(".clock .s");
       if (el) el.textContent = String(new Date().getSeconds()).padStart(2, "0");
@@ -892,7 +936,7 @@ class SfBridgeCard extends SfBase {
   render() {
     const c = this._config, now = new Date();
     const hh = String(now.getHours()).padStart(2, "0"), mm = String(now.getMinutes()).padStart(2, "0");
-    const date = now.toLocaleDateString(this.loc, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    const date = now.toLocaleDateString(this.locLatn, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
     const an = [];
     const v = this.num(c.power_in);
@@ -965,6 +1009,7 @@ class SfReactorCard extends SfBase {
   defaults() { return { devices: [], hide_idle: true, idle_w: 20, max_devices: 8 }; }
   // La disposition dépend de la largeur disponible : on re-rend quand elle change (rotation, redimensionnement).
   connectedCallback() {
+    super.connectedCallback();
     if (typeof ResizeObserver === "undefined") return;
     this._ro = new ResizeObserver(() => this._schedule());
     this._ro.observe(this);
@@ -1114,7 +1159,7 @@ class SfReactorCard extends SfBase {
           <div class="txt"><div><b>${this.kw(home)}</b><span>${this.t("MAISON")}</span></div></div></div>
         ${nodes.join("")}
       </div>
-      ${foot.length ? `<div class="foot" style="grid-template-columns:repeat(${this.esc(foot.length)},1fr)">${foot.join("")}</div>` : ""}`);
+      ${foot.length ? `<div class="foot" style="grid-template-columns:repeat(${this.esc(foot.length)},minmax(0,1fr))">${foot.join("")}</div>` : ""}`);
   }
   _node([x, y], name, icon, w, color, id) {
     const idle = w === null || Math.abs(w) < 20;
@@ -1136,11 +1181,11 @@ class SfReactorCard extends SfBase {
  * rooms: [{ name, icon, climate, temp, hum, target, regul, window }]
  * extras: [{ label, entity, icon, timer?, stop? }]   # interrupteurs/scripts sous les pièces ; timer = minuteur affiché, stop = entités coupées par un appui
  */
-const SF_HVAC = {
+const SF_HVAC = Object.assign(Object.create(null), {
   heat: ["Chauffe", "#ff7043", "mdi:fire"], cool: ["Refroidit", "#4fc3f7", "mdi:snowflake"],
   dry: ["Déshumidifie", "#ffca28", "mdi:water-percent"], fan_only: ["Ventile", "#66bb6a", "mdi:fan"],
   heat_cool: ["Auto", "#b388ff", "mdi:autorenew"], off: ["Éteint", SF_C.grey, "mdi:power"],
-};
+});
 class SfClimateCard extends SfBase {
   defaults() { return { rooms: [], extras: [], switch_script: "", min: 15, max: 30 }; }
   css() {
@@ -1295,7 +1340,7 @@ class SfConsoleCard extends SfBase {
       }
       case "cover": {
         const pos = s && s.attributes.current_position;
-        const txt = !s ? "—" : { open: this.t("ouverts"), closed: this.t("fermés"), opening: this.t("ouverture…"), closing: this.t("fermeture…") }[s.state] || this.esc(s.state);
+        const txt = !s ? "—" : Object.assign(Object.create(null), { open: this.t("ouverts"), closed: this.t("fermés"), opening: this.t("ouverture…"), closing: this.t("fermeture…") })[s.state] || this.esc(s.state);
         return `<div class="it wide"><div class="row"><span class="click" data-e="${this.esc(x.entity)}">${ic("mdi:window-shutter")}</span>
           <div class="grow"><div class="nm">${this.esc(x.label)}</div><div class="sv">${txt}${pos !== undefined && pos !== null ? ` · ${pos} %` : ""}</div></div>
           <span class="btn" ${this.call("cover.open_cover", { entity_id: x.entity })}>${this.icon("mdi:arrow-up", 16)}</span>
@@ -1341,7 +1386,7 @@ class SfConsoleCard extends SfBase {
       case "select": {
         const opts = (s && s.attributes.options) || [];
         return `<div class="it wide"><div class="nm">${this.esc(x.label)}</div><div class="seg">${opts.map((o) =>
-          `<span class="btn ${this.esc(s.state === o ? "on" : "")}" ${this.call(`${x.entity.split(".")[0]}.select_option`, { entity_id: x.entity, option: o })}>${this.esc((x.labels && x.labels[o]) || o)}</span>`).join("")}</div></div>`;
+          `<span class="btn ${this.esc(s.state === o ? "on" : "")}" ${this.call(`${x.entity.split(".")[0]}.select_option`, { entity_id: x.entity, option: o })}>${this.esc((x.labels && Object.prototype.hasOwnProperty.call(x.labels, o) && x.labels[o]) || o)}</span>`).join("")}</div></div>`;
       }
       default: return "";
     }
@@ -1366,10 +1411,10 @@ class SfConsoleCard extends SfBase {
  */
 class SfCameraCard extends SfBase {
   defaults() { return { cameras: [], refresh: 5 }; }
-  _every() { return Math.max(1, Number(this._config && this._config.refresh) || 5); }
+  _every() { const n = Number(this._config && this._config.refresh); return isFinite(n) && n > 0 ? Math.min(3600, Math.max(1, n)) : 5; }
   _restart() { clearInterval(this._timer); this._timer = setInterval(() => this._refresh(), this._every() * 1000); }
   setConfig(config) { super.setConfig(config); if (this.isConnected) this._restart(); }
-  connectedCallback() { this._restart(); }
+  connectedCallback() { super.connectedCallback(); this._restart(); }
   disconnectedCallback() { clearInterval(this._timer); }
   afterRender() { this._refresh(); }
   _refresh() {
@@ -1504,7 +1549,7 @@ class SfLedgerCard extends SfBase {
       [c.avg_price, "Prix moyen", ap === null ? "—" : this.nf(ap, 3) + " €", ""]].filter((k) => k[0]);
     return this.frame(this.t("Bilan énergétique"), p ? this.esc(p.state) : "", `
       <div class="seg">${seg}</div>
-      <div class="kpis" style="grid-template-columns:repeat(${this.esc(Math.max(1, kp.length))},1fr)">${kp.map((k) => `<div class="kpi click" data-e="${this.esc(k[0])}"><div class="lbl">${this.t(k[1])}</div><div class="v" style="${this.esc(k[3])}">${k[2]}</div></div>`).join("")}
+      <div class="kpis" style="grid-template-columns:repeat(${this.esc(Math.max(1, kp.length))},minmax(0,1fr))">${kp.map((k) => `<div class="kpi click" data-e="${this.esc(k[0])}"><div class="lbl">${this.t(k[1])}</div><div class="v" style="${this.esc(k[3])}">${k[2]}</div></div>`).join("")}
       </div>${devs}
       <div class="legend">${hasSolar ? `<span><i style="background:${SF_C.amber}"></i>${this.t("solaire")}</span>` : ""}<span><i style="background:#ff7a45"></i>${this.t("Réseau")}</span><span>${this.t("estimations")}</span></div>`);
   }
@@ -1599,10 +1644,11 @@ const SF_POP_CSS = `
 class SfLauncherCard extends SfBase {
   defaults() { return { tiles: [], columns: 2 }; }
   connectedCallback() {
+    super.connectedCallback();
     this._onPop = () => {
       if (!this.isConnected) return;   // carte retirée entre-temps : ne jamais rouvrir un popup
       if (Date.now() < (this._ignoreUntil || 0)) return;   // écho de notre propre « retour » après une fermeture
-      const h = location.hash.slice(1);
+      const h = sfHash();
       if (this._pop && h !== this._pop.hash) this._close(false);
       else if (!this._pop && h && this._hass) { const t = this._tiles().find((x) => x.hash === h); if (t) this._open(t, false); }
     };
@@ -1643,7 +1689,8 @@ class SfLauncherCard extends SfBase {
   }
   // Résumé d'une tuile, calculé depuis la config de la carte qu'elle ouvre.
   _sum(t) {
-    const c = t.card || {}, n = (id) => this.num(id);
+    const tag = String((t.card && t.card.type) || "").replace(/^custom:/, "");
+    const c = sfNormConfig(tag, { ...(t.card || {}) }), n = (id) => this.num(id);
     switch (t.summary) {
       case "climate": {
         const temps = (c.rooms || []).map((r) => n(r.temp)).filter((x) => x !== null);
@@ -1674,7 +1721,7 @@ class SfLauncherCard extends SfBase {
         const lights = items.filter((x) => x.kind === "toggle" && /^(light|switch)\./.test(x.entity || ""));
         const on = lights.filter((x) => this.isOn(x.entity)).length;
         const cov = items.find((x) => x.kind === "cover"), cs = cov && this.st(cov.entity);
-        return { main: `${on} / ${lights.length}`, sub: `${this.t("lumières allumées")}${cs ? `<br>${this.t("volets {s}", { s: ({ open: this.t("ouverts"), closed: this.t("fermés") })[cs.state] || this.esc(cs.state) })}` : ""}`, hot: false };
+        return { main: `${on} / ${lights.length}`, sub: `${this.t("lumières allumées")}${cs ? `<br>${this.t("volets {s}", { s: (Object.assign(Object.create(null), { open: this.t("ouverts"), closed: this.t("fermés") }))[cs.state] || this.esc(cs.state) })}` : ""}`, hot: false };
       }
       case "cameras": {
         const cams = c.cameras || [];
@@ -1726,9 +1773,9 @@ class SfLauncherCard extends SfBase {
     // images et caméras comprises) ; les cartes non SF gardent leur propre rendu.
     const th = this._theme(); host.setAttribute("theme", th);
     const type = String(t.card && t.card.type || ""), isSf = /^custom:sf-/.test(type);
-    const cfg = isSf && th === "light" ? { ...t.card, theme: "light" } : t.card;
+    const cfg = isSf ? { ...t.card, theme: t.card.theme || th } : t.card;
     let card;
-    if (type.startsWith("custom:") && customElements.get(type.slice(7))) {
+    if (/^custom:[a-z][a-z0-9]*(-[a-z0-9]+)+$/.test(type) && customElements.get(type.slice(7))) {
       card = document.createElement(type.slice(7));
       try { card.setConfig(cfg); } catch (e) { card.textContent = `Erreur : ${e.message}`; }
       card.hass = this._hass;
@@ -1754,7 +1801,7 @@ class SfLauncherCard extends SfBase {
     this._pop = { host, card, hash: t.hash || "" };
     this._opener = this.shadowRoot && this.shadowRoot.activeElement;   // pour rendre le focus à la fermeture
     requestAnimationFrame(() => requestAnimationFrame(() => { root.querySelector(".wrap").classList.add("open"); const b = root.querySelector(".bar button"); if (b) b.focus(); }));
-    if (push && t.hash && location.hash !== `#${t.hash}`) history.pushState({ sfPopup: t.hash }, "", `${location.pathname}${location.search}#${t.hash}`);
+    if (push && t.hash && sfHash() !== t.hash) history.pushState({ sfPopup: t.hash }, "", `${location.pathname}${location.search}#${encodeURIComponent(t.hash)}`);
   }
   _close(viaUi) {
     const p = this._pop; if (!p) return;
@@ -1764,7 +1811,7 @@ class SfLauncherCard extends SfBase {
     setTimeout(() => p.host.remove(), 330);
     if (this._opener && this._opener.isConnected && this._opener.focus) this._opener.focus();
     // Fermé à la main : on retire l'entrée #hash ajoutée à l'ouverture.
-    if (viaUi && p.hash && location.hash === `#${p.hash}`) {
+    if (viaUi && p.hash && sfHash() === p.hash) {
       if (history.state && history.state.sfPopup === p.hash) { this._ignoreUntil = Date.now() + 500; history.back(); }   // entrée poussée à l'ouverture
       else history.replaceState(history.state, "", `${location.pathname}${location.search}`);   // lien direct : on retire seulement le #hash, on ne quitte pas la page
     }
@@ -1878,7 +1925,7 @@ class SfBatteryCard extends SfBase {
  *   - { name, icon, climate: climate.x, kwh: sensor.x (consommation du jour), connection: sensor.x (facultatif),
  *       preset: select.x (facultatif : liste de préréglages d'un select, ex. avec « auto »), presets: [auto, comfort, eco, away] (ordre / filtre) }
  */
-const SF_PRESETS = { auto: "Programme", comfort: "Confort", eco: "Éco", away: "Absent", none: "Aucun", boost: "Boost", sleep: "Nuit", home: "Présent", activity: "Activité", frost_protection: "Hors-gel" };
+const SF_PRESETS = Object.assign(Object.create(null), { auto: "Programme", comfort: "Confort", eco: "Éco", away: "Absent", none: "Aucun", boost: "Boost", sleep: "Nuit", home: "Présent", activity: "Activité", frost_protection: "Hors-gel" });
 class SfRadiatorsCard extends SfBase {
   defaults() { return { radiators: [], step: 0.5, max_kwh: 5, setpoint: true, preset_labels: {} }; }
   css() {
@@ -1914,7 +1961,7 @@ class SfRadiatorsCard extends SfBase {
       .meta .bar i { display:block; height:100%; background:var(--ac); box-shadow:0 0 6px var(--ac); border-radius:2px; transition:width 1s; }
       .warn { color:${SF_C.amber}; }`;
   }
-  _label(p) { const l = (this._config.preset_labels || {})[p]; return l ? this.esc(l) : SF_PRESETS[p] ? this.t(SF_PRESETS[p]) : this.esc(p); }
+  _label(p) { const pl = this._config.preset_labels, l = pl && Object.prototype.hasOwnProperty.call(pl, p) ? pl[p] : null; return l ? this.esc(l) : SF_PRESETS[p] ? this.t(SF_PRESETS[p]) : this.esc(p); }
   _rad(r) {
     const c = this._config, cl = this.st(r.climate), dead = !cl || cl.state === "unavailable";
     const a = (cl && cl.attributes) || {};
@@ -2246,7 +2293,12 @@ function sfClean(v) {
   if (Array.isArray(v)) return v.map(sfClean);
   if (v && typeof v === "object") {
     const o = {};
-    for (const [k, x] of Object.entries(v)) if (x !== "" && x !== null && x !== undefined) o[k] = sfClean(x);
+    for (const [k, x] of Object.entries(v)) {
+      if (x === "" || x === null || x === undefined) continue;
+      const c = sfClean(x);
+      if (x && typeof x === "object" && (Array.isArray(c) ? c.length === 0 : Object.keys(c).length === 0)) continue;   // pas de « charger: {} » ni de listes vides dans le YAML émis
+      o[k] = c;
+    }
     return o;
   }
   return v;
@@ -2304,6 +2356,7 @@ class SfEditorBase extends HTMLElement {
     // et on ne reconstruit pas, pour conserver le focus.
     if (j === this._emitted) return;
     this._config = JSON.parse(j);
+    this._emitted = null;   // une config acceptée remet l'écho à zéro (sinon revenir à une valeur déjà émise serait ignoré)
     this._build();
   }
   set hass(h) {

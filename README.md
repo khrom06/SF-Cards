@@ -35,7 +35,7 @@
 - **Eleven languages** — English, French, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese and Arabic (right-to-left), picked automatically from each user's Home Assistant profile (English for any other language).
 - **Light or dark** — dark neon by default; `theme: light` or `auto` (follows the Home Assistant theme) per card, or once for all cards with a CSS variable.
 - **Accessible** — keyboard and screen-reader friendly (real buttons, focus ring, Enter / Space), respects *reduce motion*, alert levels are spelled out, popups are proper dialogs.
-- **No dependencies, no network** — a single JavaScript file; the two fonts are embedded (SIL OFL).
+- **No dependencies, no external resources** — a single JavaScript file; the two fonts are embedded (SIL OFL).
 - **Safe by design** — a missing, `unknown` or `unavailable` entity shows a grey "—" / "no data", never a fake "OK".
 
 ## Installation
@@ -108,7 +108,9 @@ power_in: sensor.ups_input_voltage         # alert below 200 V
 leaks: [binary_sensor.leak_kitchen, binary_sensor.leak_bathroom]
 doors: [binary_sensor.door_front, binary_sensor.door_garage]
 people:                                    # optional presence row
-  - { name: Alice, entity: person.alice }
+  - { name: Alice, entity: person.alice, color: "#00e5ff" }
+footer: "text"                             # optional text on the right of the presence row
+# legacy off-peak syntax, only read when hc_windows is empty: hc_start: "22:00" / hc_end: "06:00"
 home_states: [home]                        # states counted as "home" — add your custom zone name if it is smaller than the Home zone
 ```
 
@@ -239,6 +241,7 @@ cars:                                          # up to 3 cars
   - { name: Car A, soc: sensor.car_a_battery, range: sensor.car_a_range, target: sensor.car_a_target, charging: binary_sensor.car_a_charging, color: "#00e5ff" }
 distance_unit: auto                            # auto (the range sensor's own unit) | km | mi — converts if needed
 charger:
+  name: Garage                                 # optional
   connected: binary_sensor.charger_connected   # or a status sensor: "Connected", "Plugged in", "Awaiting start"…
   charging: binary_sensor.charger_charging     # or a status sensor: "Charging"… (optional: without it, power > 50 W means charging)
   # connected_states: [my_status]   # optional: replace the built-in list if your charger uses unusual status words
@@ -246,6 +249,7 @@ charger:
   power: sensor.charger_power
   current: number.charger_current
   decision: sensor.charge_controller_decision   # optional
+  mode: select.charger_mode                     # optional mode selector for this charger only
 mode: input_select.charge_mode                  # optional selector — an input_select or a select entity
 flows: { solar: sensor.solar_power, home: sensor.house_power, surplus: sensor.solar_surplus }
 warn_mode: Solar                                # optional: warn when this mode is selected in the evening…
@@ -267,7 +271,7 @@ charger:
 
 Without `controls: true` the card stays a display, exactly as before. A held-down key never counts as several presses, so it cannot get past the *Stop* confirmation.
 
-**Two chargers (or more)?** Replace `charger:` with a `chargers:` list (up to 4). Each one has its own name, status, power, current, controller decision and, if you like, its own `mode` selector. The cars are shown in a row above, one block per charger below; the header says *charging* as soon as one charger charges, and the launcher tile adds up the power. The single `charger:` syntax keeps working.
+**Two chargers (or more)?** Replace `charger:` with a `chargers:` list (up to 4). Each one has its own name, status, power, current, controller decision, its own `mode` selector and its own `controls`. The cars are shown in a row above, one block per charger below; the header says *charging* as soon as one charger charges, and the launcher tile adds up the power. The single `charger:` syntax keeps working.
 
 <img src="assets/hangar-multi.png" alt="Vehicles card with three cars and two chargers" width="420">
 
@@ -305,9 +309,9 @@ Other tile options: `unit` (force the unit), `invert: true` (alert when the valu
 type: custom:sf-cells-card
 warn: 30
 crit: 15
-limit: 12
+limit: 12                # default 16
 exclude: [sensor.some_battery]
-include_pattern: ""      # optional regex on the entity id
+include_pattern: ""      # optional regex on the entity id (a group with alternatives repeated with + or * is refused, see the console)
 exclude_pattern: ""      # optional regex: ignore matching entity ids
 ```
 
@@ -474,11 +478,11 @@ Decimals follow the language of your Home Assistant profile (`20,5 °C` in Frenc
 
 - **Home Assistant**: any recent version. The *Fill from a device* editor feature needs the entity registry in the frontend (about 2023.3 and newer); everything else only needs the standard card API.
 - **Browser**: Chrome / Edge 111+, Safari 16.2+, Firefox 113+ (the cards use `color-mix`; the Home Assistant mobile apps follow their system web view).
-- No network access, no extra resources: the cards and their fonts are one file.
+- No extra resources: the cards and their fonts are one file; they only load what your Home Assistant provides (for instance camera pictures).
 
 ## Security
 
-Text that comes from entities (names, states, units, picture URLs) is always escaped before it is displayed and never interpreted as HTML; image URLs must be relative, `http(s)` or `data:image/…` (never `javascript:`). All values from the configuration that end up in HTML attributes are escaped too, and regular expressions (`include_pattern` / `exclude_pattern`) are limited and refused when they could freeze the browser. The charger controls are off unless you set `controls: true`. The cards only call the Home Assistant services you configured (`switch`, `number`, `select`, `scene`, `script`, `climate`, `light`, `cover`…) with the entities you configured. **Treat shared YAML like shared code:** like Home Assistant's own `call-service` tap action, an `action` item or a `switch_script` calls whatever service its configuration says, under whatever label it shows — read a configuration you copied from the internet before pasting it. Please report a vulnerability privately through GitHub's *Security → Report a vulnerability*.
+Text that comes from entities (names, states, units, picture URLs) is always escaped before it is displayed and never interpreted as HTML; image URLs must start with `/`, `http://`, `https://` or be a base64 `data:image/` (PNG, JPEG, GIF, WebP) — never `javascript:`. All values from the configuration that end up in HTML attributes are escaped too, CSS values (`color`, `accent`, `span`) only accept safe forms (hex, colour name, `rgb()` / `hsl()`, `var(--x)`), and regular expressions (`include_pattern` / `exclude_pattern`) are limited and refused when they could freeze the browser. The charger controls are off unless you set `controls: true`. The cards only call the Home Assistant services you configured (`switch`, `number`, `select`, `scene`, `script`, `climate`, `light`, `cover`…) with the entities you configured. **Treat shared YAML like shared code:** like Home Assistant's own `call-service` tap action, an `action` item or a `switch_script` calls whatever service its configuration says, under whatever label it shows — read a configuration you copied from the internet before pasting it. Please report a vulnerability privately through GitHub's *Security → Report a vulnerability*.
 
 ## Development
 

@@ -513,6 +513,129 @@ window.sfTr = (lang, key, vars) => {
       ["sf-ledger-card", { devices: "x" }], ["sf-launcher-card", { tiles: null }], ["sf-cells-card", { exclude: "sensor.x" }], ["sf-radiators-card", { radiators: [null] }], ["sf-battery-card", { batteries: [null, { soc: "sensor.bat_soc" }] }]];
     for (const [tag, cfg] of bad) { try { const e = mount(tag, cfg, "en"); await wait(15); e.remove(); } catch (er) { fail(`${tag} : plante avec une configuration mal typée (${er.message})`); } }
     try { const e = document.createElement("sf-machines-card"); e.setConfig({ tiles: [] }); document.body.appendChild(e); e.hass = { locale: { language: "en" } }; await wait(20); e.remove(); } catch (er) { fail(`hass sans states : exception (${er.message})`); } }
+  // 5q. Troisième tour : injection CSS par la config, plage du cadran, intervalle caméra, états « constructor », services mal formés,
+  //     éléments HTML natifs dans les popups, chiffres latins pour les dates, typographie.
+  { window.__pwn = 0;
+    const evilCss = ['red;}</style><img src=x onerror="window.__pwn=1">', "red;position:fixed;inset:0;z-index:99999;background:url(https://evil.example/p.png)", "red;@import url(https://evil.example/x.css);"];
+    const withColors = JSON.parse(JSON.stringify(FULL));
+    withColors["sf-machines-card"].tiles[0].color = "#ffb300"; withColors["sf-reactor-card"].devices[0].color = "#2bff88"; withColors["sf-console-card"].groups[0].items[0].color = "#b388ff";
+    withColors["sf-setpoints-card"].columns[0].color = "#ffb300"; withColors["sf-launcher-card"].tiles[0].color = "#ff7043"; withColors["sf-bridge-card"].people[0].color = "#00e5ff";
+    withColors["sf-hangar-card"].cars[0].color = "#00e5ff"; withColors["sf-radar-card"].people[0].color = "#00e5ff";
+    const cfgs = { ...withColors, "sf-radiators-card": { ...FULL["sf-radiators-card"], accent: "#e07a4f" }, "sf-console-card": { ...withColors["sf-console-card"], groups: [{ ...withColors["sf-console-card"].groups[0], span: 2 }] } };
+    const colorLeaf = (o, path = []) => (o && typeof o === "object") ? Object.entries(o).flatMap(([k, v]) => colorLeaf(v, [...path, k])) : (["color", "accent", "span"].includes(path[path.length - 1]) ? [path] : []);
+    const setAt = (o, path, v) => { let c = o; path.slice(0, -1).forEach((k) => { c = c[k]; }); c[path[path.length - 1]] = v; };
+    let n = 0;
+    for (const [tag, cfg] of Object.entries(cfgs)) for (const path of colorLeaf(cfg)) for (const pl of evilCss) {
+      const c = JSON.parse(JSON.stringify(cfg)); setAt(c, path, pl); n++;
+      const el = mount(tag, c, "en"); await wait(8);
+      const html = el.shadowRoot ? el.shadowRoot.innerHTML : "";
+      if (window.__pwn || /position:\s*fixed;inset|evil\.example|<\/style><img/.test(html)) { fail(`SÉCURITÉ : injection CSS par ${tag}.${path.join(".")} (${pl.slice(0, 24)}…)`); window.__pwn = 0; }
+      el.remove(); }
+    if (n < 20) fail(`sécurité : l'injection CSS n'a couvert que ${n} cas`);
+    // Les valeurs légitimes passent toujours (hex, nom, rgb, var).
+    for (const ok of ["#00e5ff", "red", "rgb(0, 229, 255)", "var(--primary-color)", "rgba(0,229,255,.5)"]) {
+      const e = mount("sf-radiators-card", { ...FULL["sf-radiators-card"], accent: ok }, "en"); await wait(15);
+      if (!new RegExp(ok.replace(/[()]/g, "\\$&").replace(/\./g, "\\.")).test(e.shadowRoot.innerHTML)) fail(`couleur légitime refusée : ${ok}`); e.remove(); }
+    // Plage du cadran : bornée (pas de gel) ; une plage valide est conservée.
+    const t0 = performance.now(); const big = mount("sf-climate-card", { ...FULL["sf-climate-card"], min: 0, max: 3e8 }, "en"); await wait(40);
+    if (performance.now() - t0 > 2000 || big.shadowRoot.innerHTML.length > 400000) fail("sécurité : min / max du climat non bornés (gel / HTML énorme)"); big.remove();
+    const ok2 = mount("sf-climate-card", { ...FULL["sf-climate-card"], min: 10, max: 25 }, "en"); await wait(40);
+    if (!/>10</.test(ok2.shadowRoot.innerHTML.replace(/\s/g, "")) && ok2._config.min !== 10) fail("climat : une plage valide 10–25 doit être conservée"); ok2.remove();
+    // Caméra : intervalle entre 1 et 3600 s.
+    const cam = mount("sf-camera-card", { cameras: [], refresh: 3e6 }, "en"); await wait(10); if (cam._every() !== 3600) fail(`caméra : refresh 3e6 doit être borné à 3600, obtenu ${cam._every()}`);
+    cam.setConfig({ cameras: [], refresh: -5 }); if (cam._every() !== 5) fail("caméra : refresh négatif doit retomber sur 5"); cam.remove();
+    // États « constructor » / « __proto__ » / « toString » : aucune carte ne plante, aucun « function Object ».
+    for (const word of ["constructor", "__proto__", "toString", "hasOwnProperty"]) {
+      const st = { ...base, "weather.home": S(word, { temperature: 12 }), "climate.room": S(word, { hvac_action: "heating", preset_modes: [word], preset_mode: word, temperature: 20 }), "cover.cv": S(word), "select.sx": S(word, { options: [word, "b"] }) };
+      for (const [tag, cfg] of [["sf-bridge-card", { weather: "weather.home", price: "sensor.price" }], ["sf-climate-card", { rooms: [{ name: "L", climate: "climate.room", temp: "sensor.temp" }] }],
+        ["sf-radiators-card", { radiators: [{ name: "R", climate: "climate.room" }], preset_labels: {} }], ["sf-console-card", { groups: [{ title: "g", items: [{ kind: "select", entity: "select.sx", label: "s", labels: {} }, { kind: "cover", entity: "cover.cv", label: "c" }] }] }],
+        ["sf-machines-card", { tiles: [{ label: "m", entity: "cover.cv", kind: "text", map: {} }] }], ["sf-launcher-card", { tiles: [{ name: "c", summary: "commands", card: { type: "custom:sf-console-card", groups: [{ items: [{ kind: "cover", entity: "cover.cv" }] }] } }] }]]) {
+        try { const e = mount(tag, cfg, "en", st); await wait(15); if (/function Object/.test(text(e))) fail(`${tag} : état « ${word} » : « function Object » affiché`); e.remove(); }
+        catch (er) { fail(`${tag} : état « ${word} » : exception (${er.message})`); } } }
+    // Service mal formé : aucun bouton actif ; service valide : actif.
+    const co = mount("sf-console-card", { groups: [{ title: "g", items: [{ kind: "action", label: "BAD", service: "a.b;c", data: {} }, { kind: "action", label: "GOOD", service: "scene.turn_on", data: { entity_id: "scene.x" } }] }] }, "en"); await wait(30);
+    const acts = [...co.shadowRoot.querySelectorAll(".it")].map((x) => [x.textContent.trim(), x.getAttribute("data-call") || (x.querySelector("[data-call]") || { getAttribute: () => null }).getAttribute("data-call")]);
+    if (acts.some(([lab, dc]) => /BAD/.test(lab) && dc)) fail("sécurité : un service mal formé (a.b;c) ne doit déclencher aucun appel");
+    if (!acts.some(([lab, dc]) => /GOOD/.test(lab) && dc === "scene.turn_on")) fail("console : un service valide doit rester actif"); co.remove();
+    // Popup : `custom:iframe` (élément natif) ne crée jamais d'iframe directement ; l'élément passe par les helpers de HA.
+    let helperType = null; window.loadCardHelpers = async () => ({ createCardElement: (c) => { helperType = c.type; const d = document.createElement("div"); d.className = "helper-made"; return d; } });
+    const lp = mount("sf-launcher-card", { tiles: [{ name: "X", hash: "x1", summary: "text", card: { type: "custom:iframe" } }] }, "en"); await wait(40);
+    lp.shadowRoot.querySelector(".tile").click(); await wait(150);
+    const pp = [...document.body.children].filter((x) => x.shadowRoot && x.shadowRoot.querySelector(".sheet")).pop();
+    if (pp && pp.shadowRoot.querySelector("iframe")) fail("sécurité : custom:iframe a créé un iframe dans le popup");
+    if (helperType !== "custom:iframe") fail("popup : un type inconnu doit passer par les helpers de HA");
+    if (pp) pp.remove(); lp.remove(); history.replaceState(null, "", location.pathname + location.search);
+    // Dates et heures : chiffres latins même avec ar-SA ; locale avec extension déjà présente sans exception.
+    for (const lang of ["ar-SA", "de-u-co-phonebk", "fa-IR"]) { const b = mount("sf-bridge-card", { weather: "weather.home", price: "sensor.price" }, lang, base); await wait(30);
+      if (/[٠-٩۰-۹]/.test(text(b))) fail(`dates : chiffres non latins avec la langue ${lang}`); if (!text(b).trim()) fail(`bandeau : rendu vide avec ${lang}`); b.remove(); }
+    // Typographie : espace avant « : » seulement en français.
+    const dc = async (lang) => { const e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", decision: "sensor.dec" } }, lang, { ...base, "sensor.dec": S("OK"), "sensor.ev": U(0, "W") }); await wait(30); const x = text(e); e.remove(); return x; };
+    if (/Controller :/.test(await dc("en"))) fail("typographie : « Controller : » (espace française) en anglais"); if (!/Pilote :/.test(await dc("fr"))) fail("typographie : « Pilote : » attendu en français"); }
+  // 5r. Chasse aux bugs, 3e tour : résumés du lanceur sur configs mal typées, hash accentué, thème explicite dans un popup, thème d'une carte rendue
+  //     avant d'être attachée, boutons d'icône nommés, « -0.00 », débordement en allemand, retour d'éditeur, un seul bouton armé, regex, kW / mW.
+  { const pops = () => [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet"));
+    // Résumés du lanceur : une carte de tuile mal typée ne vide jamais le lanceur.
+    for (const [sum, card] of [["vehicles", { type: "custom:sf-hangar-card", cars: "x" }], ["vehicles", { type: "custom:sf-hangar-card", cars: [null, { soc: "sensor.car_soc" }] }], ["commands", { type: "custom:sf-console-card", groups: [null] }],
+      ["cameras", { type: "custom:sf-camera-card", cameras: "camera.front" }], ["machines", { type: "custom:sf-machines-card", tiles: [null] }], ["battery", { type: "custom:sf-battery-card", batteries: "x" }]]) {
+      const l = mount("sf-launcher-card", { tiles: [{ name: "T", summary: sum, card }] }, "en"); await wait(30);
+      if (!l.shadowRoot.querySelector(".tile")) fail(`lanceur : résumé « ${sum} » sur une carte mal typée : le lanceur est vide`); l.remove(); }
+    // Hash accentué : ouverture, URL, lien direct.
+    history.replaceState(null, "", location.pathname + location.search);
+    let l = mount("sf-launcher-card", { tiles: [{ name: "E", hash: "énergie", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en"); await wait(30);
+    const h0 = history.length; l.shadowRoot.querySelector(".tile").click(); await wait(100);
+    if (decodeURIComponent(location.hash) !== "#énergie") fail(`hash : « #énergie » attendu dans l'URL, obtenu « ${location.hash} »`);
+    pops().pop().shadowRoot.querySelector(".back").click(); await wait(700);
+    l.shadowRoot.querySelector(".tile").click(); await wait(100); pops().pop().shadowRoot.querySelector(".back").click(); await wait(700);
+    if (history.length - h0 > 2) fail(`hash : l'historique grossit à chaque ouverture (${history.length - h0} entrées)`); pops().forEach((x) => x.remove()); l.remove();
+    history.replaceState(null, "", location.pathname + location.search); history.pushState(null, "", "#%C3%A9nergie");
+    l = mount("sf-launcher-card", { tiles: [{ name: "E", hash: "énergie", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en"); await wait(600);
+    if (!pops().length) fail("hash : le lien direct #%C3%A9nergie doit ouvrir la tuile « énergie »"); pops().forEach((x) => x.remove()); l.remove(); history.replaceState(null, "", location.pathname + location.search);
+    // Thème explicitement sombre sur le lanceur, thème HA clair : la carte SF du popup reste sombre.
+    document.documentElement.style.setProperty("--sf-theme", "light");
+    l = mount("sf-launcher-card", { theme: "dark", tiles: [{ name: "D", hash: "dk", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en"); await wait(40);
+    l.shadowRoot.querySelector(".tile").click(); await wait(120);
+    const pp = pops().pop(); if (pp && pp.shadowRoot.querySelector("sf-battery-card").getAttribute("theme") !== "dark") fail("thème : un lanceur explicitement sombre doit garder ses cartes de popup sombres");
+    pops().forEach((x) => x.remove()); l.remove(); history.replaceState(null, "", location.pathname + location.search);
+    // Carte rendue avant d'être attachée : le thème est relu une fois dans le DOM.
+    const dt = document.createElement("sf-battery-card"); dt.setConfig({ soc: "sensor.bat_soc" }); dt.hass = HASS(base, "en"); await wait(60); document.body.appendChild(dt); await wait(60);
+    if (dt.getAttribute("theme") !== "light") fail("thème : une carte rendue avant d'être attachée doit relire --sf-theme"); dt.remove();
+    document.documentElement.style.removeProperty("--sf-theme");
+    // Boutons d'icône seule : un nom accessible.
+    const cv = mount("sf-console-card", { groups: [{ title: "g", items: [{ kind: "cover", entity: "cover.shutter", label: "Shutter" }] }] }, "en"); await wait(30);
+    const unnamed = [...cv.shadowRoot.querySelectorAll('[role="button"]')].filter((b) => !b.getAttribute("aria-label"));
+    if (unnamed.length) fail(`accessibilité : ${unnamed.length} bouton(s) d'icône sans nom accessible`); cv.remove();
+    // « -0.00 » : un petit négatif qui s'arrondit à zéro s'écrit « 0.00 ».
+    const z = mount("sf-machines-card", { tiles: [{ label: "z", entity: "sensor.neg", kind: "value", digits: 2 }] }, "en", { ...base, "sensor.neg": U(-0.001, "W") }); await wait(30);
+    if (/-0\.00/.test(text(z))) fail("nombres : « -0.00 » affiché"); z.remove();
+    // Allemand à 320 px : rien ne dépasse de la carte du bilan.
+    const box = document.createElement("div"); box.style.width = "320px"; document.body.appendChild(box);
+    const led = document.createElement("sf-ledger-card"); led.setConfig({ total_cost: "sensor.eur", solar_fraction: "sensor.fossil", avg_price: "sensor.price", devices: [] }); box.appendChild(led); led.hass = HASS(base, "de"); await wait(60);
+    const hud = led.shadowRoot.querySelector(".hud").getBoundingClientRect(); const over = [...led.shadowRoot.querySelectorAll(".kpi")].filter((k) => k.getBoundingClientRect().right > hud.right + 1);
+    if (over.length) fail(`débordement : ${over.length} indicateur(s) du bilan dépassent de la carte en allemand à 320 px`); box.remove();
+    // Éditeur : revenir à une configuration déjà émise n'est pas ignoré.
+    const ed = document.createElement("sf-hangar-card-editor"); ed.hass = { states: {}, locale: { language: "en" } }; ed.setConfig({ cars: [] }); document.body.appendChild(ed); await wait(30);
+    let em = null; ed.addEventListener("config-changed", (ev) => { em = ev.detail.config; });
+    const f0 = ed.shadowRoot.querySelector("ha-form"); f0.dispatchEvent(new CustomEvent("value-changed", { detail: { value: { ...f0.data, theme: "light" } } }));
+    if (!em) fail("éditeur : aucune configuration émise"); else {
+      if (/"charger":|"flows":|"chargers":\[\]/.test(JSON.stringify(em))) fail(`éditeur : des objets / listes vides sont injectés dans le YAML émis (${JSON.stringify(em)})`);
+      ed.setConfig({ cars: [], theme: "dark" }); ed.setConfig(JSON.parse(JSON.stringify(em)));
+      if (ed._config.theme !== "light") fail("éditeur : revenir à une configuration déjà émise doit être pris en compte"); }
+    ed.remove();
+    // Un seul bouton armé à la fois.
+    const st2 = { ...base, "switch.a": S("on"), "switch.b": S("on"), "sensor.ev": U(0, "W") };
+    const two = mount("sf-hangar-card", { cars: [], chargers: [{ name: "A", power: "sensor.ev", switch: "switch.a", controls: true }, { name: "B", power: "sensor.ev", switch: "switch.b", controls: true }] }, "en", st2); await wait(40);
+    const stops = [...two.shadowRoot.querySelectorAll(".ctl .btn")].filter((b) => /Stop/.test(b.textContent)); stops[0].click(); await wait(10); stops[1].click(); await wait(10);
+    if (two.shadowRoot.querySelectorAll(".armed").length !== 1) fail(`confirmation : un seul bouton armé attendu, obtenu ${two.shadowRoot.querySelectorAll(".armed").length}`); two.remove();
+    // Regex : `(a|b){2}` (répétition fixe) acceptée ; une regex risquée refusée avec un avertissement dans la console.
+    const warns = []; const ow = console.warn; console.warn = (...x) => { warns.push(x.join(" ")); };
+    const rs = { ...base, "sensor.ab": S(10, { device_class: "battery", unit_of_measurement: "%" }), "sensor.cc": S(20, { device_class: "battery", unit_of_measurement: "%" }) };
+    const r1 = mount("sf-cells-card", { include_pattern: "^sensor\\.(a|b){2}$" }, "en", rs); await wait(30); const n1 = r1.shadowRoot.querySelectorAll(".cell").length; r1.remove();
+    const r2 = mount("sf-cells-card", { include_pattern: "(a|b)+$" }, "en", rs); await wait(30); r2.remove(); console.warn = ow;
+    if (n1 !== 1) fail(`regex : (a|b){2} doit être acceptée (1 cellule), obtenu ${n1}`); if (!warns.some((w) => /pattern ignored/.test(w))) fail("regex : un motif refusé doit être signalé dans la console");
+    // kW / mW / valeurs absentes.
+    const k = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.mw" } }, "en", { ...base, "sensor.mw": U(5000, "mW") }); await wait(30);
+    if (!/\b5 W/.test(text(k))) fail("unités : 5000 mW doit s'afficher « 5 W »"); k.remove();
+    const kk = mount("sf-battery-card", { soc: "sensor.bat_soc" }, "en"); if (kk.kw(undefined) !== "—" || kk.kw(999.6) !== "1.00 kW") fail(`kw() : « ${kk.kw(undefined)} » / « ${kk.kw(999.6)} »`); kk.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
