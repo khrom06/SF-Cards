@@ -2126,4 +2126,4 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
   }
 }
 
-console.info("%c SF-CARDS %c v1.2.1 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
+console.info("%c SF-CARDS %c v1.3.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
