@@ -3,6 +3,12 @@
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
 ## [1.7.0]
+### Added
+- **Vehicles card — several chargers**: `chargers: [{ name, connected, charging, power, current, decision, mode }]` (up to 4) coexist in one card, each with its own state, power and optional mode selector. Header: *charging* if any charger charges. The launcher tile sums the power. The single `charger:` syntax is unchanged.
+- **Vehicles card — up to 3 cars** (was 2), laid out in a row above the chargers.
+- **Vehicles card — distance unit**: `distance_unit: auto | km | mi`. `auto` shows the range sensor's own unit; `km` / `mi` converts.
+- **Vehicles card — `select` mode entities**: the charge-mode selector now works with `select` entities as well as `input_select`.
+
 ### Changed
 - **Vehicles card — much wider compatibility**: "plugged in" and "charging" now accept `on`/`off` *and* the status words chargers publish (`Charging`, `Connected`, `Plugged in`, `Awaiting start`, `SuspendedEV`, `Charge done`…; case, spaces and dashes ignored), from any entity type (binary sensor, sensor, switch). `connected_states` / `charging_states` override the built-in lists. Without a charging entity, charger power above 50 W counts as charging, and charging implies plugged in. The launcher summary follows the same rules.
 - Visual editor: the charger entity pickers are no longer limited to binary sensors; two new YAML fields for custom status words (translated in all 11 languages).

@@ -227,8 +227,9 @@ hide_sim: true                           # hides the "simulate a doorbell" test 
 
 ```yaml
 type: custom:sf-hangar-card
-cars:
+cars:                                          # up to 3 cars
   - { name: Car A, soc: sensor.car_a_battery, range: sensor.car_a_range, target: sensor.car_a_target, charging: binary_sensor.car_a_charging, color: "#00e5ff" }
+distance_unit: auto                            # auto (the range sensor's own unit) | km | mi — converts if needed
 charger:
   connected: binary_sensor.charger_connected   # or a status sensor: "Connected", "Plugged in", "Awaiting start"…
   charging: binary_sensor.charger_charging     # or a status sensor: "Charging"… (optional: without it, power > 50 W means charging)
@@ -237,10 +238,20 @@ charger:
   power: sensor.charger_power
   current: number.charger_current
   decision: sensor.charge_controller_decision   # optional
-mode: input_select.charge_mode                  # optional selector
+mode: input_select.charge_mode                  # optional selector — an input_select or a select entity
 flows: { solar: sensor.solar_power, home: sensor.house_power, surplus: sensor.solar_surplus }
 warn_mode: Solar                                # optional: warn when this mode is selected in the evening…
 warn_text: "No sun tonight — the car will not charge in this mode."
+```
+
+**Two chargers (or more)?** Replace `charger:` with a `chargers:` list (up to 4). Each one has its own name, status, power, current, controller decision and, if you like, its own `mode` selector. The cars are shown in a row above, one block per charger below; the header says *charging* as soon as one charger charges, and the launcher tile adds up the power. The single `charger:` syntax keeps working.
+
+<img src="assets/hangar-multi.png" alt="Vehicles card with three cars and two chargers" width="420">
+
+```yaml
+chargers:
+  - { name: Garage,   connected: sensor.garage_status,   charging: sensor.garage_status,   power: sensor.garage_power,   current: number.garage_current }
+  - { name: Driveway, connected: sensor.driveway_status, charging: sensor.driveway_status, power: sensor.driveway_power, mode: select.driveway_mode }
 ```
 
 **Works with any charger and car integration.** "Plugged in" and "charging" accept `on` / `off` but also the status words most chargers publish — `Charging`, `Connected`, `Plugged in`, `Awaiting start`, `SuspendedEV`, `Charge done`… (case, spaces and dashes are ignored). If your brand uses something unusual, list the words in `connected_states` / `charging_states`. No status sensor at all? The card falls back on the charger power (above 50 W = charging). The car's own `charging` entity accepts the same words (`charging_states` per car).

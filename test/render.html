@@ -203,6 +203,46 @@ window.sfTr = (lang, key, vars) => {
     await run({ ...cc, charging_states: ["Zorglub"] }, { ...X("sensor.conn", "on"), ...X("sensor.chg", "zorglub") }, "charging", "états personnalisés");
     await run({ connected: "sensor.conn", power: "sensor.ev" }, { ...X("sensor.conn", "off"), "sensor.ev": U(3000, "W") }, "charging", "puissance en secours");
     await run({ connected: "sensor.conn", power: "sensor.ev" }, { ...X("sensor.conn", "connected"), "sensor.ev": U(0, "W") }, "waiting", "branché sans puissance"); }
+  // 5h. Carte véhicules : mode via `select` (pas seulement input_select), unité km / mi, jusqu'à 3 voitures.
+  { const calls = []; const st = { ...base, "select.mode": S("Eco", { options: ["Eco", "Fast"] }), "sensor.rkm": U(100, "km"), "sensor.rmi": U(62, "mi"), "sensor.rnone": S(100) };
+    const el = mount("sf-hangar-card", { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.rkm" }], charger: { power: "sensor.ev" }, mode: "select.mode" }, "en", st);
+    el.hass = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40);
+    const btn = [...el.shadowRoot.querySelectorAll(".seg .btn")].find((b) => /Fast/.test(b.textContent));
+    if (!btn) fail("véhicules : boutons du mode (entité select) absents"); else { btn.click(); await wait(20);
+      if (!calls.some((c) => c[0] === "select" && c[1] === "select_option" && c[2].option === "Fast")) fail("véhicules : un mode `select` doit appeler select.select_option"); }
+    el.remove();
+    const rng = async (range, unit, want, label) => { const e = mount("sf-hangar-card", { cars: [{ name: "Car", soc: "sensor.car_soc", range }], charger: {}, ...(unit ? { distance_unit: unit } : {}) }, "en", st);
+      await wait(40); const got = (e.shadowRoot.querySelector(".km") || { textContent: "" }).textContent.trim();
+      if (got !== want) fail(`véhicules [${label}] : « ${want} » attendu, obtenu « ${got} »`); e.remove(); };
+    await rng("sensor.rkm", "", "100 km range", "auto km"); await rng("sensor.rmi", "", "62 mi range", "auto mi"); await rng("sensor.rnone", "", "100 km range", "auto sans unité");
+    await rng("sensor.rkm", "mi", "62 mi range", "km → mi"); await rng("sensor.rmi", "km", "100 km range", "mi → km"); await rng("sensor.rkm", "km", "100 km range", "km → km");
+    const four = ["a", "b", "c", "d"].map((n) => ({ name: n, soc: "sensor.car_soc" }));
+    const e3 = mount("sf-hangar-card", { cars: four, charger: {} }, "en", st); await wait(40);
+    const nb = e3.shadowRoot.querySelectorAll(".car").length; if (nb !== 3) fail(`véhicules : 3 voitures maximum attendues, obtenu ${nb}`);
+    if (!e3.shadowRoot.querySelector(".bay.stack")) fail("véhicules : la disposition à 3 voitures est absente"); e3.remove(); }
+  // 5i. Deux bornes (ou plus) qui coexistent : une carte par borne, état global = « charging » si l'une charge, « waiting » si l'une est branchée,
+  //     puissance et noms propres à chaque borne, mode propre à chaque borne, ancienne syntaxe `charger:` inchangée.
+  { const calls = []; const two = (a, b) => ({ ...base, "sensor.a_st": S(a), "sensor.b_st": S(b), "sensor.a_p": U(7000, "W"), "sensor.b_p": U(0, "W"), "select.bm": S("Eco", { options: ["Eco", "Fast"] }) });
+    const cfg = { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range" }],
+      chargers: [{ name: "Wall A", connected: "sensor.a_st", charging: "sensor.a_st", power: "sensor.a_p" }, { name: "Wall B", connected: "sensor.b_st", charging: "sensor.b_st", power: "sensor.b_p", mode: "select.bm" }] };
+    const sub = (el) => (el.shadowRoot.querySelector(".head .sub") || { textContent: "" }).textContent.trim().toLowerCase();
+    const mk = async (a, b) => { const el = mount("sf-hangar-card", cfg, "en", two(a, b)); await wait(40); return el; };
+    let el = await mk("Charging", "Disconnected");
+    if (el.shadowRoot.querySelectorAll(".borne").length !== 2) fail("deux bornes : deux blocs « borne » attendus");
+    if (sub(el) !== "charging") fail(`deux bornes : « charging » attendu quand l'une charge, obtenu « ${sub(el)} »`);
+    const tx = text(el); if (!/Wall A/.test(tx) || !/Wall B/.test(tx)) fail("deux bornes : les noms de chaque borne sont attendus");
+    if (!/7000 W/.test(tx)) fail("deux bornes : la puissance de la borne A (7000 W) est attendue");
+    el.hass = { ...HASS(two("Charging", "Disconnected"), "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40);
+    const b = [...el.shadowRoot.querySelectorAll(".seg .btn")].find((x) => /Fast/.test(x.textContent));
+    if (!b) fail("deux bornes : le mode propre à la borne B est absent"); else { b.click(); await wait(20);
+      if (!calls.some((c) => c[0] === "select" && c[2].entity_id === "select.bm" && c[2].option === "Fast")) fail("deux bornes : le mode de la borne B doit appeler select.select_option"); }
+    el.remove();
+    el = await mk("Disconnected", "Plugged in"); if (sub(el) !== "waiting") fail(`deux bornes : « waiting » attendu (B branchée), obtenu « ${sub(el)} »`); el.remove();
+    el = await mk("Disconnected", "Disconnected"); if (sub(el) !== "idle") fail(`deux bornes : « idle » attendu, obtenu « ${sub(el)} »`); el.remove();
+    const six = mount("sf-hangar-card", { cars: [], chargers: ["a", "b", "c", "d", "e", "f"].map((n) => ({ name: n })) }, "en", two("on", "on")); await wait(40);
+    if (six.shadowRoot.querySelectorAll(".borne").length !== 4) fail("bornes : 4 maximum attendues"); six.remove();
+    const l = mount("sf-launcher-card", { tiles: [{ name: "EV", summary: "vehicles", card: { type: "custom:sf-hangar-card", ...cfg } }] }, "en", two("Charging", "Charging")); await wait(40);
+    if (!/7\.00 kW/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("bornes : la tuile du lanceur devrait afficher la puissance cumulée"); l.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
