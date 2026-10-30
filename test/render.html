@@ -1,0 +1,156 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Test de rendu : chargé par run.sh dans Chrome headless. Écrit son verdict (JSON) dans #result. Aucune dépendance. -->
+<body>
+<script>
+// Faux composants HA : seulement ce dont les cartes ont besoin pour s'afficher.
+class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon);
+window.requestAnimationFrame = (f) => setTimeout(f, 0);   // headless : pas de vraies frames, on rend tout de suite
+window.__errors = [];
+window.addEventListener("error", (e) => window.__errors.push(String(e.message)));
+window.__missing = new Set();
+</script>
+<script src="../dist/sf-cards.js"></script>
+<script>
+const S = (state, attrs = {}) => ({ state: String(state), attributes: attrs });
+const U = (v, unit) => S(v, { unit_of_measurement: unit });
+const base = {
+  "sensor.grid": U(850, "W"), "sensor.solar": U(2400, "W"), "sensor.ev": U(1800, "W"), "sensor.pac": U(600, "W"),
+  "sensor.bat_soc": U(62, "%"), "sensor.bat_p": U(-1200, "W"), "sensor.kwh": U(2.1, "kWh"), "sensor.eur": U(1.2, "€"),
+  "sensor.price": U(0.18, "€"), "sensor.temp": U(20.5, "°C"), "sensor.hum": U(55, "%"), "sensor.out": U(11, "°C"),
+  "sensor.solar_left": U(4.2, "kWh"), "sensor.fossil": U(12, "%"),
+  "weather.home": S("sunny", { temperature: 12 }),
+  "climate.room": S("auto", { hvac_action: "heating", preset_modes: ["comfort", "eco", "away", "none"], preset_mode: "eco", temperature: 20, min_temp: 7, max_temp: 30 }),
+  "select.room_preset": S("eco", { options: ["auto", "comfort", "eco", "away", "none"] }),
+  "input_number.target": U(20, "°C"), "input_boolean.auto": S("on"), "binary_sensor.window": S("off"), "binary_sensor.door": S("off"),
+  "binary_sensor.leak": S("off"), "binary_sensor.net": S("on"), "binary_sensor.charging": S("off"), "binary_sensor.connected": S("on"),
+  "input_select.mode": S("Auto", { options: ["Auto", "Eco", "Boost"] }), "number.current": U(10, "A"),
+  "light.lamp": S("on", { brightness: 128 }), "switch.plug": S("on"), "cover.shutter": S("closed", { current_position: 0 }),
+  "script.go": S("off"), "alarm_control_panel.home": S("disarmed"), "camera.front": S("idle"), "person.alice": S("home"),
+  "sensor.car_soc": U(55, "%"), "sensor.car_range": U(180, "km"), "sensor.car_target": U(80, "%"),
+  "sensor.dev_bat": S(18, { unit_of_measurement: "%", device_class: "battery", friendly_name: "Sensor A battery" }),
+};
+// Comme dans HA, chaque état porte son entity_id.
+const withIds = (states) => Object.fromEntries(Object.entries(states).map(([id, st]) => [id, { entity_id: id, last_changed: new Date().toISOString(), ...st }]));
+const HASS = (states, language) => ({ states: withIds(states), locale: { language }, language, callService: () => Promise.resolve() });
+
+// Une configuration complète par carte (les identifiants ci-dessus sont fictifs).
+const FULL = {
+  "sf-alert-card": { leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], alarm: "alarm_control_panel.home", hide_sim: true },
+  "sf-hangar-card": { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range", target: "sensor.car_target", charging: "binary_sensor.charging" }],
+    charger: { connected: "binary_sensor.connected", charging: "binary_sensor.charging", power: "sensor.ev", current: "number.current" }, mode: "input_select.mode",
+    flows: { solar: "sensor.solar", home: "sensor.pac", surplus: "sensor.grid" } },
+  "sf-radar-card": { people: [{ name: "Alice", person: "person.alice", color: "#00e5ff" }], rooms: [{ label: "Living", entity: "binary_sensor.door" }] },
+  "sf-machines-card": { title: "Equipment", tiles: [{ label: "A", entity: "sensor.temp", kind: "value", warn: 30 }, { label: "B", entity: "switch.plug", kind: "toggle" }, { label: "C", entity: "binary_sensor.net", kind: "binary" }, { label: "D", entity: "weather.home", kind: "text" }] },
+  "sf-bridge-card": { weather: "weather.home", outdoor: "sensor.out", price: "sensor.price", hc_price: "sensor.price", mode: "input_select.mode", solar_left: "sensor.solar_left",
+    internet: "binary_sensor.net", leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], people: [{ name: "Alice", entity: "person.alice" }] },
+  "sf-reactor-card": { solar: "sensor.solar", grid: "sensor.grid", fossil: "sensor.fossil", price: "sensor.price", battery_soc: "sensor.bat_soc", battery_power: "sensor.bat_p",
+    devices: [{ name: "EV", entity: "sensor.ev", icon: "mdi:car" }, { name: "Heat pump", entity: "sensor.pac", icon: "mdi:heat-pump" }] },
+  "sf-climate-card": { mode: "input_select.mode", rooms: [{ name: "Living", climate: "climate.room", temp: "sensor.temp", hum: "sensor.hum", target: "input_number.target", regul: "input_boolean.auto", window: "binary_sensor.window" }] },
+  "sf-console-card": { title: "Controls", groups: [{ title: "Home", items: [{ kind: "dimmer", entity: "light.lamp", label: "Lamp" }, { kind: "toggle", entity: "switch.plug", label: "Plug" },
+    { kind: "cover", entity: "cover.shutter", label: "Shutter" }, { kind: "select", entity: "input_select.mode", label: "Mode" }, { kind: "sensor", entity: "sensor.temp", label: "Temp" },
+    { kind: "action", label: "Go", service: "script.turn_on", data: { entity_id: "script.go" } }] }] },
+  "sf-camera-card": { cameras: [{ entity: "camera.front", name: "Front" }] },
+  "sf-setpoints-card": { columns: [{ label: "Day" }], rows: [{ name: "Living", entities: ["input_number.target"] }] },
+  "sf-ledger-card": { total_cost: "sensor.eur", solar_fraction: "sensor.fossil", avg_price: "sensor.price", devices: [{ name: "EV", total: "sensor.kwh", edf: "sensor.kwh", solar: "sensor.kwh", cost: "sensor.eur" }] },
+  "sf-cells-card": {},
+  "sf-radiators-card": { radiators: [{ name: "Room", climate: "climate.room", preset: "select.room_preset", kwh: "sensor.kwh" }], setpoint: false },
+  "sf-battery-card": { soc: "sensor.bat_soc", power: "sensor.bat_p", capacity_kwh: 10, charged_today: "sensor.kwh", discharged_today: "sensor.kwh", temperature: "sensor.temp", health: "sensor.hum", cycles: "sensor.kwh", mode: "input_select.mode" },
+  "sf-launcher-card": { tiles: [{ name: "Climate", summary: "room", card: { type: "custom:sf-climate-card", rooms: [{ name: "L", climate: "climate.room", temp: "sensor.temp", target: "input_number.target" }] } },
+    { name: "Battery", summary: "battery", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc", power: "sensor.bat_p" } }] },
+};
+// Même chose sans aucune entité de production solaire ni de batterie : rien de « solaire » ne doit apparaître.
+const NOSOLAR = {
+  "sf-bridge-card": { weather: "weather.home", outdoor: "sensor.out", price: "sensor.price" },
+  "sf-reactor-card": { grid: "sensor.grid", devices: [{ name: "EV", entity: "sensor.ev" }] },
+  "sf-ledger-card": { total_cost: "sensor.eur", devices: [{ name: "EV", total: "sensor.kwh", cost: "sensor.eur" }] },
+  "sf-hangar-card": { cars: [], charger: { power: "sensor.ev" }, flows: { home: "sensor.pac" } },
+  "sf-launcher-card": { tiles: [{ name: "Energy", summary: "energy", card: { type: "custom:sf-reactor-card", grid: "sensor.grid" } }] },
+};
+
+const failures = [];
+const fail = (m) => failures.push(m);
+const mount = (tag, cfg, language, states) => {
+  const el = document.createElement(tag);
+  el.setConfig(cfg);
+  document.body.appendChild(el);
+  el.hass = HASS(states || base, language);
+  return el;
+};
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const text = (el) => (el.shadowRoot ? el.shadowRoot.textContent : "");
+
+// Enregistre les clés de traduction demandées mais absentes de la table (ou incomplètes) pour une langue ≠ fr.
+const realTr = sfTr;
+window.sfTr = (lang, key, vars) => {
+  if (lang !== "fr") {
+    const e = SF_T[key];
+    if (!e) { if (/[^\x00-\x7F]|\s/.test(key)) window.__missing.add(`${lang}: ${key}`); }
+    else if (e.length < 3 || e.some((x) => !x)) window.__missing.add(`${lang}: ${key} (incomplète)`);
+  }
+  return realTr(lang, key, vars);
+};
+
+(async () => { try {
+  // 1. Chaque carte, chaque langue, config complète : pas d'erreur, pas de rendu vide, pas de « undefined / NaN ».
+  for (const language of ["en", "fr", "es", "de"]) {
+    for (const [tag, cfg] of Object.entries(FULL)) {
+      const el = mount(tag, cfg, language);
+      await wait(40);
+      const t = text(el);
+      if (!t.trim()) fail(`${tag} [${language}] : rendu vide`);
+      if (/undefined|NaN|\[object|null/.test(t)) fail(`${tag} [${language}] : texte suspect « ${(t.match(/.{0,20}(undefined|NaN|\[object|null).{0,20}/) || [""])[0]} »`);
+      el.remove();
+    }
+  }
+  // 2. Config minimale (stub) : une carte vide ne doit jamais planter.
+  for (const tag of Object.keys(FULL)) {
+    try {
+      const el = mount(tag, tag === "sf-launcher-card" ? { tiles: [] } : (customElements.get(tag).getStubConfig ? customElements.get(tag).getStubConfig() : {}), "en", {});
+      await wait(30); el.remove();
+    } catch (e) { fail(`${tag} : plante avec une config minimale (${e.message})`); }
+  }
+  // 3. Sans solaire ni batterie : aucune mention de solaire.
+  for (const [tag, cfg] of Object.entries(NOSOLAR)) {
+    const el = mount(tag, cfg, "en");
+    await wait(40);
+    if (/solar/i.test(text(el))) fail(`${tag} : affiche du solaire alors qu'aucune entité solaire n'est configurée`);
+    el.remove();
+  }
+  // 4. Carte batterie sans entité : elle doit se masquer.
+  { const el = mount("sf-battery-card", {}, "en"); await wait(40);
+    if (getComputedStyle(el).display !== "none") fail("sf-battery-card sans entité : devrait être masquée"); el.remove(); }
+  // 5. Lanceur : une carte standard de HA s'ouvre via les « card helpers ».
+  window.loadCardHelpers = async () => ({ createCardElement: (c) => { const d = document.createElement("div"); d.className = "std-" + c.type; d.textContent = "STD " + c.type; return d; } });
+  { const el = mount("sf-launcher-card", { tiles: [{ name: "Std", hash: "std", card: { type: "vertical-stack", cards: [] } }] }, "en");
+    await wait(60);
+    el.shadowRoot.querySelector(".tile").click();
+    await wait(150);
+    const pop = [...document.body.children].find((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet"));
+    if (!pop || !pop.shadowRoot.querySelector(".std-vertical-stack")) fail("lanceur : une carte standard (vertical-stack) ne s'ouvre pas dans le popup");
+    el.remove(); if (pop) pop.remove(); }
+  // 5b. Heures creuses : plusieurs plages saisies (dont une qui passe minuit) font foi ; sans plage ni prix HC, HP/HC est inconnu.
+  { const el = mount("sf-bridge-card", { weather: "weather.home", price: "sensor.price", hc_price: "sensor.price",
+      hc_windows: [{ start: "22:00", end: "02:00" }, { start: "06:00", end: "08:00" }, { start: "14:00", end: "16:00" }] }, "en");
+    await wait(40);
+    const at = (h, m) => el._isHC(new Date(2026, 0, 5, h, m));
+    const exp = [[23, 0, true], [1, 0, true], [4, 0, false], [7, 0, true], [12, 0, false], [15, 0, true], [20, 0, false]];
+    for (const [h, m, want] of exp) if (at(h, m).hc !== want) fail(`bridge : à ${h}h${m} HC attendu ${want}, obtenu ${at(h, m).hc}`);
+    if (at(15, 0).left !== 60) fail(`bridge : fin de HC à 16h attendue dans 60 min, obtenu ${at(15, 0).left}`);
+    if (at(12, 0).left !== 120) fail(`bridge : prochaine HC à 14h attendue dans 120 min, obtenu ${at(12, 0).left}`);
+    el.remove();
+    const un = mount("sf-bridge-card", { weather: "weather.home", price: "sensor.price" }, "en"); await wait(40);
+    if (un._isHC(new Date(2026, 0, 5, 3, 0)).hc !== null) fail("bridge : sans plage ni prix HC, HP/HC devrait être inconnu");
+    if (/\bHP\b|\bHC\b/.test(text(un))) fail("bridge : affiche HP/HC alors que rien n'est configuré");
+    un.remove(); }
+  // 6. Traductions manquantes.
+  for (const m of window.__missing) fail(`traduction manquante — ${m}`);
+  for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
+  } catch (e) { fail(`le test a planté : ${e && e.stack || e}`); }
+  finally {
+  const out = document.createElement("pre"); out.id = "result";
+  out.textContent = JSON.stringify({ ok: failures.length === 0, failures });
+  document.body.appendChild(out);
+  }
+})();
+</script>

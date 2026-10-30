@@ -66,7 +66,7 @@ Then edit a dashboard → **Add card** → search for **"SF ·"**.
 
 ## The cards
 
-Every card can be configured in the visual editor; the YAML below is just for reference. Entity ids are placeholders.
+Every card can be configured in the visual editor; the YAML below is just for reference. Optional entities that you leave out are simply not displayed. Entity ids are placeholders.
 
 | Card | What it is |
 |---|---|
@@ -95,8 +95,8 @@ type: custom:sf-bridge-card
 weather: weather.home
 outdoor: sensor.outdoor_temperature
 price: sensor.electricity_price_now        # €/kWh — decides peak vs off-peak
-hc_price: input_number.offpeak_price       # the off-peak price (compared with `price`)
-hc_windows:                                # only used for the "peak in 1h33" countdown
+hc_price: input_number.offpeak_price       # only used when no hc_windows are set: price == hc_price means off-peak
+hc_windows:                                # off-peak hours — as many ranges as your contract has (2, 3…); they decide peak / off-peak and the countdown
   - { start: "00:56", end: "06:56" }
   - { start: "14:26", end: "16:26" }
 mode: input_select.house_mode
@@ -187,7 +187,7 @@ Item kinds: `toggle`, `dimmer`, `action`, `sensor`, `cover`, `vacuum`, `stepper`
 
 <img src="assets/launcher.png" alt="Launcher card" width="420">
 
-Each tile shows a live summary and opens a full card in a popup:
+Each tile shows a live summary and opens a card in a popup — an SF card, a standard Home Assistant card (`vertical-stack`, `history-graph`…) or any other custom card:
 
 ```yaml
 type: custom:sf-launcher-card
@@ -379,6 +379,14 @@ Want another language? Translations live in one table (`SF_T`, near the top of `
 ## Optional theme
 
 [`themes/sf_hud.yaml`](themes/sf_hud.yaml) dresses the **native** Home Assistant cards (history graphs, logbook, entities lists…) in the same colours. Copy it to `/config/themes/` (with `frontend: themes: !include_dir_merge_named themes` in `configuration.yaml`), reload themes, then set `theme: SF HUD` on a view.
+
+## Development
+
+```bash
+./test/run.sh    # syntax + render of every card (4 languages, no-solar and empty scenarios, translations, popups) in headless Chrome
+```
+
+See the [changelog](CHANGELOG.md) for what changed in each version.
 
 ## About HACS and its future
 

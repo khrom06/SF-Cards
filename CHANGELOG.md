@@ -1,0 +1,33 @@
+# Changelog
+
+All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
+
+## [1.4.0]
+### Added
+- **Launcher**: a popup can now open **any Home Assistant card** — standard ones (`vertical-stack`, `weather-forecast`, `history-graph`…) as well as other custom cards — not only SF cards.
+- **Bridge**: off-peak hours are now a real setting. `hc_windows` takes as many ranges as your contract has (2, 3…); they decide peak / off-peak and the countdown. Without ranges, the card compares `price` with `hc_price`; without either, nothing is guessed and no HP/HC label is shown.
+- Automatic render tests (`test/run.sh`): every card, 4 languages, "no solar" and "empty card" scenarios, missing translations, multi-range off-peak logic, popups. Run before each release.
+
+### Changed
+- The 22:00–06:00 default off-peak range is gone (it showed wrong tariffs for contracts with other hours).
+
+## [1.3.0]
+### Added
+- **`sf-battery-card`**: home battery — level ring, charge / discharge, estimated time, daily energy, health, mode selector. Hides itself without `soc` / `power`.
+- Energy card: optional battery node (`battery_power`, `battery_soc`, `battery_invert`).
+- Launcher summary `battery`.
+
+### Changed
+- Anything that is not configured is no longer displayed: solar node and "solar autonomy", fossil share, instant cost, bridge "solar left" and "house mode", hangar flows, ledger solar share and legend.
+
+## [1.2.1]
+### Added
+- Bridge: `home_states` option (a custom home zone smaller than "Home" was shown as away).
+
+## [1.2.0]
+### Added
+- **`sf-radiators-card`**: radiators driven by presets, with optional setpoint (turn it off for pilot-wire heaters), presets from a `select` entity, preset labels, daily energy bar, connection warning.
+
+## [1.0.0]
+### Added
+- First public release: 13 cards (bridge, energy, climate, console, launcher, alert, hangar, machines, cells, camera, setpoints, ledger, radar), visual editors, en / fr / es / de, embedded fonts, optional theme.
