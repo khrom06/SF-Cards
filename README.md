@@ -265,7 +265,7 @@ include_pattern: ""      # optional regex on the entity id
 
 <img src="assets/radiators.png" alt="Radiators card" width="420">
 
-For radiators driven by presets (Voltalis, Netatmo, Tado…), which often have no room probe. One column and large touch targets, built for phones. Presets come from the device itself (`preset_modes`); the setpoint buttons call `climate.set_temperature`.
+For radiators driven by presets (Voltalis, Netatmo, Tado…), which often have no room probe. One column and large touch targets, built for phones. Presets come from the device itself (`preset_modes`, or the options of a `select` entity); the setpoint buttons call `climate.set_temperature` and can be turned off for pilot-wire (fil pilote) heaters, which only know modes.
 
 ```yaml
 type: custom:sf-radiators-card
@@ -273,10 +273,14 @@ title: Radiators
 accent: "#e0875a"        # optional accent colour
 step: 0.5                # setpoint step
 max_kwh: 3               # daily energy that fills the bar
+setpoint: true           # set false for pilot-wire heaters (no numeric setpoint): hides the ± control
+preset_labels: { away: Frost protection }   # optional: rename presets
 radiators:
   - name: Kitchen
     icon: mdi:countertop
     climate: climate.kitchen
+    preset: select.kitchen_preset          # optional: use a select entity's options (may include "auto")
+    presets: [auto, comfort, eco, away]    # optional: order / filter
     kwh: sensor.kitchen_energy_today       # optional (kWh or Wh)
     connection: sensor.kitchen_connection  # optional, warns when not ok/on/connected
 ```
