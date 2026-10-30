@@ -376,13 +376,16 @@ class SfHangarCard extends SfBase {
         background: linear-gradient(90deg, transparent, ${SF_C.green}, transparent); animation: run 1.1s linear infinite; }
       @keyframes run { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
       .note { margin-top:14px; padding-top:10px; border-top:1px dashed rgba(0,229,255,.18);
-        display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:11px; }
+        display:flex; justify-content:center; align-items:center; text-align:center; gap:4px 16px; flex-wrap:wrap; font-size:11px; }
+      .modes { margin-top:12px; text-align:center; }
+      .modes .lbl { margin-bottom:6px; }
+      .modes .seg { justify-content:center; }
       .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; margin-top:6px;
         border:1px solid rgba(43,255,136,.45); color:${SF_C.green}; }
-      .warnbox { margin-top:10px; padding:9px 12px; border-radius:8px; font-size:11.5px; line-height:1.4;
+      .warnbox { margin-top:10px; padding:9px 12px; border-radius:8px; font-size:11.5px; line-height:1.4; text-align:center;
         color:${SF_C.amber}; border:1px solid rgba(255,179,0,.55); background:rgba(255,179,0,.09); animation: blink 2s infinite; }
       .fl3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:12px; }
-      .fl3 > div { padding:7px 9px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); }
+      .fl3 > div { padding:7px 9px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); text-align:center; }
       .tgt { stroke:#fff; stroke-width:2; }`;
   }
   _ring(car) {
@@ -474,7 +477,7 @@ class SfHangarCard extends SfBase {
     const warn = c.warn_mode && connected && m.state === c.warn_mode && (h >= 17 || h < 6);
     const opts = (m.attributes.options || []).map((o) =>
       `<span class="btn ${m.state === o ? "on" : ""}" ${this.call(`${entity.split(".")[0]}.select_option`, { entity_id: entity, option: o })}>${this.esc(o)}</span>`).join("");
-    return `<div style="margin-top:12px"><div class="lbl" style="margin-bottom:6px">${this.t("Mode de charge")}${who ? ` · ${this.esc(who)}` : ""}</div><div class="seg">${opts}</div>
+    return `<div class="modes"><div class="lbl">${this.t("Mode de charge")}${who ? ` · ${this.esc(who)}` : ""}</div><div class="seg">${opts}</div>
       ${warn ? `<div class="warnbox">${this.esc(c.warn_text || "")}</div>` : ""}</div>`;
   }
   _flows() {
@@ -866,7 +869,7 @@ class SfReactorCard extends SfBase {
         text-shadow:0 0 10px #000, 0 0 6px var(--cc); }
       .core .txt span { font-size:9px; letter-spacing:.2em; color:#fff; text-shadow:0 0 6px #000; }
       .foot { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:6px; }
-      .foot > div { padding:8px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); }
+      .foot > div { padding:8px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); text-align:center; }
       .foot .v { font-family:Orbitron,sans-serif; font-size:16px; color:#fff; margin-top:3px; }`;
   }
   _dur(w) { // plus c'est puissant, plus le flux est rapide
@@ -1643,7 +1646,7 @@ class SfBatteryCard extends SfBase {
   css() {
     const none = this._has() ? "" : ":host{display:none}";
     return `${none}
-      .gauge { display:grid; grid-template-columns: 132px 1fr; gap:14px; align-items:center; }
+      .gauge { display:grid; grid-template-columns: 132px auto; gap:14px; align-items:center; justify-content:center; }
       @media (max-width: 380px) { .gauge { grid-template-columns: 1fr; justify-items:center; text-align:center; } }
       .ring { position:relative; width:132px; height:132px; }
       .ring svg { width:100%; height:100%; transform:rotate(-90deg); }
@@ -1660,9 +1663,9 @@ class SfBatteryCard extends SfBase {
       .bats .lv i { display:block; height:100%; border-radius:3px; }
       .bats .pc { font-family:Orbitron,sans-serif; font-size:12px; text-align:end; color:#fff; }
       .stats { display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:8px; margin-top:14px; }
-      .stats > div { padding:8px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); }
+      .stats > div { padding:8px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); text-align:center; }
       .stats .v { font-family:Orbitron,sans-serif; font-size:15px; color:#fff; margin-top:3px; }
-      .modes { margin-top:14px; } .modes .lbl { margin-bottom:6px; }`;
+      .modes { margin-top:14px; text-align:center; } .modes .lbl { margin-bottom:6px; } .modes .seg { justify-content:center; }`;
   }
   render() {
     if (!this._has()) return "";

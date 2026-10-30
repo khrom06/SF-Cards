@@ -10,6 +10,7 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 - **Vehicles card — `select` mode entities**: the charge-mode selector now works with `select` entities as well as `input_select`.
 
 ### Changed
+- **Centered layout** in the vehicles, energy and battery cards: information line, charge-mode selector, figure boxes and the battery ring block are centered. README screenshots refreshed.
 - **Vehicles card — much wider compatibility**: "plugged in" and "charging" now accept `on`/`off` *and* the status words chargers publish (`Charging`, `Connected`, `Plugged in`, `Awaiting start`, `SuspendedEV`, `Charge done`…; case, spaces and dashes ignored), from any entity type (binary sensor, sensor, switch). `connected_states` / `charging_states` override the built-in lists. Without a charging entity, charger power above 50 W counts as charging, and charging implies plugged in. The launcher summary follows the same rules.
 - Visual editor: the charger entity pickers are no longer limited to binary sensors; two new YAML fields for custom status words (translated in all 11 languages).
 
