@@ -150,6 +150,28 @@ window.sfTr = (lang, key, vars) => {
   // 5d. Variantes de langue de HA (pt-BR, zh-Hans…) : retombent sur la langue de base.
   { const a = mount("sf-radiators-card", FULL["sf-radiators-card"], "pt-BR"); const b = mount("sf-radiators-card", FULL["sf-radiators-card"], "zh-Hans"); await wait(40);
     if (!/Radiadores/.test(text(a))) fail("pt-BR : « Radiadores » attendu"); if (!/暖气片/.test(text(b))) fail("zh-Hans : « 暖气片 » attendu"); a.remove(); b.remove(); }
+  // 5e. Plusieurs batteries : niveau pondéré par la capacité (80 % de 10 kWh + 20 % de 5 kWh = 60 %), puissance cumulée,
+  //     détail par batterie ; sans capacité, moyenne simple ; un seul nœud dans la carte énergie ; une batterie indisponible est ignorée.
+  { const st = { ...base, "sensor.b1": U(80, "%"), "sensor.b1p": U(-1000, "W"), "sensor.b2": U(20, "%"), "sensor.b2p": U(400, "W"), "sensor.b3": S("unavailable") };
+    const two = [{ name: "Garage", soc: "sensor.b1", power: "sensor.b1p", capacity_kwh: 10 }, { name: "Cellar", soc: "sensor.b2", power: "sensor.b2p", capacity_kwh: 5 }];
+    const c1 = mount("sf-battery-card", { batteries: two }, "en", st); await wait(40); const t1 = text(c1);
+    const ring = (el) => (el.shadowRoot.querySelector(".ring .t b") || { textContent: "" }).textContent.trim();
+    if (ring(c1) !== "60%") fail(`batteries : niveau pondéré 60 % attendu, obtenu « ${ring(c1)} »`);
+    if (!/Garage/.test(t1) || !/Cellar/.test(t1)) fail("batteries : le détail par batterie (noms) est absent");
+    if (!/600\s*W/.test(t1)) fail("batteries : puissance cumulée 600 W attendue");
+    if (!/Charging/.test(t1)) fail("batteries : état « Charging » attendu (somme négative)");
+    c1.remove();
+    const c2 = mount("sf-battery-card", { batteries: [{ name: "A", soc: "sensor.b1" }, { name: "B", soc: "sensor.b2" }] }, "en", st); await wait(40);
+    if (ring(c2) !== "50%") fail(`batteries : sans capacité, moyenne simple 50 % attendue, obtenu « ${ring(c2)} »`); c2.remove();
+    const c3 = mount("sf-battery-card", { batteries: [{ name: "A", soc: "sensor.b1", capacity_kwh: 10 }, { name: "Dead", soc: "sensor.b3", capacity_kwh: 10 }] }, "en", st); await wait(40);
+    if (ring(c3) !== "80%") fail(`batteries : une batterie indisponible doit être ignorée (80 % attendu), obtenu « ${ring(c3)} »`); c3.remove();
+    const r = mount("sf-reactor-card", { grid: "sensor.grid", batteries: two, devices: [] }, "en", st); await wait(40);
+    const nodes = (r.shadowRoot.querySelectorAll(".node") || []); const batNodes = [...nodes].filter((n) => /Battery/.test(n.textContent));
+    if (batNodes.length !== 1) fail(`batteries : un seul nœud batterie attendu dans la carte énergie, obtenu ${batNodes.length}`);
+    if (batNodes[0] && !/Battery 60 %/.test(batNodes[0].textContent)) fail(`batteries : le nœud devrait afficher « Battery 60 % », obtenu « ${batNodes[0].textContent.trim()} »`);
+    r.remove();
+    const l = mount("sf-launcher-card", { tiles: [{ name: "Bat", summary: "battery", card: { type: "custom:sf-battery-card", batteries: two } }] }, "en", st); await wait(40);
+    if (!/60 %/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("batteries : la tuile du lanceur devrait afficher 60 %"); l.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);

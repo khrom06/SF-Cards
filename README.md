@@ -120,6 +120,7 @@ solar: sensor.solar_power
 grid: sensor.grid_power            # positive = import, negative = export
 battery_power: sensor.battery_power  # optional, W — positive = discharging (battery_invert: true to flip)
 battery_soc: sensor.battery_level    # optional, %
+# several batteries: batteries: [{ soc: sensor.a_level, power: sensor.a_power, capacity_kwh: 10 }, { … }]
 fossil: sensor.grid_fossil_percent # optional
 price: sensor.electricity_price_now
 hide_idle: true                    # hide devices below idle_w (default 20 W)
@@ -288,7 +289,22 @@ health: sensor.battery_health
 cycles: sensor.battery_cycles
 ```
 
-It also works as a launcher popup, with `summary: battery`. The energy card can show the battery as a node with `battery_power` / `battery_soc`.
+**Several batteries?** List them under `batteries`. The ring shows the overall level (weighted by each battery's capacity — a simple average if a capacity is missing), the power is the sum, the estimated time uses the total capacity, and one compact row per battery appears under the ring. A battery that is unavailable is simply left out of the average.
+
+<img src="assets/batteries.png" alt="Battery card with two batteries" width="420">
+
+```yaml
+type: custom:sf-battery-card
+batteries:
+  - { name: Garage, soc: sensor.garage_battery_level, power: sensor.garage_battery_power, capacity_kwh: 10 }
+  - { name: Cellar, soc: sensor.cellar_battery_level, power: sensor.cellar_battery_power, capacity_kwh: 5 }
+  # invert: true on a battery flips its power sign (positive = discharging by default)
+charged_today: sensor.total_battery_charged_today      # optional totals, as above
+```
+
+The single-battery fields (`soc`, `power`, `capacity_kwh`) keep working. The card also works as a launcher popup, with `summary: battery`.
+
+The **energy card** shows the battery as one node: `battery_power` / `battery_soc` for one battery, or the same `batteries:` list for several (overall level, summed power) — a node per battery would make the diagram unreadable.
 
 ### sf-radiators-card
 
