@@ -172,6 +172,17 @@ window.sfTr = (lang, key, vars) => {
     r.remove();
     const l = mount("sf-launcher-card", { tiles: [{ name: "Bat", summary: "battery", card: { type: "custom:sf-battery-card", batteries: two } }] }, "en", st); await wait(40);
     if (!/60 %/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("batteries : la tuile du lanceur devrait afficher 60 %"); l.remove(); }
+  // 5f. Carte énergie : le solaire est toujours AU-DESSUS du cœur (même abscisse, plus haut), sur téléphone comme sur grand écran.
+  for (const width of [380, 760]) {
+    const box = document.createElement("div"); box.style.width = width + "px"; document.body.appendChild(box);
+    const el = document.createElement("sf-reactor-card"); el.setConfig(FULL["sf-reactor-card"]); box.appendChild(el); el.hass = HASS(base, "en"); await wait(60);
+    const pos = (n) => ({ x: parseFloat(/left:([\d.]+)%/.exec(n.getAttribute("style"))[1]), y: parseFloat(/top:([\d.]+)%/.exec(n.getAttribute("style"))[1]) });
+    const sol = [...el.shadowRoot.querySelectorAll(".node")].find((n) => /Solar/.test(n.textContent)), core = el.shadowRoot.querySelector(".core");
+    if (!sol || !core) fail(`énergie [${width}px] : nœud solaire ou cœur introuvable`);
+    else { const a = pos(sol), b = pos(core);
+      if (Math.abs(a.x - b.x) > 1) fail(`énergie [${width}px] : le solaire doit être à la verticale du cœur (x ${a.x} / ${b.x})`);
+      if (!(a.y < b.y)) fail(`énergie [${width}px] : le solaire doit être au-dessus du cœur (y ${a.y} / ${b.y})`); }
+    box.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);

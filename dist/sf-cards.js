@@ -838,7 +838,7 @@ class SfReactorCard extends SfBase {
     // Disposition dynamique, selon le nombre d'appareils ET la largeur disponible (le cadre grandit pour garder
     // ~90 px par rang : aucun chevauchement, quel que soit le nombre d'entités).
     //  - écran large  : appareils en 1 à 3 colonnes à droite du cœur ;
-    //  - écran étroit (téléphone) : solaire / cœur / réseau en haut, appareils en grille de 3 colonnes dessous.
+    //  - écran étroit (téléphone) : solaire au-dessus du cœur, réseau à côté, appareils en grille de 3 colonnes dessous.
     // Un appareil à l'arrêt (sous `idle_w`, 20 W par défaut) est masqué (`hide_idle: false` pour tout garder) ;
     // une mesure indisponible reste visible (« — »), c'est une information. La disposition ne porte que sur les visibles.
     const visibles = c.hide_idle === false ? c.devices : c.devices.filter((d) => { const w = this.watts(d.entity); return w === null || Math.abs(w) >= (c.idle_w ?? 20); });
@@ -856,14 +856,18 @@ class SfReactorCard extends SfBase {
       devs = [{ __bat: true, name: bsoc === null ? this.t("Batterie") : `${this.t("Batterie")} ${Math.round(bsoc)} %`, icon: lvl, entity: bat.firstId,
         color: SF_C.green, w: bw === null ? null : Math.abs(bw), rev: bw !== null && bw > 0 }, ...devs];
     }
+    // Au tout premier rendu l'élément n'a pas encore sa largeur (ses styles ne sont pas appliqués) : on dessine avec 600 px puis
+    // on redessine une fois, sinon un téléphone verrait d'abord la disposition « grand écran ».
     const W = this.getBoundingClientRect().width || 600, NODE = 92;
+    if (!this.getBoundingClientRect().width && !this._retry) { this._retry = true; requestAnimationFrame(() => { this._lastHtml = null; this._schedule(); }); }
     const narrow = W < 520;
     let H, pts;
     if (narrow) {
-      const cols = devs.length <= 2 ? devs.length || 1 : 3, rows = Math.ceil(devs.length / cols), top = 205;
+      // Le solaire reste au-dessus du cœur (comme sur grand écran) ; le réseau est à côté. Sans solaire, le cœur remonte.
+      const cols = devs.length <= 2 ? devs.length || 1 : 3, rows = Math.ceil(devs.length / cols), cy = hasSolar ? 165 : 100, top = cy + 105;
       H = top + (devs.length ? rows * 92 + 10 : 0) + 10;
       const py = (px) => (px / H) * 100;
-      pts = { solar: [17, py(100)], grid: [83, py(100)], core: [50, py(100)] };
+      pts = { solar: [50, py(45)], grid: [83, py(cy)], core: [50, py(cy)] };
       devs.forEach((d, i) => {
         const col = i % cols, row = Math.floor(i / cols);
         pts[`d${i}`] = [cols === 1 ? 50 : cols === 2 ? 30 + col * 40 : 17 + col * 33, py(top + 40 + row * 92)];

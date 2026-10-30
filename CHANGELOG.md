@@ -8,8 +8,10 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 - Visual editor: a "Batteries" list on both cards, translated in all 11 languages.
 
 ### Changed
+- **Energy card on phones**: solar now sits above the core (like on wide screens) instead of beside it; the grid stays on the side. Without solar, the core moves up.
+- Fixed a first-frame glitch: before it knew its width, the energy card briefly drew the wide-screen layout on phones.
 - The single-battery fields (`soc`, `power`, `capacity_kwh`, `battery_soc`, `battery_power`) are unchanged and keep working.
-- Render tests cover the multi-battery maths (weighted level, summed power, fallback, unavailable battery) and the launcher summary.
+- Render tests check that solar is above the core at both widths, and cover the multi-battery maths (weighted level, summed power, fallback, unavailable battery) and the launcher summary.
 
 ## [1.5.0]
 ### Added
