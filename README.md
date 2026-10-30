@@ -230,8 +230,10 @@ type: custom:sf-hangar-card
 cars:
   - { name: Car A, soc: sensor.car_a_battery, range: sensor.car_a_range, target: sensor.car_a_target, charging: binary_sensor.car_a_charging, color: "#00e5ff" }
 charger:
-  connected: binary_sensor.charger_connected
-  charging: binary_sensor.charger_charging
+  connected: binary_sensor.charger_connected   # or a status sensor: "Connected", "Plugged in", "Awaiting start"…
+  charging: binary_sensor.charger_charging     # or a status sensor: "Charging"… (optional: without it, power > 50 W means charging)
+  # connected_states: [my_status]   # optional: replace the built-in list if your charger uses unusual status words
+  # charging_states: [my_status]
   power: sensor.charger_power
   current: number.charger_current
   decision: sensor.charge_controller_decision   # optional
@@ -240,6 +242,8 @@ flows: { solar: sensor.solar_power, home: sensor.house_power, surplus: sensor.so
 warn_mode: Solar                                # optional: warn when this mode is selected in the evening…
 warn_text: "No sun tonight — the car will not charge in this mode."
 ```
+
+**Works with any charger and car integration.** "Plugged in" and "charging" accept `on` / `off` but also the status words most chargers publish — `Charging`, `Connected`, `Plugged in`, `Awaiting start`, `SuspendedEV`, `Charge done`… (case, spaces and dashes are ignored). If your brand uses something unusual, list the words in `connected_states` / `charging_states`. No status sensor at all? The card falls back on the charger power (above 50 W = charging). The car's own `charging` entity accepts the same words (`charging_states` per car).
 
 ### sf-machines-card
 

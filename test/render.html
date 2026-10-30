@@ -183,6 +183,26 @@ window.sfTr = (lang, key, vars) => {
       if (Math.abs(a.x - b.x) > 1) fail(`énergie [${width}px] : le solaire doit être à la verticale du cœur (x ${a.x} / ${b.x})`);
       if (!(a.y < b.y)) fail(`énergie [${width}px] : le solaire doit être au-dessus du cœur (y ${a.y} / ${b.y})`); }
     box.remove(); }
+  // 5g. Carte véhicules : « branché » et « en charge » acceptent on/off mais aussi les statuts texte des bornes (casse, espaces, tirets
+  //     ignorés), des états personnalisés, et la puissance en secours.
+  { const sub = (el) => (el.shadowRoot.querySelector(".head .sub") || { textContent: "" }).textContent.trim().toLowerCase();
+    const run = async (cfgCharger, st, want, label) => {
+      const el = mount("sf-hangar-card", { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range" }], charger: cfgCharger }, "en", { ...base, ...st });
+      await wait(40); const got = sub(el);
+      if (got !== want) fail(`véhicules [${label}] : « ${want} » attendu, obtenu « ${got} »`); el.remove(); };
+    const X = (id, v) => ({ [id]: S(v) });
+    const cc = { connected: "sensor.conn", charging: "sensor.chg", power: "sensor.ev" };
+    await run(cc, { ...X("sensor.conn", "on"), ...X("sensor.chg", "on") }, "charging", "on/on");
+    await run(cc, { ...X("sensor.conn", "Connected"), ...X("sensor.chg", "Charging") }, "charging", "Connected/Charging");
+    await run(cc, { ...X("sensor.conn", "Plugged in"), ...X("sensor.chg", "Not charging") }, "waiting", "Plugged in");
+    await run(cc, { ...X("sensor.conn", "Awaiting start"), ...X("sensor.chg", "paused") }, "waiting", "Awaiting start");
+    await run(cc, { ...X("sensor.conn", "SuspendedEV"), ...X("sensor.chg", "off") }, "waiting", "SuspendedEV");
+    await run(cc, { ...X("sensor.conn", "charge-done"), ...X("sensor.chg", "off") }, "waiting", "charge-done");
+    await run(cc, { ...X("sensor.conn", "Disconnected"), ...X("sensor.chg", "Disconnected") }, "idle", "Disconnected");
+    await run(cc, { ...X("sensor.conn", "unavailable"), ...X("sensor.chg", "unavailable") }, "idle", "unavailable");
+    await run({ ...cc, charging_states: ["Zorglub"] }, { ...X("sensor.conn", "on"), ...X("sensor.chg", "zorglub") }, "charging", "états personnalisés");
+    await run({ connected: "sensor.conn", power: "sensor.ev" }, { ...X("sensor.conn", "off"), "sensor.ev": U(3000, "W") }, "charging", "puissance en secours");
+    await run({ connected: "sensor.conn", power: "sensor.ev" }, { ...X("sensor.conn", "connected"), "sensor.ev": U(0, "W") }, "waiting", "branché sans puissance"); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
