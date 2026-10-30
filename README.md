@@ -79,6 +79,7 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-hangar-card`](#sf-hangar-card) | EV(s) + shared charger, charge‑mode selector, energy flows |
 | [`sf-machines-card`](#sf-machines-card) | Status tiles: values with thresholds, on/off, toggles with timers |
 | [`sf-cells-card`](#sf-cells-card) | Weakest sensor batteries first, discovered automatically |
+| [`sf-radiators-card`](#sf-radiators-card) | Radiators: preset, setpoint, heating state and daily energy — works without a temperature probe |
 | [`sf-camera-card`](#sf-camera-card) | Camera mosaic with motion / person overlay |
 | [`sf-setpoints-card`](#sf-setpoints-card) | Setpoint matrix per room (+ / −) |
 | [`sf-ledger-card`](#sf-ledger-card) | Consumption per device and period |
@@ -258,6 +259,26 @@ crit: 15
 limit: 12
 exclude: [sensor.some_battery]
 include_pattern: ""      # optional regex on the entity id
+```
+
+### sf-radiators-card
+
+<img src="assets/radiators.png" alt="Radiators card" width="420">
+
+For radiators driven by presets (Voltalis, Netatmo, Tado…), which often have no room probe. One column and large touch targets, built for phones. Presets come from the device itself (`preset_modes`); the setpoint buttons call `climate.set_temperature`.
+
+```yaml
+type: custom:sf-radiators-card
+title: Radiators
+accent: "#e0875a"        # optional accent colour
+step: 0.5                # setpoint step
+max_kwh: 3               # daily energy that fills the bar
+radiators:
+  - name: Kitchen
+    icon: mdi:countertop
+    climate: climate.kitchen
+    kwh: sensor.kitchen_energy_today       # optional (kWh or Wh)
+    connection: sensor.kitchen_connection  # optional, warns when not ok/on/connected
 ```
 
 ### sf-camera-card
