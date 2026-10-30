@@ -2,6 +2,15 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.5.0]
+### Added
+- **Seven new languages**: Dutch, Italian, Portuguese, Polish, Russian, Chinese (simplified) and Arabic — 11 languages in total. Regional variants (`pt-BR`, `zh-Hans`…) fall back to their family.
+- **Right-to-left layout** for Arabic (diagrams and dials keep their natural orientation).
+- Screenshot of the battery card in the README.
+
+### Changed
+- Render tests now cover all 11 languages, the right-to-left switch and regional variants.
+
 ## [1.4.0]
 ### Added
 - **Launcher**: a popup can now open **any Home Assistant card** — standard ones (`vertical-stack`, `weather-forecast`, `history-graph`…) as well as other custom cards — not only SF cards.

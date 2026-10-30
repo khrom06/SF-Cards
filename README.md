@@ -32,7 +32,7 @@
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone or on a wall tablet; idle devices can be hidden automatically and the number of displayed devices is capped.
-- **Four languages** — English, French, Spanish, German, picked automatically from each user's Home Assistant profile (English for any other language).
+- **Eleven languages** — English, French, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese and Arabic (right-to-left), picked automatically from each user's Home Assistant profile (English for any other language).
 - **No dependencies, no network** — a single JavaScript file; the two fonts are embedded (SIL OFL).
 - **Safe by design** — a missing, `unknown` or `unavailable` entity shows a grey "—" / "no data", never a fake "OK".
 
@@ -271,6 +271,8 @@ include_pattern: ""      # optional regex on the entity id
 
 ### sf-battery-card
 
+<img src="assets/battery.png" alt="Battery card" width="420">
+
 Home battery. Everything is optional — only configured entities are shown, and without `soc` or `power` the card hides itself.
 
 ```yaml
@@ -370,11 +372,15 @@ Edit a dashboard, open any SF card and switch to the **visual editor**:
 
 ## Languages
 
-The cards speak **English, French, Spanish and German**. The language follows the **Home Assistant profile of the person looking at the dashboard** (*Profile → Language*), so two users of the same dashboard can see two languages. If HA is set to any other language, the cards fall back to **English**. Date and time formats follow the same locale.
+The cards speak **English, French, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese (simplified) and Arabic**. The language follows the **Home Assistant profile of the person looking at the dashboard** (*Profile → Language*), so two users of the same dashboard can see two languages. If HA is set to any other language, the cards fall back to **English**. Date and time formats follow the same locale.
+
+Regional variants (`pt-BR`, `zh-Hans`…) use the language of the same family. Arabic switches the cards to right-to-left; diagrams and dials keep their natural orientation.
 
 Texts coming from your own configuration (titles, labels, names) are of course shown as you typed them.
 
-Want another language? Translations live in one table (`SF_T`, near the top of `dist/sf-cards.js`: *key = French text → `[English, Spanish, German]`*). Pull requests are welcome.
+> The languages were chosen from available proxies (Home Assistant publishes no usage statistics per language): the countries behind most downloads and website traffic, and the languages of the HA frontend. The translations were written by Claude; **native speakers are very welcome to review and correct them**.
+
+Want another language? Translations live in one table (`SF_T`, near the top of `dist/sf-cards.js`: *key = French text → `[English, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese, Arabic]`*). Pull requests are welcome.
 
 ## Optional theme
 

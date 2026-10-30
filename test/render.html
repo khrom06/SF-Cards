@@ -86,14 +86,14 @@ window.sfTr = (lang, key, vars) => {
   if (lang !== "fr") {
     const e = SF_T[key];
     if (!e) { if (/[^\x00-\x7F]|\s/.test(key)) window.__missing.add(`${lang}: ${key}`); }
-    else if (e.length < 3 || e.some((x) => !x)) window.__missing.add(`${lang}: ${key} (incomplète)`);
+    else if (e.length < 10 || e.some((x) => !x)) window.__missing.add(`${lang}: ${key} (incomplète)`);
   }
   return realTr(lang, key, vars);
 };
 
 (async () => { try {
   // 1. Chaque carte, chaque langue, config complète : pas d'erreur, pas de rendu vide, pas de « undefined / NaN ».
-  for (const language of ["en", "fr", "es", "de"]) {
+  for (const language of ["en", "fr", "es", "de", "nl", "it", "pt", "pl", "ru", "zh", "ar"]) {
     for (const [tag, cfg] of Object.entries(FULL)) {
       const el = mount(tag, cfg, language);
       await wait(40);
@@ -143,6 +143,13 @@ window.sfTr = (lang, key, vars) => {
     if (un._isHC(new Date(2026, 0, 5, 3, 0)).hc !== null) fail("bridge : sans plage ni prix HC, HP/HC devrait être inconnu");
     if (/\bHP\b|\bHC\b/.test(text(un))) fail("bridge : affiche HP/HC alors que rien n'est configuré");
     un.remove(); }
+  // 5c. Arabe : sens d'écriture inversé sur la carte ; les autres langues restent de gauche à droite.
+  { const ar = mount("sf-machines-card", FULL["sf-machines-card"], "ar"); const en = mount("sf-machines-card", FULL["sf-machines-card"], "en"); await wait(40);
+    if (ar.dir !== "rtl") fail("arabe : la carte devrait être en sens rtl"); if (en.dir !== "ltr") fail("anglais : la carte devrait être en sens ltr");
+    ar.remove(); en.remove(); }
+  // 5d. Variantes de langue de HA (pt-BR, zh-Hans…) : retombent sur la langue de base.
+  { const a = mount("sf-radiators-card", FULL["sf-radiators-card"], "pt-BR"); const b = mount("sf-radiators-card", FULL["sf-radiators-card"], "zh-Hans"); await wait(40);
+    if (!/Radiadores/.test(text(a))) fail("pt-BR : « Radiadores » attendu"); if (!/暖气片/.test(text(b))) fail("zh-Hans : « 暖气片 » attendu"); a.remove(); b.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
