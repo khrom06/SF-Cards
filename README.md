@@ -79,6 +79,7 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-hangar-card`](#sf-hangar-card) | EV(s) + shared charger, charge‑mode selector, energy flows |
 | [`sf-machines-card`](#sf-machines-card) | Status tiles: values with thresholds, on/off, toggles with timers |
 | [`sf-cells-card`](#sf-cells-card) | Weakest sensor batteries first, discovered automatically |
+| [`sf-battery-card`](#sf-battery-card) | Home battery: level, flow, estimated time, daily energy, mode — only shows what you configure |
 | [`sf-radiators-card`](#sf-radiators-card) | Radiators: preset, setpoint, heating state and daily energy — works without a temperature probe |
 | [`sf-camera-card`](#sf-camera-card) | Camera mosaic with motion / person overlay |
 | [`sf-setpoints-card`](#sf-setpoints-card) | Setpoint matrix per room (+ / −) |
@@ -117,6 +118,8 @@ home_states: [home]                        # states counted as "home" — add yo
 type: custom:sf-reactor-card
 solar: sensor.solar_power
 grid: sensor.grid_power            # positive = import, negative = export
+battery_power: sensor.battery_power  # optional, W — positive = discharging (battery_invert: true to flip)
+battery_soc: sensor.battery_level    # optional, %
 fossil: sensor.grid_fossil_percent # optional
 price: sensor.electricity_price_now
 hide_idle: true                    # hide devices below idle_w (default 20 W)
@@ -126,6 +129,8 @@ devices:
   - { name: Heat pump,  entity: sensor.hp_power,   icon: "mdi:heat-pump",      color: "#4fc3f7" }
   - { name: Boiler,     entity: sensor.boiler_pwr, icon: "mdi:water-boiler",   color: "#ff7043" }
 ```
+
+No solar panels? Leave `solar` out: the solar node, the flow and the "solar autonomy" figure disappear. The same goes for the footer figures (`fossil`, `price`), the bridge's "solar left" / house mode, the hangar's flows and the ledger's solar share: **anything you don't configure is not displayed**.
 
 The layout adapts to the number of visible devices and to the width: up to three columns on a wide card, a grid under the core on a phone.
 
@@ -263,6 +268,25 @@ limit: 12
 exclude: [sensor.some_battery]
 include_pattern: ""      # optional regex on the entity id
 ```
+
+### sf-battery-card
+
+Home battery. Everything is optional — only configured entities are shown, and without `soc` or `power` the card hides itself.
+
+```yaml
+type: custom:sf-battery-card
+soc: sensor.battery_level                  # %
+power: sensor.battery_power                # W, positive = discharging (invert: true to flip)
+capacity_kwh: 10                           # enables "full in 3h10 / empty in …"
+charged_today: sensor.battery_charged_today        # kWh
+discharged_today: sensor.battery_discharged_today  # kWh
+mode: select.battery_mode                  # optional mode selector (select or input_select)
+temperature: sensor.battery_temperature
+health: sensor.battery_health
+cycles: sensor.battery_cycles
+```
+
+It also works as a launcher popup, with `summary: battery`. The energy card can show the battery as a node with `battery_power` / `battery_soc`.
 
 ### sf-radiators-card
 
