@@ -126,7 +126,7 @@ window.sfTr = (lang, key, vars) => {
     await wait(60);
     el.shadowRoot.querySelector(".tile").click();
     await wait(150);
-    const pop = [...document.body.children].find((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet"));
+    const pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
     if (!pop || !pop.shadowRoot.querySelector(".std-vertical-stack")) fail("lanceur : une carte standard (vertical-stack) ne s'ouvre pas dans le popup");
     el.remove(); if (pop) pop.remove(); }
   // 5b. Heures creuses : plusieurs plages saisies (dont une qui passe minuit) font foi ; sans plage ni prix HC, HP/HC est inconnu.
@@ -243,6 +243,125 @@ window.sfTr = (lang, key, vars) => {
     if (six.shadowRoot.querySelectorAll(".borne").length !== 4) fail("bornes : 4 maximum attendues"); six.remove();
     const l = mount("sf-launcher-card", { tiles: [{ name: "EV", summary: "vehicles", card: { type: "custom:sf-hangar-card", ...cfg } }] }, "en", two("Charging", "Charging")); await wait(40);
     if (!/7\.00 kW/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("bornes : la tuile du lanceur devrait afficher la puissance cumulée"); l.remove(); }
+  // 5j. Formats de nombres : la décimale suit la langue du profil (virgule en français), chiffres latins partout, sans séparateur de milliers.
+  { const st = { ...base, "sensor.t1": U(20.5, "°C"), "sensor.p1": U(-1200, "W") };
+    const m = async (lang, want) => { const e = mount("sf-machines-card", { tiles: [{ label: "T", entity: "sensor.t1", kind: "value", digits: 1 }] }, lang, st); await wait(40);
+      const got = (e.shadowRoot.querySelector(".tile .v") || { textContent: "" }).textContent.replace(/\s/g, ""); if (!got.startsWith(want)) fail(`nombres [${lang}] : « ${want} » attendu, obtenu « ${got} »`); e.remove(); };
+    await m("en", "20.5"); await m("fr", "20,5"); await m("de", "20,5"); await m("pt-BR", "20,5"); await m("ru", "20,5"); await m("zh", "20.5"); await m("ar", "20.5");
+    const b = mount("sf-battery-card", { soc: "sensor.bat_soc", power: "sensor.p1" }, "fr", st); await wait(40);
+    if (!/1,20\s*kW/.test(text(b))) fail("nombres [fr] : « 1,20 kW » attendu dans la carte batterie"); b.remove(); }
+  // 5k. Accessibilité : boutons clavier (rôle, focus, nom, Entrée / Espace), état des sélecteurs, niveau d'alerte en toutes lettres,
+  //     mouvement réduit, dialogue des popups.
+  { const calls = []; const st = { ...base, "select.cm": S("Eco", { options: ["Eco", "Fast"] }), "sensor.hot": U(95, "°C") };
+    const el = mount("sf-hangar-card", { cars: [], charger: {}, mode: "select.cm" }, "en", st);
+    el.hass = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40);
+    const btns = [...el.shadowRoot.querySelectorAll(".seg .btn")];
+    if (!btns.length || !btns.every((b) => b.getAttribute("role") === "button" && b.getAttribute("tabindex") === "0" && b.getAttribute("aria-label"))) fail("accessibilité : les boutons doivent avoir rôle, tabindex et nom accessible");
+    if (btns.length && !btns.some((b) => b.getAttribute("aria-pressed") === "true")) fail("accessibilité : le mode actif doit être aria-pressed=true");
+    const fast = btns.find((b) => /Fast/.test(b.textContent));
+    if (fast) { fast.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })); await wait(20);
+      if (!calls.some((c) => c[2].option === "Fast")) fail("accessibilité : Entrée doit activer le bouton"); }
+    if (!/prefers-reduced-motion/.test(el.shadowRoot.querySelector("style").textContent)) fail("accessibilité : règle prefers-reduced-motion absente");
+    el.remove();
+    const m = mount("sf-machines-card", { tiles: [{ label: "Pump", entity: "sensor.hot", kind: "value", warn: 60, crit: 90 }] }, "en", st); await wait(40);
+    if (!/critical/.test((m.shadowRoot.querySelector(".tile") || { getAttribute: () => "" }).getAttribute("aria-label"))) fail("accessibilité : le niveau critique doit être dit en toutes lettres (aria-label)"); m.remove();
+    const l = mount("sf-launcher-card", { tiles: [{ name: "Pop", hash: "pop", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en"); await wait(40);
+    const tile = l.shadowRoot.querySelector(".tile"); if (!tile || tile.getAttribute("role") !== "button") fail("accessibilité : la tuile du lanceur doit être un bouton");
+    tile.click(); await wait(120);
+    const pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
+    if (!pop || pop.shadowRoot.querySelector(".sheet").getAttribute("role") !== "dialog") fail("accessibilité : le popup doit avoir le rôle dialog");
+    if (pop) pop.remove(); l.remove(); }
+  // 5l. Thème : sombre par défaut ; `light` ; `auto` suit le thème de HA ; variable CSS --sf-theme ; popup clair sans double inversion.
+  { const th = async (cfg, themes) => { const e = mount("sf-battery-card", { soc: "sensor.bat_soc", ...cfg }, "en"); if (themes) e.hass = { ...HASS(base, "en"), themes }; await wait(40);
+      const r = e.getAttribute("theme"); e.remove(); return r; };
+    if (await th({}) !== "dark") fail("thème : sombre par défaut attendu");
+    if (await th({ theme: "light" }) !== "light") fail("thème : light attendu");
+    if (await th({ theme: "auto" }, { darkMode: false }) !== "light") fail("thème : auto + HA clair → light");
+    if (await th({ theme: "auto" }, { darkMode: true }) !== "dark") fail("thème : auto + HA sombre → dark");
+    document.documentElement.style.setProperty("--sf-theme", "light");
+    if (await th({}) !== "light") fail("thème : la variable CSS --sf-theme doit s'appliquer"); document.documentElement.style.removeProperty("--sf-theme");
+    const e = mount("sf-battery-card", { soc: "sensor.bat_soc", theme: "light" }, "en"); await wait(40);
+    if (!/invert/.test(getComputedStyle(e).filter)) fail("thème : le filtre d'inversion doit s'appliquer à la carte claire"); e.remove();
+    window.loadCardHelpers = async () => ({ createCardElement: (c) => { const d = document.createElement("div"); d.className = "std-" + c.type; return d; } });
+    const l = mount("sf-launcher-card", { theme: "light", tiles: [{ name: "A", hash: "a", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }, { name: "B", hash: "b", summary: "text", card: { type: "vertical-stack", cards: [] } }] }, "en"); await wait(60);
+    const tiles = l.shadowRoot.querySelectorAll(".tile");
+    tiles[0].click(); await wait(120);
+    let pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
+    if (!pop || pop.getAttribute("theme") !== "light") fail("thème : le popup doit être clair");
+    const inner = pop && pop.shadowRoot.querySelector("sf-battery-card"); if (inner && inner.getAttribute("theme") !== "dark") fail("thème : une carte SF dans un popup clair ne doit pas s'inverser deux fois");
+    if (pop) pop.remove(); l._pop = null;
+    tiles[1].click(); await wait(150);
+    pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
+    if (!pop || !pop.shadowRoot.querySelector(".std .std-vertical-stack")) fail("thème : une carte non SF dans un popup clair doit être remise à l'endroit (.std)");
+    if (pop) pop.remove(); l.remove(); }
+  // 5l-bis. Un popup ouvert ne survit jamais à sa carte (même retirée juste après un clic, avant le minuteur de lien direct).
+  { const count = () => [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).length;
+    const before = count();
+    const l = mount("sf-launcher-card", { tiles: [{ name: "A", hash: "ghost", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en"); await wait(30);
+    l.shadowRoot.querySelector(".tile").click(); await wait(30); l.remove(); await wait(700);
+    if (count() !== before) fail("popup : un popup est resté affiché après le retrait de sa carte");
+    history.replaceState(null, "", location.pathname + location.search); }
+  // 5m. Commandes de borne : rien sans `controls: true` ; démarrer / arrêter (arrêt en 2 appuis) ; intensité ± bornée.
+  { const calls = []; const st = { ...base, "switch.sw": S("off"), "number.cur": S(10, { min: 6, max: 16, step: 1, unit_of_measurement: "A" }), "sensor.cur2": U(10, "A"), "sensor.ev": U(0, "W") };
+    const mk = async (charger) => { const e = mount("sf-hangar-card", { cars: [], charger }, "en", st);
+      e.hass = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40); return e; };
+    let e = await mk({ power: "sensor.ev", switch: "switch.sw", current: "number.cur" });
+    if (e.shadowRoot.querySelector(".ctl")) fail("commandes : rien ne doit s'afficher sans controls: true"); e.remove();
+    e = await mk({ power: "sensor.ev", switch: "switch.sw", current: "number.cur", controls: true });
+    const start = [...e.shadowRoot.querySelectorAll(".ctl .btn")].find((b) => /Start/.test(b.textContent));
+    if (!start) fail("commandes : bouton Start attendu"); else { start.click(); await wait(20); if (!calls.some((c) => c[0] === "switch" && c[1] === "turn_on")) fail("commandes : Start doit appeler switch.turn_on"); }
+    const pm = [...e.shadowRoot.querySelectorAll(".ctlrow .btn")];
+    if (pm.length !== 2) fail("commandes : boutons − et + attendus"); else { pm[1].click(); await wait(20);
+      if (!calls.some((c) => c[1] === "set_value" && c[2].value === 11)) fail("commandes : + doit passer 10 A à 11 A"); }
+    e.remove();
+    const st2 = { ...st, "switch.sw": S("on"), "number.cur": S(16, { min: 6, max: 16, step: 1 }) }; calls.length = 0;
+    e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", switch: "switch.sw", current: "number.cur", controls: true } }, "en", st2);
+    e.hass = { ...HASS(st2, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40);
+    const stop = [...e.shadowRoot.querySelectorAll(".ctl .btn")].find((b) => /Stop/.test(b.textContent));
+    if (!stop) fail("commandes : bouton Stop attendu"); else { stop.click(); await wait(20);
+      if (calls.some((c) => c[1] === "turn_off")) fail("commandes : l'arrêt doit demander une confirmation (2 appuis)");
+      stop.click(); await wait(20); if (!calls.some((c) => c[0] === "switch" && c[1] === "turn_off")) fail("commandes : le 2e appui doit arrêter la charge"); }
+    const plus = [...e.shadowRoot.querySelectorAll(".ctlrow .btn")][1]; calls.length = 0; if (plus) { plus.click(); await wait(20);
+      if (!calls.some((c) => c[2].value === 16)) fail("commandes : l'intensité doit rester bornée au maximum (16 A)"); }
+    e.remove();
+    e = await mk({ power: "sensor.ev", current: "sensor.cur2", controls: true });
+    if (e.shadowRoot.querySelector(".ctl")) fail("commandes : sans interrupteur ni entité number, aucune commande ne doit apparaître"); e.remove(); }
+  // 5n. Éditeurs : tous se construisent ; « Remplir depuis un appareil » retrouve les entités d'après leur type, sans rien écraser.
+  { const hassEd = { states: withIds({ ...base,
+      "sensor.car_soc": S(55, { unit_of_measurement: "%", device_class: "battery" }), "sensor.car_range": S(180, { unit_of_measurement: "km", device_class: "distance" }),
+      "binary_sensor.car_charging": S("off", { device_class: "battery_charging" }), "sensor.car_wifi_battery": S(3, { unit_of_measurement: "%", device_class: "battery" }),
+      "sensor.wb_power": S(0, { unit_of_measurement: "W", device_class: "power" }), "binary_sensor.wb_plug": S("off", { device_class: "plug" }), "number.wb_current_limit": S(10, { unit_of_measurement: "A" }),
+      "switch.wb_charging_enable": S("on"), "sensor.wb_status": S("Charging"),
+      "sensor.bat_level": S(60, { unit_of_measurement: "%", device_class: "battery" }), "sensor.bat_power": S(100, { unit_of_measurement: "W", device_class: "power" }),
+      "sensor.bat_charged_today": S(3, { unit_of_measurement: "kWh", device_class: "energy" }), "sensor.bat_discharged_today": S(2, { unit_of_measurement: "kWh", device_class: "energy" }) }),
+      entities: Object.fromEntries([["sensor.car_soc", "dcar"], ["sensor.car_range", "dcar"], ["binary_sensor.car_charging", "dcar"], ["sensor.car_wifi_battery", "dcar"], ["sensor.wb_power", "dwb"], ["binary_sensor.wb_plug", "dwb"],
+        ["number.wb_current_limit", "dwb"], ["switch.wb_charging_enable", "dwb"], ["sensor.wb_status", "dwb"], ["sensor.bat_level", "dbat"], ["sensor.bat_power", "dbat"], ["sensor.bat_charged_today", "dbat"], ["sensor.bat_discharged_today", "dbat"]]
+        .map(([id, d]) => [id, { entity_id: id, device_id: d }])),
+      devices: { dcar: { name: "My EV" }, dwb: { name: "Wallbox", name_by_user: "Garage box" }, dbat: { name: "Home battery" } }, locale: { language: "en" }, language: "en" };
+    const g = (dev, kind) => sfGuess(hassEd, dev, kind);
+    const car = g("dcar", "car"); if (car.soc !== "sensor.car_soc" || car.range !== "sensor.car_range" || car.charging !== "binary_sensor.car_charging" || car.name !== "My EV") fail(`remplissage voiture : ${JSON.stringify(car)}`);
+    const wb = g("dwb", "charger"); if (wb.power !== "sensor.wb_power" || wb.connected !== "binary_sensor.wb_plug" || wb.current !== "number.wb_current_limit" || wb.switch !== "switch.wb_charging_enable" || wb.charging !== "sensor.wb_status" || wb.name !== "Garage box") fail(`remplissage borne : ${JSON.stringify(wb)}`);
+    const bt = g("dbat", "battery"); if (bt.soc !== "sensor.bat_level" || bt.power !== "sensor.bat_power" || bt.charged_today !== "sensor.bat_charged_today" || bt.discharged_today !== "sensor.bat_discharged_today") fail(`remplissage batterie : ${JSON.stringify(bt)}`);
+    if (Object.keys(g("inconnu", "car")).length > 0) fail("remplissage : un appareil inconnu ne doit rien remplir");
+    const d = { soc: "sensor.mine" }; sfAutofill(hassEd, d, "dcar", "car"); if (d.soc !== "sensor.mine" || d.range !== "sensor.car_range") fail("remplissage : un champ déjà rempli ne doit jamais être écrasé");
+    for (const tag of Object.keys(FULL)) {
+      const ed = document.createElement(tag + "-editor"); if (!customElements.get(tag + "-editor")) { fail(`${tag} : éditeur absent`); continue; }
+      ed.hass = hassEd; ed.setConfig(customElements.get(tag).getStubConfig()); document.body.appendChild(ed); await wait(30);
+      if (!ed.shadowRoot.querySelectorAll("ha-form").length) fail(`${tag} : l'éditeur ne construit aucun formulaire`);
+      const tf = [...ed.shadowRoot.querySelectorAll("ha-form")][0]; if (!JSON.stringify(tf.schema).includes('"name":"theme"')) fail(`${tag} : champ Thème absent de l'éditeur`);
+      ed.remove(); }
+    const ed = document.createElement("sf-hangar-card-editor"); ed.hass = hassEd; ed.setConfig({ cars: [{}], chargers: [{}] }); document.body.appendChild(ed); await wait(30);
+    let emitted = null; ed.addEventListener("config-changed", (ev) => { emitted = ev.detail.config; });
+    const forms = [...ed.shadowRoot.querySelectorAll("ha-form")], pickForm = (k) => forms.find((f) => (f.schema || []).some((x) => x.sfFill === k));
+    const cf = pickForm("car"), wf = forms.filter((f) => (f.schema || []).some((x) => x.sfFill === "charger")).pop();   // le dernier = élément de la liste `chargers`
+    if (!cf || !wf) fail("éditeur : champs « Remplir depuis un appareil » absents");
+    else {
+      cf.dispatchEvent(new CustomEvent("value-changed", { detail: { value: { ...cf.data, _device: "dcar" } } }));
+      if (!emitted || emitted.cars[0].soc !== "sensor.car_soc" || emitted.cars[0].range !== "sensor.car_range") fail("éditeur : la voiture doit être préremplie depuis l'appareil");
+      wf.dispatchEvent(new CustomEvent("value-changed", { detail: { value: { ...wf.data, _device: "dwb" } } }));
+      if (!emitted || emitted.chargers[0].power !== "sensor.wb_power" || emitted.chargers[0].name !== "Garage box") fail("éditeur : la borne doit être préremplie depuis l'appareil");
+      if (/_device/.test(JSON.stringify(emitted))) fail("éditeur : le champ technique _device ne doit jamais être enregistré dans la configuration"); }
+    ed.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);

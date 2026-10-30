@@ -33,6 +33,8 @@
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone or on a wall tablet; idle devices can be hidden automatically and the number of displayed devices is capped.
 - **Eleven languages** — English, French, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese and Arabic (right-to-left), picked automatically from each user's Home Assistant profile (English for any other language).
+- **Light or dark** — dark neon by default; `theme: light` or `auto` (follows the Home Assistant theme) per card, or once for all cards with a CSS variable.
+- **Accessible** — keyboard and screen-reader friendly (real buttons, focus ring, Enter / Space), respects *reduce motion*, alert levels are spelled out, popups are proper dialogs.
 - **No dependencies, no network** — a single JavaScript file; the two fonts are embedded (SIL OFL).
 - **Safe by design** — a missing, `unknown` or `unavailable` entity shows a grey "—" / "no data", never a fake "OK".
 
@@ -244,6 +246,18 @@ warn_mode: Solar                                # optional: warn when this mode 
 warn_text: "No sun tonight — the car will not charge in this mode."
 ```
 
+**Control the charger from the card (optional).** Add `controls: true` to a charger and the card shows what it can drive, only if the entities are set:
+
+```yaml
+charger:
+  switch: switch.charger_charging        # shows Start / Stop (stopping asks for a second tap)
+  current: number.charger_current        # a number entity: shows − / + (bounded by its min / max)
+  current_step: 1                        # optional (defaults to the entity's own step)
+  controls: true                         # nothing is shown, and nothing can be triggered, without this
+```
+
+Without `controls: true` the card stays a display, exactly as before.
+
 **Two chargers (or more)?** Replace `charger:` with a `chargers:` list (up to 4). Each one has its own name, status, power, current, controller decision and, if you like, its own `mode` selector. The cars are shown in a row above, one block per charger below; the header says *charging* as soon as one charger charges, and the launcher tile adds up the power. The single `charger:` syntax keeps working.
 
 <img src="assets/hangar-multi.png" alt="Vehicles card with three cars and two chargers" width="420">
@@ -399,7 +413,9 @@ Edit a dashboard, open any SF card and switch to the **visual editor**:
 - lists (rooms, groups, items, tiles, devices, cameras…) have **+ Add**, **↑ / ↓** and a **two‑tap Delete** (the first tap arms it, so you can't delete by accident);
 - in the launcher, each tile's popup content is chosen from a menu and edited with the *editor of that card*, nested;
 - rarely used fields (service data, shortcuts…) are YAML boxes inside the form;
-- the editor changes the configuration in place and never drops a field it doesn't know.
+- the editor changes the configuration in place and never drops a field it doesn't know;
+- **Fill from a device** — in the vehicle, charger and battery editors, pick a Home Assistant *device* and the empty fields are filled with its entities, found from their type (`device_class`, unit, name): battery level, range, power, plug, current… It is a best guess — check the result — and it **never overwrites** a field you already filled. Needs Home Assistant's entity registry (any recent version);
+- every card has a **Theme** field (dark / light / auto).
 
 ## Languages
 
@@ -412,6 +428,28 @@ Texts coming from your own configuration (titles, labels, names) are of course s
 > The languages were chosen from available proxies (Home Assistant publishes no usage statistics per language): the countries behind most downloads and website traffic, and the languages of the HA frontend. The translations were written by Claude; **native speakers are very welcome to review and correct them**.
 
 Want another language? Translations live in one table (`SF_T`, near the top of `dist/sf-cards.js`: *key = French text → `[English, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese, Arabic]`*). Pull requests are welcome.
+
+## Light theme
+
+The cards are dark neon by default. For a light dashboard:
+
+```yaml
+type: custom:sf-reactor-card   # any SF card
+theme: light                  # dark (default) | light | auto
+```
+
+- `auto` follows the Home Assistant theme: light when HA is in light mode, dark otherwise.
+- **Set it once for every card**: add `sf-theme: light` (or `auto`) to your Home Assistant theme — HA turns every theme key into a CSS variable, here `--sf-theme` — then leave `theme` out of the cards (a `theme` set on a card always wins).
+- The light variant is the same card with its brightness inverted, hues kept, images left untouched. It is a convenient alternative to the dark HUD, not a separate design.
+- In a launcher popup, SF cards follow the launcher's theme; other cards (standard Home Assistant cards) keep their own look.
+
+## Accessibility
+
+Everything clickable is a real button for keyboards and screen readers (role, focus ring, **Enter / Space**, a name read aloud, `aria-pressed` on selectors). Popups are dialogs: the focus moves in and comes back, **Esc** closes. Alert levels are spelled out ("critical", "warning") instead of relying on colour alone. With *reduce motion* enabled in your system, animations are switched off, and touch screens get larger tap targets.
+
+## Numbers
+
+Decimals follow the language of your Home Assistant profile (`20,5 °C` in French, `20.5 °C` in English), with Latin digits everywhere and no thousands separator.
 
 ## Optional theme
 

@@ -4,10 +4,18 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 
 ## [1.7.0]
 ### Added
+- **Light theme**: `theme: dark | light | auto` on every card (editor field included), or once for all cards via the `--sf-theme` CSS variable of your HA theme. `auto` follows the HA theme. Launcher popups follow the launcher's theme (SF cards are not inverted twice; standard HA cards keep their own look).
+- **Accessibility**: clickable elements are real buttons (role, focus ring, Enter / Space, accessible names, `aria-pressed`), popups are dialogs (focus in / back, Esc), alert levels spelled out ("critical" / "warning"), `prefers-reduced-motion` respected, larger touch targets on touch screens.
+- **Locale-aware numbers**: the decimal separator follows the HA profile language (`20,5` in French), Latin digits, no thousands separator. The timestamp tile no longer forces French.
+- **Editor — fill from a device**: vehicle, charger and battery editors can pick a HA device and fill the empty fields from its entities (by `device_class`, unit and name). Never overwrites a filled field.
+- **Charger controls (optional)**: `controls: true` shows Start / Stop (`switch`, two taps to stop) and current − / + (`number`, bounded). Nothing changes without `controls: true`.
 - **Vehicles card — several chargers**: `chargers: [{ name, connected, charging, power, current, decision, mode }]` (up to 4) coexist in one card, each with its own state, power and optional mode selector. Header: *charging* if any charger charges. The launcher tile sums the power. The single `charger:` syntax is unchanged.
 - **Vehicles card — up to 3 cars** (was 2), laid out in a row above the chargers.
 - **Vehicles card — distance unit**: `distance_unit: auto | km | mi`. `auto` shows the range sensor's own unit; `km` / `mi` converts.
 - **Vehicles card — `select` mode entities**: the charge-mode selector now works with `select` entities as well as `input_select`.
+
+### Fixed
+- A launcher popup could reappear (or stay) after its card was removed from the page, e.g. when leaving the view right after a tap.
 
 ### Changed
 - **Centered layout** in the vehicles, energy and battery cards: information line, charge-mode selector, figure boxes and the battery ring block are centered. README screenshots refreshed.
@@ -32,6 +40,7 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 - Screenshot of the battery card in the README.
 
 ### Changed
+- Render tests now also cover the editors, locale numbers, accessibility, themes, charger controls and the device guess.
 - Render tests now cover all 11 languages, the right-to-left switch and regional variants.
 
 ## [1.4.0]
