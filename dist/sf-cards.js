@@ -31,7 +31,7 @@ if (window.SF_CARDS_VERSION) {   // ressource déclarée deux fois (HACS + fichi
   console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.8.0) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
   return;
 }
-window.SF_CARDS_VERSION = "1.8.0";
+window.SF_CARDS_VERSION = "1.8.1";
 
 // Embedded fonts (OFL 1.1, see THIRD_PARTY_NOTICES.md). Orbitron is a variable font.
 if (!document.getElementById("sf-hud-fonts")) {
