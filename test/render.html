@@ -81,14 +81,12 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const text = (el) => (el.shadowRoot ? el.shadowRoot.textContent : "");
 
 // Enregistre les clés de traduction demandées mais absentes de la table (ou incomplètes) pour une langue ≠ fr.
-const realTr = sfTr;
-window.sfTr = (lang, key, vars) => {
+__SF.SF_HOOK.tr = (lang, key) => {
   if (lang !== "fr") {
-    const e = SF_T[key];
+    const e = __SF.SF_T[key];
     if (!e) { if (/[^\x00-\x7F]|\s/.test(key)) window.__missing.add(`${lang}: ${key}`); }
     else if (e.length < 10 || e.some((x) => !x)) window.__missing.add(`${lang}: ${key} (incomplète)`);
   }
-  return realTr(lang, key, vars);
 };
 
 (async () => { try {
@@ -239,7 +237,7 @@ window.sfTr = (lang, key, vars) => {
     el.remove();
     el = await mk("Disconnected", "Plugged in"); if (sub(el) !== "waiting") fail(`deux bornes : « waiting » attendu (B branchée), obtenu « ${sub(el)} »`); el.remove();
     el = await mk("Disconnected", "Disconnected"); if (sub(el) !== "idle") fail(`deux bornes : « idle » attendu, obtenu « ${sub(el)} »`); el.remove();
-    const six = mount("sf-hangar-card", { cars: [], chargers: ["a", "b", "c", "d", "e", "f"].map((n) => ({ name: n })) }, "en", two("on", "on")); await wait(40);
+    const six = mount("sf-hangar-card", { cars: [], chargers: ["a", "b", "c", "d", "e", "f"].map((n) => ({ name: n, power: "sensor.ev" })) }, "en", two("on", "on")); await wait(40);
     if (six.shadowRoot.querySelectorAll(".borne").length !== 4) fail("bornes : 4 maximum attendues"); six.remove();
     const l = mount("sf-launcher-card", { tiles: [{ name: "EV", summary: "vehicles", card: { type: "custom:sf-hangar-card", ...cfg } }] }, "en", two("Charging", "Charging")); await wait(40);
     if (!/7\.00 kW/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("bornes : la tuile du lanceur devrait afficher la puissance cumulée"); l.remove(); }
@@ -257,7 +255,7 @@ window.sfTr = (lang, key, vars) => {
   // 5k. Accessibilité : boutons clavier (rôle, focus, nom, Entrée / Espace), état des sélecteurs, niveau d'alerte en toutes lettres,
   //     mouvement réduit, dialogue des popups.
   { const calls = []; const st = { ...base, "select.cm": S("Eco", { options: ["Eco", "Fast"] }), "sensor.hot": U(95, "°C") };
-    const el = mount("sf-hangar-card", { cars: [], charger: {}, mode: "select.cm" }, "en", st);
+    const el = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev" }, mode: "select.cm" }, "en", st);
     el.hass = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40);
     const btns = [...el.shadowRoot.querySelectorAll(".seg .btn")];
     if (!btns.length || !btns.every((b) => b.getAttribute("role") === "button" && b.getAttribute("tabindex") === "0" && b.getAttribute("aria-label"))) fail("accessibilité : les boutons doivent avoir rôle, tabindex et nom accessible");
@@ -344,12 +342,12 @@ window.sfTr = (lang, key, vars) => {
         ["number.wb_current_limit", "dwb"], ["switch.wb_charging_enable", "dwb"], ["sensor.wb_status", "dwb"], ["sensor.bat_level", "dbat"], ["sensor.bat_power", "dbat"], ["sensor.bat_charged_today", "dbat"], ["sensor.bat_discharged_today", "dbat"]]
         .map(([id, d]) => [id, { entity_id: id, device_id: d }])),
       devices: { dcar: { name: "My EV" }, dwb: { name: "Wallbox", name_by_user: "Garage box" }, dbat: { name: "Home battery" } }, locale: { language: "en" }, language: "en" };
-    const g = (dev, kind) => sfGuess(hassEd, dev, kind);
+    const g = (dev, kind) => __SF.sfGuess(hassEd, dev, kind);
     const car = g("dcar", "car"); if (car.soc !== "sensor.car_soc" || car.range !== "sensor.car_range" || car.charging !== "binary_sensor.car_charging" || car.name !== "My EV") fail(`remplissage voiture : ${JSON.stringify(car)}`);
     const wb = g("dwb", "charger"); if (wb.power !== "sensor.wb_power" || wb.connected !== "binary_sensor.wb_plug" || wb.current !== "number.wb_current_limit" || wb.switch !== "switch.wb_charging_enable" || wb.charging !== "sensor.wb_status" || wb.name !== "Garage box") fail(`remplissage borne : ${JSON.stringify(wb)}`);
     const bt = g("dbat", "battery"); if (bt.soc !== "sensor.bat_level" || bt.power !== "sensor.bat_power" || bt.charged_today !== "sensor.bat_charged_today" || bt.discharged_today !== "sensor.bat_discharged_today") fail(`remplissage batterie : ${JSON.stringify(bt)}`);
     if (Object.keys(g("inconnu", "car")).length > 0) fail("remplissage : un appareil inconnu ne doit rien remplir");
-    const d = { soc: "sensor.mine" }; sfAutofill(hassEd, d, "dcar", "car"); if (d.soc !== "sensor.mine" || d.range !== "sensor.car_range") fail("remplissage : un champ déjà rempli ne doit jamais être écrasé");
+    const d = { soc: "sensor.mine" }; __SF.sfAutofill(hassEd, d, "dcar", "car"); if (d.soc !== "sensor.mine" || d.range !== "sensor.car_range") fail("remplissage : un champ déjà rempli ne doit jamais être écrasé");
     for (const tag of Object.keys(FULL)) {
       const ed = document.createElement(tag + "-editor"); if (!customElements.get(tag + "-editor")) { fail(`${tag} : éditeur absent`); continue; }
       ed.hass = hassEd; ed.setConfig(customElements.get(tag).getStubConfig()); document.body.appendChild(ed); await wait(30);
@@ -399,17 +397,17 @@ window.sfTr = (lang, key, vars) => {
     if (!calls.some((c) => c[2].value === 9)) fail("intensité : − doit passer 10 A à 9 A"); e.remove();
     // Devinette prudente : pas de 12 V, pas d'odomètre, pas de « connectivité », pas d'interrupteur de pause, ambigu = vide.
     const H = (list, dev) => ({ states: withIds(Object.fromEntries(list.map(([id, st]) => [id, st]))), entities: Object.fromEntries(list.map(([id]) => [id, { entity_id: id, device_id: dev }])), devices: { [dev]: { name: "X" } } });
-    const g1 = sfGuess(H([["sensor.car_12v_battery", S(12, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.car_odometer", S(5000, { unit_of_measurement: "km", device_class: "distance" })]], "d"), "d", "car");
+    const g1 = __SF.sfGuess(H([["sensor.car_12v_battery", S(12, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.car_odometer", S(5000, { unit_of_measurement: "km", device_class: "distance" })]], "d"), "d", "car");
     if (g1.soc || g1.range) fail(`devinette : batterie 12 V / odomètre ne doivent pas être choisis (${JSON.stringify(g1)})`);
-    const g2 = sfGuess(H([["binary_sensor.wb_online", S("on", { device_class: "connectivity" })], ["switch.wb_pause_session", S("off")], ["switch.wb_smart_charging", S("on")]], "d"), "d", "charger");
+    const g2 = __SF.sfGuess(H([["binary_sensor.wb_online", S("on", { device_class: "connectivity" })], ["switch.wb_pause_session", S("off")], ["switch.wb_smart_charging", S("on")]], "d"), "d", "charger");
     if (g2.connected || g2.switch) fail(`devinette : connectivité / pause / « smart » ne doivent pas devenir branché / interrupteur (${JSON.stringify(g2)})`);
-    const g3 = sfGuess(H([["sensor.a_soc", S(50, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.b_level", S(60, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.p1", S(1, { unit_of_measurement: "W", device_class: "power" })], ["sensor.p2", S(2, { unit_of_measurement: "W", device_class: "power" })]], "d"), "d", "battery");
+    const g3 = __SF.sfGuess(H([["sensor.a_soc", S(50, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.b_level", S(60, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.p1", S(1, { unit_of_measurement: "W", device_class: "power" })], ["sensor.p2", S(2, { unit_of_measurement: "W", device_class: "power" })]], "d"), "d", "battery");
     if (g3.power) fail(`devinette : deux puissances sans préférence = ambigu, rien ne doit être rempli (${JSON.stringify(g3)})`);
-    const g4 = sfGuess({ ...H([["sensor.hid_soc", S(50, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.ok_soc", S(60, { unit_of_measurement: "%", device_class: "battery" })]], "d"), entities: { "sensor.hid_soc": { entity_id: "sensor.hid_soc", device_id: "d", hidden: true }, "sensor.ok_soc": { entity_id: "sensor.ok_soc", device_id: "d" } } }, "d", "battery");
+    const g4 = __SF.sfGuess({ ...H([["sensor.hid_soc", S(50, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.ok_soc", S(60, { unit_of_measurement: "%", device_class: "battery" })]], "d"), entities: { "sensor.hid_soc": { entity_id: "sensor.hid_soc", device_id: "d", hidden: true }, "sensor.ok_soc": { entity_id: "sensor.ok_soc", device_id: "d" } } }, "d", "battery");
     if (g4.soc !== "sensor.ok_soc") fail(`devinette : une entité masquée doit être ignorée (${JSON.stringify(g4)})`);
     // URL d'images : javascript: / data:text refusés, relative acceptée, ? ou & selon l'URL.
-    if (sfSafeUrl("javascript:alert(1)") || sfSafeUrl("data:text/html;base64,AAAA") || sfSafeUrl("//evil.example/x.png")) fail("URL : javascript:, data:text et // doivent être refusés");
-    if (sfSafeUrl("/api/camera_proxy/camera.x?token=1") !== "/api/camera_proxy/camera.x?token=1" || !sfSafeUrl("https://a.example/x.jpg")) fail("URL : une URL relative ou https doit être acceptée");
+    if (__SF.sfSafeUrl("javascript:alert(1)") || __SF.sfSafeUrl("data:text/html;base64,AAAA") || __SF.sfSafeUrl("//evil.example/x.png")) fail("URL : javascript:, data:text et // doivent être refusés");
+    if (__SF.sfSafeUrl("/api/camera_proxy/camera.x?token=1") !== "/api/camera_proxy/camera.x?token=1" || !__SF.sfSafeUrl("https://a.example/x.jpg")) fail("URL : une URL relative ou https doit être acceptée");
     const cam = mount("sf-camera-card", { cameras: [{ entity: "camera.front" }] }, "en", { ...base, "camera.front": S("idle", { entity_picture: "javascript:alert(1)" }) }); await wait(60);
     if (/javascript:/.test(cam.shadowRoot.innerHTML)) fail("sécurité : une entity_picture javascript: ne doit jamais atteindre le DOM"); cam.remove();
     // Texte venu d'une entité : jamais interprété comme du HTML (unité, nom, état).

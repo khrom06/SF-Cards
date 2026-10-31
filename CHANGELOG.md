@@ -14,6 +14,8 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 - **Vehicles card — distance unit**: `distance_unit: auto | km | mi` (`auto` shows the range sensor's own unit; `km` / `mi` converts).
 - **Vehicles card — `select` mode entities**: the charge-mode selector works with `select` entities as well as `input_select`.
 - **Charger controls (optional)**: `controls: true` shows Start / Stop (`switch`, two taps to stop; `switch_invert` for pause-type switches) and current − / + (`number`, bounded by its min / max or by `current_min` / `current_max`, `current_step`). Nothing changes without `controls: true`.
+- **Mandatory fields**: required fields of the visual editors are marked with a red bar and a red asterisk; an amber banner lists what is missing, and a card with nothing useful to show displays "Card to complete" instead of an empty frame.
+- **Duplicate resource guard**: if the file is loaded twice (HACS + manual), the first copy stays active and a console warning explains it.
 
 ### Changed
 - **Behaviour changes to know about**: the vehicles card's info line, mode selector and figure boxes, the energy card's footer boxes and the battery card's blocks are now **centered** (they were left-aligned or spread); a charger counts as *plugged in* when it is charging, and more status words are recognised (`full`, `finished`, `waiting`…), so a status sensor that used those words may now read as plugged in.
