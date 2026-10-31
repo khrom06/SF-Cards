@@ -434,6 +434,7 @@ Edit a dashboard, open any SF card and switch to the **visual editor**:
 - the editor changes the configuration in place and never drops a field it doesn't know;
 - **Fill from a device** — in the vehicle, charger and battery editors, pick a Home Assistant *device* and the empty fields are filled with its entities, found from their type (`device_class`, unit, name): battery level, range, power, plug, current… It is a **cautious** best guess: a field is only filled when exactly one entity matches or one matches the expected name (several candidates and no clear winner = left empty); it skips hidden entities, 12 V batteries, odometers, connectivity sensors and *pause / lock / schedule* switches; the sign of a battery's power is not guessed (check `invert`). It **never overwrites** a field you already filled, and a Home Assistant notification tells you how many fields were filled — always check the result. Needs Home Assistant's entity registry (`hass.entities`, Home Assistant 2023.3 or newer);
 - every card has a **Theme** field (dark / light / auto).
+- **Mandatory fields** are marked with a red bar and a red asterisk (for example the thermostat of a room, the camera of a camera entry). An amber banner at the top of the editor lists what is still missing, and a card with nothing useful to show displays **Card to complete** with the same list instead of an empty frame. The rules are lenient: only a card that would display nothing is flagged.
 
 ## Languages
 
