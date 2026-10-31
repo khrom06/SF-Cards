@@ -56,7 +56,7 @@ const SF_REQ = {
   "sf-reactor-card": (c) => (c.grid || c.solar || c.battery_soc || c.battery_power || sfHas(c.batteries) || sfHas(c.devices)) ? [] : ["Au moins une source : réseau, solaire, batterie ou appareil"],
   "sf-battery-card": (c) => sfBatUsable(c) ? [] : ["Niveau de charge (%) ou puissance (W) d'au moins une batterie"],
   "sf-climate-card": (c) => (c.rooms || []).some((r) => r && r.climate) ? [] : ["Au moins une pièce avec son thermostat (entité climate)"],
-  "sf-hangar-card": (c) => (sfHas(c.cars) || [c.charger, ...(c.chargers || [])].some((x) => x && (x.power || x.connected || x.charging))) ? [] : ["Au moins une voiture ou une borne (puissance, branché, en charge)"],
+  "sf-hangar-card": (c) => (sfHas(c.cars) || [c.charger, ...(c.chargers || [])].some((x) => x && ["power", "connected", "charging", "current", "switch", "decision", "mode"].some((k) => sfHas(x[k]))) || sfHas(c.mode)) ? [] : ["Au moins une voiture ou une borne (puissance, branché, en charge)"],
   "sf-console-card": (c) => (c.groups || []).some((g) => g && sfHas(g.items)) ? [] : ["Au moins un groupe avec un élément"],
   "sf-machines-card": (c) => sfHas(c.tiles) ? [] : ["Au moins une tuile"],
   "sf-launcher-card": (c) => sfHas(c.tiles) ? [] : ["Au moins une tuile"],
@@ -1096,7 +1096,7 @@ class SfReactorCard extends SfBase {
     // Plusieurs batteries : `batteries: [{ soc, power, capacity_kwh }]` → un seul nœud (niveau pondéré, puissance cumulée).
     const bat = sfBatAgg(this, { batteries: c.batteries, soc: c.battery_soc, power: c.battery_power, invert: c.battery_invert });
     const hasBat = bat.n > 0, bsoc = bat.soc, bw = bat.power;
-    const home = grid === null ? null : Math.max(0, solar + grid + (bw || 0));   // jamais négatif (signe de la batterie inversé = `battery_invert`)
+    const home = grid === null ? null : solar + grid + (bw || 0);
     const exporting = grid !== null && grid < -20;
     const autonomy = (hasSolar || hasBat) && home && home > 0 ? Math.min(100, ((hasSolar ? Math.min(solar, home) : 0) + Math.max(bw || 0, 0)) / home * 100) : null;
     const cc = exporting || (autonomy !== null && autonomy > 90) ? SF_C.green : grid !== null && grid > 3000 ? SF_C.amber : SF_C.cyan;
@@ -2598,5 +2598,5 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
 console.info("%c SF-CARDS %c v1.7.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
 
 // Accès réservé aux tests automatiques (le fichier est encapsulé : ses fonctions ne sont plus globales).
-window.__SF = { SF_T, SF_HOOK, sfGuess, sfAutofill, sfSafeUrl, sfNormConfig, SF_REQ };
+if (window.__SF_TEST) window.__SF = { SF_T, SF_HOOK, sfGuess, sfAutofill, sfSafeUrl, sfNormConfig, SF_REQ };
 })();

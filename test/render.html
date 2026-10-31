@@ -9,6 +9,7 @@ window.requestAnimationFrame = (f) => setTimeout(f, 0);   // headless : pas de v
 window.__errors = [];
 window.addEventListener("error", (e) => window.__errors.push(`${e.message} @${(e.filename || "").split("/").pop()}:${e.lineno}`));
 window.__missing = new Set();
+window.__SF_TEST = true;   // expose les fonctions internes à ce test uniquement
 </script>
 <script src="../dist/sf-cards.js"></script>
 <script>
