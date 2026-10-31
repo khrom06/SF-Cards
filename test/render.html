@@ -29,6 +29,8 @@ const base = {
   "light.lamp": S("on", { brightness: 128 }), "switch.plug": S("on"), "cover.shutter": S("closed", { current_position: 0 }),
   "script.go": S("off"), "alarm_control_panel.home": S("disarmed"), "camera.front": S("idle"), "person.alice": S("home"),
   "sensor.car_soc": U(55, "%"), "sensor.car_range": U(180, "km"), "sensor.car_target": U(80, "%"),
+  "lock.car": S("locked"), "vacuum.robot": S("docked"), "sensor.robot_bat": U(80, "%"), "button.sc1": S("unknown"), "scene.dim": S("scening"), "media_player.tv": S("off"),
+  "input_select.ns_mode": S("Jour"), "sensor.fridge": U(4.2, "°C"), "sensor.freezer": U(-19, "°C"), "number.cur": U(8, "A"), "sensor.kwh_imp": U(1, "kWh"), "sensor.kwh_sol": U(2, "kWh"), "sensor.kwh_exp": U(0.5, "kWh"),
   "sensor.dev_bat": S(18, { unit_of_measurement: "%", device_class: "battery", friendly_name: "Sensor A battery" }),
 };
 // Comme dans HA, chaque état porte son entity_id.
@@ -54,6 +56,18 @@ const FULL = {
   "sf-camera-card": { cameras: [{ entity: "camera.front", name: "Front" }] },
   "sf-setpoints-card": { columns: [{ label: "Day" }], rows: [{ name: "Living", entities: ["input_number.target"] }] },
   "sf-ledger-card": { total_cost: "sensor.eur", solar_fraction: "sensor.fossil", avg_price: "sensor.price", devices: [{ name: "EV", total: "sensor.kwh", edf: "sensor.kwh", solar: "sensor.kwh", cost: "sensor.eur" }] },
+  "sf-ns-card": { weather: "weather.home", outdoor: "sensor.out", mode_entity: "input_select.ns_mode", cover: "cover.shutter", scene_dim: "scene.dim", lights_off: ["light.lamp"],
+    rooms: [{ name: "Living room", icon: "mdi:sofa", entity: "sensor.temp", min: 15 }, { name: "Bedroom", icon: "mdi:bed", entity: "sensor.temp" }],
+    fridge: [{ name: "Fridge", icon: "mdi:fridge", entity: "sensor.fridge", max: 6 }, { name: "Freezer", icon: "mdi:snowflake", entity: "sensor.freezer", max: -15 }],
+    cars: [{ name: "Car A", color: "#00e5ff", soc: "sensor.car_soc", range: "sensor.car_range", lock: "lock.car", charging: "binary_sensor.charging", low: 20 }, { name: "Car B", color: "#ff3bd4", soc: "sensor.bat_soc" }],
+    leaks: [{ name: "Kitchen", entity: "binary_sensor.leak" }],
+    tiles: [{ name: "Lamp", icon: "mdi:lamp", color: "#ffb300", entity: "light.lamp" }, { name: "Plug", icon: "mdi:power-plug", color: "#2bff88", entity: "switch.plug" }, { name: "Shutters", icon: "mdi:window-shutter", color: "#00e5ff", entity: "cover.shutter" },
+      { name: "Dim", icon: "mdi:weather-night", color: "#b388ff", entity: "scene.dim" }, { name: "TV", icon: "mdi:television", color: "#ff7043", entity: "media_player.tv" }],
+    shortcuts: [{ name: "Kitchen", icon: "mdi:silverware", entity: "button.sc1" }, { name: "Hall", icon: "mdi:door", entity: "button.sc1" }],
+    vacuum: { entity: "vacuum.robot", battery: "sensor.robot_bat", name: "Robot" },
+    energy: { solar: "sensor.solar", home: "sensor.pac", grid: "sensor.grid", ev: "sensor.ev", ev_connected: "binary_sensor.connected", price: "sensor.price", hc_below: 0.15, ev_current: "number.cur",
+      ev_solar: "sensor.kwh", ev_grid: "sensor.kwh", devices: [{ name: "Heat pump", entity: "sensor.pac", icon: "mdi:heat-pump" }],
+      day: { import: "sensor.kwh_imp", export: "sensor.kwh_exp", solar: "sensor.kwh_sol", hp: 0.2, hc: 0.1, hc_hours: [[0, 6]] } } },
   "sf-cells-card": {},
   "sf-radiators-card": { radiators: [{ name: "Room", climate: "climate.room", preset: "select.room_preset", kwh: "sensor.kwh" }], setpoint: false },
   "sf-battery-card": { soc: "sensor.bat_soc", power: "sensor.bat_p", capacity_kwh: 10, charged_today: "sensor.kwh", discharged_today: "sensor.kwh", temperature: "sensor.temp", health: "sensor.hum", cycles: "sensor.kwh", mode: "input_select.mode" },
@@ -433,7 +447,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
     document.documentElement.style.removeProperty("--sf-theme"); tc.remove(); }
   // 5p. Deuxième tour (chasse aux bugs + audit de sécurité) : injection par la CONFIG, regex piégée, noms géants, confirmation persistante,
   //     historique des popups, kW, autonomie « 1h60 », libellés accessibles, configs mal typées, caméra.
-  { // -- Injection par la configuration : chaque champ texte est empoisonné, un à la fois, sur les 15 cartes. Rien ne doit s'exécuter.
+  { // -- Injection par la configuration : chaque champ texte est empoisonné, un à la fois, sur les 16 cartes. Rien ne doit s'exécuter.
     window.__pwn = 0; const payloads = ['x"><img src=x onerror="window.__pwn=1">', "x'><svg onload=window.__pwn=1>", 'x" onfocus="window.__pwn=1" autofocus="'];
     const leaves = (o, path = []) => (o && typeof o === "object") ? Object.entries(o).flatMap(([k, v]) => leaves(v, [...path, k])) : (typeof o === "string" ? [path] : []);
     const setAt = (o, path, v) => { let c = o; path.slice(0, -1).forEach((k) => { c = c[k]; }); c[path[path.length - 1]] = v; };
@@ -635,6 +649,58 @@ __SF.SF_HOOK.tr = (lang, key) => {
     const k = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.mw" } }, "en", { ...base, "sensor.mw": U(5000, "mW") }); await wait(30);
     if (!/\b5 W/.test(text(k))) fail("unités : 5000 mW doit s'afficher « 5 W »"); k.remove();
     const kk = mount("sf-battery-card", { soc: "sensor.bat_soc" }, "en"); if (kk.kw(undefined) !== "—" || kk.kw(999.6) !== "1.00 kW") fail(`kw() : « ${kk.kw(undefined)} » / « ${kk.kw(999.6)} »`); kk.remove(); }
+  // 5h. Carte plein format : 4 modes x 11 langues sans débordement à 480 x 480, config vide, états absents / hostiles, bilan du jour, popup.
+  { const MODES = ["Matin", "Jour", "Soir", "Nuit"], NS = FULL["sf-ns-card"];
+    const box = document.createElement("div"); box.style.cssText = "width:480px;height:480px;position:relative;overflow:hidden"; box.style.setProperty("--sf-ns-height", "480px"); document.body.appendChild(box);
+    const mk = async (cfg, states, language, hassExtra) => { const el = document.createElement("sf-ns-card"); el.setConfig(cfg); box.appendChild(el); el.hass = { ...HASS(states, language), ...(hassExtra || {}) }; await wait(60); return el; };
+    const noText = (el, lab) => { const t = text(el); if (!t.trim()) fail(`${lab} : rendu vide`); if (/undefined|NaN|\[object|null/.test(t)) fail(`${lab} : texte suspect « ${(t.match(/.{0,20}(undefined|NaN|\[object|null).{0,20}/) || [""])[0]} »`); };
+    const overflow = (el, lab) => {
+      const sr = el.shadowRoot, ns = sr.querySelector(".ns"); if (!ns) { fail(`${lab} : zone .ns absente`); return; }
+      const R0 = ns.getBoundingClientRect();
+      if (Math.abs(R0.height - 480) > 1 || Math.abs(R0.width - 480) > 1) fail(`${lab} : .ns mesure ${Math.round(R0.width)}x${Math.round(R0.height)} au lieu de 480x480`);
+      const clip = [...sr.querySelectorAll(".panel, .tile, .stat, .pill, .btn, .car, .mini, .alert")].filter((e) => e.scrollHeight > e.clientHeight + 1 || e.scrollWidth > e.clientWidth + 1);
+      if (clip.length) fail(`${lab} : contenu rogné dans ${[...new Set(clip.map((e) => e.className.toString().split(" ")[0] + " « " + e.textContent.trim().replace(/\s+/g, " ").slice(0, 30) + " »"))].join(", ")}`);
+      const out = [...sr.querySelectorAll(".main > *, .dock, .hero, .alerts")].filter((e) => { const r = e.getBoundingClientRect(); return r.bottom > R0.bottom + 1 || r.right > R0.right + 1 || r.left < R0.left - 1 || r.top < R0.top - 1; });
+      if (out.length) fail(`${lab} : ${out.length} bloc(s) sortent de l'écran`);
+    };
+    const callWS = async (m) => { const base0 = new Date(); base0.setHours(0, 0, 0, 0); const y0 = base0.getTime() - 86400000, out = {};
+      m.statistic_ids.forEach((id) => { out[id] = [...Array(48)].map((_, h) => ({ start: y0 + h * 3600000, change: id === "sensor.kwh_sol" ? 0.5 : id === "sensor.kwh_exp" ? 0.1 : 0.4 })); }); return out; };
+    const now0 = new Date(); const fc = [...Array(12)].map((_, i) => ({ datetime: new Date(now0.getTime() + (i + 1) * 3600000).toISOString(), condition: "rainy", precipitation_probability: [0, 10, 20, 70, 90, 60, 30, 10, 0, 0, 0, 0][i] }));
+    const conn = { connection: { subscribeMessage: async (cb) => { setTimeout(() => cb({ forecast: fc }), 5); return () => {}; } }, callWS };
+    for (const language of ["en", "fr", "es", "de", "nl", "it", "pt", "pl", "ru", "zh", "ar"]) for (const m of MODES) {
+      const el = await mk(NS, { ...base, "input_select.ns_mode": S(m) }, language, conn); await wait(40);
+      noText(el, `sf-ns-card [${language}/${m}]`); overflow(el, `sf-ns-card [${language}/${m}]`); el.remove();
+    }
+    // une alerte active (fuite + voiture non verrouillée) : la ligne rouge s'intercale sans rien écraser
+    for (const m of MODES) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(m), "binary_sensor.leak": S("on"), "lock.car": S("unlocked"), "sensor.fridge": U(9, "°C") }, "de", conn);
+      if (!el.shadowRoot.querySelector(".alert")) fail(`sf-ns-card [${m}] : l'alerte de fuite n'apparaît pas`); overflow(el, `sf-ns-card alerte [${m}]`); el.remove(); }
+    // mode : noms français ET anglais acceptés ; un nom inconnu / hostile retombe sur l'heure sans planter
+    for (const [v, want] of [["Evening", "soir"], ["night", "nuit"], ["Matin", "matin"]]) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(v) }, "en"); if (!el.shadowRoot.querySelector(".ns." + want)) fail(`sf-ns-card : mode « ${v} » devrait donner .${want}`); el.remove(); }
+    for (const v of ["constructor", "__proto__", "toString", ""]) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(v), "weather.home": S(v, { temperature: "<b>x</b>" }) }, "en"); if (!el.shadowRoot.querySelector(".ns")) fail(`sf-ns-card : état « ${v} » fait planter la carte`); el.remove(); }
+    // configuration vide : « Carte à compléter », pas de plantage
+    { const el = await mk({}, base, "en"); if (!/Card to complete/.test(text(el))) fail("sf-ns-card sans configuration : « Card to complete » attendu"); el.remove();
+      const e2 = await mk({ rooms: [], tiles: [], shortcuts: "x", energy: [], vacuum: "x", cars: "nope" }, base, "en"); e2.remove(); }
+    // tout indisponible : aucun « NaN », aucune erreur
+    for (const m of MODES) { const dead = Object.fromEntries(Object.keys(base).map((k) => [k, S("unavailable")])); dead["input_select.ns_mode"] = S(m);
+      const el = await mk(NS, dead, "en"); noText(el, `sf-ns-card indisponible [${m}]`); el.remove(); }
+    // bilan du jour : consommation, part solaire, coût et comparaison à hier
+    { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Soir") }, "en", conn); await wait(80);
+      const t = text(el); if (!/today/i.test(t) || !/kWh/.test(t)) fail(`sf-ns-card : bilan du jour absent (« ${t.slice(0, 120)} »)`); el.remove(); }
+    // pluie : le message d'état de la prévision apparaît le matin
+    { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Matin") }, "en", conn); await wait(80);
+      if (!/rain (in|around)|raining/.test(text(el))) fail(`sf-ns-card : message de pluie absent (« ${text(el).slice(0, 140)} »)`); el.remove(); }
+    // popup aspirateur : raccourcis + retour base / stop ; un état hostile ne plante pas
+    { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Jour"), "vacuum.robot": S("constructor") }, "en"); el._pop = "vac"; el._key = null; el._render();
+      const t = text(el); if (!/Return to base/.test(t) || !/Stop/.test(t) || !/Kitchen/.test(t) || !/Robot/.test(t)) fail(`sf-ns-card : popup aspirateur incomplet (« ${t.slice(0, 160)} »)`);
+      overflow(el, "sf-ns-card popup"); el.remove(); }
+    // actions : « Tout éteindre » demande deux appuis ; l'appui sur une tuile appelle le bon service
+    { const calls = []; const el = await mk(NS, { ...base, "input_select.ns_mode": S("Soir") }, "en", { callService: (d, s, x) => { calls.push(`${d}.${s}`); return Promise.resolve(); } });
+      const tile = el.shadowRoot.querySelector('.tile[data-e="switch.plug"]'); tile.click(); await wait(10);
+      if (!calls.includes("homeassistant.toggle")) fail(`sf-ns-card : tuile interrupteur → homeassistant.toggle attendu, obtenu ${calls}`);
+      const off = el.shadowRoot.querySelector('[data-act="lights_off"]'); off.click(); await wait(10); if (calls.includes("light.turn_off")) fail("sf-ns-card : « Éteindre » ne doit rien envoyer au premier appui");
+      el.shadowRoot.querySelector('[data-act="lights_off"]').click(); await wait(10); if (!calls.includes("light.turn_off")) fail("sf-ns-card : le second appui sur « Éteindre » doit envoyer light.turn_off");
+      const ar = el.shadowRoot.querySelectorAll('[role="button"]'); if (ar.length < 4) fail("sf-ns-card : éléments cliquables sans rôle de bouton"); el.remove(); }
+    box.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
