@@ -2,7 +2,11 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased] — 1.9.0
+## [1.9.1]
+### Fixed
+- Seasonal theme: the welcome banner (`sf-bridge-card`) now gets the decoration too.
+
+## [1.9.0]
 ### Added
 - **Seasonal themes**, automatic by date, on every card: Halloween (20 Oct – 1 Nov: orange accents, cobweb and pumpkin) and Christmas (1 – 26 Dec: red accents, tree and snow). The wall-panel card gets a full theme (pumpkin, flying bat, falling snow; never at night). Turn off with `events: false` on a card or `window.SF_EVENTS = false`; preview with `?event=halloween|noel`. Respects *reduce motion*; red alerts keep their red.
 

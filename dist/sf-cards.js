@@ -31,7 +31,7 @@ if (window.SF_CARDS_VERSION) {   // ressource déclarée deux fois (HACS + fichi
   console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.8.0) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
   return;
 }
-window.SF_CARDS_VERSION = "1.9.0";
+window.SF_CARDS_VERSION = "1.9.1";
 
 // Embedded fonts (OFL 1.1, see THIRD_PARTY_NOTICES.md). Orbitron is a variable font.
 if (!document.getElementById("sf-hud-fonts")) {
@@ -1037,8 +1037,9 @@ class SfBridgeCard extends SfBase {
       return `<span class="member click ${this.esc(home ? "" : "away")}" data-e="${this.esc(p.entity)}"><span class="av" style="background:${this.esc(p.color || SF_C.cyan)};box-shadow:0 0 8px ${this.esc(p.color || SF_C.cyan)}">${this.esc(String(p.name || "?")[0])}</span>${this.esc(p.name)} · ${home ? this.t("à la maison") : this.t("absent·e")}</span>`;
     }).join("");
 
-    return `<div class="hud bridge"><div class="floor"></div><div class="horizon"></div>
-      <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+    const ev = this._ev();
+    return `<div class="hud bridge${ev ? " ev-" + ev : ""}"><div class="floor"></div><div class="horizon"></div>
+      <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>${ev ? this._evDecor(ev) : ""}
       <div class="top">
         <div><div class="clock">${hh}:${mm}<span class="s">${String(now.getSeconds()).padStart(2, "0")}</span></div>
           <div class="date">${this.esc(date)}</div></div>
