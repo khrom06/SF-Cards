@@ -2,6 +2,13 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased] — 1.8.0
+### Added
+- **`sf-ns-card` — full-screen panel** (16th card) for a wall tablet or a **Sonoff NSPanel Pro** (480 × 480): one screen that changes with the time of day — **Morning** (weather with a 12-hour rain strip and a "rain in 40 min" / "dry for 12 h" message, vehicles, room temperatures, shortcuts), **Day** (solar core, rich Home / Charger / Grid tiles with the two biggest consumers, charger current and solar share, peak / off-peak price and cost per hour, fridge and freezer), **Evening** (ambience tiles, daily summary: kWh, estimated cost, solar share, comparison with yesterday, vehicle levels) and **Night** (standby sentinel: leaks and locks, "good night" with confirmation). A red alert line (leak, unlocked car, low battery, cold room, warm fridge) slides in at any time; a dock keeps *turn off / shutters / dimmed / vacuum / mode* within reach, and the vacuum popup has your shortcuts, *return to base* and *stop*.
+  - Sized in `vmin`, so it stays proportional (tested at 480 × 480 in 11 languages × 4 modes); `--sf-ns-height` overrides the available height; `hide_header: true` hides the Home Assistant top bar (kiosk) and `?header=1` brings it back; `?mode=Evening` previews a mode; the mode follows an optional `input_select` (Morning / Day / Evening / Night, French names accepted too) or the clock; long press opens an entity's details.
+  - No default entity, nothing personal: everything comes from the card configuration. Visual editor, 11 languages, light / auto theme, reduce-motion, keyboard access.
+  - The daily summary reads hourly long-term statistics of your cumulative energy counters (`energy.day`: `import`, optional `export` and `solar`, optional `hp` / `hc` prices and `hc_hours`).
+
 ## [1.7.0]
 ### Added
 - **Light theme**: `theme: dark | light | auto` on every card (editor field included), or once for all cards via the `--sf-theme` CSS variable of your HA theme (re-read when the HA theme changes). `auto` follows the HA theme. In a launcher popup the sheet gets a real light look, SF cards switch to light themselves (no double inversion, snapshots keep their colours) and standard HA cards keep their own look.
