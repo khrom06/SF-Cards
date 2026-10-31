@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SF Cards — live demo</title>
+<meta name="description" content="Sci-fi HUD cards for Home Assistant. Try all 16 cards live, in 11 languages, with fake data.">
+<meta property="og:title" content="SF Cards — sci-fi HUD cards for Home Assistant">
+<meta property="og:description" content="16 Lovelace cards, visual editors, 11 languages, a 480×480 wall-panel dashboard. Try them live.">
+<meta property="og:image" content="https://khrom06.github.io/SF-Cards/social.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -10%,#10304a 0%,#06101d 50%,#03080f 100%);color:#cfefff;font:16px/1.5 system-ui,sans-serif;min-height:100vh}
+header{max-width:1100px;margin:0 auto;padding:48px 20px 12px}
+h1{font-size:clamp(28px,5vw,48px);margin:0;letter-spacing:.08em;color:#00e5ff;text-shadow:0 0 24px rgba(0,229,255,.5)}
+header p{max-width:680px;color:#9fc3d9}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0}
+.bar a,.bar select,.bar button{font:inherit;color:#00e5ff;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.45);border-radius:10px;padding:8px 14px;text-decoration:none;cursor:pointer}
+.bar a:hover,.bar button:hover{background:rgba(0,229,255,.18)}
+.bar .pri{background:#00e5ff;color:#03080f;font-weight:700}
+main{max-width:1100px;margin:0 auto;padding:0 20px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:20px}
+section{min-width:0}section h2{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#7fa3bd;margin:10px 0 6px}
+section.wide{grid-column:1/-1}
+#ns{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+#nsframe{width:480px;height:480px;border:10px solid #0b1626;border-radius:28px;overflow:hidden;box-shadow:0 0 40px rgba(0,229,255,.25);position:relative;flex:0 0 auto}
+#nsframe sf-ns-card{display:block;width:100%;height:100%}
+.modes{display:flex;gap:8px;flex-wrap:wrap}.modes button.on{background:#00e5ff;color:#03080f}
+.note{color:#7fa3bd;font-size:14px;max-width:460px}
+footer{max-width:1100px;margin:0 auto;padding:0 20px 40px;color:#7fa3bd;font-size:14px}
+footer a{color:#00e5ff}
+</style></head><body>
+<script>
+class FakeIcon extends HTMLElement{static get observedAttributes(){return["icon"]}connectedCallback(){this.r()}attributeChangedCallback(){this.r()}
+ r(){if(!this.shadowRoot)this.attachShadow({mode:"open"});const n=(this.getAttribute("icon")||"").replace("mdi:","");
+ this.shadowRoot.innerHTML='<style>@import url(https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css);:host{display:inline-block;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px);line-height:0}i{font-size:var(--mdc-icon-size,24px);line-height:1;display:block}</style><i class="mdi mdi-'+n+'"></i>'}}
+customElements.define("ha-icon",FakeIcon);
+</script>
+<script src="sf-cards.js"></script>
+<header>
+<h1>SF CARDS</h1>
+<p>Sci-fi HUD cards for Home Assistant: an animated energy core, room dials, alerts, a wall-panel dashboard… Everything below is live, with <b>fake data</b>. Nothing leaves your browser.</p>
+<div class="bar">
+<a class="pri" href="https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard" target="_blank" rel="noopener">Add to HACS</a>
+<a href="https://github.com/khrom06/SF-Cards" target="_blank" rel="noopener">GitHub</a>
+<label>Language <select id="lang"></select></label>
+<button id="theme">Light / dark</button>
+</div></header>
+<main id="gallery"></main>
+<footer>MIT licence · fonts under SIL OFL · icons: Material Design Icons (Apache 2.0, demo only). Made by Claude with Chris.</footer>
+<script>
+const S = (state, attrs = {}) => ({ state: String(state), attributes: attrs });
+const U = (v, unit) => S(v, { unit_of_measurement: unit });
+const base = {
+  "sensor.grid": U(850, "W"), "sensor.solar": U(2400, "W"), "sensor.ev": U(1800, "W"), "sensor.pac": U(600, "W"),
+  "sensor.bat_soc": U(62, "%"), "sensor.bat_p": U(-1200, "W"), "sensor.kwh": U(2.1, "kWh"), "sensor.eur": U(1.2, "€"),
+  "sensor.price": U(0.18, "€"), "sensor.temp": U(20.5, "°C"), "sensor.hum": U(55, "%"), "sensor.out": U(11, "°C"),
+  "sensor.solar_left": U(4.2, "kWh"), "sensor.fossil": U(12, "%"),
+  "weather.home": S("sunny", { temperature: 12 }),
+  "climate.room": S("auto", { hvac_action: "heating", preset_modes: ["comfort", "eco", "away", "none"], preset_mode: "eco", temperature: 20, min_temp: 7, max_temp: 30 }),
+  "select.room_preset": S("eco", { options: ["auto", "comfort", "eco", "away", "none"] }),
+  "input_number.target": U(20, "°C"), "input_boolean.auto": S("on"), "binary_sensor.window": S("off"), "binary_sensor.door": S("off"),
+  "binary_sensor.leak": S("off"), "binary_sensor.net": S("on"), "binary_sensor.charging": S("off"), "binary_sensor.connected": S("on"),
+  "input_select.mode": S("Auto", { options: ["Auto", "Eco", "Boost"] }), "number.current": U(10, "A"),
+  "light.lamp": S("on", { brightness: 128 }), "switch.plug": S("on"), "cover.shutter": S("closed", { current_position: 0 }),
+  "script.go": S("off"), "alarm_control_panel.home": S("disarmed"), "camera.front": S("idle"), "person.alice": S("home"),
+  "sensor.car_soc": U(55, "%"), "sensor.car_range": U(180, "km"), "sensor.car_target": U(80, "%"),
+  "sensor.dev_bat": S(18, { unit_of_measurement: "%", device_class: "battery", friendly_name: "Sensor A battery" }),
+};
+// Comme dans HA, chaque état porte son entity_id.
+const withIds = (states) => Object.fromEntries(Object.entries(states).map(([id, st]) => [id, { entity_id: id, last_changed: new Date().toISOString(), ...st }]));
+const HASS = (states, language) => ({ states: withIds(states), locale: { language }, language, callService: () => Promise.resolve() });
+
+// Une configuration complète par carte (les identifiants ci-dessus sont fictifs).
+const FULL = {
+  "sf-alert-card": { leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], alarm: "alarm_control_panel.home", hide_sim: true },
+  "sf-hangar-card": { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range", target: "sensor.car_target", charging: "binary_sensor.charging" }],
+    charger: { connected: "binary_sensor.connected", charging: "binary_sensor.charging", power: "sensor.ev", current: "number.current" }, mode: "input_select.mode",
+    flows: { solar: "sensor.solar", home: "sensor.pac", surplus: "sensor.grid" } },
+  "sf-radar-card": { people: [{ name: "Alice", person: "person.alice", color: "#00e5ff" }], rooms: [{ label: "Living", entity: "binary_sensor.door" }] },
+  "sf-machines-card": { title: "Equipment", tiles: [{ label: "A", entity: "sensor.temp", kind: "value", warn: 30 }, { label: "B", entity: "switch.plug", kind: "toggle" }, { label: "C", entity: "binary_sensor.net", kind: "binary" }, { label: "D", entity: "weather.home", kind: "text" }] },
+  "sf-bridge-card": { weather: "weather.home", outdoor: "sensor.out", price: "sensor.price", hc_price: "sensor.price", mode: "input_select.mode", solar_left: "sensor.solar_left",
+    internet: "binary_sensor.net", leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], people: [{ name: "Alice", entity: "person.alice" }] },
+  "sf-reactor-card": { solar: "sensor.solar", grid: "sensor.grid", fossil: "sensor.fossil", price: "sensor.price", battery_soc: "sensor.bat_soc", battery_power: "sensor.bat_p",
+    devices: [{ name: "EV", entity: "sensor.ev", icon: "mdi:car" }, { name: "Heat pump", entity: "sensor.pac", icon: "mdi:heat-pump" }] },
+  "sf-climate-card": { mode: "input_select.mode", rooms: [{ name: "Living", climate: "climate.room", temp: "sensor.temp", hum: "sensor.hum", target: "input_number.target", regul: "input_boolean.auto", window: "binary_sensor.window" }] },
+  "sf-console-card": { title: "Controls", groups: [{ title: "Home", items: [{ kind: "dimmer", entity: "light.lamp", label: "Lamp" }, { kind: "toggle", entity: "switch.plug", label: "Plug" },
+    { kind: "cover", entity: "cover.shutter", label: "Shutter" }, { kind: "select", entity: "input_select.mode", label: "Mode" }, { kind: "sensor", entity: "sensor.temp", label: "Temp" },
+    { kind: "action", label: "Go", service: "script.turn_on", data: { entity_id: "script.go" } }] }] },
+  "sf-camera-card": { cameras: [{ entity: "camera.front", name: "Front" }] },
+  "sf-setpoints-card": { columns: [{ label: "Day" }], rows: [{ name: "Living", entities: ["input_number.target"] }] },
+  "sf-ledger-card": { total_cost: "sensor.eur", solar_fraction: "sensor.fossil", avg_price: "sensor.price", devices: [{ name: "EV", total: "sensor.kwh", edf: "sensor.kwh", solar: "sensor.kwh", cost: "sensor.eur" }] },
+  "sf-cells-card": {},
+  "sf-radiators-card": { radiators: [{ name: "Room", climate: "climate.room", preset: "select.room_preset", kwh: "sensor.kwh" }], setpoint: false },
+  "sf-battery-card": { soc: "sensor.bat_soc", power: "sensor.bat_p", capacity_kwh: 10, charged_today: "sensor.kwh", discharged_today: "sensor.kwh", temperature: "sensor.temp", health: "sensor.hum", cycles: "sensor.kwh", mode: "input_select.mode" },
+  "sf-launcher-card": { tiles: [{ name: "Climate", summary: "room", card: { type: "custom:sf-climate-card", rooms: [{ name: "L", climate: "climate.room", temp: "sensor.temp", target: "input_number.target" }] } },
+    { name: "Battery", summary: "battery", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc", power: "sensor.bat_p" } }] },
+};
+
+const live = {};   // valeurs animées pour que la démo vive
+const tick = () => { const t = Date.now() / 1000;
+  base["sensor.solar"] = U(Math.round(2400 + 900 * Math.sin(t / 6)), "W"); base["sensor.grid"] = U(Math.round(300 + 500 * Math.sin(t / 9)), "W");
+  base["sensor.ev"] = U(Math.round(1800 + 200 * Math.sin(t / 4)), "W"); base["sensor.bat_soc"] = U(Math.round(60 + 8 * Math.sin(t / 20)), "%"); };
+const LANGS = { en: "English", fr: "Français", es: "Español", de: "Deutsch", nl: "Nederlands", it: "Italiano", pt: "Português", pl: "Polski", ru: "Русский", zh: "中文", ar: "العربية" };
+const sel = document.getElementById("lang");
+Object.entries(LANGS).forEach(([k, v]) => sel.add(new Option(v, k)));
+sel.value = (navigator.language || "en").slice(0, 2) in LANGS ? (navigator.language || "en").slice(0, 2) : "en";
+let theme = "dark"; const els = [];
+const gal = document.getElementById("gallery");
+Object.entries(FULL).forEach(([tag, cfg]) => {
+  if (!customElements.get(tag)) return;
+  const sec = document.createElement("section"); sec.innerHTML = `<h2>${tag.replace("sf-", "").replace("-card", "")}</h2>`;
+  const el = document.createElement(tag); sec.appendChild(el); gal.appendChild(sec);
+  els.push([el, cfg]);
+});
+const apply = () => { document.documentElement.dir = sel.value === "ar" ? "rtl" : "ltr"; tick();
+  els.forEach(([el, cfg]) => { try { el.setConfig({ ...cfg, theme: theme === "light" ? "light" : undefined }); } catch (e) {} el.hass = HASS(base, sel.value); }); };
+sel.onchange = apply; document.getElementById("theme").onclick = () => { theme = theme === "dark" ? "light" : "dark"; document.body.style.background = theme === "light" ? "#e9f0f6" : ""; apply(); };
+apply(); setInterval(() => { tick(); els.forEach(([el]) => { el.hass = HASS(base, sel.value); }); }, 2500);
+</script>
+</body></html>

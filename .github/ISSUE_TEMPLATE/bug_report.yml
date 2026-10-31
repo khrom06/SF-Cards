@@ -1,0 +1,25 @@
+name: Bug report
+description: A card looks wrong or does not work
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Please **remove any personal data** (names, addresses, IPs, tokens) from screenshots and YAML before posting."
+  - type: input
+    id: version
+    attributes: { label: SF Cards version, description: "Shown in the browser console (SF-CARDS …) or in HACS" }
+    validations: { required: true }
+  - type: input
+    id: ha
+    attributes: { label: Home Assistant version and browser / app }
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes: { label: What happens, description: "And what you expected" }
+    validations: { required: true }
+  - type: textarea
+    id: yaml
+    attributes: { label: Card configuration (YAML), render: yaml }
+  - type: textarea
+    id: console
+    attributes: { label: Browser console errors (F12), render: text }

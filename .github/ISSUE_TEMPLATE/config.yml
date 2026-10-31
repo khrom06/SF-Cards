@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Live demo
+    url: https://khrom06.github.io/SF-Cards/
+    about: Try every card with fake data before opening an issue

@@ -1,0 +1,11 @@
+name: Feature request
+description: An idea for a card, an option or a theme
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes: { label: What would you like?, description: "Describe the use case first, not the solution" }
+    validations: { required: true }
+  - type: textarea
+    id: device
+    attributes: { label: Your setup, description: "Wall tablet, phone, panel model, screen size… (no personal data)" }
