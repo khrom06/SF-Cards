@@ -18,7 +18,7 @@ header p{max-width:680px;color:#9fc3d9}
 .bar .pri{background:#00e5ff;color:#03080f;font-weight:700}
 main{max-width:1100px;margin:0 auto;padding:0 20px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:20px}
 section{min-width:0}section h2{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#7fa3bd;margin:10px 0 6px}
-section.wide{grid-column:1/-1}
+section.wide{grid-column:1/-1}.modes button{font:inherit;color:#00e5ff;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.45);border-radius:10px;padding:8px 14px;cursor:pointer}
 #ns{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
 #nsframe{width:480px;height:480px;border:10px solid #0b1626;border-radius:28px;overflow:hidden;box-shadow:0 0 40px rgba(0,229,255,.25);position:relative;flex:0 0 auto}
 #nsframe sf-ns-card{display:block;width:100%;height:100%}
@@ -44,7 +44,7 @@ customElements.define("ha-icon",FakeIcon);
 <button id="theme">Light / dark</button>
 </div></header>
 <main id="gallery"></main>
-<footer>MIT licence · fonts under SIL OFL · icons: Material Design Icons (Apache 2.0, demo only). Made by Claude with Chris.</footer>
+<footer>MIT licence · fonts under SIL OFL · icons: Material Design Icons (Apache 2.0, demo only). Designed and written by Claude (Anthropic).</footer>
 <script>
 const S = (state, attrs = {}) => ({ state: String(state), attributes: attrs });
 const U = (v, unit) => S(v, { unit_of_measurement: unit });
@@ -110,6 +110,15 @@ Object.entries(FULL).forEach(([tag, cfg]) => {
   const el = document.createElement(tag); sec.appendChild(el); gal.appendChild(sec);
   els.push([el, cfg]);
 });
+const nsSec = document.createElement("section"); nsSec.className = "wide";
+nsSec.innerHTML = `<h2>sf-ns-card · wall panel 480×480 (NSPanel Pro and similar)</h2><div id="ns"><div id="nsframe"><iframe id="nsif" title="NSPanel simulator" style="width:100%;height:100%;border:0"></iframe></div>
+<div><div class="modes" id="modes"></div><p class="note">The card follows the time of day: <b>morning</b> (weather, 12 h rain chart, vehicles), <b>day</b> (solar orb, consumption, charger, grid price), <b>evening</b> (ambience tiles, today's energy and cost) and <b>night</b> (all-clear sentinel). Real panels switch automatically, or from an <code>input_select</code>.</p></div></div>`;
+gal.prepend(nsSec);
+let nsMode = "Jour"; const nsif = document.getElementById("nsif");
+const nsLoad = () => { nsif.src = "ns.html?mode=" + nsMode + "&lang=" + sel.value; };
+["Matin", "Jour", "Soir", "Nuit"].forEach((m) => { const b = document.createElement("button"); b.textContent = { Matin: "Morning", Jour: "Day", Soir: "Evening", Nuit: "Night" }[m];
+  b.onclick = () => { nsMode = m; [...document.querySelectorAll("#modes button")].forEach((x) => x.classList.toggle("on", x === b)); nsLoad(); }; if (m === nsMode) b.classList.add("on"); document.getElementById("modes").appendChild(b); });
+sel.addEventListener("change", nsLoad); nsLoad();
 const apply = () => { document.documentElement.dir = sel.value === "ar" ? "rtl" : "ltr"; tick();
   els.forEach(([el, cfg]) => { try { el.setConfig({ ...cfg, theme: theme === "light" ? "light" : undefined }); } catch (e) {} el.hass = HASS(base, sel.value); }); };
 sel.onchange = apply; document.getElementById("theme").onclick = () => { theme = theme === "dark" ? "light" : "dark"; document.body.style.background = theme === "light" ? "#e9f0f6" : ""; apply(); };

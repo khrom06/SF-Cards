@@ -1,0 +1,60 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>html,body{margin:0;height:100%;background:#000}#r{height:100vh}</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+<script>
+class FakeIcon extends HTMLElement{static get observedAttributes(){return["icon"]}
+ connectedCallback(){this.r()} attributeChangedCallback(){this.r()}
+ r(){if(!this.shadowRoot)this.attachShadow({mode:"open"});const n=(this.getAttribute("icon")||"").replace("mdi:","");
+  this.shadowRoot.innerHTML='<style>@import url(https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css);:host{display:inline-block;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px);line-height:0}i{font-size:var(--mdc-icon-size,24px);line-height:1;display:block}</style><i class="mdi mdi-'+n+'"></i>'}}
+customElements.define("ha-icon",FakeIcon);
+</script>
+<script src="sf-cards.js"></script>
+</head><body><div id="r"></div>
+<script>
+const q = new URLSearchParams(location.search), mode = q.get("mode") || "Jour";
+const HOURS = { Matin: [7, 34], Jour: [13, 20], Soir: [19, 45], Nuit: [23, 40] }[mode];
+const FAKE = new Date(2026, 3, 14, HOURS[0], HOURS[1], 0);
+const S = (s, a = {}) => ({ entity_id: "x", state: String(s), attributes: a, last_changed: FAKE.toISOString() });
+const U = (v, u, a = {}) => S(v, { unit_of_measurement: u, ...a });
+const states = {
+  "weather.home": S("sunny", { temperature: 17 }), "sensor.outdoor": U(17.4, "°C"),
+  "sensor.living_t": U(21.3, "°C"), "sensor.bedroom_t": U(19.6, "°C"), "sensor.office_t": U(20.4, "°C"),
+  "sensor.fridge_t": U(4.1, "°C"), "sensor.freezer_t": U(-19.2, "°C"), "sensor.garage_t": U(14, "°C"),
+  "sensor.car_a_soc": U(68, "%"), "sensor.car_a_range": U(313, "km"), "lock.car_a": S("locked"), "binary_sensor.car_a_charging": S("off"),
+  "sensor.car_b_soc": U(92, "%"), "sensor.car_b_range": U(150, "km"), "lock.car_b": S("locked"), "binary_sensor.car_b_charging": S("on"),
+  "binary_sensor.leak_kitchen": S("off"), "binary_sensor.leak_bath": S("off"), "binary_sensor.leak_laundry": S("off"),
+  "sensor.solar": U(3400, "W"), "sensor.home": U(1200, "W"), "sensor.grid": U(-400, "W"), "sensor.charger": U(1800, "W"), "sensor.charger_day": U(7.4, "kWh"), "binary_sensor.plugged": S("on"),
+  "sensor.price": U(0.17, "€/kWh"), "number.charger_a": U(8, "A"), "sensor.ev_solar": U(1.6, "kW"), "sensor.ev_grid": U(0.2, "kW"),
+  "sensor.heatpump": U(780, "W"), "sensor.boiler": U(320, "W"), "sensor.washer": U(0, "W"), "sensor.tv_w": U(95, "W"),
+  "sensor.g_import": U(5000, "kWh"), "sensor.g_export": U(3000, "kWh"), "sensor.pv_total": U(9000, "kWh"),
+  "light.living": S("on"), "light.terrace": S("off"), "light.bedroom": S("off"), "scene.dim": S("scening"), "cover.shutters": S("open"), "media_player.tv": S("off"),
+  "button.sc_kitchen": S("unknown"), "button.sc_bath": S("unknown"), "button.sc_hall": S("unknown"), "vacuum.robot": S("docked"), "sensor.robot_bat": U(100, "%"),
+};
+const cfg = {
+  type: "custom:sf-ns-card", weather: "weather.home", outdoor: "sensor.outdoor", cover: "cover.shutters", scene_dim: "scene.dim", lights_off: ["light.living", "light.terrace", "light.bedroom"],
+  rooms: [{ name: "Living", icon: "mdi:sofa", entity: "sensor.living_t", min: 17 }, { name: "Bedroom", icon: "mdi:bed", entity: "sensor.bedroom_t" }, { name: "Office", icon: "mdi:desk", entity: "sensor.office_t" }],
+  fridge: [{ name: "Fridge", icon: "mdi:fridge", entity: "sensor.fridge_t", max: 6 }, { name: "Freezer", icon: "mdi:snowflake", entity: "sensor.freezer_t", max: -15 }, { name: "Garage", icon: "mdi:garage", entity: "sensor.garage_t" }],
+  cars: [{ name: "Car A", color: "#00e5ff", soc: "sensor.car_a_soc", range: "sensor.car_a_range", lock: "lock.car_a", charging: "binary_sensor.car_a_charging", low: 20 },
+         { name: "Car B", color: "#ff3bd4", soc: "sensor.car_b_soc", range: "sensor.car_b_range", lock: "lock.car_b", charging: "binary_sensor.car_b_charging", low: 20 }],
+  leaks: [{ name: "Kitchen", entity: "binary_sensor.leak_kitchen" }, { name: "Bathroom", entity: "binary_sensor.leak_bath" }, { name: "Laundry", entity: "binary_sensor.leak_laundry" }],
+  tiles: [{ name: "Living room", icon: "mdi:sofa", color: "#ffb300", entity: "light.living" }, { name: "Terrace", icon: "mdi:outdoor-lamp", color: "#2bff88", entity: "light.terrace" }, { name: "Bedroom", icon: "mdi:bed", color: "#ff7043", entity: "light.bedroom" },
+          { name: "Dimmed", icon: "mdi:weather-night", color: "#b388ff", entity: "scene.dim" }, { name: "Shutters", icon: "mdi:window-shutter", color: "#00e5ff", entity: "cover.shutters" }, { name: "TV", icon: "mdi:television", color: "#ff7043", entity: "media_player.tv" }],
+  shortcuts: [{ name: "Kitchen", icon: "mdi:silverware-fork-knife", entity: "button.sc_kitchen" }, { name: "Bath", icon: "mdi:shower", entity: "button.sc_bath" }, { name: "Hall", icon: "mdi:door", entity: "button.sc_hall" }],
+  vacuum: { entity: "vacuum.robot", battery: "sensor.robot_bat", name: "Vacuum" },
+  energy: { solar: "sensor.solar", home: "sensor.home", grid: "sensor.grid", ev: "sensor.charger", ev_connected: "binary_sensor.plugged", price: "sensor.price", hc_below: 0.15, ev_current: "number.charger_a",
+    ev_solar: "sensor.ev_solar", ev_grid: "sensor.ev_grid", devices: [{ name: "Heat pump", entity: "sensor.heatpump", icon: "mdi:heat-pump" }, { name: "Boiler", entity: "sensor.boiler", icon: "mdi:water-boiler" }, { name: "Washer", entity: "sensor.washer", icon: "mdi:washing-machine" }, { name: "TV", entity: "sensor.tv_w", icon: "mdi:television" }],
+    ev_day: "sensor.charger_day",
+    day: { import: "sensor.g_import", export: "sensor.g_export", solar: "sensor.pv_total", hp: 0.17, hc: 0.13, hc_hours: [[0.9, 6.9], [14.4, 16.4]] } },
+};
+const fc = [...Array(14)].map((_, i) => ({ datetime: new Date(FAKE.getTime() + (i + 1) * 3600000).toISOString(), condition: "sunny", precipitation_probability: [0, 0, 5, 10, 20, 45, 70, 85, 60, 30, 10, 0, 0, 0][i] }));
+const callWS = async (m) => { const t0 = Date.parse(m.start_time), out = {};
+  m.statistic_ids.forEach((id) => { out[id] = [...Array(48)].map((_, h) => { const hr = h % 24, sun = hr >= 7 && hr <= 19 ? Math.sin((hr - 7) / 12 * Math.PI) : 0, k = h < 24 ? 1.15 : 1;
+    return { start: t0 + h * 3600000, change: id.includes("pv") ? 1.2 * sun : id.includes("export") ? 0.35 * sun : (0.28 + (hr >= 18 && hr <= 22 ? 0.5 : 0)) * k }; }); });
+  return out; };
+const hass = { states, locale: { language: q.get("lang") || "en" }, language: q.get("lang") || "en", callService: () => Promise.resolve(), callWS,
+  connection: { subscribeMessage: async (cb) => { setTimeout(() => cb({ forecast: fc }), 20); return () => {}; } } };
+const el = document.createElement("sf-ns-card"); el.style.setProperty("--sf-ns-height", "100vh"); el.now = () => new Date(FAKE);
+el.setConfig(cfg); document.getElementById("r").appendChild(el); el.hass = hass;
+if (q.get("alert")) { states["binary_sensor.leak_kitchen"] = S("on"); el.hass = { ...hass, states: { ...states } }; }
+if (q.get("pop")) { el._pop = "vac"; }
+</script></body></html>

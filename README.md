@@ -1,14 +1,28 @@
 # SF Cards
 
-**Sci‑fi "HUD" cards for Home Assistant** — a set of 15 Lovelace cards with a glowing, cinematic look: an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… and a **visual editor for every card**, so nobody has to write YAML.
+**Sci‑fi "HUD" cards for Home Assistant** — a set of 16 Lovelace cards with a glowing, cinematic look: an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… and a **visual editor for every card**, so nobody has to write YAML.
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Languages](https://img.shields.io/badge/languages-11-00e5ff)
+[![Live demo](https://img.shields.io/badge/live-demo-2bff88)](https://khrom06.github.io/SF-Cards/)
+[![Add to HACS](https://img.shields.io/badge/HACS-add%20this%20repository-00e5ff)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 
 <p align="center">
   <img src="assets/reactor.png" alt="Energy card" width="780">
 </p>
+
+> **▶ [Try every card live, with fake data](https://khrom06.github.io/SF-Cards/)** — no install, 11 languages, light / dark.
+
+### New: a dashboard for wall panels (NSPanel Pro, 480×480 and other small screens)
+
+`sf-ns-card` fills a whole square panel and **changes with the time of day**:
+
+<p align="center">
+  <img src="assets/ns-morning.png" alt="Morning" width="230"> <img src="assets/ns-day.png" alt="Day" width="230"> <img src="assets/ns-evening.png" alt="Evening" width="230"> <img src="assets/ns-night.png" alt="Night" width="230">
+</p>
+
+[Jump to the card](#sf-ns-card)
 
 > **Made by Claude.** This whole project — the cards, the visual editors, the translations, the documentation and this README — was designed and written by **Claude** (Anthropic's AI, working through Claude Code) from the ideas, requests and feedback of **khrom06**, plus a few ideas of Claude's own. khrom06 steered every design decision, tested everything on a real Home Assistant installation and kept asking for "one more thing" until it looked right. See [Credits](#credits).
 
@@ -28,7 +42,7 @@
 
 ## Features
 
-- **15 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
+- **16 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone or on a wall tablet; idle devices can be hidden automatically and the number of displayed devices is capped.
@@ -87,6 +101,7 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-setpoints-card`](#sf-setpoints-card) | Setpoint matrix per room (+ / −) |
 | [`sf-ledger-card`](#sf-ledger-card) | Consumption per device and period |
 | [`sf-radar-card`](#sf-radar-card) | Presence from three never‑merged sources (advanced) |
+| [`sf-ns-card`](#sf-ns-card) | **Full‑screen dashboard for wall panels** (NSPanel Pro, 480×480): morning / day / evening / night modes, kiosk mode |
 
 ### sf-bridge-card
 
@@ -422,6 +437,65 @@ type: custom:sf-radar-card
 people: [{ name: Alice, person: person.alice, face: sensor.alice_last_camera, color: "#00e5ff" }]
 rooms:  [{ label: Living room, entity: binary_sensor.living_room_occupancy }]
 ```
+
+### sf-ns-card
+
+A full‑screen card for small wall panels, tuned for the **Sonoff NSPanel Pro (480 × 480, square)** but sized in `vmin`, so it adapts to any screen. It shows different things depending on the time of day:
+
+| Mode | When (default) | What it shows |
+|---|---|---|
+| Morning | 06 – 09 | weather, **12‑hour rain chart** ("rain in 40 min" / "dry for 12 h"), vehicles (charge, range, lock), room temperatures, shortcuts |
+| Day | 09 – 18 | solar orb with self‑use, three rich tiles (home, charger, grid with peak / off‑peak price and cost per hour), charger decision, fridge / freezer pills |
+| Evening | 18 – 22 | big ambience tiles (lights, shutters, TV, scenes), **today's consumption, cost, solar share and comparison with yesterday**, vehicles |
+| Night | 22 – 06 | "all clear" sentinel (leaks, locks), indoor / outdoor temperature, a "Good night" button that switches everything off |
+
+Also: one alert line when something is wrong (leak, open lock, fridge too warm), a popup for a robot vacuum (shortcuts, return to base, stop), long‑press on any tile for the entity's history, confirmation on "turn everything off".
+
+**Which mode?** Give it an `input_select` with the options `Morning / Day / Evening / Night` (or the French `Matin / Jour / Soir / Nuit`) and an automation of your choice — or leave `mode_entity` out and the mode simply follows the clock. Add `?mode=Evening` to the URL to preview a mode without changing anything.
+
+**Kiosk mode.** Set `hide_header: true` to hide the Home Assistant header on that dashboard (add `?header=1` to the URL to bring it back). Use a dashboard view of type **panel** with this card alone.
+
+```yaml
+type: custom:sf-ns-card
+mode_entity: input_select.panel_mode      # optional
+weather: weather.home
+outdoor: sensor.outdoor_temperature
+hide_header: true
+rooms:
+  - { name: Living, icon: mdi:sofa, entity: sensor.living_temperature, min: 17 }
+fridge:
+  - { name: Fridge, icon: mdi:fridge, entity: sensor.fridge_temperature, max: 6 }
+cars:
+  - { name: Car A, color: "#00e5ff", soc: sensor.car_a_soc, range: sensor.car_a_range, lock: lock.car_a, charging: binary_sensor.car_a_charging, low: 20 }
+tiles:                                    # up to 6, evening mode
+  - { name: Living room, icon: mdi:sofa, color: "#ffb300", entity: light.living }
+shortcuts:                                # buttons (morning mode + vacuum popup)
+  - { name: Kitchen, icon: mdi:silverware-fork-knife, entity: button.vacuum_kitchen }
+vacuum: { entity: vacuum.robot, battery: sensor.robot_battery, name: Vacuum }
+lights_off: [light.living, light.bedroom]
+cover: cover.shutters
+scene_dim: scene.dimmed
+energy:
+  solar: sensor.solar_power
+  home: sensor.home_power
+  grid: sensor.grid_power                 # + = import, − = export
+  ev: sensor.charger_power
+  price: sensor.electricity_price
+  hc_below: 0.15                          # a price below this is shown as off‑peak
+  devices:                                # the two biggest are shown on the "home" tile
+    - { name: Heat pump, entity: sensor.heat_pump_power, icon: mdi:heat-pump }
+  day:                                    # "today" summary in the evening (long‑term statistics)
+    import: sensor.grid_energy_import     # cumulative kWh counters
+    export: sensor.grid_energy_export
+    solar: sensor.solar_energy_total
+    hp: 0.18                              # peak price per kWh
+    hc: 0.14                              # off‑peak price per kWh
+    hc_hours: [[0.9, 6.9], [14.4, 16.4]]  # off‑peak windows, decimal hours
+```
+
+Every entity is optional: a block without its entities is simply not displayed. The cost shown in the evening is an estimate (hourly statistics weighted by your off‑peak windows). Entity ids above are placeholders; the visual editor offers drop‑downs for everything except the free‑form `energy.devices` and `energy.day` objects, which are set in YAML.
+
+<p align="center"><img src="assets/ns-evening.png" alt="Evening mode" width="300"></p>
 
 ## Visual editor
 
