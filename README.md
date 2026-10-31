@@ -50,6 +50,7 @@
 - **Light or dark** — dark neon by default; `theme: light` or `auto` (follows the Home Assistant theme) per card, or once for all cards with a CSS variable.
 - **Accessible** — keyboard and screen-reader friendly (real buttons, focus ring, Enter / Space), respects *reduce motion*, alert levels are spelled out, popups are proper dialogs.
 - **No dependencies, no external resources** — a single JavaScript file; the two fonts are embedded (SIL OFL).
+- **Seasonal themes** — Halloween and Christmas decorations appear by themselves on the right dates (subtle, never on red alerts, off with `events: false`).
 - **Safe by design** — a missing, `unknown` or `unavailable` entity shows a grey "—" / "no data", never a fake "OK".
 
 ## Installation

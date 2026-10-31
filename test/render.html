@@ -10,6 +10,7 @@ window.__errors = [];
 window.addEventListener("error", (e) => window.__errors.push(`${e.message} @${(e.filename || "").split("/").pop()}:${e.lineno}`));
 window.__missing = new Set();
 window.__SF_TEST = true;   // expose les fonctions internes à ce test uniquement
+window.SF_EVENTS = false;   // les thèmes d'événements dépendent de la date : désactivés pour des tests reproductibles
 </script>
 <script src="../dist/sf-cards.js"></script>
 <script>
@@ -701,6 +702,22 @@ __SF.SF_HOOK.tr = (lang, key) => {
       el.shadowRoot.querySelector('[data-act="lights_off"]').click(); await wait(10); if (!calls.includes("light.turn_off")) fail("sf-ns-card : le second appui sur « Éteindre » doit envoyer light.turn_off");
       const ar = el.shadowRoot.querySelectorAll('[role="button"]'); if (ar.length < 4) fail("sf-ns-card : éléments cliquables sans rôle de bouton"); el.remove(); }
     box.remove(); }
+  // 5b. Thèmes d'événements : décor présent le bon jour, absent si désactivé, jamais en mode Nuit, jamais sur l'alerte rouge.
+  { window.SF_EVENTS = true;
+    const evBox = document.createElement("div"); document.body.appendChild(evBox);
+    const mkEv = async (tag, cfg, ev) => { const el = document.createElement(tag); el.setConfig(cfg); evBox.appendChild(el); if (ev !== undefined) el._ev = () => ev; el.hass = HASS(base, "en"); await wait(60); return el; };
+    for (const ev of ["halloween", "noel"]) {
+      const el = await mkEv("sf-machines-card", FULL["sf-machines-card"], ev), r = el.shadowRoot;
+      if (!r.querySelector(".hud.ev-" + ev) || !r.querySelector(".evx")) fail(`thème ${ev} : décor absent sur sf-machines-card`);
+      const ns = await mkEv("sf-ns-card", { ...FULL["sf-ns-card"], mode_entity: undefined }, ev);
+      ns._mode = null; ns.mode = () => "Jour"; ns._render();
+      if (!ns.shadowRoot.querySelector(".evd")) fail(`thème ${ev} : décor absent sur sf-ns-card`);
+      ns.mode = () => "Nuit"; ns._key = null; ns._render();
+      if (ns.shadowRoot.querySelector(".evd")) fail(`thème ${ev} : décor présent en mode Nuit`);
+    }
+   const off = await mkEv("sf-machines-card", { ...FULL["sf-machines-card"], events: false }, undefined);
+    if (off.shadowRoot.querySelector(".evx") || off._ev() !== null) fail("events: false n'a pas désactivé le thème");
+    window.SF_EVENTS = false; evBox.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);

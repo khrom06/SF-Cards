@@ -31,7 +31,7 @@ if (window.SF_CARDS_VERSION) {   // ressource déclarée deux fois (HACS + fichi
   console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.8.0) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
   return;
 }
-window.SF_CARDS_VERSION = "1.8.1";
+window.SF_CARDS_VERSION = "1.9.0";
 
 // Embedded fonts (OFL 1.1, see THIRD_PARTY_NOTICES.md). Orbitron is a variable font.
 if (!document.getElementById("sf-hud-fonts")) {
@@ -108,6 +108,18 @@ const SF_CSS = `
   .c { position:absolute; width:14px; height:14px; border-color:${SF_C.cyan}; border-style:solid; opacity:.8; }
   .c.tl { top:6px; left:6px; border-width:2px 0 0 2px; } .c.tr { top:6px; right:6px; border-width:2px 2px 0 0; }
   .c.bl { bottom:6px; left:6px; border-width:0 0 2px 2px; } .c.br { bottom:6px; right:6px; border-width:0 2px 2px 0; }
+  .hud.ev-halloween:not(.alert) .c { border-color:#ff8a1f; }
+  .hud.ev-halloween:not(.alert) .head { color:#ff8a1f; text-shadow:0 0 8px rgba(255,138,31,.6); }
+  .hud.ev-noel:not(.alert) .c { border-color:#ff5a5f; }
+  .hud.ev-noel:not(.alert) .head { color:#ff5a5f; text-shadow:0 0 8px rgba(255,90,95,.55); }
+  .evx { position:absolute; pointer-events:none; z-index:2; }
+  .evx.web { top:0; left:0; width:44px; height:44px; opacity:.3; }
+  .evx.fig { right:10px; bottom:8px; width:26px; height:26px; opacity:.9; filter:drop-shadow(0 0 6px rgba(255,138,31,.6)); }
+  .evx.fig.noel { filter:drop-shadow(0 0 6px rgba(43,255,136,.5)); }
+  .evx svg { width:100%; height:100%; display:block; }
+  .evx.snow { top:-6px; width:4px; height:4px; border-radius:50%; background:#fff; opacity:.6; animation:evxfall linear infinite; }
+  @keyframes evxfall { from { transform:translateY(0) } to { transform:translateY(420px) } }
+  @media (prefers-reduced-motion: reduce) { .evx.snow { display:none } }
   .head { display:flex; align-items:center; gap:10px; margin-bottom:14px;
     font-family:Orbitron, sans-serif; font-weight:700; font-size:12px; letter-spacing:.22em;
     text-transform:uppercase; color:${SF_C.cyan}; text-shadow:0 0 8px rgba(0,229,255,.6); }
@@ -192,6 +204,12 @@ function sfSafeUrl(u) {
   const x = String(u || "").trim();
   return /^(\/(?!\/)|https?:\/\/|data:image\/(png|jpe?g|gif|webp);base64,)/i.test(x) ? x : "";
 }
+// Thèmes d'événements (Halloween 20/10→01/11, Noël 01→26/12) : décor discret sur tous les cadres. Désactiver : `events: false` sur la carte, ou window.SF_EVENTS = false. Aperçu : ?event=halloween | noel
+const SF_EVSVG = {
+  pumpkin: `<svg viewBox="0 0 64 64"><ellipse cx="32" cy="38" rx="26" ry="22" fill="#ff8a1f"/><ellipse cx="19" cy="38" rx="11" ry="21" fill="#ffa84d" opacity=".55"/><ellipse cx="45" cy="38" rx="11" ry="21" fill="#e56f00" opacity=".55"/><rect x="29" y="10" width="6" height="11" rx="2" fill="#4caf50"/><path d="M17 33L26 33L21.5 41ZM38 33L47 33L42.5 41Z M19 47Q32 59 45 47L41 47L38 51L32 48L26 51L23 47Z" fill="#2a0e00"/></svg>`,
+  web: `<svg viewBox="0 0 40 40"><g stroke="#d9cdf2" stroke-width=".7" fill="none"><path d="M0 0L40 0M0 0L0 40M0 0L34 34M0 0L40 16M0 0L16 40"/><path d="M10 0Q9 9 0 10M20 0Q18 18 0 20M30 0Q27 27 0 30"/></g></svg>`,
+  tree: `<svg viewBox="0 0 64 64"><path d="M32 6L40 20L35 20L45 34L38 34L50 50L14 50L26 34L19 34L29 20L24 20Z" fill="#2bff88" opacity=".9"/><rect x="29" y="50" width="6" height="8" fill="#8d5a2b"/><path d="M32 1L33.6 5.4L38 5.6L34.6 8.4L35.8 12.6L32 10.2L28.2 12.6L29.4 8.4L26 5.6L30.4 5.4Z" fill="#ffd54f"/><circle cx="28" cy="30" r="2" fill="#ff5a5f"/><circle cx="37" cy="42" r="2" fill="#ffd54f"/><circle cx="26" cy="44" r="2" fill="#00e5ff"/></svg>`,
+};
 class SfBase extends HTMLElement {
   setConfig(config) {
     if (!config) throw new Error(`${this.localName} : config requise`);
@@ -387,8 +405,24 @@ class SfBase extends HTMLElement {
     if (m < 1) return this.t("à l'instant"); if (m < 60) return this.t("il y a {n} min", { n: m });
     const h = Math.round(m / 60); return h < 48 ? this.t("il y a {n} h", { n: h }) : this.t("il y a {n} j", { n: Math.round(h / 24) });
   }
+  _ev() {
+    try {
+      if (window.SF_EVENTS === false || (this._config && this._config.events === false)) return null;
+      const q = new URLSearchParams(location.search).get("event");
+      if (q) return q === "halloween" || q === "noel" ? q : null;
+      const d = new Date(), m = d.getMonth() + 1, j = d.getDate();
+      if ((m === 10 && j >= 20) || (m === 11 && j <= 1)) return "halloween";
+      if (m === 12 && j <= 26) return "noel";
+    } catch (e) { /* pas de thème */ }
+    return null;
+  }
+  _evDecor(ev) {
+    if (ev === "halloween") return `<div class="evx web">${SF_EVSVG.web}</div><div class="evx fig">${SF_EVSVG.pumpkin}</div>`;
+    return `<div class="evx fig noel">${SF_EVSVG.tree}</div>` + [14, 33, 52, 71, 88].map((x, i) => `<i class="evx snow" style="left:${x}%;animation-duration:${8 + (i * 5) % 7}s;animation-delay:-${(i * 3) % 8}s"></i>`).join("");
+  }
   frame(title, sub, body, extraClass = "") {
-    return `<div class="hud ${this.esc(extraClass)}"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+    const ev = /\balert\b/.test(extraClass) ? null : this._ev();
+    return `<div class="hud ${ev ? "ev-" + ev + " " : ""}${this.esc(extraClass)}"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>${ev ? this._evDecor(ev) : ""}
       <div class="head"><span class="dot"></span>${title}<span class="sub">${sub || ""}</span></div>${body}</div>`;
   }
   // Minuteur d'un bouton (ex. sèche-serviette) : { actif, reste (min) }. Un rafraîchissement
@@ -2048,6 +2082,11 @@ class SfRadiatorsCard extends SfBase {
  * mais proportionnel : tout est en « vmin ». À placer seule dans une vue de type « panel ». Toute la configuration vient du tableau :
  * aucune entité par défaut.
  */
+const SF_NS_EVENTS = {
+  halloween: { a: "#ff8a1f", bg: "radial-gradient(ellipse at 50% -10%, #3d1a06 0%, #1b0b2e 50%, #06020b 100%)" },
+  noel:      { a: "#ff5a5f", bg: "radial-gradient(ellipse at 50% -10%, #3a0f16 0%, #0b2218 52%, #030a07 100%)" },
+};
+SF_EVSVG.bat = `<svg viewBox="0 0 40 20"><path d="M2 8Q8 2 15 8Q18 4 20 9Q22 4 25 8Q32 2 38 8Q32 8 29 13Q26 9 23 13L20 17L17 13Q14 9 11 13Q8 8 2 8Z" fill="#b388ff"/></svg>`;
 const SF_NS_MODES = {
   Matin: { label: "Matin", greet: "Bonjour", a: "#ffb347", bg: "radial-gradient(ellipse at 50% -10%, #3a2347 0%, #14203a 48%, #050b16 100%)" },
   Jour:  { label: "Jour",  greet: "Énergie", a: "#00e5ff", bg: "radial-gradient(ellipse at 50% -10%, #0e2f52 0%, #07182c 52%, #03080f 100%)" },
@@ -2078,6 +2117,17 @@ const SF_NS_CSS = `
     font-family:'B612 Mono', ui-monospace, monospace; font-size:calc(var(--u)*2.6); background:var(--bg); transition:background .8s; }
   .ns.full { --H:var(--sf-ns-height, 100vh); }
   .ns::after { content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px); }
+  .evd { position:absolute; pointer-events:none; z-index:3; }
+  .evd.mid { left:50%; top:calc(var(--u)*1.2); width:calc(var(--u)*9); height:calc(var(--u)*9); transform:translateX(-50%); filter:drop-shadow(0 0 calc(var(--u)*1.6) rgba(255,138,31,.7)); animation:evflick 3.2s ease-in-out infinite; }
+  .evd.noel { filter:drop-shadow(0 0 calc(var(--u)*1.4) rgba(43,255,136,.5)); }
+  .evd svg { width:100%; height:100%; display:block; }
+  .evd.web { left:0; top:0; width:calc(var(--u)*13); height:calc(var(--u)*13); opacity:.32; }
+  .evd.bat { top:calc(var(--u)*3); left:-12%; width:calc(var(--u)*7); height:calc(var(--u)*3.5); animation:evfly 24s linear infinite; opacity:.85; }
+  .evd.snow { top:calc(var(--u)*-3); width:calc(var(--u)*1.5); height:calc(var(--u)*1.5); border-radius:50%; background:#fff; opacity:.7; animation:evfall linear infinite; }
+  @keyframes evflick { 0%,100% { opacity:1 } 45% { opacity:.8 } 60% { opacity:.95 } }
+  @keyframes evfly { 0% { left:-12%; top:calc(var(--u)*7) } 25% { top:calc(var(--u)*2) } 50% { top:calc(var(--u)*8) } 75% { top:calc(var(--u)*3) } 100% { left:112%; top:calc(var(--u)*6) } }
+  @keyframes evfall { from { transform:translateY(0) } to { transform:translateY(calc(var(--u)*108)) } }
+  @media (prefers-reduced-motion: reduce) { .evd { animation:none !important } .evd.snow, .evd.bat { display:none } }
   .ns.nuit { color:#b9a39e; }
   .ns.nuit .panel { background:rgba(255,255,255,.02); border-color:rgba(217,87,63,.22); box-shadow:none; }
   .hm, .big, .num, .nm { font-family:Orbitron, sans-serif; }
@@ -2274,6 +2324,11 @@ class SfNsCard extends SfBase {
     return h < 6 || h >= 22 ? "Nuit" : h < 9 ? "Matin" : h < 18 ? "Jour" : "Soir";
   }
 
+  _nsDecor(ev) {
+    if (ev === "halloween") return `<div class="evd web">${SF_EVSVG.web}</div><div class="evd mid">${SF_EVSVG.pumpkin}</div><div class="evd bat">${SF_EVSVG.bat}</div>`;
+    const flakes = [8, 19, 31, 44, 57, 69, 81, 92].map((x, i) => `<i class="evd snow" style="left:${x}%;animation-duration:${9 + (i * 7) % 8}s;animation-delay:-${(i * 3) % 9}s"></i>`).join("");
+    return `<div class="evd mid noel">${SF_EVSVG.tree}</div>${flakes}`;
+  }
   async _subFc() {
     if (this._fcUnsub || this._fcBusy || !this._hass || !this._hass.connection || !this._config || !this._config.weather) return;
     this._fcBusy = true;
@@ -2558,6 +2613,7 @@ class SfNsCard extends SfBase {
     // une seule ligne d'alerte (la plus grave d'abord) pour ne jamais écraser l'écran ; « +N » s'il y en a d'autres
     const al = this.alerts().sort((x, y) => (x.warn ? 1 : 0) - (y.warn ? 1 : 0)), a0 = al[0], more = al.length - 1;
     const alerts = a0 ? `<div class="alerts"><div class="alert tap ${a0.warn ? "warn" : ""}" data-info="${this.esc(a0.e)}">${this.ic(a0.i)}<span>${this.esc(a0.t)}</span>${more > 0 ? `<em>+${more}</em>` : ""}</div></div>` : "";
+    const EVT = mode === "Nuit" ? null : this._ev();
     const H = (n) => `calc(var(--u)*${n})`; let main = "", grid = "";
     if (mode === "Matin") { main = this.weatherBlock() + this.carsBlock() + this.pills(c.rooms) + this.shortcuts(); grid = "grid-template-columns:1fr 1fr;grid-template-rows:1.15fr 1fr"; }
     else if (mode === "Jour") { const e = this.energyBlocks(); main = (e ? e.join("") : "") + this.pills(c.fridge, true); grid = `grid-template-columns:1.2fr 1fr;grid-template-rows:1fr ${H(12.5)}`;
@@ -2570,7 +2626,7 @@ class SfNsCard extends SfBase {
       .shead ha-icon{--mdc-icon-size:calc(var(--u)*5)} .shead .r{margin-left:auto;font-family:'B612 Mono',monospace;font-weight:400;font-size:calc(var(--u)*2.6);letter-spacing:.04em;text-transform:none;color:#9fc3d9}
       .shead .x{width:calc(var(--u)*8);height:calc(var(--u)*8);display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgba(255,255,255,.2);color:#fff}
       .btn.big ha-icon{--mdc-icon-size:calc(var(--u)*11)} .btn.big{font-size:calc(var(--u)*2.8)} .nrow{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:calc(var(--u)*1.7);min-height:0} .nrow>.panel{min-height:0}</style>
-      <div class="ns ${mode.toLowerCase()}${this._kiosk ? " full" : ""}${a0 ? " tight" : ""}" style="--a:${M.a};--bg:${M.bg}">${this.hero(mode)}${alerts}<div class="main" style="${grid}">${main}</div>${mode === "Nuit" ? "" : this.dock()}${this.popup()}</div>`;
+      <div class="ns ${mode.toLowerCase()}${this._kiosk ? " full" : ""}${a0 ? " tight" : ""}" style="--a:${EVT ? SF_NS_EVENTS[EVT].a : M.a};--bg:${EVT ? SF_NS_EVENTS[EVT].bg : M.bg}">${EVT ? this._nsDecor(EVT) : ""}${this.hero(mode)}${alerts}<div class="main" style="${grid}">${main}</div>${mode === "Nuit" ? "" : this.dock()}${this.popup()}</div>`;
     // pas de réécriture si rien n'a changé (sinon animations et appuis longs seraient coupés) ; l'heure est exclue de la comparaison
     const key = html.replace(/<div class="hm">[^<]*<\/div>/, "").replace(/left:[\d.]+%/, "");
     if (key === this._key) { this._tick(); return; }
