@@ -157,6 +157,32 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (un._isHC(new Date(2026, 0, 5, 3, 0)).hc !== null) fail("bridge : sans plage ni prix HC, HP/HC devrait être inconnu");
     if (/\bHP\b|\bHC\b/.test(text(un))) fail("bridge : affiche HP/HC alors que rien n'est configuré");
     un.remove(); }
+  // 5b2. Consignes : toucher une valeur ouvre l'éditeur (bornes / pas de l'entité) ; « Appliquer » règle la portée choisie ; « Annuler » ne règle rien.
+  { const IN = (v, mn, mx, st) => ({ state: String(v), attributes: { min: mn, max: mx, step: st } });
+    const stt = { "input_number.a1": IN(19, 15, 25, 0.5), "input_number.a2": IN(21, 15, 25, 0.5), "input_number.b1": IN(18, 15, 25, 0.5), "input_number.b2": IN(20, 15, 25, 0.5) };
+    const cfg = { columns: [{ label: "Day" }, { label: "Night" }], rows: [{ name: "Living", entities: ["input_number.a1", "input_number.a2"] }, { name: "Bed", entities: ["input_number.b1", "input_number.b2"] }] };
+    const calls = []; const el = mount("sf-setpoints-card", cfg, "en"); el.hass = { ...HASS(stt, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(60);
+    const q = (sel) => el.shadowRoot.querySelector(sel);
+    if (!q("[data-ed-open]")) fail("consignes : valeur non éditable (data-ed-open absent)");
+    q('[data-ed-open="0,1"]').click(); await wait(60);
+    if (!q("[data-ed-range]")) fail("consignes : l'éditeur ne s'ouvre pas au toucher d'une valeur");
+    if (q("[data-ed-range]").max !== "25" || q("[data-ed-range]").step !== "0.5") fail("consignes : bornes/pas de l'entité non repris par le curseur");
+    if (!/21/.test(q("[data-ed-out]").textContent)) fail("consignes : valeur de départ attendue 21");
+    q('[data-ed="inc"]').click(); q('[data-ed="inc"]').click(); await wait(10);
+    if (!/22/.test(q("[data-ed-out]").textContent)) fail("consignes : deux « + » attendus → 22");
+    for (let k = 0; k < 30; k++) q('[data-ed="inc"]').click();
+    if (!/25/.test(q("[data-ed-out]").textContent)) fail("consignes : la valeur doit s'arrêter à la borne 25");
+    q('[data-ed="cancel"]').click(); await wait(60);
+    if (calls.length) fail("consignes : « Annuler » ne doit rien régler"); if (q("[data-ed-range]")) fail("consignes : l'éditeur reste ouvert après « Annuler »");
+    q('[data-ed-open="0,1"]').click(); await wait(60);
+    q('[data-ed="inc"]').click(); q('[data-ed-scope="col"]').click(); q('[data-ed="ok"]').click(); await wait(80);
+    const got = calls.map((c) => `${c[2].entity_id}=${c[2].value}`).sort().join(",");
+    if (got !== "input_number.a2=21.5,input_number.b2=21.5") fail(`consignes : portée « programme » attendue sur les 2 pièces (obtenu ${got})`);
+    if (calls.some((c) => c[0] !== "input_number" || c[1] !== "set_value")) fail("consignes : service attendu input_number.set_value");
+    if (q("[data-ed-range]")) fail("consignes : l'éditeur doit se fermer après « Appliquer »");
+    calls.length = 0; q('[data-ed-open="1,0"]').click(); await wait(60); q('[data-ed-scope="row"]').click(); q('[data-ed="dec"]').click(); q('[data-ed="ok"]').click(); await wait(80);
+    if (calls.map((c) => `${c[2].entity_id}=${c[2].value}`).sort().join(",") !== "input_number.b1=17.5,input_number.b2=17.5") fail("consignes : portée « pièce » attendue sur la ligne");
+    el.remove(); }
   // 5c. Arabe : sens d'écriture inversé sur la carte ; les autres langues restent de gauche à droite.
   { const ar = mount("sf-machines-card", FULL["sf-machines-card"], "ar"); const en = mount("sf-machines-card", FULL["sf-machines-card"], "en"); await wait(40);
     if (ar.dir !== "rtl") fail("arabe : la carte devrait être en sens rtl"); if (en.dir !== "ltr") fail("anglais : la carte devrait être en sens ltr");

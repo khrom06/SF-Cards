@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.10.0]
+### Added
+- `sf-setpoints-card`: **setpoint editor**. Tap a value to open an editor with a slider and large − / + buttons (range and step read from the `input_number`), then *Apply*. Choose the scope: this value only, the whole program (column) or the whole room (row). Works on phones, where the inline − / + buttons are hidden. 6 new translated strings (11 languages).
+
 ## [1.9.1]
 ### Fixed
 - Seasonal theme: the welcome banner (`sf-bridge-card`) now gets the decoration too.

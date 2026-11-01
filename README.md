@@ -99,7 +99,7 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-battery-card`](#sf-battery-card) | Home battery: level, flow, estimated time, daily energy, mode — only shows what you configure |
 | [`sf-radiators-card`](#sf-radiators-card) | Radiators: preset, setpoint, heating state and daily energy — works without a temperature probe |
 | [`sf-camera-card`](#sf-camera-card) | Camera mosaic with motion / person overlay |
-| [`sf-setpoints-card`](#sf-setpoints-card) | Setpoint matrix per room (+ / −) |
+| [`sf-setpoints-card`](#sf-setpoints-card) | Setpoint matrix per room; tap a value to edit (slider, scope: value / program / room) |
 | [`sf-ledger-card`](#sf-ledger-card) | Consumption per device and period |
 | [`sf-radar-card`](#sf-radar-card) | Presence from three never‑merged sources (advanced) |
 | [`sf-ns-card`](#sf-ns-card) | **Full‑screen dashboard for wall panels** (NSPanel Pro, 480×480): morning / day / evening / night modes, kiosk mode |
