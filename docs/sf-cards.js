@@ -79,7 +79,7 @@ function sfLang(hass) {
 function sfTr(lang, key, vars) {
   if (SF_HOOK.tr) SF_HOOK.tr(lang, key);
   let s = key;
-  if (lang !== "fr") { const e = SF_T[key]; if (e) s = e[SF_LANGS[lang] ?? 0]; }
+  if (lang !== "fr") { const e = Object.prototype.hasOwnProperty.call(SF_T, key) ? SF_T[key] : null; if (e) s = e[SF_LANGS[lang] ?? 0]; }
   return vars ? s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? "")) : s;
 }
 

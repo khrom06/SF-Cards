@@ -99,7 +99,7 @@ const text = (el) => (el.shadowRoot ? el.shadowRoot.textContent : "");
 // Enregistre les clés de traduction demandées mais absentes de la table (ou incomplètes) pour une langue ≠ fr.
 __SF.SF_HOOK.tr = (lang, key) => {
   if (lang !== "fr") {
-    const e = __SF.SF_T[key];
+    const e = Object.prototype.hasOwnProperty.call(__SF.SF_T, key) ? __SF.SF_T[key] : undefined;
     if (!e) { if (/[^\x00-\x7F]|\s/.test(key)) window.__missing.add(`${lang}: ${key}`); }
     else if (e.length < 10 || e.some((x) => !x)) window.__missing.add(`${lang}: ${key} (incomplète)`);
   }
