@@ -2,7 +2,7 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.10.1]
 ### Fixed
 - Card editor: choosing an entity could freeze the page (browser tab or iOS app). The red "required field" marking re-triggered its own observer in an endless loop because `:scope > style` never matches inside a shadow root. Regression test added.
 - `sf-ns-card`: a failing hourly-forecast subscription (weather entity without hourly forecast, unavailable…) was retried on every `hass` update, i.e. several times per second. It is now retried at most once a minute.
