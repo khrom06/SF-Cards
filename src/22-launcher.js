@@ -108,15 +108,15 @@ class SfLauncherCard extends SfBase {
         const temps = (c.rooms || []).map((r) => n(r.temp)).filter((x) => x !== null);
         const act = (c.rooms || []).filter((r) => { const s = this.st(r.climate); return s && ["heating", "cooling", "drying"].includes(s.attributes.hvac_action); }).length;
         const m = this.st(c.mode);
-        return { main: temps.length ? this.t("{t}° moy.", { t: this.nf(temps.reduce((a, b) => a + b, 0) / temps.length, 1) }) : "—",
-          sub: `${m ? this.esc(m.state.replace(/^[^\p{L}]+/u, "")) : ""} · ${act ? this.t("{n} pièce(s) active(s)", { n: act }) : this.t("au repos")}`, hot: act > 0 };
+        return { main: temps.length ? this.t("launcher.t_avg", { t: this.nf(temps.reduce((a, b) => a + b, 0) / temps.length, 1) }) : "—",
+          sub: `${m ? this.esc(m.state.replace(/^[^\p{L}]+/u, "")) : ""} · ${act ? this.t("launcher.n_room_s_heating_or_cooling", { n: act }) : this.t("common.idle")}`, hot: act > 0 };
       }
       case "room": {
         const r = (c.rooms || [])[0] || {}, t = n(r.temp), h = n(r.hum), cl = this.st(r.climate);
         const act = cl && ["heating", "cooling", "drying", "fan"].includes(cl.attributes.hvac_action);
         const lbl = cl && SF_HVAC[cl.state] ? this.t(SF_HVAC[cl.state][0]) : "";
         return { main: t === null ? "—" : this.nf(t, 1) + "°",
-          sub: `${h === null ? "" : Math.round(h) + " % · "}${act ? lbl : cl && cl.state !== "off" ? this.t("En veille") : this.t("Éteint")}`, hot: !!act };
+          sub: `${h === null ? "" : Math.round(h) + " % · "}${act ? lbl : cl && cl.state !== "off" ? this.t("common.idle_2") : this.t("common.off")}`, hot: !!act };
       }
       case "vehicles": {
         const cars = (c.cars || []).map((x) => `${this.esc(x.name)} ${n(x.soc) === null ? "—" : Math.round(n(x.soc)) + " %"}`).join(" · ");
@@ -125,43 +125,43 @@ class SfLauncherCard extends SfBase {
           return { pw, chg, con: sfEvOn(this, ch.connected, "connected", ch.connected_states) || chg }; });
         const charging = sts.some((x) => x.chg), con = sts.some((x) => x.con), total = sts.reduce((a, x) => a + (x.chg ? x.pw || 0 : 0), 0);
         const m = this.st(c.mode);
-        return { main: charging ? this.kw(total) : con ? this.t("Branchée") : this.t("Libre"),
-          sub: `${cars}${m ? `<br>${this.t("Mode {m}", { m: this.esc(m.state) })}` : ""}`, hot: charging };
+        return { main: charging ? this.kw(total) : con ? this.t("launcher.plugged_in") : this.t("launcher.free"),
+          sub: `${cars}${m ? `<br>${this.t("launcher.mode_m", { m: this.esc(m.state) })}` : ""}`, hot: charging };
       }
       case "commands": {
         const items = (c.groups || []).flatMap((g) => g.items || []);
         const lights = items.filter((x) => x.kind === "toggle" && /^(light|switch)\./.test(x.entity || ""));
         const on = lights.filter((x) => this.isOn(x.entity)).length;
         const cov = items.find((x) => x.kind === "cover"), cs = cov && this.st(cov.entity);
-        return { main: `${on} / ${lights.length}`, sub: `${this.t("lumières allumées")}${cs ? `<br>${this.t("volets {s}", { s: (Object.assign(Object.create(null), { open: this.t("ouverts"), closed: this.t("fermés") }))[cs.state] || this.esc(cs.state) })}` : ""}`, hot: false };
+        return { main: `${on} / ${lights.length}`, sub: `${this.t("launcher.lights_on")}${cs ? `<br>${this.t("launcher.shutters_s", { s: (Object.assign(Object.create(null), { open: this.t("common.open"), closed: this.t("common.closed") }))[cs.state] || this.esc(cs.state) })}` : ""}`, hot: false };
       }
       case "cameras": {
         const cams = c.cameras || [];
         const mv = cams.filter((k) => this.isOn(k.motion)).length;
-        return { main: mv ? this.t("{n} mouvement(s)", { n: mv }) : this.t("Calme"), sub: this.t("{n} caméras · appui = images", { n: cams.length }), hot: mv > 0 };
+        return { main: mv ? this.t("launcher.n_motion_s", { n: mv }) : this.t("launcher.calm"), sub: this.t("launcher.n_cameras_tap_images", { n: cams.length }), hot: mv > 0 };
       }
       case "energy": {
         const solar = Math.max(0, this.watts(c.solar) ?? 0), grid = this.watts(c.grid);
-        return { main: this.kw(grid === null ? null : solar + grid), sub: `${this.t("consommation maison")}${c.solar ? `<br>${this.t("solaire {w}", { w: this.kw(solar) })}` : ""}`, hot: false };
+        return { main: this.kw(grid === null ? null : solar + grid), sub: `${this.t("launcher.home_consumption")}${c.solar ? `<br>${this.t("launcher.solar_w", { w: this.kw(solar) })}` : ""}`, hot: false };
       }
       case "battery": {
         const a = sfBatAgg(this, c), soc = a.soc, bw = a.power;
-        return { main: soc === null ? "—" : `${Math.round(soc)} %`, sub: bw === null ? "" : Math.abs(bw) < 20 ? this.t("En veille") : bw > 0 ? `${this.t("Décharge")} · ${this.kw(bw)}` : `${this.t("Charge")} · ${this.kw(-bw)}`, hot: bw !== null && Math.abs(bw) >= 20 };
+        return { main: soc === null ? "—" : `${Math.round(soc)} %`, sub: bw === null ? "" : Math.abs(bw) < 20 ? this.t("common.idle_2") : bw > 0 ? `${this.t("common.discharging")} · ${this.kw(bw)}` : `${this.t("common.charging")} · ${this.kw(-bw)}`, hot: bw !== null && Math.abs(bw) >= 20 };
       }
       case "machines": {
         const tiles = c.tiles || [];
         const bad = tiles.filter((x) => !this.ok(x.entity)).length;
         const first = tiles[0], v = first ? n(first.entity) : null;
         return { main: v === null ? "—" : `${this.nf(v, first.digits ?? 1)}${this.esc(first.unit ?? this.unit(first.entity))}`,
-          sub: `${first ? this.esc(first.label) : ""}${bad ? ` · ${this.t("{n} sans réponse", { n: bad })}` : ""}`, hot: false };
+          sub: `${first ? this.esc(first.label) : ""}${bad ? ` · ${this.t("launcher.n_not_responding", { n: bad })}` : ""}`, hot: false };
       }
       case "health": {
         // Same verdict as the health card, from the checks of the card the tile opens (counted here, nothing is decided).
         const h = this._hc || (this._hc = document.createElement("sf-health-card")); h._hass = this._hass;
         const checks = (Array.isArray(c.checks) ? c.checks : []).filter((x) => x && typeof x.entity === "string" && /^[a-z0-9_]+\.[a-z0-9_]+$/i.test(x.entity)).slice(0, SF_HEALTH_MAX);
         const ev = checks.map((x) => h._eval(x)), bad = checks.filter((x, i) => ev[i].lvl !== "ok"), crit = ev.some((x) => x.lvl === "critical");
-        return { main: bad.length ? this.t(bad.length > 1 ? "{n} anomalies" : "{n} anomalie", { n: bad.length }) : this.t("Tout va bien"),
-          sub: bad.length ? this.esc(bad.slice(0, 2).map((x) => x.name || x.entity).join(" · ")) : this.t("{n} contrôles normaux", { n: checks.length }), hot: bad.length > 0, crit };
+        return { main: bad.length ? this.t(bad.length > 1 ? "{n} anomalies" : "{n} anomalie", { n: bad.length }) : this.t("common.all_good"),
+          sub: bad.length ? this.esc(bad.slice(0, 2).map((x) => x.name || x.entity).join(" · ")) : this.t("launcher.n_checks_normal", { n: checks.length }), hot: bad.length > 0, crit };
       }
       default: return { main: "", sub: this.esc(t.sub || ""), hot: false };
     }
@@ -187,7 +187,7 @@ class SfLauncherCard extends SfBase {
     host.dir = this.lang === "ar" ? "rtl" : "ltr";
     const root = host.attachShadow({ mode: "open" });
     root.innerHTML = `<style>${SF_POP_CSS}</style><div class="wrap"><div class="back"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${this.esc(t.name || "")}">
-      <div class="grab"></div><div class="bar"><button aria-label="${this.esc(this.t("Fermer"))}">✕</button></div><div class="body"></div></div></div>`;
+      <div class="grab"></div><div class="bar"><button aria-label="${this.esc(this.t("launcher.close"))}">✕</button></div><div class="body"></div></div></div>`;
     // Card already known to the browser (SF or another loaded custom card): direct creation. Otherwise (standard HA card:
     // vertical-stack, weather-forecast, history-graph…): we go through HA's "card helpers", which create any card.
     // Light theme: the panel takes a light look; each SF card switches to the light theme by itself (no double inversion,

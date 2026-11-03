@@ -53,36 +53,36 @@ class SfAlertCard extends SfBase {
     const mute = [...c.leaks, c.ring, c.alarm].filter((id) => id && !this.ok(id));
 
     if (ring || alarmTriggered || leaksOn.length || powerCut) {
-      let title = this.t("ALERTE"), what = "";
-      if (powerCut) { title = this.t("COUPURE DE COURANT"); what = this.t("Plus de tension en entrée de l'onduleur"); }
-      if (leaksOn.length) { title = this.t("FUITE D'EAU"); what = leaksOn.map((i) => this._name(i)).join(" · "); }
-      if (alarmTriggered) { title = this.t("INTRUSION"); what = this.t("Alarme déclenchée"); }
-      if (ring) { title = this.t("SONNETTE"); what = sim ? this.t("simulation locale — rien n'est envoyé")
-        : this.t("à {t}", { t: new Date(this.st(c.ring).last_changed).toLocaleTimeString(this.locLatn, { hour: "2-digit", minute: "2-digit" }) }); }
+      let title = this.t("alert.alert"), what = "";
+      if (powerCut) { title = this.t("alert.power_cut"); what = this.t("alert.no_mains_voltage_at_the_ups_input"); }
+      if (leaksOn.length) { title = this.t("common.water_leak"); what = leaksOn.map((i) => this._name(i)).join(" · "); }
+      if (alarmTriggered) { title = this.t("alert.intrusion"); what = this.t("alert.alarm_triggered"); }
+      if (ring) { title = this.t("alert.doorbell"); what = sim ? this.t("alert.local_simulation_nothing_is_sent")
+        : this.t("alert.at_t", { t: new Date(this.st(c.ring).last_changed).toLocaleTimeString(this.locLatn, { hour: "2-digit", minute: "2-digit" }) }); }
       const snapState = this.st(c.snapshot);
       const snapUrl = snapState ? sfSafeUrl(snapState.attributes.entity_picture) : "";
       const img = ring && snapUrl ? `<img class="snap click" data-e="${this.esc(c.snapshot)}" src="${this.esc(snapUrl)}">` : "";
-      return this.frame(this.t("Alerte"), new Date().toLocaleTimeString(this.locLatn),
+      return this.frame(this.t("alert.alert_2"), new Date().toLocaleTimeString(this.locLatn),
         `<div class="big">${title}</div><div>${what}</div>${img}`, "alert");
     }
 
-    const alarmTxt = !alarmS ? "—" : ({ disarmed: this.t("désarmée"), armed_away: this.t("armée (absent)"),
-      armed_home: this.t("armée (présent)"), armed_night: this.t("armée (nuit)"), arming: this.t("armement…") }[alarmS.state] || this.esc(alarmS.state));
+    const alarmTxt = !alarmS ? "—" : ({ disarmed: this.t("alert.disarmed"), armed_away: this.t("alert.armed_away"),
+      armed_home: this.t("alert.armed_home"), armed_night: this.t("alert.armed_night"), arming: this.t("alert.arming") }[alarmS.state] || this.esc(alarmS.state));
     const chip = (id, label, kind) => {
-      if (!this.ok(id)) return `<span class="chip ${this.esc(kind)} mute click" data-e="${this.esc(id)}">${label} · ${this.t("muet")}</span>`;
+      if (!this.ok(id)) return `<span class="chip ${this.esc(kind)} mute click" data-e="${this.esc(id)}">${label} · ${this.t("common.no_data")}</span>`;
       const on = this.st(id).state === "on";
-      return `<span class="chip ${this.esc(kind)} click ${this.esc(on ? "on" : "ok")}" data-e="${this.esc(id)}">${label}${on && kind === "door" ? ` · ${this.t("ouverte")}` : ""}</span>`;
+      return `<span class="chip ${this.esc(kind)} click ${this.esc(on ? "on" : "ok")}" data-e="${this.esc(id)}">${label}${on && kind === "door" ? ` · ${this.t("alert.open")}` : ""}</span>`;
     };
     const short = (id) => this._name(id).replace(/^(Fuite|Ouverture|Leak|Opening)\s*/i, "")
       .replace(/\s*(Humidité|Contact|Porte|Door|Humidity)$/i, "").replace(/\bEntree\b/, "entrée");
-    return this.frame(this.t("Sécurité"), mute.length ? this.t("{n} capteur(s) muet(s)", { n: mute.length }) : this.t("veille"),
+    return this.frame(this.t("alert.security"), mute.length ? this.t("alert.n_sensor_s_with_no_data", { n: mute.length }) : this.t("alert.standby"),
       `<div class="calm">
-         <div><div class="lbl">${this.t("État")}</div><div class="state">${this.t("NORMAL")}</div></div>
-         <div class="click" data-e="${this.esc(c.alarm)}"><div class="lbl">${this.t("Alarme")}</div><div class="val">${alarmTxt}</div></div>
-         ${c.hide_sim ? "" : `<button class="sim">▶ ${this.t("simuler une sonnette")}</button>`}
+         <div><div class="lbl">${this.t("alert.state")}</div><div class="state">${this.t("alert.normal")}</div></div>
+         <div class="click" data-e="${this.esc(c.alarm)}"><div class="lbl">${this.t("alert.alarm")}</div><div class="val">${alarmTxt}</div></div>
+         ${c.hide_sim ? "" : `<button class="sim">▶ ${this.t("alert.simulate_a_doorbell")}</button>`}
        </div>
-       <div class="chips"><span class="lbl" style="align-self:center">${this.t("Fuites")}</span>${c.leaks.map((id) => chip(id, short(id), "leak")).join("")}</div>
-       <div class="chips" style="margin-top:6px"><span class="lbl" style="align-self:center">${this.t("Ouvrants")}</span>${c.doors.map((id) => chip(id, short(id), "door")).join("")}</div>`);
+       <div class="chips"><span class="lbl" style="align-self:center">${this.t("alert.leaks")}</span>${c.leaks.map((id) => chip(id, short(id), "leak")).join("")}</div>
+       <div class="chips" style="margin-top:6px"><span class="lbl" style="align-self:center">${this.t("alert.openings")}</span>${c.doors.map((id) => chip(id, short(id), "door")).join("")}</div>`);
   }
   afterRender() {
     const b = this.shadowRoot.querySelector(".sim");

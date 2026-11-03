@@ -28,11 +28,9 @@ const text = (el) => (el.shadowRoot ? el.shadowRoot.textContent : "");
 
 // Records the translation keys requested but missing from the table (or incomplete) for a language other than fr.
 __SF.SF_HOOK.tr = (lang, key) => {
-  if (lang !== "fr") {
-    const e = Object.prototype.hasOwnProperty.call(__SF.SF_T, key) ? __SF.SF_T[key] : undefined;
-    if (!e) { if (/[^\x00-\x7F]|\s/.test(key)) window.__missing.add(`${lang}: ${key}`); }
-    else if (e.length < 10 || e.some((x) => !x)) window.__missing.add(`${lang}: ${key} (incomplète)`);
-  }
+  const own = Object.prototype.hasOwnProperty, id = own.call(__SF.SF_T, key) ? key : own.call(__SF.SF_FR2ID, key) ? __SF.SF_FR2ID[key] : null;
+  if (!id) { if (/[^\x00-\x7F]|\s/.test(key) || /^[a-z]+\.[a-z0-9_]+$/.test(key)) window.__missing.add(`${lang}: ${key} (unknown key / id)`); return; }
+  const e = __SF.SF_T[id]; if (e.length < 11 || e.some((x) => !x)) window.__missing.add(`${lang}: ${id} (incomplete)`);
 };
 
 (async () => { try {
@@ -1030,7 +1028,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
     const el = document.createElement("sf-launcher-card"); el.setConfig({ tiles: [{ name: "E", summary: "energy", card: { type: "custom:sf-energy-flow-card", ...FULL["sf-reactor-card"] } }] }); document.body.appendChild(el); el.hass = HASS(base, "fr"); await wait(40);
     if (!el.shadowRoot.querySelector(".tile")) fail("launcher: a tile whose card uses a friendly name must render"); el.remove(); }
   // 6. Traductions manquantes.
-  for (const m of window.__missing) fail(`traduction manquante — ${m}`);
+  for (const m of window.__missing) fail(`translation problem: ${m}`);
   for (const e of window.__errors) fail(`JavaScript error: ${e}`);
   } catch (e) { fail(`the test crashed: ${e && e.stack || e}`); }
   finally {

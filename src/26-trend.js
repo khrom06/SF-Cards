@@ -102,7 +102,7 @@ class SfTrendCard extends SfBase {
     const used = new Set(ser.filter((x) => x.color).map((x) => String(x.color).toLowerCase())), free = SF_TREND_COLORS.filter((x) => !used.has(x.toLowerCase())); let k = 0;
     return ser.map((x) => x.color || free[k++ % free.length] || SF_C.cyan);
   }
-  _rangeLabel(h) { return h === "today" ? this.t("Aujourd'hui") : h >= 48 && h % 24 === 0 ? this.t("{n} j", { n: h / 24 }) : this.t("{n} h", { n: h }); }
+  _rangeLabel(h) { return h === "today" ? this.t("common.today") : h >= 48 && h % 24 === 0 ? this.t("trend.n_d", { n: h / 24 }) : this.t("common.n_h", { n: h }); }
   _fmtT(t, long) {
     try { return new Intl.DateTimeFormat(this.locLatn, long ? { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" } : { hour: "2-digit", minute: "2-digit" }).format(new Date(t)); } catch (e) { return ""; }
   }
@@ -180,11 +180,11 @@ class SfTrendCard extends SfBase {
       // value now: the entity's state, or for an attribute series the point nearest to now
       let cur = this._attr(s) ? null : this.num(s.entity); if (cur !== null) cur *= this._factor(s);
       if (this._attr(s) && pts.length) { const nw = Date.now(); let b = pts[0]; for (const p of pts) if (Math.abs(p[0] - nw) < Math.abs(b[0] - nw)) b = p; cur = Math.abs(b[0] - nw) <= 3600000 ? b[1] : null; }
-      const mm = vs.length ? `${this.t("min")} ${this.nf(Math.min(...vs), dg)} · ${this.t("max")} ${this.nf(Math.max(...vs), dg)}` : "";
+      const mm = vs.length ? `${this.t("trend.min")} ${this.nf(Math.min(...vs), dg)} · ${this.t("trend.max")} ${this.nf(Math.max(...vs), dg)}` : "";
       return `<div class="it" data-e="${this.esc(s.entity)}" style="color:${this.esc(col)}"><span class="dt" style="background:${this.esc(col)}"></span><span class="nm" style="color:${SF_C.text}" title="${this.esc(nm)}">${this.esc(nm)}</span>
         <span class="vl">${cur === null ? "—" : this.esc(this.nf(cur, dg)) + (u ? " " + this.esc(u) : "")}</span><span class="mm">${this.esc(mm)}</span></div>`;
     }).join("");
-    return this.frame(this.esc(c.title || this.t("Tendance")), "", `${btn ? `<div class="rgs">${btn}</div>` : ""}${body}<div class="lg">${lg}</div>`);
+    return this.frame(this.esc(c.title || this.t("trend.trend")), "", `${btn ? `<div class="rgs">${btn}</div>` : ""}${body}<div class="lg">${lg}</div>`);
   }
   afterRender() {
     const root = this.shadowRoot;

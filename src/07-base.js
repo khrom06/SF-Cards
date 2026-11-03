@@ -24,7 +24,7 @@ class SfBase extends HTMLElement {
       // rewritten if the render really changed, otherwise the animations
       // (3D rotations, flows) would restart from zero several times per second.
       const rq = SF_REQ[sfCanon(this.localName)], miss = rq && this.localName !== "sf-battery-card" ? rq(this._config) : [];
-      const body = miss.length ? this.frame(this.esc(this.t("Carte à compléter")), "", `<div style="color:${SF_C.amber};line-height:1.6">${miss.map((m) => `• ${this.esc(this.t(m))}`).join("<br>")}</div>`) : this.render();
+      const body = miss.length ? this.frame(this.esc(this.t("common.card_to_complete")), "", `<div style="color:${SF_C.amber};line-height:1.6">${miss.map((m) => `• ${this.esc(this.t(m))}`).join("<br>")}</div>`) : this.render();
       const html = `<style>${SF_CSS}${this.css ? this.css() : ""}</style>${body}`;
       this.dir = this.lang === "ar" ? "rtl" : "ltr";
       const th = this._theme(); if (this.getAttribute("theme") !== th) this.setAttribute("theme", th);
@@ -196,8 +196,8 @@ class SfBase extends HTMLElement {
   ago(id) {
     const s = this.st(id); if (!s) return "";
     const m = Math.round((Date.now() - new Date(s.last_changed).getTime()) / 60000);
-    if (m < 1) return this.t("à l'instant"); if (m < 60) return this.t("il y a {n} min", { n: m });
-    const h = Math.round(m / 60); return h < 48 ? this.t("il y a {n} h", { n: h }) : this.t("il y a {n} j", { n: Math.round(h / 24) });
+    if (m < 1) return this.t("common.just_now"); if (m < 60) return this.t("common.n_min_ago", { n: m });
+    const h = Math.round(m / 60); return h < 48 ? this.t("common.n_h_ago", { n: h }) : this.t("common.n_d_ago", { n: Math.round(h / 24) });
   }
   _ev() {
     try {

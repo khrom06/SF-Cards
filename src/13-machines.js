@@ -89,7 +89,7 @@ class SfMachinesCard extends SfBase {
       // `timer` + `stop`: while the timer runs, the tile shows the remaining time and a press stops it (2 presses).
       const tm = this.timerInfo(t.timer), dead = !this.ok(id);
       const on = tm.actif || this.isOn(id), col = dead ? SF_C.grey : on ? (t.color || SF_C.cyan) : SF_C.grey;
-      const act = tm.actif && t.stop ? this.call("homeassistant.turn_off", { entity_id: t.stop }, this.t("Arrêter ?")) : this.toggleCall(id);
+      const act = tm.actif && t.stop ? this.call("homeassistant.turn_off", { entity_id: t.stop }, this.t("common.stop")) : this.toggleCall(id);
       const txt = dead ? "—" : tm.actif ? (tm.reste === null ? "ON" : `${tm.reste} min`) : on ? "ON" : "OFF";
       return `<div class="tile" ${act} style="cursor:pointer">
         <span class="led" style="background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></span>
@@ -122,7 +122,7 @@ class SfMachinesCard extends SfBase {
         else if (t.low !== undefined && n < t.low) col = SF_C.amber;   // low threshold (e.g. water of a tank that is too cold)
       }
     }
-    const lvl = col === SF_C.red ? this.t("critique") : col === SF_C.amber ? this.t("attention") : "";
+    const lvl = col === SF_C.red ? this.t("machines.critical") : col === SF_C.amber ? this.t("machines.warning") : "";
     return `<div class="tile click" data-e="${this.esc(id)}" aria-label="${this.esc(`${t.label}: ${v}${u}${lvl ? ` (${lvl})` : ""}`)}">
       <span class="led" style="background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></span>
       <div class="lbl">${this.esc(t.label)}</div><div class="v" style="color:${this.esc(col === SF_C.grey ? SF_C.grey : "#fff")}">${this.esc(v)}<span class="u">${this.esc(u)}</span></div>
@@ -131,7 +131,7 @@ class SfMachinesCard extends SfBase {
   render() {
     const tiles = this._config.tiles;
     const bad = tiles.filter((t) => !this.ok(t.entity)).length;
-    return this.frame(this.esc(this._config.title || this.t("Équipements")), bad ? this.t("{n} capteur(s) sans réponse", { n: bad }) : this.t("tout fonctionne"),
+    return this.frame(this.esc(this._config.title || this.t("machines.equipment")), bad ? this.t("machines.n_sensor_s_not_responding", { n: bad }) : this.t("machines.all_good"),
       `<div class="grid">${tiles.map((t) => this._tile(t)).join("")}</div>
        <svg class="pulse" viewBox="0 0 200 26" preserveAspectRatio="none" width="100%"><path d="M0 13 H70 L78 4 L86 22 L94 13 H200"/></svg>`);
   }

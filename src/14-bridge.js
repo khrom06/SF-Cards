@@ -94,17 +94,17 @@ class SfBridgeCard extends SfBase {
 
     const an = [];
     const v = this.num(c.power_in);
-    if (c.power_in && (v === null || v < 200)) an.push(["red", v === null ? this.t("Onduleur muet") : this.t("Coupure secteur · {v} V", { v: Math.round(v) }), c.power_in]);
-    c.leaks.forEach((id) => { if (this.st(id) && this.st(id).state === "on") an.push(["red", this.t("Fuite · {n}", { n: this._short(id) }), id]); });
-    if (c.internet && this.st(c.internet) && this.st(c.internet).state === "off") an.push(["red", this.t("Internet coupé"), c.internet]);
-    c.doors.forEach((id) => { if (this.st(id) && this.st(id).state === "on") an.push(["amber", this.t("{n} ouverte", { n: this._short(id) }), id]); });
-    c.leaks.forEach((id) => { if (!this.ok(id)) an.push(["amber", this.t("Fuite {n} · muet", { n: this._short(id) }), id]); });
+    if (c.power_in && (v === null || v < 200)) an.push(["red", v === null ? this.t("bridge.ups_not_responding") : this.t("bridge.power_cut_v_v", { v: Math.round(v) }), c.power_in]);
+    c.leaks.forEach((id) => { if (this.st(id) && this.st(id).state === "on") an.push(["red", this.t("bridge.leak_n", { n: this._short(id) }), id]); });
+    if (c.internet && this.st(c.internet) && this.st(c.internet).state === "off") an.push(["red", this.t("bridge.internet_down"), c.internet]);
+    c.doors.forEach((id) => { if (this.st(id) && this.st(id).state === "on") an.push(["amber", this.t("bridge.n_open", { n: this._short(id) }), id]); });
+    c.leaks.forEach((id) => { if (!this.ok(id)) an.push(["amber", this.t("bridge.leak_n_no_data", { n: this._short(id) }), id]); });
     const reds = an.filter((a) => a[0] === "red").length;
     const status = an.length
-      ? `<div class="big" style="color:${this.esc(reds ? SF_C.red : SF_C.amber)}">${this.t("{s} · {n} point(s)", { s: this.t(reds ? "ALERTE" : "VIGILANCE"), n: an.length })}</div>
+      ? `<div class="big" style="color:${this.esc(reds ? SF_C.red : SF_C.amber)}">${this.t("bridge.s_n_issue_s", { s: this.t(reds ? "ALERTE" : "VIGILANCE"), n: an.length })}</div>
          <div class="chips">${an.map(([k, t, id]) => `<span class="an ${this.esc(k)} click" data-e="${this.esc(id)}">${this.esc(t)}</span>`).join("")}</div>`
-      : `<div class="big" style="color:${SF_C.green};text-shadow:0 0 12px rgba(43,255,136,.6)">${this.t("TOUT EST NORMAL")}</div>
-         <div class="lbl" style="margin-top:8px">${this.t("portes fermées · aucune fuite · secteur OK")}</div>`;
+      : `<div class="big" style="color:${SF_C.green};text-shadow:0 0 12px rgba(43,255,136,.6)">${this.t("bridge.all_normal")}</div>
+         <div class="lbl" style="margin-top:8px">${this.t("bridge.doors_closed_no_leaks_mains_ok")}</div>`;
 
     const w = this.st(c.weather);
     const [wTxt0, wIco] = (w && SF_WEATHER[w.state]) || [w ? this.esc(w.state) : "—", "mdi:weather-cloudy-alert"];
@@ -120,7 +120,7 @@ class SfBridgeCard extends SfBase {
       // "at home" = state `home`, or one of the `home_states` (custom home zone, smaller than "home").
       const hs = (c.home_states || ["home"]).map((x) => String(x).trim().toLowerCase());
       const home = this.st(p.entity) && hs.includes(String(this.st(p.entity).state).trim().toLowerCase());
-      return `<span class="member click ${this.esc(home ? "" : "away")}" data-e="${this.esc(p.entity)}"><span class="av" style="background:${this.esc(p.color || SF_C.cyan)};box-shadow:0 0 8px ${this.esc(p.color || SF_C.cyan)}">${this.esc(String(p.name || "?")[0])}</span>${this.esc(p.name)} · ${home ? this.t("à la maison") : this.t("absent·e")}</span>`;
+      return `<span class="member click ${this.esc(home ? "" : "away")}" data-e="${this.esc(p.entity)}"><span class="av" style="background:${this.esc(p.color || SF_C.cyan)};box-shadow:0 0 8px ${this.esc(p.color || SF_C.cyan)}">${this.esc(String(p.name || "?")[0])}</span>${this.esc(p.name)} · ${home ? this.t("common.home") : this.t("common.away")}</span>`;
     }).join("");
 
     const ev = this._ev();
@@ -131,13 +131,13 @@ class SfBridgeCard extends SfBase {
           <div class="date">${this.esc(date)}</div></div>
         <div class="status">${status}</div>
         <div class="meta">
-          <div class="click" data-e="${this.esc(c.weather)}"><div class="lbl">${this.t("Extérieur")}</div><div class="v">${this.icon(wIco, 18, SF_C.cyan)}${out === null ? "—" : this.nf(out, 1) + "°"}</div><div class="lbl" style="margin-top:2px">${wTxt}</div></div>
-          ${c.price || hc !== null ? `<div class="click" data-e="${this.esc(c.price || "")}"><div class="lbl">${this.t("Tarif")}</div><div class="v" style="color:${this.esc(hc === null ? SF_C.text : hc ? SF_C.green : SF_C.amber)}">${hc === null ? "" : this.t(hc ? "HC" : "HP") + " "}<span style="font-size:11px;color:${SF_C.text}">${price === null ? "" : this.nf(price, 3) + " €"}</span></div>${left === null ? "" : `<div class="lbl" style="margin-top:2px">${this.t("{x} dans {h}h{m}", { x: this.t(hc ? "HP" : "HC"), h: Math.floor(left / 60), m: String(left % 60).padStart(2, "0") })}</div>`}</div>` : ""}
-          ${c.mode ? `<div class="click" data-e="${this.esc(c.mode)}"><div class="lbl">${this.t("Mode maison")}</div><div class="v">${modeTxt}</div></div>` : ""}
-          ${c.solar_left ? `<div class="click" data-e="${this.esc(c.solar_left)}"><div class="lbl">${this.t("Solaire restant")}</div><div class="v">${this.icon("mdi:solar-power-variant", 16, SF_C.amber)}${sol === null ? "—" : this.nf(sol, 1) + " kWh"}</div></div>` : ""}
+          <div class="click" data-e="${this.esc(c.weather)}"><div class="lbl">${this.t("bridge.outside")}</div><div class="v">${this.icon(wIco, 18, SF_C.cyan)}${out === null ? "—" : this.nf(out, 1) + "°"}</div><div class="lbl" style="margin-top:2px">${wTxt}</div></div>
+          ${c.price || hc !== null ? `<div class="click" data-e="${this.esc(c.price || "")}"><div class="lbl">${this.t("bridge.tariff")}</div><div class="v" style="color:${this.esc(hc === null ? SF_C.text : hc ? SF_C.green : SF_C.amber)}">${hc === null ? "" : this.t(hc ? "HC" : "HP") + " "}<span style="font-size:11px;color:${SF_C.text}">${price === null ? "" : this.nf(price, 3) + " €"}</span></div>${left === null ? "" : `<div class="lbl" style="margin-top:2px">${this.t("bridge.x_in_hhm", { x: this.t(hc ? "HP" : "HC"), h: Math.floor(left / 60), m: String(left % 60).padStart(2, "0") })}</div>`}</div>` : ""}
+          ${c.mode ? `<div class="click" data-e="${this.esc(c.mode)}"><div class="lbl">${this.t("common.house_mode")}</div><div class="v">${modeTxt}</div></div>` : ""}
+          ${c.solar_left ? `<div class="click" data-e="${this.esc(c.solar_left)}"><div class="lbl">${this.t("bridge.solar_remaining")}</div><div class="v">${this.icon("mdi:solar-power-variant", 16, SF_C.amber)}${sol === null ? "—" : this.nf(sol, 1) + " kWh"}</div></div>` : ""}
         </div>
       </div>
-      ${c.people.length ? `<div class="crew"><span class="lbl">${this.t("Présence")}</span>${crew}<span class="right">${this.esc(c.footer || "")}</span></div>` : ""}</div>`;
+      ${c.people.length ? `<div class="crew"><span class="lbl">${this.t("bridge.presence")}</span>${crew}<span class="right">${this.esc(c.footer || "")}</span></div>` : ""}</div>`;
   }
   _short(id) {
     const s = this.st(id), n = String((s && s.attributes.friendly_name) || id).slice(0, 120);

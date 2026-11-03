@@ -56,7 +56,7 @@ class SfHealthCard extends SfBase {
     const c = this._config, all = this._checks().map((k) => ({ k, ...this._eval(k) }));
     const crit = all.filter((x) => x.lvl === "critical"), warn = all.filter((x) => x.lvl === "warning"), good = all.filter((x) => x.lvl === "ok"), probs = [...crit, ...warn];
     const tone = crit.length ? SF_C.red : warn.length ? SF_C.amber : SF_C.green;
-    const head = !probs.length ? this.t("Tout va bien") : this.t(probs.length > 1 ? "{n} anomalies" : "{n} anomalie", { n: probs.length });
+    const head = !probs.length ? this.t("common.all_good") : this.t(probs.length > 1 ? "{n} anomalies" : "{n} anomalie", { n: probs.length });
     const pill = (n, col, lbl) => n ? `<span class="pill2" style="color:${col}">${this.esc(n)} ${this.esc(this.t(lbl))}</span>` : "";
     const name = (x) => x.k.name || (this.st(x.k.entity) && this.st(x.k.entity).attributes.friendly_name) || x.k.entity;
     const row = (x) => { const col = x.lvl === "critical" ? SF_C.red : SF_C.amber, why = x.why ? this.t(x.why[0], x.why[1]) : "";
@@ -66,12 +66,12 @@ class SfHealthCard extends SfBase {
     const units = [], byG = new Map();
     for (const x of probs) { const g = x.k.group ? String(x.k.group) : ""; if (!g) units.push({ g: "", xs: [x] }); else if (byG.has(g)) byG.get(g).xs.push(x); else { const u = { g, xs: [x] }; byG.set(g, u); units.push(u); } }
     let list = "";
-    for (const u of units) { if (u.g && u.xs.length > 1) list += `<div class="grp">${this.esc(u.g)} · ${this.esc(this.t("{n} anomalies", { n: u.xs.length }))}</div>`; else if (u.g) list += `<div class="grp">${this.esc(u.g)}</div>`;
+    for (const u of units) { if (u.g && u.xs.length > 1) list += `<div class="grp">${this.esc(u.g)} · ${this.esc(this.t("health.n_issues", { n: u.xs.length }))}</div>`; else if (u.g) list += `<div class="grp">${this.esc(u.g)}</div>`;
       list += u.xs.map(row).join(""); }
     const oks = c.show_ok ? `<div class="oks">${good.map((x) => `<span class="okc" data-e="${this.esc(x.k.entity)}">${this.esc(name(x))}</span>`).join("")}</div>` : "";
     const body = `<div class="sum" style="color:${tone}">${this.icon(!probs.length ? "mdi:check-circle" : crit.length ? "mdi:alert-octagon" : "mdi:alert", 24, tone)}<span class="big">${this.esc(head)}</span>
       <span class="cnt">${pill(crit.length, SF_C.red, "critique")}${pill(warn.length, SF_C.amber, "attention")}${!probs.length ? "" : pill(good.length, SF_C.green, "normal")}</span></div>${list}${oks}`;
-    return this.frame(this.esc(c.title || this.t("Santé")), this.esc(`${good.length}/${all.length}`), all.length ? body : `<div class="empty" style="color:${SF_C.dim};text-align:center;padding:22px 0">${this.esc(this.t("Aucun contrôle"))}</div>`);
+    return this.frame(this.esc(c.title || this.t("health.health")), this.esc(`${good.length}/${all.length}`), all.length ? body : `<div class="empty" style="color:${SF_C.dim};text-align:center;padding:22px 0">${this.esc(this.t("health.no_checks"))}</div>`);
   }
   getCardSize() { return 4; }
 }

@@ -54,13 +54,13 @@ class SfSetpointsCard extends SfBase {
     const colr = col.color || SF_C.cyan, scopes = [["cell", "Cette valeur"]];
     if (c.rows.length > 1) scopes.push(["col", "Tout le programme"]);
     if (row.entities.length > 1) scopes.push(["row", "Toute la pièce"]);
-    return this.frame(this.esc(c.title || this.t("Consignes")), "", `<div class="ed" style="--ed-col:${this.esc(colr)}">
+    return this.frame(this.esc(c.title || this.t("setpoints.setpoints")), "", `<div class="ed" style="--ed-col:${this.esc(colr)}">
       <div class="who">${this.icon(row.icon || "mdi:home", 16, SF_C.dim)} ${this.esc(row.name)} · <b style="color:${this.esc(colr)}">${this.esc(col.label || "")}</b></div>
       <div class="big"><button type="button" class="btn" data-ed="dec" aria-label="−">−</button><output data-ed-out aria-live="polite" style="text-shadow:0 0 10px ${this.esc(colr)}"></output><button type="button" class="btn" data-ed="inc" aria-label="+">+</button></div>
       <input type="range" data-ed-range min="${this.esc(l.min)}" max="${this.esc(l.max)}" step="${this.esc(l.step)}" aria-label="${this.esc(row.name)}">
       ${scopes.length > 1 ? `<div class="seg" role="group">${scopes.map(([k, lab]) => `<button type="button" class="btn" data-ed-scope="${k}">${this.esc(this.t(lab))}</button>`).join("")}</div>` : ""}
       <div class="err" data-ed-err role="alert"></div>
-      <div class="acts"><button type="button" class="btn on" data-ed="ok">${this.esc(this.t("Appliquer"))}</button><button type="button" class="btn" data-ed="cancel">${this.esc(this.t("Annuler"))}</button><button type="button" class="btn" data-ed="info">${this.esc(this.t("Détails"))}</button></div>
+      <div class="acts"><button type="button" class="btn on" data-ed="ok">${this.esc(this.t("setpoints.apply"))}</button><button type="button" class="btn" data-ed="cancel">${this.esc(this.t("setpoints.cancel"))}</button><button type="button" class="btn" data-ed="info">${this.esc(this.t("setpoints.details"))}</button></div>
     </div>`);
   }
   render() {
@@ -74,7 +74,7 @@ class SfSetpointsCard extends SfBase {
         ${v === null ? `<b style="${sh}">—</b>` : `<b class="edit" role="button" tabindex="0" data-ed-open="${ri},${i}" aria-label="${this.esc(r.name)} ${this.esc((c.columns[i] || {}).label || "")} ${this.esc(this.nf(v, 1))}°" style="${sh}">${this.nf(v, 1)}°</b>`}
         <span class="btn" ${this.call("input_number.increment", { entity_id: id })}>+</span></div></td>`;
     }).join("")}</tr>`).join("");
-    return this.frame(this.esc(c.title || this.t("Consignes")), this.esc(c.subtitle || ""), `<table>${head}${rows}</table>`);
+    return this.frame(this.esc(c.title || this.t("setpoints.setpoints")), this.esc(c.subtitle || ""), `<table>${head}${rows}</table>`);
   }
   afterRender() {
     const root = this.shadowRoot;

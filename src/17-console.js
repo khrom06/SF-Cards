@@ -44,7 +44,7 @@ class SfConsoleCard extends SfBase {
       case "toggle": {
         const on = this.isOn(x.entity);
         return `<div class="it ${this.esc(on ? "on" : "")} ${this.esc(dead ? "dead" : "")}" style="${this.esc(x.color ? `--ac:${x.color}` : "")}" ${this.toggleCall(x.entity)}>
-          ${ic("mdi:toggle-switch")}<span class="nm">${this.esc(x.label)}</span><span class="sv">${dead ? this.t("muet") : on ? this.t("allumé") : this.t("éteint")}</span></div>`;
+          ${ic("mdi:toggle-switch")}<span class="nm">${this.esc(x.label)}</span><span class="sv">${dead ? this.t("common.no_data") : on ? this.t("console.on") : this.t("console.off")}</span></div>`;
       }
       case "action":
         return `<div class="it ${this.esc(dead ? "dead" : "")}" style="${this.esc(x.color ? `--ac:${x.color}` : "")}" ${this.call(x.service, x.data, x.confirm)}>
@@ -56,7 +56,7 @@ class SfConsoleCard extends SfBase {
       }
       case "cover": {
         const pos = s && s.attributes.current_position;
-        const txt = !s ? "—" : Object.assign(Object.create(null), { open: this.t("ouverts"), closed: this.t("fermés"), opening: this.t("ouverture…"), closing: this.t("fermeture…") })[s.state] || this.esc(s.state);
+        const txt = !s ? "—" : Object.assign(Object.create(null), { open: this.t("common.open"), closed: this.t("common.closed"), opening: this.t("console.opening"), closing: this.t("console.closing") })[s.state] || this.esc(s.state);
         return `<div class="it wide"><div class="row"><span class="click" data-e="${this.esc(x.entity)}">${ic("mdi:window-shutter")}</span>
           <div class="grow"><div class="nm">${this.esc(x.label)}</div><div class="sv">${txt}${pos !== undefined && pos !== null ? ` · ${pos} %` : ""}</div></div>
           <span class="btn" ${this.call("cover.open_cover", { entity_id: x.entity })}>${this.icon("mdi:arrow-up", 16)}</span>
@@ -65,7 +65,7 @@ class SfConsoleCard extends SfBase {
       }
       case "vacuum": {
         const st = s ? s.state : "unavailable";
-        const txt = { docked: this.t("à la base"), cleaning: this.t("nettoie"), returning: this.t("retour base"), paused: this.t("en pause"), idle: this.t("en attente"), error: this.t("ERREUR") }[st] || this.esc(st);
+        const txt = { docked: this.t("console.docked"), cleaning: this.t("console.cleaning"), returning: this.t("console.returning"), paused: this.t("console.paused"), idle: this.t("common.waiting"), error: this.t("console.error") }[st] || this.esc(st);
         const bat = this.num(x.battery);
         return `<div class="it wide ${this.esc(st === "cleaning" ? "on" : "")}" style="--ac:${SF_C.green}"><div class="row">
           <span class="click" data-e="${this.esc(x.entity)}">${ic("mdi:robot-vacuum")}</span>
@@ -83,7 +83,7 @@ class SfConsoleCard extends SfBase {
         const step = (d) => this.call("light.turn_on", { entity_id: x.entity, brightness_step_pct: d });
         return `<div class="it wide ${this.esc(on ? "on" : "")} ${this.esc(dead ? "dead" : "")}" style="${this.esc(x.color ? `--ac:${x.color}` : "")}"><div class="row">
           <span ${this.toggleCall(x.entity)}>${ic("mdi:lightbulb")}</span>
-          <div class="grow click" data-e="${this.esc(x.entity)}"><div class="nm">${this.esc(x.label)}</div><div class="sv">${dead ? this.t("muet") : on ? (pct === null ? this.t("allumé") : pct + " %") : this.t("éteint")}</div></div>
+          <div class="grow click" data-e="${this.esc(x.entity)}"><div class="nm">${this.esc(x.label)}</div><div class="sv">${dead ? this.t("common.no_data") : on ? (pct === null ? this.t("console.on") : pct + " %") : this.t("console.off")}</div></div>
           <span class="btn" ${dead ? "" : step(-10)}>−</span><span class="btn" ${dead ? "" : step(10)}>+</span></div></div>`;
       }
       case "stepper": {
@@ -111,7 +111,7 @@ class SfConsoleCard extends SfBase {
     const c = this._config;
     const body = c.groups.map((g) => `<div class="grp" style="${this.esc(g.span ? `grid-column:span ${g.span}` : "")}"><h4>${g.icon ? this.icon(g.icon, 14) : ""}${this.esc(g.title)}</h4>
       <div class="items">${(g.items || []).map((x) => this._item(x)).join("")}</div></div>`).join("");
-    return this.frame(this.esc(c.title || this.t("Commandes")), c.subtitle ? this.esc(c.subtitle) : "", `<div class="groups">${body}</div>`);
+    return this.frame(this.esc(c.title || this.t("console.controls")), c.subtitle ? this.esc(c.subtitle) : "", `<div class="groups">${body}</div>`);
   }
   getCardSize() { return 6; }
 }

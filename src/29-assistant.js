@@ -32,7 +32,7 @@ class SfAssistantCard extends SfBase {
   _ago(st) {
     const lc = st && Date.parse(st.last_changed || st.last_updated || ""); if (!isFinite(lc)) return "";
     const m = Math.max(0, Math.round((Date.now() - lc) / 60000));
-    return m < 1 ? this.t("à l'instant") : m < 60 ? this.t("il y a {n} min", { n: m }) : m < 2880 ? this.t("il y a {n} h", { n: Math.round(m / 60) }) : "";
+    return m < 1 ? this.t("common.just_now") : m < 60 ? this.t("common.n_min_ago", { n: m }) : m < 2880 ? this.t("common.n_h_ago", { n: Math.round(m / 60) }) : "";
   }
   connectedCallback() { super.connectedCallback(); clearInterval(this._tk); this._tk = setInterval(() => this._schedule(), 60000); }   // the displayed age advances even without a hass update
   disconnectedCallback() { super.disconnectedCallback(); clearInterval(this._tk); this._tk = null; }
@@ -62,7 +62,7 @@ class SfAssistantCard extends SfBase {
     const acts = (Array.isArray(c.actions) ? c.actions : []).filter((a) => a && typeof a.service === "string").slice(0, 6).map((a) => {
       const call = this.call(a.service, a.data && typeof a.data === "object" ? a.data : {}, a.confirm ? String(a.confirm) : "");
       return call ? `<span class="btn" role="button" ${call}>${a.icon ? this.icon(a.icon, 14) : ""}${this.esc(a.name || a.service)}</span>` : ""; }).join("");
-    return this.frame(this.esc(c.name || this.t("Assistant")), "", `<div class="as" style="--pc:${col}"><span class="orb ${ph === "thinking" || ph === "acting" || ph === "listening" ? "live" : ""}">${this.icon(P[1], 24, col)}</span>
+    return this.frame(this.esc(c.name || this.t("assistant.assistant")), "", `<div class="as" style="--pc:${col}"><span class="orb ${ph === "thinking" || ph === "acting" || ph === "listening" ? "live" : ""}">${this.icon(P[1], 24, col)}</span>
       <span class="ph">${this.esc(this.t(P[0]))}<small>${this.esc(stE ? this._ago(stE) : "")}</small></span></div>${rows}${acts ? `<div class="acts">${acts}</div>` : ""}`);
   }
   getCardSize() { return 3; }

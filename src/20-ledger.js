@@ -36,11 +36,11 @@ class SfLedgerCard extends SfBase {
     const hasSolar = !!c.solar_fraction || c.devices.some((d) => d.solar);
     const kp = [[c.total_cost, "Coût réseau", tc === null ? "—" : this.nf(tc, 2) + " €", ""], [c.solar_fraction, "Part solaire", fr === null ? "—" : Math.round(fr) + " %", `color:${SF_C.amber}`],
       [c.avg_price, "Prix moyen", ap === null ? "—" : this.nf(ap, 3) + " €", ""]].filter((k) => k[0]);
-    return this.frame(this.t("Bilan énergétique"), p ? this.esc(p.state) : "", `
+    return this.frame(this.t("ledger.energy_summary"), p ? this.esc(p.state) : "", `
       <div class="seg">${seg}</div>
       <div class="kpis" style="grid-template-columns:repeat(${this.esc(Math.max(1, kp.length))},minmax(0,1fr))">${kp.map((k) => `<div class="kpi click" data-e="${this.esc(k[0])}"><div class="lbl">${this.t(k[1])}</div><div class="v" style="${this.esc(k[3])}">${k[2]}</div></div>`).join("")}
       </div>${devs}
-      <div class="legend">${hasSolar ? `<span><i style="background:${SF_C.amber}"></i>${this.t("solaire")}</span>` : ""}<span><i style="background:#ff7a45"></i>${this.t("Réseau")}</span><span>${this.t("estimations")}</span></div>`);
+      <div class="legend">${hasSolar ? `<span><i style="background:${SF_C.amber}"></i>${this.t("ledger.solar")}</span>` : ""}<span><i style="background:#ff7a45"></i>${this.t("common.grid")}</span><span>${this.t("ledger.estimates")}</span></div>`);
   }
   getCardSize() { return 6; }
 }

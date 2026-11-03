@@ -36,8 +36,10 @@ function sfLang(hass) {
 }
 function sfTr(lang, key, vars) {
   if (SF_HOOK.tr) SF_HOOK.tr(lang, key);
+  // `key` is a neutral id; a French text is still accepted as a legacy key (SF_FR2ID). An unknown key is shown as is (and flagged by the tests).
+  const own = Object.prototype.hasOwnProperty, id = own.call(SF_T, key) ? key : own.call(SF_FR2ID, key) ? SF_FR2ID[key] : null;
   let s = key;
-  if (lang !== "fr") { const e = Object.prototype.hasOwnProperty.call(SF_T, key) ? SF_T[key] : null; if (e) s = e[SF_LANGS[lang] ?? 0]; }
+  if (id) { const e = SF_T[id]; s = e[SF_LANGS[lang] ?? 1] || e[1] || e[0]; }   // fallback chain: the language, then English, then French
   return vars ? s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? "")) : s;
 }
 

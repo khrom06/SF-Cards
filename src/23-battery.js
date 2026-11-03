@@ -58,7 +58,7 @@ class SfBatteryCard extends SfBase {
     const c = this._config, agg = sfBatAgg(this, c), soc = agg.soc, bw = agg.power;   // bw > 0 = discharging
     const idle = bw === null || Math.abs(bw) < 20;
     const col = soc === null ? SF_C.grey : soc <= 15 ? SF_C.red : soc <= 30 ? SF_C.amber : SF_C.green;
-    const state = idle ? this.t("En veille") : bw > 0 ? this.t("Décharge") : this.t("Charge");
+    const state = idle ? this.t("common.idle_2") : bw > 0 ? this.t("common.discharging") : this.t("common.charging");
     const R = 56, C = 2 * Math.PI * R, pct = soc === null ? 0 : Math.max(0, Math.min(100, soc));
     // Estimated autonomy: only if the capacity is known and something is flowing.
     let eta = "";
@@ -73,17 +73,17 @@ class SfBatteryCard extends SfBase {
     // Per-battery detail when there are several.
     const bats = agg.items.length > 1 ? `<div class="bats">${agg.items.map((b, i) => {
       const lv = b.soc === null ? null : Math.max(0, Math.min(100, b.soc)), bc = lv === null ? SF_C.grey : lv <= 15 ? SF_C.red : lv <= 30 ? SF_C.amber : SF_C.green;
-      const pw = b.power === null ? "—" : Math.abs(b.power) < 20 ? this.t("En veille") : `${this.icon(b.power > 0 ? "mdi:arrow-down-bold" : "mdi:arrow-up-bold", 12)} ${this.kw(Math.abs(b.power))}`;
-      return `<div class="b click" data-e="${this.esc(b.id)}"><span class="n">${b.name ? this.esc(b.name) : `${this.t("Batterie")} ${i + 1}`}</span><span class="p" style="color:${this.esc(b.power === null || Math.abs(b.power) < 20 ? SF_C.dim : b.power > 0 ? SF_C.amber : SF_C.green)}">${pw}</span>
+      const pw = b.power === null ? "—" : Math.abs(b.power) < 20 ? this.t("common.idle_2") : `${this.icon(b.power > 0 ? "mdi:arrow-down-bold" : "mdi:arrow-up-bold", 12)} ${this.kw(Math.abs(b.power))}`;
+      return `<div class="b click" data-e="${this.esc(b.id)}"><span class="n">${b.name ? this.esc(b.name) : `${this.t("common.battery_2")} ${i + 1}`}</span><span class="p" style="color:${this.esc(b.power === null || Math.abs(b.power) < 20 ? SF_C.dim : b.power > 0 ? SF_C.amber : SF_C.green)}">${pw}</span>
         <span class="lv"><i style="width:${this.esc(lv ?? 0)}%;background:${this.esc(bc)};box-shadow:0 0 6px ${this.esc(bc)}"></i></span><span class="pc">${lv === null ? "—" : Math.round(lv) + " %"}</span></div>`;
     }).join("")}</div>` : "";
     const m = c.mode && this.st(c.mode);
-    const modes = m && (m.attributes.options || []).length ? `<div class="modes"><div class="lbl">${this.t("Mode")}</div><div class="seg">${m.attributes.options.map((o) =>
+    const modes = m && (m.attributes.options || []).length ? `<div class="modes"><div class="lbl">${this.t("common.mode")}</div><div class="seg">${m.attributes.options.map((o) =>
       `<span class="btn ${this.esc(m.state === o ? "on" : "")}" ${this.call(`${c.mode.split(".")[0]}.select_option`, { entity_id: c.mode, option: o })}>${this.esc(o)}</span>`).join("")}</div></div>` : "";
-    return this.frame(this.esc(c.title || this.t("Batterie")), soc === null ? "" : `${Math.round(soc)} %`, `
+    return this.frame(this.esc(c.title || this.t("common.battery_2")), soc === null ? "" : `${Math.round(soc)} %`, `
       <div class="gauge"><div class="ring click" data-e="${this.esc(agg.firstId)}"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="${this.esc(R)}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/>
           <circle cx="66" cy="66" r="${this.esc(R)}" fill="none" stroke="${this.esc(col)}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${this.esc((C * pct) / 100)} ${this.esc(C)}" style="filter:drop-shadow(0 0 5px ${this.esc(col)})"/></svg>
-          <div class="t"><b>${soc === null ? "—" : Math.round(soc)}<span style="font-size:14px">%</span></b><small>${this.t("NIVEAU")}</small></div></div>
+          <div class="t"><b>${soc === null ? "—" : Math.round(soc)}<span style="font-size:14px">%</span></b><small>${this.t("battery.level")}</small></div></div>
         <div><div class="st" style="color:${this.esc(idle ? SF_C.dim : bw > 0 ? SF_C.amber : SF_C.green)}">${this.icon(idle ? "mdi:battery-heart-variant" : bw > 0 ? "mdi:battery-arrow-down" : "mdi:battery-arrow-up", 20)} ${state}</div>
           <div class="sub">${bw === null ? "" : this.kw(Math.abs(bw))}${eta ? `<br>${eta}` : ""}</div></div></div>
       ${bats}${stats ? `<div class="stats">${stats}</div>` : ""}${modes}`);

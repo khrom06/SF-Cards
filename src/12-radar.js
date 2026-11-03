@@ -49,9 +49,9 @@ class SfRadarCard extends SfBase {
     let svg = `<circle class="ringl" cx="50" cy="50" r="${this.esc(R.outer)}"/><circle class="ringl" cx="50" cy="50" r="${this.esc(R.mid)}"/>
       <circle class="ringl" cx="50" cy="50" r="${this.esc(R.inner)}"/>
       <line class="cross" x1="50" y1="2" x2="50" y2="98"/><line class="cross" x1="2" y1="50" x2="98" y2="50"/>
-      <text class="rl" x="50" y="${this.esc(50 - R.outer - 1.2)}" text-anchor="middle">${this.t("RÉSEAU")}</text>
-      <text class="rl" x="50" y="${this.esc(50 - R.mid - 1.2)}" text-anchor="middle">${this.t("VISAGE")}</text>
-      <text class="rl" x="50" y="${this.esc(50 - R.inner - 1.2)}" text-anchor="middle">${this.t("PIÈCES")}</text>
+      <text class="rl" x="50" y="${this.esc(50 - R.outer - 1.2)}" text-anchor="middle">${this.t("radar.network")}</text>
+      <text class="rl" x="50" y="${this.esc(50 - R.mid - 1.2)}" text-anchor="middle">${this.t("radar.face")}</text>
+      <text class="rl" x="50" y="${this.esc(50 - R.inner - 1.2)}" text-anchor="middle">${this.t("radar.rooms")}</text>
       <circle cx="50" cy="50" r="2" fill="${SF_C.cyan}"/>`;
     const peopleRows = [], faceRows = [], roomRows = [];
     c.people.forEach((p, i) => {
@@ -60,28 +60,28 @@ class SfRadarCard extends SfBase {
         const home = this.st(p.person) && this.st(p.person).state === "home";
         const [x1, y1] = pos(R.outer, i, np, -60);
         svg += blip(x1, y1, col, home, p.name);
-        peopleRows.push(`<div class="row click" data-e="${this.esc(p.person)}"><span style="color:${this.esc(col)}">${this.esc(p.name)}</span><span>${!this.ok(p.person) ? "—" : home ? this.t("à la maison") : this.t("absent·e")}</span></div>`);
+        peopleRows.push(`<div class="row click" data-e="${this.esc(p.person)}"><span style="color:${this.esc(col)}">${this.esc(p.name)}</span><span>${!this.ok(p.person) ? "—" : home ? this.t("common.home") : this.t("common.away")}</span></div>`);
       }
       if (p.face) {
         const cam = this.ok(p.face) ? this.st(p.face).state : null;
         const seen = cam && cam.toLowerCase() !== "unknown";
         const [x2, y2] = pos(R.mid, i, np, 20);
         svg += blip(x2, y2, col, seen, p.name);
-        faceRows.push(`<div class="row click" data-e="${this.esc(p.face)}"><span style="color:${this.esc(col)}">${this.esc(p.name)}</span><span>${seen ? `${this.esc(cam)} · ${this.ago(p.face)}` : this.t("jamais vu·e")}</span></div>`);
+        faceRows.push(`<div class="row click" data-e="${this.esc(p.face)}"><span style="color:${this.esc(col)}">${this.esc(p.name)}</span><span>${seen ? `${this.esc(cam)} · ${this.ago(p.face)}` : this.t("radar.never_seen")}</span></div>`);
       }
     });
     c.rooms.forEach((r, i) => {
       const on = this.st(r.entity) && this.st(r.entity).state === "on";
       const [x, y] = pos(R.inner, i, nr, 90);
       svg += blip(x, y, SF_C.amber, on, r.label);
-      roomRows.push(`<div class="row click" data-e="${this.esc(r.entity)}"><span>${this.esc(r.label)}</span><span>${!this.ok(r.entity) ? "—" : on ? this.t("occupée") : this.t("vide")}</span></div>`);
+      roomRows.push(`<div class="row click" data-e="${this.esc(r.entity)}"><span>${this.esc(r.label)}</span><span>${!this.ok(r.entity) ? "—" : on ? this.t("radar.occupied") : this.t("radar.empty")}</span></div>`);
     });
-    return this.frame(this.t("Radar de présence"), this.t("3 sources indépendantes"),
+    return this.frame(this.t("radar.presence_radar"), this.t("radar.3_independent_sources"),
       `<div class="wrap"><div class="radar"><div class="sweep"></div><svg viewBox="0 0 100 100">${svg}</svg></div>
-        <div class="legend"><h4>${this.t("Réseau / GPS")}</h4>${peopleRows.join("")}
-          <h4>${this.t("Visage Frigate · dernière vue")}</h4>${faceRows.join("") || '<div class="row muted">—</div>'}
-          <h4>${this.t("Capteurs de pièce · sans identité")}</h4>${roomRows.join("") || '<div class="row muted">—</div>'}
-          <div class="rule">${this.t("Les anneaux ne sont jamais croisés : aucune position n'est déduite.")}</div></div></div>`);
+        <div class="legend"><h4>${this.t("radar.network_gps")}</h4>${peopleRows.join("")}
+          <h4>${this.t("radar.frigate_face_last_seen")}</h4>${faceRows.join("") || '<div class="row muted">—</div>'}
+          <h4>${this.t("radar.room_sensors_no_identity")}</h4>${roomRows.join("") || '<div class="row muted">—</div>'}
+          <div class="rule">${this.t("radar.rings_are_never_cross_referenced_no_posi")}</div></div></div>`);
   }
   getCardSize() { return 6; }
 }

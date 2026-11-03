@@ -99,23 +99,23 @@ class SfHangarCard extends SfBase {
   _target(car) {
     const t = this.num(car.target); if (t === null) return "";
     const a = (t / 100) * 2 * Math.PI - Math.PI / 2;
-    return `<line class="tgt" x1="${this.esc(55 + 36 * Math.cos(a))}" y1="${this.esc(55 + 36 * Math.sin(a))}" x2="${this.esc(55 + 48 * Math.cos(a))}" y2="${this.esc(55 + 48 * Math.sin(a))}"><title>${this.esc(this.t("CIBLE"))} ${Math.round(t)} %</title></line>`;
+    return `<line class="tgt" x1="${this.esc(55 + 36 * Math.cos(a))}" y1="${this.esc(55 + 36 * Math.sin(a))}" x2="${this.esc(55 + 48 * Math.cos(a))}" y2="${this.esc(55 + 48 * Math.sin(a))}"><title>${this.esc(this.t("common.target"))} ${Math.round(t)} %</title></line>`;
   }
   // Range: `distance_unit: auto` (default) shows the sensor's value and unit (km or mi); `km` / `mi` converts if needed.
   _range(car) {
     const want = String(this._config.distance_unit || "auto").toLowerCase(), raw = this.num(car.range);
     const su = String(this.unit(car.range) || "").toLowerCase(), src = su.startsWith("mi") ? "mi" : "km";
-    if (raw === null) return this.t("{n} {u} d'autonomie", { n: this.fmt(car.range), u: this.esc(src) });
+    if (raw === null) return this.t("hangar.n_u_range", { n: this.fmt(car.range), u: this.esc(src) });
     const u = want === "km" || want === "mi" ? want : (su.startsWith("mi") ? "mi" : su === "km" || !su ? "km" : su);
     const v = (want === "km" || want === "mi") && want !== src ? (want === "mi" ? raw * 0.621371 : raw / 0.621371) : raw;
-    return this.t("{n} {u} d'autonomie", { n: Math.round(v), u: this.esc(u) });
+    return this.t("hangar.n_u_range", { n: Math.round(v), u: this.esc(u) });
   }
   _car(car) {
     const charging = sfEvOn(this, car.charging, "charging", car.charging_states);
     return `<div class="car">${this._ring(car)}
       <div class="name">${this.esc(car.name)}</div>
       <div class="km click" data-e="${this.esc(car.range)}">${this._range(car)}</div>
-      ${charging ? `<span class="badge">${this.t("EN CHARGE")}</span>` : ""}</div>`;
+      ${charging ? `<span class="badge">${this.t("hangar.charging_2")}</span>` : ""}</div>`;
   }
   // One or more chargers: `chargers: [{ name, connected, charging, power, current, decision, mode }]`; `charger: {…}` remains valid (a single one).
   _chargers() {
@@ -146,13 +146,13 @@ class SfHangarCard extends SfBase {
     if (ch.switch && this.st(ch.switch)) {
       // `switch_invert: true`: the switch is active when charging is PAUSED (e.g. "pause the session").
       const raw = this.isOn(ch.switch), on = ch.switch_invert ? !raw : raw, dead = !this.ok(ch.switch);
-      out.push(`<span class="btn ${this.esc(on ? "on" : "")}" title="${this.esc(this.t(on ? "Arrêter la charge" : "Démarrer la charge"))}" ${dead ? "" : this.call(`${ch.switch.split(".")[0]}.turn_${raw ? "off" : "on"}`, { entity_id: ch.switch }, on ? this.t("Arrêter ?") : "")}>${this.icon(on ? "mdi:stop" : "mdi:play", 16)} ${this.t(on ? "Arrêter" : "Démarrer")}</span>`);
+      out.push(`<span class="btn ${this.esc(on ? "on" : "")}" title="${this.esc(this.t(on ? "Arrêter la charge" : "Démarrer la charge"))}" ${dead ? "" : this.call(`${ch.switch.split(".")[0]}.turn_${raw ? "off" : "on"}`, { entity_id: ch.switch }, on ? this.t("common.stop") : "")}>${this.icon(on ? "mdi:stop" : "mdi:play", 16)} ${this.t(on ? "Arrêter" : "Démarrer")}</span>`);
     }
     const cur = ch.current && this.st(ch.current), dom = (ch.current || "").split(".")[0];
     if (cur && (dom === "number" || dom === "input_number") && this.ok(ch.current) && isFinite(Number(cur.state))) {
       const a = cur.attributes, step = Number(ch.current_step) || a.step || 1, v = Number(cur.state);
       const go = (d) => this.call(`${dom}.set_value`, { entity_id: ch.current, value: Math.max(Number(ch.current_min ?? a.min ?? 0), Math.min(Number(ch.current_max ?? a.max ?? Infinity), Math.round((v + d * step) * 100) / 100)) });
-      out.push(`<span class="ctlrow"><span class="btn" aria-label="${this.esc(this.t("Diminuer l'intensité"))}" ${go(-1)}>−</span><span class="btn" aria-label="${this.esc(this.t("Augmenter l'intensité"))}" ${go(1)}>+</span></span>`);
+      out.push(`<span class="ctlrow"><span class="btn" aria-label="${this.esc(this.t("hangar.decrease_current"))}" ${go(-1)}>−</span><span class="btn" aria-label="${this.esc(this.t("hangar.increase_current"))}" ${go(1)}>+</span></span>`);
     }
     return out.length ? `<div class="ctl">${out.join("")}</div>` : "";
   }
@@ -160,7 +160,7 @@ class SfHangarCard extends SfBase {
     const c = this._config, chs = this._chargers(), sts = chs.map((ch) => this._chState(ch)), multi = chs.length > 1;
     const charging = sts.some((x) => x.charging), connected = sts.some((x) => x.connected);
     const cars = c.cars.slice(0, 3);
-    const label = (ch, k) => ch.name || (multi ? `${this.t("Borne")} ${k + 1}` : this.t("Borne"));
+    const label = (ch, k) => ch.name || (multi ? `${this.t("hangar.charger")} ${k + 1}` : this.t("hangar.charger"));
     const bornes = chs.map((ch, k) => this._borne(ch, sts[k], label(ch, k)));
     // Layout: one charger and ≤ 2 cars = car | charger | car; otherwise the cars in a row, the chargers below.
     const carsHtml = cars.map((k) => this._car(k)).join("");
@@ -168,13 +168,13 @@ class SfHangarCard extends SfBase {
       ? `<div class="bay">${cars[0] ? this._car(cars[0]) : "<div></div>"}${bornes[0]}${cars[1] ? this._car(cars[1]) : "<div></div>"}</div>`
       : `<div class="bay stack">${cars.length ? `<div class="cars" style="grid-template-columns:repeat(${this.esc(cars.length)},minmax(0,1fr))">${carsHtml}</div>` : ""}<div class="bornes">${bornes.join("")}</div></div>`;
     // Information line: one charger = usual message; several = one line per charger.
-    const decOf = (ch) => ch.decision ? `<span class="click" data-e="${this.esc(ch.decision)}">${this.t("Pilote")}${this.lang === "fr" ? " " : ""}: <b style="color:${SF_C.cyan}">${this.fmt(ch.decision)}</b></span>` : "";
+    const decOf = (ch) => ch.decision ? `<span class="click" data-e="${this.esc(ch.decision)}">${this.t("hangar.controller")}${this.lang === "fr" ? " " : ""}: <b style="color:${SF_C.cyan}">${this.fmt(ch.decision)}</b></span>` : "";
     const note = !multi
-      ? `<span>${sts[0].connected ? `${this.t("Câble branché")} · <span style="color:${SF_C.amber}">${this.t("voiture non identifiée par HA")}</span>` : `<span class="muted">${this.t("Aucun véhicule branché")}</span>`}</span>${decOf(chs[0])}`
-      : chs.map((ch, k) => `<span style="flex:1 1 100%"><b style="color:${this.esc(sts[k].charging ? SF_C.green : sts[k].connected ? SF_C.amber : SF_C.dim)}">${this.esc(label(ch, k))}</b> · ${sts[k].charging ? this.t("charge en cours") : sts[k].connected ? this.t("en attente") : this.t("au repos")}${ch.decision ? ` · ${decOf(ch)}` : ""}</span>`).join("");
+      ? `<span>${sts[0].connected ? `${this.t("hangar.cable_plugged_in")} · <span style="color:${SF_C.amber}">${this.t("hangar.car_not_identified_by_ha")}</span>` : `<span class="muted">${this.t("hangar.no_vehicle_plugged_in")}</span>`}</span>${decOf(chs[0])}`
+      : chs.map((ch, k) => `<span style="flex:1 1 100%"><b style="color:${this.esc(sts[k].charging ? SF_C.green : sts[k].connected ? SF_C.amber : SF_C.dim)}">${this.esc(label(ch, k))}</b> · ${sts[k].charging ? this.t("hangar.charging") : sts[k].connected ? this.t("common.waiting") : this.t("common.idle")}${ch.decision ? ` · ${decOf(ch)}` : ""}</span>`).join("");
     // Mode selectors: the global mode, then that of each charger that has one.
     const modes = [this._modes(c.mode, connected, multi ? "" : null), ...chs.map((ch, k) => ch.mode ? this._modes(ch.mode, sts[k].connected, label(ch, k)) : "")].join("");
-    return this.frame(this.t("Véhicules"), charging ? this.t("charge en cours") : connected ? this.t("en attente") : this.t("au repos"),
+    return this.frame(this.t("hangar.vehicles"), charging ? this.t("hangar.charging") : connected ? this.t("common.waiting") : this.t("common.idle"),
       `${bay}<div class="note">${note}</div>${modes}${this._flows()}`);
   }
   // Charge-mode selector (input_select or select) + safeguard: car plugged in in the evening
@@ -186,14 +186,14 @@ class SfHangarCard extends SfBase {
     const warn = c.warn_mode && connected && m.state === c.warn_mode && (h >= 17 || h < 6);
     const opts = (m.attributes.options || []).map((o) =>
       `<span class="btn ${this.esc(m.state === o ? "on" : "")}" ${this.call(`${entity.split(".")[0]}.select_option`, { entity_id: entity, option: o })}>${this.esc(o)}</span>`).join("");
-    return `<div class="modes"><div class="lbl">${this.t("Mode de charge")}${who ? ` · ${this.esc(who)}` : ""}</div><div class="seg">${opts}</div>
+    return `<div class="modes"><div class="lbl">${this.t("hangar.charge_mode")}${who ? ` · ${this.esc(who)}` : ""}</div><div class="seg">${opts}</div>
       ${warn ? `<div class="warnbox">${this.esc(c.warn_text || "")}</div>` : ""}</div>`;
   }
   _flows() {
     const f = this._config.flows; if (!f) return "";
     const cell = (lbl, id, col) => { const w = this.watts(id); return `<div class="click" data-e="${this.esc(id)}"><div class="lbl">${lbl}</div><div class="val" style="color:${this.esc(col)}">${this.kw(w)}</div></div>`; };
-    const cells = [f.solar && cell(this.t("Solaire"), f.solar, SF_C.amber), f.home && cell(this.t("Maison hors VE"), f.home, SF_C.cyan),
-      f.surplus && cell(this.t("Surplus"), f.surplus, (this.watts(f.surplus) ?? 0) >= 0 ? SF_C.green : "#ff7a45")].filter(Boolean);
+    const cells = [f.solar && cell(this.t("common.solar"), f.solar, SF_C.amber), f.home && cell(this.t("hangar.home_excl_ev"), f.home, SF_C.cyan),
+      f.surplus && cell(this.t("hangar.surplus"), f.surplus, (this.watts(f.surplus) ?? 0) >= 0 ? SF_C.green : "#ff7a45")].filter(Boolean);
     return cells.length ? `<div class="fl3" style="grid-template-columns:repeat(${this.esc(cells.length)},minmax(0,1fr))">${cells.join("")}</div>` : "";
   }
 }

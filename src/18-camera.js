@@ -58,15 +58,15 @@ class SfCameraCard extends SfBase {
       const pc = this.num(k.persons);
       const rv = k.review && this.ok(k.review) ? this.st(k.review).state : null;
       return `<div class="cam click" data-e="${this.esc(k.entity)}">
-        <div class="nofeed">${s ? this.t("chargement…") : this.t("caméra indisponible")}</div>
+        <div class="nofeed">${s ? this.t("camera.loading") : this.t("camera.camera_unavailable")}</div>
         ${s ? `<img data-cam="${this.esc(k.entity)}" alt="">` : ""}
         <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i><div class="ret"></div>
         <div class="ov"><div class="t"><span class="tag">${this.esc(k.name)}</span>${s && s.state === "recording" ? `<span class="rec">REC</span>` : `<span class="pill">${s ? this.esc(s.state) : "—"}</span>`}</div>
-          <div class="b"><span class="pill ${this.esc(motion ? "hot" : "")}">${motion ? this.t("MOUVEMENT") : this.t("calme")}</span>
-            ${pc !== null ? `<span class="pill ${this.esc(pc > 0 ? "hot" : "")}">${this.t("{n} personne(s)", { n: pc })}</span>` : ""}
-            ${rv && rv !== "NONE" ? `<span class="pill ${this.esc(rv === "ALERT" ? "red" : "hot")}">${rv === "ALERT" ? this.t("alerte Frigate") : this.t("détection")}</span>` : ""}</div></div></div>`;
+          <div class="b"><span class="pill ${this.esc(motion ? "hot" : "")}">${motion ? this.t("camera.motion") : this.t("camera.calm")}</span>
+            ${pc !== null ? `<span class="pill ${this.esc(pc > 0 ? "hot" : "")}">${this.t("camera.n_person_s", { n: pc })}</span>` : ""}
+            ${rv && rv !== "NONE" ? `<span class="pill ${this.esc(rv === "ALERT" ? "red" : "hot")}">${rv === "ALERT" ? this.t("camera.frigate_alert") : this.t("camera.detection")}</span>` : ""}</div></div></div>`;
     }).join("");
-    return this.frame(this.t("Caméras"), this.t("rafraîchi toutes les {n} s · appui = direct", { n: this._every() }), `<div class="cams">${cams}</div>`);
+    return this.frame(this.t("camera.cameras"), this.t("camera.refreshed_every_n_s_tap_live", { n: this._every() }), `<div class="cams">${cams}</div>`);
   }
   getCardSize() { return 6; }
 }

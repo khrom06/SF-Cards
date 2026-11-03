@@ -72,20 +72,20 @@ class SfClimateCard extends SfBase {
     const on = mode !== "off";
     return `<div class="room ${this.esc(active ? "active" : "")}" style="--hc:${this.esc(hc)}">
       <div class="rh">${this.icon(r.icon || "mdi:home", 16, hc)}<span>${this.esc(r.name)}</span>
-        <span class="fl">${win ? `<span class="click" data-e="${this.esc(r.window)}" title="${this.esc(this.t("fenêtre ouverte"))}">${this.icon("mdi:window-open-variant", 16, SF_C.amber)}</span>` : ""}
-        ${r.regul ? `<span class="click" data-e="${this.esc(r.regul)}" title="${this.esc(this.t("régulation auto"))}">${this.icon(auto ? "mdi:robot" : "mdi:robot-off", 16, auto ? SF_C.green : SF_C.grey)}</span>` : ""}
-        <span class="btn pw ${this.esc(on ? "on" : "")}" title="${this.esc(this.t("allumer / éteindre la pièce"))}" ${c.switch_script ? this.call(c.switch_script, { regulation: r.regul, climat: r.climate }) : this.call(on ? "climate.turn_off" : "climate.turn_on", { entity_id: r.climate })}>${this.icon("mdi:power", 15)}</span></span></div>
+        <span class="fl">${win ? `<span class="click" data-e="${this.esc(r.window)}" title="${this.esc(this.t("climate.window_open"))}">${this.icon("mdi:window-open-variant", 16, SF_C.amber)}</span>` : ""}
+        ${r.regul ? `<span class="click" data-e="${this.esc(r.regul)}" title="${this.esc(this.t("climate.auto_regulation"))}">${this.icon(auto ? "mdi:robot" : "mdi:robot-off", 16, auto ? SF_C.green : SF_C.grey)}</span>` : ""}
+        <span class="btn pw ${this.esc(on ? "on" : "")}" title="${this.esc(this.t("climate.turn_the_room_on_off"))}" ${c.switch_script ? this.call(c.switch_script, { regulation: r.regul, climat: r.climate }) : this.call(on ? "climate.turn_off" : "climate.turn_on", { entity_id: r.climate })}>${this.icon("mdi:power", 15)}</span></span></div>
       <div class="dial click" data-e="${this.esc(r.climate)}">
         <svg viewBox="0 0 120 112">${marks}
           <path d="${this.esc(this._arc(60, 60, 50, A0, A1))}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="6" stroke-linecap="round"/>
           ${t !== null ? `<path d="${this.esc(this._arc(60, 60, 50, A0, Math.max(A0 + 1, ang(t))))}" fill="none" stroke="${this.esc(hc)}" stroke-width="6" stroke-linecap="round" style="filter:drop-shadow(0 0 4px ${this.esc(hc)})"/>` : ""}
           ${tg}</svg>
         <div class="t"><b>${t === null ? "—" : this.nf(Number(t), 1)}°</b>
-          <small>${this.icon(mIco, 11, hc)} ${mode === "off" ? mTxt : active ? mTxt : this.t("En veille")}${hum !== null ? ` · ${Math.round(hum)} %` : ""}</small></div>
+          <small>${this.icon(mIco, 11, hc)} ${mode === "off" ? mTxt : active ? mTxt : this.t("common.idle_2")}${hum !== null ? ` · ${Math.round(hum)} %` : ""}</small></div>
       </div>
       <div class="ctl">
         <span class="btn" ${this.call("input_number.decrement", { entity_id: r.target })}>−</span>
-        <div class="tg click" data-e="${this.esc(r.target)}"><small>${this.t("CIBLE")}</small>${tgt === null ? "—" : this.nf(tgt, 1) + "°"}</div>
+        <div class="tg click" data-e="${this.esc(r.target)}"><small>${this.t("common.target")}</small>${tgt === null ? "—" : this.nf(tgt, 1) + "°"}</div>
         <span class="btn" ${this.call("input_number.increment", { entity_id: r.target })}>+</span>
       </div></div>`;
   }
@@ -100,11 +100,11 @@ class SfClimateCard extends SfBase {
     const temps = c.rooms.map((r) => this.num(r.temp)).filter((x) => x !== null);
     const avg = temps.length ? this.nf(temps.reduce((a, b) => a + b, 0) / temps.length, 1) : null;
     const extras = c.extras.map((x) => {
-      const tm = this.timerInfo(x.timer), act = tm.actif && x.stop ? this.call("homeassistant.turn_off", { entity_id: x.stop }, this.t("Arrêter ?")) : this.toggleCall(x.entity);
+      const tm = this.timerInfo(x.timer), act = tm.actif && x.stop ? this.call("homeassistant.turn_off", { entity_id: x.stop }, this.t("common.stop")) : this.toggleCall(x.entity);
       return `<span class="btn ${this.esc(tm.actif || this.isOn(x.entity) ? "on" : "")}" ${act}>${this.icon(x.icon || "mdi:toggle-switch", 15)}${this.esc(x.label)}${tm.actif && tm.reste ? ` · ${tm.reste} min` : ""}</span>`;
     }).join("");
-    return this.frame(this.t("Climat"), avg === null ? "" : this.t("{t}° moyen", { t: avg }), `
-      ${modes ? `<div class="seg modes"><span class="lbl" style="align-self:center;margin-right:4px">${this.t("Mode maison")}</span>${modes}</div>` : ""}
+    return this.frame(this.t("climate.climate"), avg === null ? "" : this.t("climate.t_average", { t: avg }), `
+      ${modes ? `<div class="seg modes"><span class="lbl" style="align-self:center;margin-right:4px">${this.t("common.house_mode")}</span>${modes}</div>` : ""}
       <div class="rooms">${c.rooms.map((r) => this._room(r)).join("")}</div>
       ${extras ? `<div class="extras">${extras}</div>` : ""}`);
   }

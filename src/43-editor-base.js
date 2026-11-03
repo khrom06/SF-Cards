@@ -34,7 +34,7 @@ class SfEditorBase extends HTMLElement {
     let b = root.querySelector(".req");
     if (!b) { b = document.createElement("div"); b.className = "req"; const w = root.querySelector("div"); if (w) w.prepend(b); }
     b.hidden = !miss.length;
-    b.textContent = miss.length ? `${this._t("Champs obligatoires manquants")} : ${miss.map((m) => this._t(m)).join(" · ")}` : "";
+    b.textContent = miss.length ? `${this._t("editor.missing_required_fields")} : ${miss.map((m) => this._t(m)).join(" · ")}` : "";
   }
   _emit() {
     this._banner();
@@ -81,8 +81,8 @@ class SfEditorBase extends HTMLElement {
           const had = Object.keys(data).length, hasInv = !!(this._hass && this._hass.entities);
           sfAutofill(this._hass, data, dv, fld.sfFill); f.data = { ...data };
           const n = Object.keys(data).length - had;
-          const msg = !hasInv ? this._t("Remplissage indisponible : inventaire des entités absent (Home Assistant trop ancien ?)")
-            : n > 0 ? this._t("Remplissage : {n} champ(s) rempli(s) — à vérifier").replace("{n}", n) : this._t("Aucune entité reconnue (ou champs déjà remplis) pour cet appareil");
+          const msg = !hasInv ? this._t("editor.fill_unavailable_entity_registry_missing")
+            : n > 0 ? this._t("editor.filled_n_field_s_please_check").replace("{n}", n) : this._t("editor.no_entity_recognised_or_fields_already_f");
           this.dispatchEvent(new CustomEvent("hass-notification", { detail: { message: msg }, bubbles: true, composed: true }));
         }
       }
@@ -95,14 +95,14 @@ class SfEditorBase extends HTMLElement {
   // Nested card (e.g. a panel's content): choice of the type then the editor of that card.
   _embed(item, key, onChange) {
     const box = document.createElement("div");
-    const h = document.createElement("h3"); h.textContent = this._t("Contenu du panneau"); box.appendChild(h);
+    const h = document.createElement("h3"); h.textContent = this._t("editor.panel_content"); box.appendChild(h);
     const tag = sfCardTag(item[key]);
     const sel = document.createElement("ha-form");
     // "Other card" is only offered if the panel is not already an SF card: choosing it would erase its content.
-    const opts = [...(tag ? [] : [["", this._t("Autre carte (YAML ci-dessus)")]]), ...Object.entries(SF_CARD_NAMES).map(([k, v]) => [k, this._t(v)])];
+    const opts = [...(tag ? [] : [["", this._t("editor.other_card_yaml_above")]]), ...Object.entries(SF_CARD_NAMES).map(([k, v]) => [k, this._t(v)])];
     const schema = [{ name: "type", selector: { select: { mode: "dropdown", options: opts.map(([value, label]) => ({ value, label })) } } }];
     sel.hass = this._hass; sel.schema = schema; sel.data = { type: tag };
-    sel.computeLabel = () => this._t("Type de carte du panneau");
+    sel.computeLabel = () => this._t("editor.panel_card_type");
     sel.addEventListener("value-changed", (ev) => {
       ev.stopPropagation();
       const nt = ev.detail.value && ev.detail.value.type;
@@ -142,12 +142,12 @@ class SfEditorBase extends HTMLElement {
         sm.appendChild(b); return b;
       };
       const move = (to) => () => { const [x] = arr.splice(i, 1); arr.splice(to, 0, x); this._open.clear(); onChange(); rebuild(); };
-      if (i > 0) btn("↑", "", move(i - 1), this._t("Monter"));
-      if (i < arr.length - 1) btn("↓", "", move(i + 1), this._t("Descendre"));
-      btn(this._t("Supprimer"), "del", (b) => {
+      if (i > 0) btn("↑", "", move(i - 1), this._t("editor.move_up"));
+      if (i < arr.length - 1) btn("↓", "", move(i + 1), this._t("editor.move_down"));
+      btn(this._t("editor.delete"), "del", (b) => {
         if (!b.classList.contains("armed")) {   // two presses: avoids deleting by mistake
-          b.classList.add("armed"); b.textContent = this._t("Confirmer ?");
-          setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = this._t("Supprimer"); } }, 3000);
+          b.classList.add("armed"); b.textContent = this._t("editor.confirm");
+          setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = this._t("editor.delete"); } }, 3000);
           return;
         }
         arr.splice(i, 1); this._open.clear(); onChange(); rebuild();

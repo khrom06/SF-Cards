@@ -298,8 +298,8 @@ class SfNsCard extends SfBase {
     const f = (x) => this.nf(x, 1);
     const chips = (d.cost !== null ? `<span class="chip">≈ ${this.nf(d.cost, 2)} ${this.esc(this.cur())}</span>` : "")
       + (d.share !== null ? `<span class="chip">${this.ic("mdi:white-balance-sunny")}${Math.round(d.share * 100)} %</span>` : "")
-      + (d.delta !== null ? `<span class="chip ${d.delta > 0.05 ? "up" : d.delta < -0.05 ? "hc" : ""}">${this.esc(this.t("{p} % hier", { p: (d.delta > 0 ? "+" : "") + Math.round(d.delta * 100) }))}</span>` : "");
-    return this.panel(`<div class="dayB"><div class="dv"><span class="lbl">${this.esc(this.t("aujourd'hui"))}</span><span class="big">${f(d.c)}<small> kWh</small></span></div><div class="dc">${chips}</div></div>`, "", `data-info="${this.esc(this._config.energy.day.import)}"`);
+      + (d.delta !== null ? `<span class="chip ${d.delta > 0.05 ? "up" : d.delta < -0.05 ? "hc" : ""}">${this.esc(this.t("wallpanel.p_vs_yesterday", { p: (d.delta > 0 ? "+" : "") + Math.round(d.delta * 100) }))}</span>` : "");
+    return this.panel(`<div class="dayB"><div class="dv"><span class="lbl">${this.esc(this.t("wallpanel.today"))}</span><span class="big">${f(d.c)}<small> kWh</small></span></div><div class="dc">${chips}</div></div>`, "", `data-info="${this.esc(this._config.energy.day.import)}"`);
   }
   // ---------------------------------------------------------------- actions
   _schedule() {
@@ -363,13 +363,13 @@ class SfNsCard extends SfBase {
   // ---------------------------------------------------------------- blocs
   alerts() {
     const c = this._config, out = [];
-    for (const l of this.leaks) if (this.st(l.entity) && this.st(l.entity).state === "on") out.push({ i: "mdi:water-alert", t: `${this.t("FUITE D'EAU")} · ${l.name}`, e: l.entity });
+    for (const l of this.leaks) if (this.st(l.entity) && this.st(l.entity).state === "on") out.push({ i: "mdi:water-alert", t: `${this.t("common.water_leak")} · ${l.name}`, e: l.entity });
     for (const car of c.cars) {
-      if (car.lock && this.st(car.lock) && this.st(car.lock).state === "unlocked") out.push({ i: "mdi:car-door-lock-open", t: this.t("{n} non verrouillée", { n: car.name }), e: car.lock, warn: true });
-      const s = this.num(car.soc); if (s !== null && s < (car.low || 0)) out.push({ i: "mdi:battery-alert", t: this.t("{n} : batterie {p} %", { n: car.name, p: Math.round(s) }), e: car.soc, warn: true });
+      if (car.lock && this.st(car.lock) && this.st(car.lock).state === "unlocked") out.push({ i: "mdi:car-door-lock-open", t: this.t("wallpanel.n_unlocked", { n: car.name }), e: car.lock, warn: true });
+      const s = this.num(car.soc); if (s !== null && s < (car.low || 0)) out.push({ i: "mdi:battery-alert", t: this.t("wallpanel.n_battery_p", { n: car.name, p: Math.round(s) }), e: car.soc, warn: true });
     }
-    for (const r of c.rooms) { const v = this.num(r.entity); if (r.min && v !== null && v < r.min) out.push({ i: "mdi:thermometer-alert", t: this.t("{n} froid · {v}°", { n: r.name, v: this.f1(v) }), e: r.entity, warn: true }); }
-    for (const f of c.fridge) { const v = this.num(f.entity); if (f.max !== undefined && v !== null && v > f.max) out.push({ i: "mdi:fridge-alert", t: this.t("{n} trop chaud · {v}°", { n: f.name, v: this.f1(v) }), e: f.entity }); }
+    for (const r of c.rooms) { const v = this.num(r.entity); if (r.min && v !== null && v < r.min) out.push({ i: "mdi:thermometer-alert", t: this.t("wallpanel.n_cold_v", { n: r.name, v: this.f1(v) }), e: r.entity, warn: true }); }
+    for (const f of c.fridge) { const v = this.num(f.entity); if (f.max !== undefined && v !== null && v > f.max) out.push({ i: "mdi:fridge-alert", t: this.t("wallpanel.n_too_warm_v", { n: f.name, v: this.f1(v) }), e: f.entity }); }
     return out;
   }
   hero(mode) {
@@ -395,9 +395,9 @@ class SfNsCard extends SfBase {
     let head = "", dry = false;
     if (fc.length >= 6) {
       const k = fc.findIndex(wet);
-      if (k < 0) { head = this.t("sec pour {n} h", { n: fc.length }); dry = true; }
+      if (k < 0) { head = this.t("wallpanel.dry_for_n_h", { n: fc.length }); dry = true; }
       else { const t = new Date(fc[k].datetime).getTime(), mn = Math.round((t - nowT) / 60000);
-        head = k === 0 || mn <= 0 ? this.t("pluie en cours") : mn < 90 ? this.t("pluie dans {n} min", { n: mn }) : this.t("pluie vers {h} h", { h: new Date(t).getHours() }); }
+        head = k === 0 || mn <= 0 ? this.t("wallpanel.raining_now") : mn < 90 ? this.t("wallpanel.rain_in_n_min", { n: mn }) : this.t("wallpanel.rain_around_h_00", { h: new Date(t).getHours() }); }
     }
     const bars = fc.map((f, j) => { const v = pv(f), h = Math.max(7, Math.min(100, v)); const hh = new Date(f.datetime).getHours();
       return `<div class="rb ${wet(f) ? "wet" : ""}"><i style="height:${h}%"></i>${j % 4 === 0 ? `<span>${hh}h</span>` : ""}</div>`; }).join("");
@@ -442,13 +442,13 @@ class SfNsCard extends SfBase {
     const ratio = sol > 30 && grid !== null ? Math.round(Math.min(100, ((sol - Math.max(0, -grid)) / sol) * 100)) : null;
     const imp = grid !== null && grid > 20, dec = this.st(e.decision), evc = this.isOn(e.ev_connected);
     const orb = this.panel(`<div class="orbWrap" data-info="${this.esc(e.solar)}"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="8"/>${arcs}</svg>
-      <div class="orbC"><div class="lbl">${this.esc(this.t(sol > 30 ? "solaire" : "nuit"))}</div><div class="big">${this.pw(sol)}</div>${ratio !== null ? `<div class="lbl" style="margin-top:4px">${this.esc(this.t("autoconso {n} %", { n: ratio }))}</div>` : ""}</div></div>`, "orbP");
+      <div class="orbC"><div class="lbl">${this.esc(this.t(sol > 30 ? "solaire" : "nuit"))}</div><div class="big">${this.pw(sol)}</div>${ratio !== null ? `<div class="lbl" style="margin-top:4px">${this.esc(this.t("wallpanel.self_use_n", { n: ratio }))}</div>` : ""}</div></div>`, "orbP");
     // --- three information tiles: each has an icon, a value, a proportional bar and a context line
     const E = e, scale = Math.max(sol, home + ev, Math.abs(grid || 0), 500);
     const ico = (n, col) => this.ic(n).replace("<ha-icon", `<ha-icon style="color:${col}"`);
     // house: the devices that draw the most (2 at most, > 30 W)
     const devs = (Array.isArray(E.devices) ? E.devices : []).filter((d) => d && typeof d === "object").map((d) => ({ ...d, w: this.watts(d.entity) })).filter((d) => d.w !== null && d.w > 30).sort((x, y) => y.w - x.w).slice(0, 2);
-    const chipsHome = devs.length ? devs.map((d) => `<span class="chip" data-info="${this.esc(d.entity)}">${this.ic(d.icon || "mdi:flash")}${this.pw(d.w)}</span>`).join("") : `<span class="sub1">${this.esc(this.t("consommation de fond"))}</span>`;
+    const chipsHome = devs.length ? devs.map((d) => `<span class="chip" data-info="${this.esc(d.entity)}">${this.ic(d.icon || "mdi:flash")}${this.pw(d.w)}</span>`).join("") : `<span class="sub1">${this.esc(this.t("wallpanel.base_load"))}</span>`;
     // charger: current + solar share of the charge
     const evS = this.watts(E.ev_solar), evG = this.watts(E.ev_grid), evPct = evS !== null && evG !== null && evS + evG > 20 ? Math.round(evS / (evS + evG) * 100) : null;
     const amps = this.num(E.ev_current);
@@ -457,11 +457,11 @@ class SfNsCard extends SfBase {
     // grid: direction, current tariff (peak/off-peak), hourly cost of the draw
     const price = this.num(E.price), hc = price !== null && E.hc_below !== undefined && price < E.hc_below;
     const costH = imp && price !== null ? (grid / 1000 * price) : null;
-    const subGrid = `${price !== null ? `<span class="chip ${hc ? "hc" : ""}">${this.esc(this.t(hc ? "HC" : "HP"))} ${this.nf(price, 3)} ${this.esc(this.cur())}</span>` : ""}${costH !== null ? `<span class="chip">≈ ${this.nf(costH, 2)} ${this.esc(this.cur())}/h</span>` : ""}${!imp && grid !== null ? `<span class="chip">${this.ic("mdi:transmission-tower-export")}${this.esc(this.t("injecte"))}</span>` : ""}`;
+    const subGrid = `${price !== null ? `<span class="chip ${hc ? "hc" : ""}">${this.esc(this.t(hc ? "HC" : "HP"))} ${this.nf(price, 3)} ${this.esc(this.cur())}</span>` : ""}${costH !== null ? `<span class="chip">≈ ${this.nf(costH, 2)} ${this.esc(this.cur())}/h</span>` : ""}${!imp && grid !== null ? `<span class="chip">${this.ic("mdi:transmission-tower-export")}${this.esc(this.t("wallpanel.exporting"))}</span>` : ""}`;
     const tile = (lbl, icon, col, val, frac, sub, info) => `<div class="stat tap" data-info="${this.esc(info)}"><div class="srow">${ico(icon, col)}<span class="lbl">${lbl}</span><span class="v">${val}</span></div>
       <div class="sbar"><i style="width:${Math.max(0, Math.min(100, frac * 100)).toFixed(0)}%;background:${col};box-shadow:0 0 6px ${col}"></i></div><div class="ssub">${sub}</div></div>`;
-    const stats = `<div class="stats">${tile(this.t("maison"), "mdi:home-lightning-bolt-outline", "#00e5ff", this.pw(home), home / scale, chipsHome, e.home)}
-      ${tile(this.t("borne"), ev > 20 ? "mdi:ev-plug-type2" : "mdi:ev-station", "#2bff88", this.pw(ev), ev / scale, subEv, e.ev)}
+    const stats = `<div class="stats">${tile(this.t("wallpanel.home"), "mdi:home-lightning-bolt-outline", "#00e5ff", this.pw(home), home / scale, chipsHome, e.home)}
+      ${tile(this.t("wallpanel.charger"), ev > 20 ? "mdi:ev-plug-type2" : "mdi:ev-station", "#2bff88", this.pw(ev), ev / scale, subEv, e.ev)}
       ${tile(this.t(imp ? "réseau" : "export"), imp ? "mdi:transmission-tower-import" : "mdi:transmission-tower-export", imp ? "#ff7043" : "#ffb300", this.pw(grid), Math.abs(grid || 0) / scale, subGrid, e.grid)}</div>`;
     const decP = e.ev ? this.panel(`<div class="dec">${this.ic(evc ? "mdi:ev-plug-type2" : "mdi:ev-station")}<span>${dec && dec.state !== "unknown" ? this.esc(dec.state) : this.esc(this.t(evc ? "branchée" : "libre"))}</span>
       <span class="r">${this.num(e.ev_day) !== null ? this.f1(this.num(e.ev_day)) + " kWh" : ""}</span></div>`) : "<div></div>";
@@ -469,7 +469,7 @@ class SfNsCard extends SfBase {
   }
   tilesBlock() {
     const list = this._config.tiles;
-    if (!list.length) return this.panel(`<div class="lbl">${this.esc(this.t("Aucune tuile configurée"))}</div>`);
+    if (!list.length) return this.panel(`<div class="lbl">${this.esc(this.t("wallpanel.no_tile_configured"))}</div>`);
     return `<div class="tiles">${list.slice(0, 6).map((x) => { const eid = String(x.entity || ""), on = this.isOn(eid) && !eid.startsWith("scene."), cv = eid.startsWith("cover."), s = this.st(eid);
       const CV = { open: "ouverts", closed: "fermés", opening: "ouverture…", closing: "fermeture…" };
       const txt = this.t(cv ? this.own(CV, s && s.state) || "" : eid.startsWith("scene.") ? "scène" : on ? "allumé" : "éteint");
@@ -489,17 +489,17 @@ class SfNsCard extends SfBase {
     const main = this.panel(`<div class="sentRow ${bad.length ? "bad" : ""}">${this.ic(bad.length ? "mdi:shield-alert" : "mdi:shield-check")}<div><div class="big">${this.esc(this.t(bad.length ? "ALERTE" : "R.A.S."))}</div><div class="sub">${this.esc(this.t(bad.length ? "voir la bande rouge" : "la maison veille"))}</div></div></div><div class="dots">${dots}</div>`, "sentP");
     const pl = [];
     if (r0) pl.push(this.panel(`<div class="pills"><div class="pill tap" data-info="${this.esc(r0.entity)}">${this.ic(r0.icon || "mdi:home")}<div class="num">${this.f1(this.num(r0.entity))}<small>°</small></div><div class="lbl">${this.esc(r0.name)}</div></div></div>`));
-    if (c.outdoor) pl.push(this.panel(`<div class="pills"><div class="pill tap" data-info="${this.esc(c.outdoor)}">${this.ic("mdi:thermometer")}<div class="num">${this.f1(this.num(c.outdoor))}<small>°</small></div><div class="lbl">${this.esc(this.t("Dehors"))}</div></div></div>`));
-    const gn = c.lights_off.length || c.cover ? `<div class="panel goodnight tap" data-act="goodnight" data-confirm="${this.esc(this.t("Éteindre + fermer ?"))}">${this.esc(this.t("Bonne nuit"))}</div>` : "";
+    if (c.outdoor) pl.push(this.panel(`<div class="pills"><div class="pill tap" data-info="${this.esc(c.outdoor)}">${this.ic("mdi:thermometer")}<div class="num">${this.f1(this.num(c.outdoor))}<small>°</small></div><div class="lbl">${this.esc(this.t("wallpanel.outside"))}</div></div></div>`));
+    const gn = c.lights_off.length || c.cover ? `<div class="panel goodnight tap" data-act="goodnight" data-confirm="${this.esc(this.t("wallpanel.turn_off_close"))}">${this.esc(this.t("wallpanel.good_night"))}</div>` : "";
     return [main, pl.join("") + gn];
   }
   dock() {
     const c = this._config, cv = this.st(c.cover), b = [];
-    if (c.lights_off.length) b.push(`<div class="btn tap" data-act="lights_off" data-confirm="${this.esc(this.t("Tout éteindre ?"))}">${this.ic("mdi:lightbulb-off-outline")}<span>${this.esc(this.t("Éteindre"))}</span></div>`);
-    if (c.cover) b.push(`<div class="btn tap" data-act="toggle" data-e="${this.esc(c.cover)}">${this.ic(cv && cv.state === "closed" ? "mdi:window-shutter" : "mdi:window-shutter-open")}<span>${this.esc(this.t("Volets"))}</span></div>`);
-    if (c.scene_dim) b.push(`<div class="btn tap" data-act="toggle" data-e="${this.esc(c.scene_dim)}">${this.ic("mdi:weather-night")}<span>${this.esc(this.t("Tamisé"))}</span></div>`);
-    if (c.shortcuts.length || this.vac) b.push(`<div class="btn tap" data-act="popup" data-e="vac">${this.ic("mdi:robot-vacuum")}<span>${this.esc((this.vac && this.vac.name) || this.t("Aspirateur"))}</span></div>`);
-    if (c.mode_entity) b.push(`<div class="btn tap" data-act="info" data-e="${this.esc(c.mode_entity)}">${this.ic("mdi:home-clock")}<span>${this.esc(this.t("Mode"))}</span></div>`);
+    if (c.lights_off.length) b.push(`<div class="btn tap" data-act="lights_off" data-confirm="${this.esc(this.t("wallpanel.turn_everything_off"))}">${this.ic("mdi:lightbulb-off-outline")}<span>${this.esc(this.t("wallpanel.turn_off"))}</span></div>`);
+    if (c.cover) b.push(`<div class="btn tap" data-act="toggle" data-e="${this.esc(c.cover)}">${this.ic(cv && cv.state === "closed" ? "mdi:window-shutter" : "mdi:window-shutter-open")}<span>${this.esc(this.t("wallpanel.shutters"))}</span></div>`);
+    if (c.scene_dim) b.push(`<div class="btn tap" data-act="toggle" data-e="${this.esc(c.scene_dim)}">${this.ic("mdi:weather-night")}<span>${this.esc(this.t("wallpanel.dimmed"))}</span></div>`);
+    if (c.shortcuts.length || this.vac) b.push(`<div class="btn tap" data-act="popup" data-e="vac">${this.ic("mdi:robot-vacuum")}<span>${this.esc((this.vac && this.vac.name) || this.t("wallpanel.vacuum"))}</span></div>`);
+    if (c.mode_entity) b.push(`<div class="btn tap" data-act="info" data-e="${this.esc(c.mode_entity)}">${this.ic("mdi:home-clock")}<span>${this.esc(this.t("common.mode"))}</span></div>`);
     return b.length ? `<div class="dock"><div class="btns">${b.join("")}</div></div>` : "";
   }
   // Vacuum popup: same shortcuts as the morning screen, available at any hour + vacuum state and battery.
@@ -508,9 +508,9 @@ class SfNsCard extends SfBase {
     const c = this._config, V = this.vac, v = V && this.st(V.entity), bat = V && this.num(V.battery);
     const FR = { docked: "à la base", cleaning: "nettoie", returning: "retourne à la base", idle: "en attente", paused: "en pause", error: "erreur" };
     const sh = c.shortcuts.map((x) => `<div class="btn tap big" data-act="toggle" data-e="${this.esc(x.entity)}">${this.ic(x.icon)}<span>${this.esc(x.name)}</span></div>`).join("");
-    const ctl = V ? `<div class="btn tap" data-act="vac_home" data-e="${this.esc(V.entity)}">${this.ic("mdi:home-import-outline")}<span>${this.esc(this.t("Retour base"))}</span></div>
-      <div class="btn tap" data-act="vac_stop" data-e="${this.esc(V.entity)}">${this.ic("mdi:stop")}<span>${this.esc(this.t("Stop"))}</span></div>` : "";
-    return `<div class="pop" data-act="close"><div class="sheet" data-stop="1"><div class="shead"><span>${this.ic("mdi:robot-vacuum")} ${this.esc((V && V.name) || this.t("Aspirateur"))}</span><span class="r">${v ? this.esc(this.own(FR, v.state) ? this.t(this.own(FR, v.state)) : v.state) : ""}${bat !== null && bat !== undefined ? ` · ${Math.round(bat)} %` : ""}</span>
+    const ctl = V ? `<div class="btn tap" data-act="vac_home" data-e="${this.esc(V.entity)}">${this.ic("mdi:home-import-outline")}<span>${this.esc(this.t("wallpanel.return_to_base"))}</span></div>
+      <div class="btn tap" data-act="vac_stop" data-e="${this.esc(V.entity)}">${this.ic("mdi:stop")}<span>${this.esc(this.t("wallpanel.stop"))}</span></div>` : "";
+    return `<div class="pop" data-act="close"><div class="sheet" data-stop="1"><div class="shead"><span>${this.ic("mdi:robot-vacuum")} ${this.esc((V && V.name) || this.t("wallpanel.vacuum"))}</span><span class="r">${v ? this.esc(this.own(FR, v.state) ? this.t(this.own(FR, v.state)) : v.state) : ""}${bat !== null && bat !== undefined ? ` · ${Math.round(bat)} %` : ""}</span>
       <span class="x tap" data-act="close">${this.ic("mdi:close")}</span></div><div class="btns" style="flex:1 1 auto">${sh}</div><div class="btns" style="flex:0 0 calc(var(--u)*13)">${ctl}</div></div></div>`;
   }
 
@@ -529,7 +529,7 @@ class SfNsCard extends SfBase {
     this.dir = this.lang === "ar" ? "rtl" : "ltr";
     const th = this._theme(); if (this.getAttribute("theme") !== th) this.setAttribute("theme", th);
     if (miss.length) {   // nothing useful to display: same "Card to be completed" message as the other cards
-      const h0 = `<style>${SF_CSS}</style>` + this.frame(this.esc(this.t("Carte à compléter")), "", `<div style="color:${SF_C.amber};line-height:1.6">${miss.map((m) => `• ${this.esc(this.t(m))}`).join("<br>")}</div>`);
+      const h0 = `<style>${SF_CSS}</style>` + this.frame(this.esc(this.t("common.card_to_complete")), "", `<div style="color:${SF_C.amber};line-height:1.6">${miss.map((m) => `• ${this.esc(this.t(m))}`).join("<br>")}</div>`);
       if (h0 !== this._key) { this._key = h0; this.shadowRoot.innerHTML = h0; }
       return;
     }

@@ -112,7 +112,7 @@ class SfTimelineCard extends SfBase {
       const today = new Date().toDateString(), yest = new Date(Date.now() - 86400000).toDateString(); let curDay = "", html = "";
       for (const e of rows) {
         const dt = new Date(e.t), dk = dt.toDateString();
-        if (dk !== curDay) { curDay = dk; let lbl; try { lbl = dk === today ? this.t("Aujourd'hui") : dk === yest ? this.t("Hier") : new Intl.DateTimeFormat(this.locLatn, { weekday: "short", day: "numeric", month: "short" }).format(dt); } catch (er) { lbl = dk; } html += `<div class="day">${this.esc(lbl)}</div>`; }
+        if (dk !== curDay) { curDay = dk; let lbl; try { lbl = dk === today ? this.t("common.today") : dk === yest ? this.t("timeline.yesterday") : new Intl.DateTimeFormat(this.locLatn, { weekday: "short", day: "numeric", month: "short" }).format(dt); } catch (er) { lbl = dk; } html += `<div class="day">${this.esc(lbl)}</div>`; }
         const cfg = cfgOf[e.id] || {}, w = this._what(e, cfg), st = this.st(e.id), nm = cfg.name || (st && st.attributes.friendly_name) || e.id;
         const col = cfg.color || (w.tone === "bad" ? SF_C.red : w.tone === "warn" ? SF_C.amber : w.tone === "dim" ? SF_C.grey : SF_C.cyan);
         let tm = ""; try { tm = new Intl.DateTimeFormat(this.locLatn, { hour: "2-digit", minute: "2-digit" }).format(dt); } catch (er) { tm = ""; }
@@ -121,7 +121,7 @@ class SfTimelineCard extends SfBase {
       }
       body = `<div class="tl">${html}</div>`;
     }
-    return this.frame(this.esc(c.title || this.t("Journal")), this.esc(this.t("{n} h", { n: this._hours() })), body);
+    return this.frame(this.esc(c.title || this.t("timeline.timeline")), this.esc(this.t("common.n_h", { n: this._hours() })), body);
   }
   getCardSize() { return 6; }
 }

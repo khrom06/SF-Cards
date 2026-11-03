@@ -33,7 +33,7 @@ class SfCellsCard extends SfBase {
       return `<div class="cell click" data-e="${this.esc(s.entity_id)}" style="color:${this.esc(col)}"><div class="bat"><i style="height:calc(${this.esc(Math.max(4, Math.min(100, v)))}% - 3px)"></i></div>
         <div><div class="nm" style="color:${SF_C.text}" title="${this.esc(nm)}">${this.esc(nm)}</div><div class="pc">${Math.round(v)} %</div></div></div>`;
     }).join("");
-    return this.frame(this.t("Batteries des capteurs"), this.t("{n} capteurs · {m} à remplacer bientôt", { n: list.length, m: low }), `<div class="cells">${cells}</div>`);
+    return this.frame(this.t("cells.sensor_batteries"), this.t("cells.n_sensors_m_to_replace_soon", { n: list.length, m: low }), `<div class="cells">${cells}</div>`);
   }
   getCardSize() { return 5; }
 }

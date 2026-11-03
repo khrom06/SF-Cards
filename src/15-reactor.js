@@ -97,7 +97,7 @@ class SfReactorCard extends SfBase {
     // The battery is an always-visible "device", placed first, whose flow goes from the core to it (charging) or the other way round.
     if (hasBat) {
       const lvl = bsoc === null ? "mdi:battery" : bsoc >= 95 ? "mdi:battery" : `mdi:battery-${Math.max(10, Math.round(bsoc / 10) * 10)}`;
-      devs = [{ __bat: true, name: bsoc === null ? this.t("Batterie") : `${this.t("Batterie")} ${Math.round(bsoc)} %`, icon: lvl, entity: bat.firstId,
+      devs = [{ __bat: true, name: bsoc === null ? this.t("common.battery_2") : `${this.t("common.battery_2")} ${Math.round(bsoc)} %`, icon: lvl, entity: bat.firstId,
         color: SF_C.green, w: bw === null ? null : Math.abs(bw), rev: bw !== null && bw > 0 }, ...devs];
     }
     // On the very first render the element does not have its width yet (its styles are not applied): we draw with 600 px then
@@ -150,21 +150,21 @@ class SfReactorCard extends SfBase {
       svg += line("core", `d${i}`, w, d.color || SF_C.cyan, !!d.rev);
       nodes.push(this._node(pts[`d${i}`], d.name, d.icon, w, d.color || SF_C.cyan, d.entity));
     });
-    if (hasSolar) nodes.push(this._node(pts.solar, this.t("Solaire"), "mdi:solar-power-variant", solar, SF_C.amber, c.solar));
-    nodes.push(this._node(pts.grid, exporting ? this.t("Injection") : this.t("Réseau"), "mdi:transmission-tower", grid === null ? null : Math.abs(grid), exporting ? SF_C.green : "#ff7a45", c.grid));
+    if (hasSolar) nodes.push(this._node(pts.solar, this.t("common.solar"), "mdi:solar-power-variant", solar, SF_C.amber, c.solar));
+    nodes.push(this._node(pts.grid, exporting ? this.t("reactor.export") : this.t("common.grid"), "mdi:transmission-tower", grid === null ? null : Math.abs(grid), exporting ? SF_C.green : "#ff7a45", c.grid));
 
     const fossil = this.num(c.fossil), price = this.num(c.price);
     // Footer: only the indicators whose entities are configured.
     const foot = [
       (hasSolar || hasBat) && `<div><div class="lbl">${this.t(hasSolar ? "Autonomie solaire" : "Autonomie")}</div><div class="v" style="color:${this.esc(cc)}">${autonomy === null ? "—" : Math.round(autonomy) + " %"}</div></div>`,
-      c.fossil && `<div class="click" data-e="${this.esc(c.fossil)}"><div class="lbl">${this.t("Réseau fossile")}</div><div class="v">${fossil === null ? "—" : this.nf(fossil, 0) + " %"}</div></div>`,
-      c.price && `<div class="click" data-e="${this.esc(c.price)}"><div class="lbl">${this.t("Coût instantané")}</div><div class="v">${price === null || grid === null ? "—" : this.nf((Math.max(grid, 0) / 1000) * price, 2) + " €/h"}</div></div>`,
+      c.fossil && `<div class="click" data-e="${this.esc(c.fossil)}"><div class="lbl">${this.t("reactor.fossil_grid_share")}</div><div class="v">${fossil === null ? "—" : this.nf(fossil, 0) + " %"}</div></div>`,
+      c.price && `<div class="click" data-e="${this.esc(c.price)}"><div class="lbl">${this.t("reactor.live_cost")}</div><div class="v">${price === null || grid === null ? "—" : this.nf((Math.max(grid, 0) / 1000) * price, 2) + " €/h"}</div></div>`,
     ].filter(Boolean);
-    return this.frame(this.t("Énergie"), `${exporting ? this.t("surplus injecté") : hasSolar && solar > 50 ? this.t("solaire actif") : this.t("réseau")}${hidden ? ` · ${this.t("{n} au repos", { n: hidden })}` : ""}${extra ? ` · ${this.t("+{n} autres", { n: extra })}` : ""}`, `
+    return this.frame(this.t("reactor.energy"), `${exporting ? this.t("reactor.exporting_surplus") : hasSolar && solar > 50 ? this.t("reactor.solar_active") : this.t("reactor.grid")}${hidden ? ` · ${this.t("reactor.n_idle", { n: hidden })}` : ""}${extra ? ` · ${this.t("reactor.n_more", { n: extra })}` : ""}`, `
       <div class="stage" style="${this.esc(narrow ? `aspect-ratio:auto;height:${H}px` : `min-height:${H}px`)}">
         <svg viewBox="0 0 100 56.25" preserveAspectRatio="none">${svg}</svg>
         <div class="core" style="--cc:${this.esc(cc)};left:${this.esc(pts.core[0])}%;top:${this.esc(pts.core[1])}%"><div class="r r1"></div><div class="r r2"></div><div class="r r3"></div><div class="orb"></div>
-          <div class="txt"><div><b>${this.kw(home)}</b><span>${this.t("MAISON")}</span></div></div></div>
+          <div class="txt"><div><b>${this.kw(home)}</b><span>${this.t("reactor.home")}</span></div></div></div>
         ${nodes.join("")}
       </div>
       ${foot.length ? `<div class="foot" style="grid-template-columns:repeat(${this.esc(foot.length)},minmax(0,1fr))">${foot.join("")}</div>` : ""}`);

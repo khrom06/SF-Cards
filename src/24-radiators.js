@@ -68,27 +68,27 @@ class SfRadiatorsCard extends SfBase {
     const u = r.kwh ? this.unit(r.kwh).toLowerCase() : "";
     const kv = kwh === null ? null : (u === "wh" ? kwh / 1000 : kwh);
     const lost = r.connection && this.st(r.connection) && !["ok", "on", "connected", "online", "home"].includes(String(this.st(r.connection).state).toLowerCase());
-    const status = dead ? this.t("Hors ligne") : off ? this.t("Éteint") : heat ? this.t("Chauffe") : this.t("En veille");
+    const status = dead ? this.t("radiators.offline") : off ? this.t("common.off") : heat ? this.t("radiators.heating") : this.t("common.idle_2");
     return `<div class="rad ${this.esc(heat ? "heat" : "")} ${this.esc(off || dead ? "off" : "")}">
       <div class="rh">${this.icon(r.icon || "mdi:radiator", 20, heat ? "var(--ac)" : SF_C.dim)}
         <span class="nm click" data-e="${this.esc(r.climate)}">${this.esc(r.name)}</span>
-        ${lost ? `<span class="warn click" data-e="${this.esc(r.connection)}" title="${this.esc(this.t("connexion perdue"))}">${this.icon("mdi:wifi-alert", 16, SF_C.amber)}</span>` : ""}
+        ${lost ? `<span class="warn click" data-e="${this.esc(r.connection)}" title="${this.esc(this.t("radiators.connection_lost"))}">${this.icon("mdi:wifi-alert", 16, SF_C.amber)}</span>` : ""}
         <span class="st">${status}${now !== null ? ` · ${this.nf(now, 1)}°` : ""}</span>
-        ${dead ? "" : `<span class="btn pw ${this.esc(off ? "" : "on")}" title="${this.esc(this.t("allumer / éteindre le radiateur"))}" ${this.call(off ? "climate.turn_on" : "climate.turn_off", { entity_id: r.climate })}>${this.icon("mdi:power", 16)}</span>`}</div>
+        ${dead ? "" : `<span class="btn pw ${this.esc(off ? "" : "on")}" title="${this.esc(this.t("radiators.turn_the_radiator_on_off"))}" ${this.call(off ? "climate.turn_on" : "climate.turn_off", { entity_id: r.climate })}>${this.icon("mdi:power", 16)}</span>`}</div>
       ${presets.length && !dead ? `<div class="presets">${presets.map((p) =>
         `<span class="btn ${this.esc(cur === p && !off ? "on" : "")}" ${viaSel ? this.call("select.select_option", { entity_id: r.preset, option: p }) : this.call("climate.set_preset_mode", { entity_id: r.climate, preset_mode: p })}>${this._label(p)}</span>`).join("")}</div>` : ""}
       ${c.setpoint !== false && tgt !== null && !dead ? `<div class="ctl"><span class="btn" ${setT(-1)}>−</span>
-        <div class="tg click" data-e="${this.esc(r.climate)}"><small>${this.t("CONSIGNE")}</small><b>${this.nf(tgt, 1)}°</b></div>
+        <div class="tg click" data-e="${this.esc(r.climate)}"><small>${this.t("radiators.setpoint")}</small><b>${this.nf(tgt, 1)}°</b></div>
         <span class="btn" ${setT(1)}>+</span></div>` : ""}
-      ${kv !== null ? `<div class="meta"><span>${this.icon("mdi:flash", 12)} ${this.t("{k} kWh aujourd'hui", { k: this.nf(kv, 2) })}</span>
+      ${kv !== null ? `<div class="meta"><span>${this.icon("mdi:flash", 12)} ${this.t("radiators.k_kwh_today", { k: this.nf(kv, 2) })}</span>
         <span class="bar"><i style="width:${this.esc(Math.min(100, (kv / (Number(c.max_kwh) || 5)) * 100))}%"></i></span></div>` : ""}</div>`;
   }
   render() {
     const c = this._config, rs = c.radiators || [];
     const n = rs.filter((r) => { const s = this.st(r.climate); return s && s.attributes.hvac_action === "heating" && s.state !== "off"; }).length;
     const tot = rs.reduce((t, r) => { const v = r.kwh ? this.num(r.kwh) : null; return t + (v === null ? 0 : (this.unit(r.kwh).toLowerCase() === "wh" ? v / 1000 : v)); }, 0);
-    return this.frame(this.esc(c.title || this.t("Radiateurs")),
-      `${this.t("{n} en chauffe", { n })} · ${this.nf(tot, 1)} kWh`, `<div class="list">${rs.map((r) => this._rad(r)).join("")}</div>`);
+    return this.frame(this.esc(c.title || this.t("radiators.radiators")),
+      `${this.t("radiators.n_heating", { n })} · ${this.nf(tot, 1)} kWh`, `<div class="list">${rs.map((r) => this._rad(r)).join("")}</div>`);
   }
   getCardSize() { return 2 + (this._config.radiators || []).length * 2; }
 }
