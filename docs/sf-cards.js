@@ -737,16 +737,20 @@ const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; -
     --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff; --sf-white:#fff;
     --sf-bg0:#0d2440; --sf-bg1:#06101d; --sf-bg2:#03080f; --sf-bg-rgb:3 8 15; --sf-scrim-rgb:1 4 9; --sf-sheet0:#071426; --sf-shade-rgb:0 0 0; --sf-on-accent:#03080f;
     --sf-alert0:#4a0714; --sf-alert1:#1a0308; --sf-alert2:#0a0104;`;
+// Light palette: accents re-tuned for contrast on a light surface (>= 4.5:1 against white for text), neutral overlays darken instead of lighten.
+const SF_VARS_LIGHT = `--sf-cyan:#00798f; --sf-amber:#a85f00; --sf-red:#c8173d; --sf-green:#08783f; --sf-grey:#6a7b8b; --sf-text:#1c3a4e; --sf-dim:#4f6c84;
+    --sf-cyan-rgb:0 121 143; --sf-amber-rgb:168 95 0; --sf-red-rgb:200 23 61; --sf-green-rgb:8 120 63; --sf-fg-rgb:4 40 62; --sf-strong:#04141f; --sf-white:#fff;
+    --sf-bg0:#fbfdff; --sf-bg1:#eef5fb; --sf-bg2:#e2edf6; --sf-bg-rgb:255 255 255; --sf-scrim-rgb:206 220 232; --sf-sheet0:#f6fafd; --sf-shade-rgb:40 90 125; --sf-on-accent:#fff;
+    --sf-alert0:#ffe1e7; --sf-alert1:#ffd0d9; --sf-alert2:#ffc2ce;`;
 
 const SF_CSS = `
   :host { display:block; ${SF_VARS_DARK} }
+  :host([theme="light"]) { ${SF_VARS_LIGHT} }
   .lbl, .kpi, .foot > div, .stats > div, .fl3 > div, .tile { min-width:0; overflow-wrap:anywhere; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; } }
   [role="button"]:focus-visible, .tile:focus-visible { outline:2px solid ${SF_C.cyan}; outline-offset:2px; border-radius:6px; }
   @media (pointer: coarse) { .btn { min-height:40px; } }
-  /* Light theme: the same card with inverted luminosity (hues are kept); images get their real colours back. */
-  :host([theme="light"]) { filter: invert(1) hue-rotate(180deg); }
-  :host([theme="light"]) img, :host([theme="light"]) video, :host([theme="light"]) canvas { filter: invert(1) hue-rotate(180deg); }
+  /* Light theme: the same card re-coloured by its custom properties (see SF_VARS_LIGHT). */
   :host([dir="rtl"]) svg, :host([dir="rtl"]) .stage, :host([dir="rtl"]) .core, :host([dir="rtl"]) .dial, :host([dir="rtl"]) .ring, :host([dir="rtl"]) .gauge .ring { direction:ltr; }
   .hud { position:relative; overflow:hidden; border-radius:14px; padding:16px 18px 18px;
     background: radial-gradient(ellipse at 50% -20%, var(--sf-bg0) 0%, var(--sf-bg1) 60%, var(--sf-bg2) 100%);
@@ -2462,6 +2466,7 @@ class SfCellsCard extends SfBase {
  */
 const SF_POP_CSS = `
   :host { ${SF_VARS_DARK} }
+  :host([theme="light"]) { ${SF_VARS_LIGHT} }
   @media (prefers-reduced-motion: reduce) { .back, .sheet { transition:none !important; } }
   :host([theme="light"]) .sheet { background: linear-gradient(180deg, #f3f8fc 0%, #e3edf5 100%); border-color:rgba(0,110,150,.45); box-shadow:0 -10px 40px rgba(0,90,130,.22); }
   :host([theme="light"]) .back { background:rgba(180,200,215,.55); }
@@ -2898,7 +2903,7 @@ const SF_NS_CSS = `
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   .ns { direction:ltr; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; } }
-  :host([theme="light"]) { filter: invert(1) hue-rotate(180deg); }
+  /* the wall panel is a dark kiosk screen: it keeps its own palette whatever the theme option says */
   [role="button"]:focus-visible { outline:2px solid var(--sf-cyan); outline-offset:2px; }
   /* Everything is sized in "u" = 1 vmin (4.8 px on the NSPanel Pro 480 x 480): the layout stays proportional. */
   /* available height: that of --sf-ns-height if defined; otherwise the whole screen in kiosk mode, or the screen minus the HA bar (56 px) */

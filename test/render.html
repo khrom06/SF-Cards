@@ -242,7 +242,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
     const pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
     if (!pop || pop.shadowRoot.querySelector(".sheet").getAttribute("role") !== "dialog") fail("accessibility: the popup must have the dialog role");
     if (pop) pop.remove(); l.remove(); }
-  // 5l. Theme: dark by default; `light`; `auto` follows the HA theme; CSS variable --sf-theme; light popup without double inversion.
+  // 5l. Theme: dark by default; `light`; `auto` follows the HA theme; CSS variable --sf-theme; light popup with the light palette.
   { const th = async (cfg, themes) => { const e = mount("sf-battery-card", { soc: "sensor.bat_soc", ...cfg }, "en"); if (themes) e.hass = { ...HASS(base, "en"), themes }; await wait(40);
       const r = e.getAttribute("theme"); e.remove(); return r; };
     if (await th({}) !== "dark") fail("theme: dark expected by default");
@@ -251,16 +251,21 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (await th({ theme: "auto" }, { darkMode: true }) !== "dark") fail("theme: auto + dark HA -> dark");
     document.documentElement.style.setProperty("--sf-theme", "light");
     if (await th({}) !== "light") fail("theme: the CSS variable --sf-theme must apply"); document.documentElement.style.removeProperty("--sf-theme");
-    const e = mount("sf-battery-card", { soc: "sensor.bat_soc", theme: "light" }, "en"); await wait(40);
-    if (!/invert/.test(getComputedStyle(e).filter)) fail("theme: the inversion filter must apply to the light card"); e.remove();
+    // the light theme is a real palette (custom properties), not a filter: tokens differ from the dark ones, no filter anywhere
+    const e = mount("sf-battery-card", { soc: "sensor.bat_soc", theme: "light" }, "en"), d0 = mount("sf-battery-card", { soc: "sensor.bat_soc", theme: "dark" }, "en"); await wait(40);
+    const tok = (el, n) => getComputedStyle(el).getPropertyValue(n).trim();
+    if (getComputedStyle(e).filter !== "none") fail("theme: the light card must not use a filter any more");
+    for (const n of ["--sf-cyan", "--sf-text", "--sf-strong", "--sf-bg1", "--sf-fg-rgb", "--sf-red"]) { if (!tok(e, n) || !tok(d0, n)) fail(`theme: token ${n} missing (light '${tok(e, n)}', dark '${tok(d0, n)}')`); else if (tok(e, n) === tok(d0, n)) fail(`theme: token ${n} must differ between light and dark (both '${tok(e, n)}')`); }
+    if (tok(d0, "--sf-cyan") !== "#00e5ff") fail("theme: the dark palette must keep the original neon cyan"); e.remove(); d0.remove();
+    // every colour used by the cards goes through the tokens: no hard-coded literal left in the card CSS except an explicit allow-list (checked by lint)
     window.loadCardHelpers = async () => ({ createCardElement: (c) => { const d = document.createElement("div"); d.className = "std-" + c.type; return d; } });
     const l = mount("sf-launcher-card", { theme: "light", tiles: [{ name: "A", hash: "a", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }, { name: "B", hash: "b", summary: "text", card: { type: "vertical-stack", cards: [] } }] }, "en"); await wait(60);
     const tiles = l.shadowRoot.querySelectorAll(".tile");
     tiles[0].click(); await wait(120);
     let pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
     if (!pop || pop.getAttribute("theme") !== "light") fail("theme: the popup must be light");
-    const inner = pop && pop.shadowRoot.querySelector("sf-battery-card"); if (!inner || inner.getAttribute("theme") !== "light") fail("theme: an SF card in a light popup must itself be in light theme (neither dark nor double inversion)");
-    if (pop && /invert/.test(getComputedStyle(pop.shadowRoot.querySelector(".sheet")).filter)) fail("theme: the light popup panel must no longer be inverted (double inversion, containing block)");
+    const inner = pop && pop.shadowRoot.querySelector("sf-battery-card"); if (!inner || inner.getAttribute("theme") !== "light") fail("theme: an SF card in a light popup must itself be in light theme");
+    if (pop && getComputedStyle(pop.shadowRoot.querySelector(".sheet")).filter !== "none") fail("theme: the light popup panel must not use a filter");
     if (pop) pop.remove(); l._pop = null;
     tiles[1].click(); await wait(150);
     pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();

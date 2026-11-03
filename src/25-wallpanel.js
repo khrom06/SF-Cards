@@ -26,7 +26,7 @@ const SF_NS_CSS = `
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   .ns { direction:ltr; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; } }
-  :host([theme="light"]) { filter: invert(1) hue-rotate(180deg); }
+  /* the wall panel is a dark kiosk screen: it keeps its own palette whatever the theme option says */
   [role="button"]:focus-visible { outline:2px solid var(--sf-cyan); outline-offset:2px; }
   /* Everything is sized in "u" = 1 vmin (4.8 px on the NSPanel Pro 480 x 480): the layout stays proportional. */
   /* available height: that of --sf-ns-height if defined; otherwise the whole screen in kiosk mode, or the screen minus the HA bar (56 px) */

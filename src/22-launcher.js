@@ -21,6 +21,7 @@
  */
 const SF_POP_CSS = `
   :host { ${SF_VARS_DARK} }
+  :host([theme="light"]) { ${SF_VARS_LIGHT} }
   @media (prefers-reduced-motion: reduce) { .back, .sheet { transition:none !important; } }
   :host([theme="light"]) .sheet { background: linear-gradient(180deg, #f3f8fc 0%, #e3edf5 100%); border-color:rgba(0,110,150,.45); box-shadow:0 -10px 40px rgba(0,90,130,.22); }
   :host([theme="light"]) .back { background:rgba(180,200,215,.55); }
