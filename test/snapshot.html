@@ -29,7 +29,9 @@ const hash = (str) => { let h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (let i = 0; i 
   for (const tag of Object.keys(FULL)) for (const lang of langs) for (const theme of ["dark", "light"]) {
     const el = document.createElement(tag); el.setConfig({ ...FULL[tag], theme }); document.body.appendChild(el);
     el.hass = HASS(base, lang); await wait(8);
-    out[`${tag}|${lang}|${theme}`] = hash((el.shadowRoot ? el.shadowRoot.innerHTML : "") + "|" + (el.getAttribute("theme") || "") + "|" + (el.getAttribute("dir") || "")); el.remove();
+    // two hashes per render: the markup without <style> ("structure + text") and the CSS, so that a CSS-only change is told apart from a content change
+    const full = el.shadowRoot ? el.shadowRoot.innerHTML : "", css = (full.match(/<style>[\s\S]*?<\/style>/g) || []).join(""), markup = full.replace(/<style>[\s\S]*?<\/style>/g, "");
+    out[`${tag}|${lang}|${theme}`] = hash(markup + "|" + (el.getAttribute("theme") || "") + "|" + (el.getAttribute("dir") || "")) + "." + hash(css); el.remove();
   }
   const pre = document.createElement("pre"); pre.id = "result"; pre.textContent = JSON.stringify({ errors: window.__errors, hashes: out }); document.body.appendChild(pre);
 })();
