@@ -3,14 +3,14 @@
 <!-- Test de rendu : chargé par run.sh dans Chrome headless. Écrit son verdict (JSON) dans #result. Aucune dépendance. -->
 <body>
 <script>
-// Faux composants HA : seulement ce dont les cartes ont besoin pour s'afficher.
+// Fake HA components: only what the cards need to render.
 class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon);
-window.requestAnimationFrame = (f) => setTimeout(f, 0);   // headless : pas de vraies frames, on rend tout de suite
+window.requestAnimationFrame = (f) => setTimeout(f, 0);   // headless: no real frames, render immediately
 window.__errors = [];
 window.addEventListener("error", (e) => window.__errors.push(`${e.message} @${(e.filename || "").split("/").pop()}:${e.lineno}`));
 window.__missing = new Set();
-window.__SF_TEST = true;   // expose les fonctions internes à ce test uniquement
-window.SF_EVENTS = false;   // les thèmes d'événements dépendent de la date : désactivés pour des tests reproductibles
+window.__SF_TEST = true;   // exposes internal functions to this test only
+window.SF_EVENTS = false;   // event themes depend on the date: disabled for reproducible tests
 </script>
 <script src="../dist/sf-cards.js"></script>
 <script>
@@ -34,11 +34,11 @@ const base = {
   "input_select.ns_mode": S("Jour"), "sensor.fridge": U(4.2, "°C"), "sensor.freezer": U(-19, "°C"), "number.cur": U(8, "A"), "sensor.kwh_imp": U(1, "kWh"), "sensor.kwh_sol": U(2, "kWh"), "sensor.kwh_exp": U(0.5, "kWh"),
   "sensor.dev_bat": S(18, { unit_of_measurement: "%", device_class: "battery", friendly_name: "Sensor A battery" }),
 };
-// Comme dans HA, chaque état porte son entity_id.
+// As in HA, every state carries its entity_id.
 const withIds = (states) => Object.fromEntries(Object.entries(states).map(([id, st]) => [id, { entity_id: id, last_changed: new Date().toISOString(), ...st }]));
 const HASS = (states, language) => ({ states: withIds(states), locale: { language }, language, callService: () => Promise.resolve() });
 
-// Une configuration complète par carte (les identifiants ci-dessus sont fictifs).
+// One full configuration per card (the identifiers above are fictitious).
 const FULL = {
   "sf-assistant-card": { name: "Assistant", state: "assist_satellite.kitchen", request: "sensor.as_req", action: "sensor.as_act", result: "sensor.as_res", reply: "sensor.as_rep", actions: [{ name: "Stop", icon: "mdi:stop", service: "script.stop", confirm: "Stop?" }] },
   "sf-health-card": { title: "Health", checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Network" }, { name: "UPS", entity: "sensor.ups", min: 30 }] },
@@ -79,7 +79,7 @@ const FULL = {
   "sf-launcher-card": { tiles: [{ name: "Climate", summary: "room", card: { type: "custom:sf-climate-card", rooms: [{ name: "L", climate: "climate.room", temp: "sensor.temp", target: "input_number.target" }] } },
     { name: "Battery", summary: "battery", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc", power: "sensor.bat_p" } }] },
 };
-// Même chose sans aucune entité de production solaire ni de batterie : rien de « solaire » ne doit apparaître.
+// Same thing without any solar-production or battery entity: nothing "solar" must appear.
 const NOSOLAR = {
   "sf-bridge-card": { weather: "weather.home", outdoor: "sensor.out", price: "sensor.price" },
   "sf-reactor-card": { grid: "sensor.grid", devices: [{ name: "EV", entity: "sensor.ev" }] },
@@ -100,7 +100,7 @@ const mount = (tag, cfg, language, states) => {
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const text = (el) => (el.shadowRoot ? el.shadowRoot.textContent : "");
 
-// Enregistre les clés de traduction demandées mais absentes de la table (ou incomplètes) pour une langue ≠ fr.
+// Records the translation keys requested but missing from the table (or incomplete) for a language other than fr.
 __SF.SF_HOOK.tr = (lang, key) => {
   if (lang !== "fr") {
     const e = Object.prototype.hasOwnProperty.call(__SF.SF_T, key) ? __SF.SF_T[key] : undefined;
@@ -110,7 +110,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
 };
 
 (async () => { try {
-  // 1. Chaque carte, chaque langue, config complète : pas d'erreur, pas de rendu vide, pas de « undefined / NaN ».
+  // 1. Every card, every language, full config: no error, no empty render, no "undefined / NaN".
   for (const language of ["en", "fr", "es", "de", "nl", "it", "pt", "pl", "ru", "zh", "ar"]) {
     for (const [tag, cfg] of Object.entries(FULL)) {
       const el = mount(tag, cfg, language);
@@ -121,119 +121,119 @@ __SF.SF_HOOK.tr = (lang, key) => {
       el.remove();
     }
   }
-  // 2. Config minimale (stub) : une carte vide ne doit jamais planter.
+  // 2. Minimal config (stub): an empty card must never crash.
   for (const tag of Object.keys(FULL)) {
     try {
       const el = mount(tag, tag === "sf-launcher-card" ? { tiles: [] } : (customElements.get(tag).getStubConfig ? customElements.get(tag).getStubConfig() : {}), "en", {});
       await wait(30); el.remove();
-    } catch (e) { fail(`${tag} : plante avec une config minimale (${e.message})`); }
+    } catch (e) { fail(`${tag}: crashes with a minimal config (${e.message})`); }
   }
-  // 3. Sans solaire ni batterie : aucune mention de solaire.
+  // 3. Without solar or battery: no mention of solar.
   for (const [tag, cfg] of Object.entries(NOSOLAR)) {
     const el = mount(tag, cfg, "en");
     await wait(40);
-    if (/solar/i.test(text(el))) fail(`${tag} : affiche du solaire alors qu'aucune entité solaire n'est configurée`);
+    if (/solar/i.test(text(el))) fail(`${tag}: shows solar although no solar entity is configured`);
     el.remove();
   }
-  // 4. Carte batterie sans entité : elle doit se masquer.
+  // 4. Battery card without entity: it must hide itself.
   { const el = mount("sf-battery-card", {}, "en"); await wait(40);
-    if (getComputedStyle(el).display !== "none") fail("sf-battery-card sans entité : devrait être masquée"); el.remove(); }
-  // 5. Lanceur : une carte standard de HA s'ouvre via les « card helpers ».
+    if (getComputedStyle(el).display !== "none") fail("sf-battery-card without entity: should be hidden"); el.remove(); }
+  // 5. Launcher: a standard HA card opens through the "card helpers".
   window.loadCardHelpers = async () => ({ createCardElement: (c) => { const d = document.createElement("div"); d.className = "std-" + c.type; d.textContent = "STD " + c.type; return d; } });
   { const el = mount("sf-launcher-card", { tiles: [{ name: "Std", hash: "std", card: { type: "vertical-stack", cards: [] } }] }, "en");
     await wait(60);
     el.shadowRoot.querySelector(".tile").click();
     await wait(150);
     const pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
-    if (!pop || !pop.shadowRoot.querySelector(".std-vertical-stack")) fail("lanceur : une carte standard (vertical-stack) ne s'ouvre pas dans le popup");
+    if (!pop || !pop.shadowRoot.querySelector(".std-vertical-stack")) fail("launcher: a standard card (vertical-stack) does not open in the popup");
     el.remove(); if (pop) pop.remove(); }
-  // 5b. Heures creuses : plusieurs plages saisies (dont une qui passe minuit) font foi ; sans plage ni prix HC, HP/HC est inconnu.
+  // 5b. Off-peak hours: several windows entered (one of them crossing midnight) are authoritative; without a window or off-peak price, peak/off-peak is unknown.
   { const el = mount("sf-bridge-card", { weather: "weather.home", price: "sensor.price", hc_price: "sensor.price",
       hc_windows: [{ start: "22:00", end: "02:00" }, { start: "06:00", end: "08:00" }, { start: "14:00", end: "16:00" }] }, "en");
     await wait(40);
     const at = (h, m) => el._isHC(new Date(2026, 0, 5, h, m));
     const exp = [[23, 0, true], [1, 0, true], [4, 0, false], [7, 0, true], [12, 0, false], [15, 0, true], [20, 0, false]];
-    for (const [h, m, want] of exp) if (at(h, m).hc !== want) fail(`bridge : à ${h}h${m} HC attendu ${want}, obtenu ${at(h, m).hc}`);
-    if (at(15, 0).left !== 60) fail(`bridge : fin de HC à 16h attendue dans 60 min, obtenu ${at(15, 0).left}`);
-    if (at(12, 0).left !== 120) fail(`bridge : prochaine HC à 14h attendue dans 120 min, obtenu ${at(12, 0).left}`);
+    for (const [h, m, want] of exp) if (at(h, m).hc !== want) fail(`bridge: at ${h}h${m} expected off-peak ${want}, got ${at(h, m).hc}`);
+    if (at(15, 0).left !== 60) fail(`bridge: end of off-peak at 16h expected in 60 min, got ${at(15, 0).left}`);
+    if (at(12, 0).left !== 120) fail(`bridge: next off-peak at 14h expected in 120 min, got ${at(12, 0).left}`);
     el.remove();
     const un = mount("sf-bridge-card", { weather: "weather.home", price: "sensor.price" }, "en"); await wait(40);
-    if (un._isHC(new Date(2026, 0, 5, 3, 0)).hc !== null) fail("bridge : sans plage ni prix HC, HP/HC devrait être inconnu");
-    if (/\bHP\b|\bHC\b/.test(text(un))) fail("bridge : affiche HP/HC alors que rien n'est configuré");
+    if (un._isHC(new Date(2026, 0, 5, 3, 0)).hc !== null) fail("bridge: without window or off-peak price, peak/off-peak should be unknown");
+    if (/\bHP\b|\bHC\b/.test(text(un))) fail("bridge: shows peak/off-peak although nothing is configured");
     un.remove(); }
-  // 5b2. Consignes : toucher une valeur ouvre l'éditeur (bornes / pas de l'entité) ; « Appliquer » règle la portée choisie ; « Annuler » ne règle rien.
+  // 5b2. Setpoints: touching a value opens the editor (bounds / entity step); "Apply" sets the chosen scope; "Cancel" sets nothing.
   { const IN = (v, mn, mx, st) => ({ state: String(v), attributes: { min: mn, max: mx, step: st } });
     const stt = { "input_number.a1": IN(19, 15, 25, 0.5), "input_number.a2": IN(21, 15, 25, 0.5), "input_number.b1": IN(18, 15, 25, 0.5), "input_number.b2": IN(20, 15, 25, 0.5) };
     const cfg = { columns: [{ label: "Day" }, { label: "Night" }], rows: [{ name: "Living", entities: ["input_number.a1", "input_number.a2"] }, { name: "Bed", entities: ["input_number.b1", "input_number.b2"] }] };
     const calls = []; const el = mount("sf-setpoints-card", cfg, "en"); el.hass = { ...HASS(stt, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(60);
     const q = (sel) => el.shadowRoot.querySelector(sel);
-    if (!q("[data-ed-open]")) fail("consignes : valeur non éditable (data-ed-open absent)");
+    if (!q("[data-ed-open]")) fail("setpoints: value is not editable (data-ed-open missing)");
     q('[data-ed-open="0,1"]').click(); await wait(60);
-    if (!q("[data-ed-range]")) fail("consignes : l'éditeur ne s'ouvre pas au toucher d'une valeur");
-    if (q("[data-ed-range]").max !== "25" || q("[data-ed-range]").step !== "0.5") fail("consignes : bornes/pas de l'entité non repris par le curseur");
-    if (!/21/.test(q("[data-ed-out]").textContent)) fail("consignes : valeur de départ attendue 21");
+    if (!q("[data-ed-range]")) fail("setpoints: the editor does not open when a value is touched");
+    if (q("[data-ed-range]").max !== "25" || q("[data-ed-range]").step !== "0.5") fail("setpoints: the entity's bounds/step were not picked up by the slider");
+    if (!/21/.test(q("[data-ed-out]").textContent)) fail("setpoints: starting value expected 21");
     q('[data-ed="inc"]').click(); q('[data-ed="inc"]').click(); await wait(10);
-    if (!/22/.test(q("[data-ed-out]").textContent)) fail("consignes : deux « + » attendus → 22");
+    if (!/22/.test(q("[data-ed-out]").textContent)) fail("setpoints: two '+' presses expected -> 22");
     for (let k = 0; k < 30; k++) q('[data-ed="inc"]').click();
-    if (!/25/.test(q("[data-ed-out]").textContent)) fail("consignes : la valeur doit s'arrêter à la borne 25");
+    if (!/25/.test(q("[data-ed-out]").textContent)) fail("setpoints: the value must stop at the bound 25");
     q('[data-ed="cancel"]').click(); await wait(60);
-    if (calls.length) fail("consignes : « Annuler » ne doit rien régler"); if (q("[data-ed-range]")) fail("consignes : l'éditeur reste ouvert après « Annuler »");
+    if (calls.length) fail("setpoints: 'Cancel' must not set anything"); if (q("[data-ed-range]")) fail("setpoints: the editor stays open after 'Cancel'");
     q('[data-ed-open="0,1"]').click(); await wait(60);
     q('[data-ed="inc"]').click(); q('[data-ed-scope="col"]').click(); q('[data-ed="ok"]').click(); await wait(80);
     const got = calls.map((c) => `${c[2].entity_id}=${c[2].value}`).sort().join(",");
-    if (got !== "input_number.a2=21.5,input_number.b2=21.5") fail(`consignes : portée « programme » attendue sur les 2 pièces (obtenu ${got})`);
-    if (calls.some((c) => c[0] !== "input_number" || c[1] !== "set_value")) fail("consignes : service attendu input_number.set_value");
-    if (q("[data-ed-range]")) fail("consignes : l'éditeur doit se fermer après « Appliquer »");
+    if (got !== "input_number.a2=21.5,input_number.b2=21.5") fail(`setpoints: 'program' scope expected on the 2 rooms (got ${got})`);
+    if (calls.some((c) => c[0] !== "input_number" || c[1] !== "set_value")) fail("setpoints: service expected input_number.set_value");
+    if (q("[data-ed-range]")) fail("setpoints: the editor must close after 'Apply'");
     calls.length = 0; q('[data-ed-open="1,0"]').click(); await wait(60); q('[data-ed-scope="row"]').click(); q('[data-ed="dec"]').click(); q('[data-ed="ok"]').click(); await wait(80);
-    if (calls.map((c) => `${c[2].entity_id}=${c[2].value}`).sort().join(",") !== "input_number.b1=17.5,input_number.b2=17.5") fail("consignes : portée « pièce » attendue sur la ligne");
+    if (calls.map((c) => `${c[2].entity_id}=${c[2].value}`).sort().join(",") !== "input_number.b1=17.5,input_number.b2=17.5") fail("setpoints: 'room' scope expected on the row");
     el.remove(); }
-  // 5c. Arabe : sens d'écriture inversé sur la carte ; les autres langues restent de gauche à droite.
+  // 5c. Arabic: reversed writing direction on the card; the other languages stay left to right.
   { const ar = mount("sf-machines-card", FULL["sf-machines-card"], "ar"); const en = mount("sf-machines-card", FULL["sf-machines-card"], "en"); await wait(40);
-    if (ar.dir !== "rtl") fail("arabe : la carte devrait être en sens rtl"); if (en.dir !== "ltr") fail("anglais : la carte devrait être en sens ltr");
+    if (ar.dir !== "rtl") fail("arabic: the card should be rtl"); if (en.dir !== "ltr") fail("english: the card should be ltr");
     ar.remove(); en.remove(); }
-  // 5d. Variantes de langue de HA (pt-BR, zh-Hans…) : retombent sur la langue de base.
+  // 5d. HA language variants (pt-BR, zh-Hans…): fall back to the base language.
   { const a = mount("sf-radiators-card", FULL["sf-radiators-card"], "pt-BR"); const b = mount("sf-radiators-card", FULL["sf-radiators-card"], "zh-Hans"); await wait(40);
-    if (!/Radiadores/.test(text(a))) fail("pt-BR : « Radiadores » attendu"); if (!/暖气片/.test(text(b))) fail("zh-Hans : « 暖气片 » attendu"); a.remove(); b.remove(); }
-  // 5e. Plusieurs batteries : niveau pondéré par la capacité (80 % de 10 kWh + 20 % de 5 kWh = 60 %), puissance cumulée,
-  //     détail par batterie ; sans capacité, moyenne simple ; un seul nœud dans la carte énergie ; une batterie indisponible est ignorée.
+    if (!/Radiadores/.test(text(a))) fail("pt-BR: 'Radiadores' expected"); if (!/暖气片/.test(text(b))) fail("zh-Hans: '暖气片' expected"); a.remove(); b.remove(); }
+  // 5e. Several batteries: capacity-weighted level (80 % of 10 kWh + 20 % of 5 kWh = 60 %), summed power,
+  //     per-battery detail; without capacity, simple average; a single node in the energy card; an unavailable battery is ignored.
   { const st = { ...base, "sensor.b1": U(80, "%"), "sensor.b1p": U(-1000, "W"), "sensor.b2": U(20, "%"), "sensor.b2p": U(400, "W"), "sensor.b3": S("unavailable") };
     const two = [{ name: "Garage", soc: "sensor.b1", power: "sensor.b1p", capacity_kwh: 10 }, { name: "Cellar", soc: "sensor.b2", power: "sensor.b2p", capacity_kwh: 5 }];
     const c1 = mount("sf-battery-card", { batteries: two }, "en", st); await wait(40); const t1 = text(c1);
     const ring = (el) => (el.shadowRoot.querySelector(".ring .t b") || { textContent: "" }).textContent.trim();
-    if (ring(c1) !== "60%") fail(`batteries : niveau pondéré 60 % attendu, obtenu « ${ring(c1)} »`);
-    if (!/Garage/.test(t1) || !/Cellar/.test(t1)) fail("batteries : le détail par batterie (noms) est absent");
-    if (!/600\s*W/.test(t1)) fail("batteries : puissance cumulée 600 W attendue");
-    if (!/Charging/.test(t1)) fail("batteries : état « Charging » attendu (somme négative)");
+    if (ring(c1) !== "60%") fail(`batteries: weighted level 60 % expected, got '${ring(c1)}'`);
+    if (!/Garage/.test(t1) || !/Cellar/.test(t1)) fail("batteries: the per-battery detail (names) is missing");
+    if (!/600\s*W/.test(t1)) fail("batteries: summed power 600 W expected");
+    if (!/Charging/.test(t1)) fail("batteries: state 'Charging' expected (negative sum)");
     c1.remove();
     const c2 = mount("sf-battery-card", { batteries: [{ name: "A", soc: "sensor.b1" }, { name: "B", soc: "sensor.b2" }] }, "en", st); await wait(40);
-    if (ring(c2) !== "50%") fail(`batteries : sans capacité, moyenne simple 50 % attendue, obtenu « ${ring(c2)} »`); c2.remove();
+    if (ring(c2) !== "50%") fail(`batteries: without capacity, simple average 50 % expected, got '${ring(c2)}'`); c2.remove();
     const c3 = mount("sf-battery-card", { batteries: [{ name: "A", soc: "sensor.b1", capacity_kwh: 10 }, { name: "Dead", soc: "sensor.b3", capacity_kwh: 10 }] }, "en", st); await wait(40);
-    if (ring(c3) !== "80%") fail(`batteries : une batterie indisponible doit être ignorée (80 % attendu), obtenu « ${ring(c3)} »`); c3.remove();
+    if (ring(c3) !== "80%") fail(`batteries: an unavailable battery must be ignored (80 % expected), got '${ring(c3)}'`); c3.remove();
     const r = mount("sf-reactor-card", { grid: "sensor.grid", batteries: two, devices: [] }, "en", st); await wait(40);
     const nodes = (r.shadowRoot.querySelectorAll(".node") || []); const batNodes = [...nodes].filter((n) => /Battery/.test(n.textContent));
-    if (batNodes.length !== 1) fail(`batteries : un seul nœud batterie attendu dans la carte énergie, obtenu ${batNodes.length}`);
-    if (batNodes[0] && !/Battery 60 %/.test(batNodes[0].textContent)) fail(`batteries : le nœud devrait afficher « Battery 60 % », obtenu « ${batNodes[0].textContent.trim()} »`);
+    if (batNodes.length !== 1) fail(`batteries: a single battery node expected in the energy card, got ${batNodes.length}`);
+    if (batNodes[0] && !/Battery 60 %/.test(batNodes[0].textContent)) fail(`batteries: the node should show 'Battery 60 %', got '${batNodes[0].textContent.trim()}'`);
     r.remove();
     const l = mount("sf-launcher-card", { tiles: [{ name: "Bat", summary: "battery", card: { type: "custom:sf-battery-card", batteries: two } }] }, "en", st); await wait(40);
-    if (!/60 %/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("batteries : la tuile du lanceur devrait afficher 60 %"); l.remove(); }
-  // 5f. Carte énergie : le solaire est toujours AU-DESSUS du cœur (même abscisse, plus haut), sur téléphone comme sur grand écran.
+    if (!/60 %/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("batteries: the launcher tile should show 60 %"); l.remove(); }
+  // 5f. Energy card: solar is always ABOVE the core (same x, higher), on phone as on wide screen.
   for (const width of [380, 760]) {
     const box = document.createElement("div"); box.style.width = width + "px"; document.body.appendChild(box);
     const el = document.createElement("sf-reactor-card"); el.setConfig(FULL["sf-reactor-card"]); box.appendChild(el); el.hass = HASS(base, "en"); await wait(60);
     const pos = (n) => ({ x: parseFloat(/left:([\d.]+)%/.exec(n.getAttribute("style"))[1]), y: parseFloat(/top:([\d.]+)%/.exec(n.getAttribute("style"))[1]) });
     const sol = [...el.shadowRoot.querySelectorAll(".node")].find((n) => /Solar/.test(n.textContent)), core = el.shadowRoot.querySelector(".core");
-    if (!sol || !core) fail(`énergie [${width}px] : nœud solaire ou cœur introuvable`);
+    if (!sol || !core) fail(`energy [${width}px]: solar or core node not found`);
     else { const a = pos(sol), b = pos(core);
-      if (Math.abs(a.x - b.x) > 1) fail(`énergie [${width}px] : le solaire doit être à la verticale du cœur (x ${a.x} / ${b.x})`);
-      if (!(a.y < b.y)) fail(`énergie [${width}px] : le solaire doit être au-dessus du cœur (y ${a.y} / ${b.y})`); }
+      if (Math.abs(a.x - b.x) > 1) fail(`energy [${width}px]: solar must be vertically aligned with the core (x ${a.x} / ${b.x})`);
+      if (!(a.y < b.y)) fail(`energy [${width}px]: solar must be above the core (y ${a.y} / ${b.y})`); }
     box.remove(); }
-  // 5g. Carte véhicules : « branché » et « en charge » acceptent on/off mais aussi les statuts texte des bornes (casse, espaces, tirets
-  //     ignorés), des états personnalisés, et la puissance en secours.
+  // 5g. Vehicles card: "plugged in" and "charging" accept on/off but also the chargers' text statuses (case, spaces, hyphens
+  //     ignored), custom states, and power as a fallback.
   { const sub = (el) => (el.shadowRoot.querySelector(".head .sub") || { textContent: "" }).textContent.trim().toLowerCase();
     const run = async (cfgCharger, st, want, label) => {
       const el = mount("sf-hangar-card", { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range" }], charger: cfgCharger }, "en", { ...base, ...st });
       await wait(40); const got = sub(el);
-      if (got !== want) fail(`véhicules [${label}] : « ${want} » attendu, obtenu « ${got} »`); el.remove(); };
+      if (got !== want) fail(`vehicles [${label}]: '${want}' expected, got '${got}'`); el.remove(); };
     const X = (id, v) => ({ [id]: S(v) });
     const cc = { connected: "sensor.conn", charging: "sensor.chg", power: "sensor.ev" };
     await run(cc, { ...X("sensor.conn", "on"), ...X("sensor.chg", "on") }, "charging", "on/on");
@@ -247,136 +247,136 @@ __SF.SF_HOOK.tr = (lang, key) => {
     await run({ ...cc, charging_states: ["Zorglub"] }, { ...X("sensor.conn", "on"), ...X("sensor.chg", "zorglub") }, "charging", "états personnalisés");
     await run({ connected: "sensor.conn", power: "sensor.ev" }, { ...X("sensor.conn", "off"), "sensor.ev": U(3000, "W") }, "charging", "puissance en secours");
     await run({ connected: "sensor.conn", power: "sensor.ev" }, { ...X("sensor.conn", "connected"), "sensor.ev": U(0, "W") }, "waiting", "branché sans puissance"); }
-  // 5h. Carte véhicules : mode via `select` (pas seulement input_select), unité km / mi, jusqu'à 3 voitures.
+  // 5h. Vehicles card: mode via `select` (not only input_select), km / mi unit, up to 3 cars.
   { const calls = []; const st = { ...base, "select.mode": S("Eco", { options: ["Eco", "Fast"] }), "sensor.rkm": U(100, "km"), "sensor.rmi": U(62, "mi"), "sensor.rnone": S(100) };
     const el = mount("sf-hangar-card", { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.rkm" }], charger: { power: "sensor.ev" }, mode: "select.mode" }, "en", st);
     el.hass = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40);
     const btn = [...el.shadowRoot.querySelectorAll(".seg .btn")].find((b) => /Fast/.test(b.textContent));
-    if (!btn) fail("véhicules : boutons du mode (entité select) absents"); else { btn.click(); await wait(20);
-      if (!calls.some((c) => c[0] === "select" && c[1] === "select_option" && c[2].option === "Fast")) fail("véhicules : un mode `select` doit appeler select.select_option"); }
+    if (!btn) fail("vehicles: mode buttons (select entity) missing"); else { btn.click(); await wait(20);
+      if (!calls.some((c) => c[0] === "select" && c[1] === "select_option" && c[2].option === "Fast")) fail("vehicles: a `select` mode must call select.select_option"); }
     el.remove();
     const rng = async (range, unit, want, label) => { const e = mount("sf-hangar-card", { cars: [{ name: "Car", soc: "sensor.car_soc", range }], charger: {}, ...(unit ? { distance_unit: unit } : {}) }, "en", st);
       await wait(40); const got = (e.shadowRoot.querySelector(".km") || { textContent: "" }).textContent.trim();
-      if (got !== want) fail(`véhicules [${label}] : « ${want} » attendu, obtenu « ${got} »`); e.remove(); };
+      if (got !== want) fail(`vehicles [${label}]: '${want}' expected, got '${got}'`); e.remove(); };
     await rng("sensor.rkm", "", "100 km range", "auto km"); await rng("sensor.rmi", "", "62 mi range", "auto mi"); await rng("sensor.rnone", "", "100 km range", "auto sans unité");
     await rng("sensor.rkm", "mi", "62 mi range", "km → mi"); await rng("sensor.rmi", "km", "100 km range", "mi → km"); await rng("sensor.rkm", "km", "100 km range", "km → km");
     const four = ["a", "b", "c", "d"].map((n) => ({ name: n, soc: "sensor.car_soc" }));
     const e3 = mount("sf-hangar-card", { cars: four, charger: {} }, "en", st); await wait(40);
-    const nb = e3.shadowRoot.querySelectorAll(".car").length; if (nb !== 3) fail(`véhicules : 3 voitures maximum attendues, obtenu ${nb}`);
-    if (!e3.shadowRoot.querySelector(".bay.stack")) fail("véhicules : la disposition à 3 voitures est absente"); e3.remove(); }
-  // 5i. Deux bornes (ou plus) qui coexistent : une carte par borne, état global = « charging » si l'une charge, « waiting » si l'une est branchée,
-  //     puissance et noms propres à chaque borne, mode propre à chaque borne, ancienne syntaxe `charger:` inchangée.
+    const nb = e3.shadowRoot.querySelectorAll(".car").length; if (nb !== 3) fail(`vehicles: 3 cars maximum expected, got ${nb}`);
+    if (!e3.shadowRoot.querySelector(".bay.stack")) fail("vehicles: the 3-car layout is missing"); e3.remove(); }
+  // 5i. Two (or more) chargers that coexist: one card per charger, global state = "charging" if one charges, "waiting" if one is plugged in,
+  //     power and names specific to each charger, mode specific to each charger, old `charger:` syntax unchanged.
   { const calls = []; const two = (a, b) => ({ ...base, "sensor.a_st": S(a), "sensor.b_st": S(b), "sensor.a_p": U(7000, "W"), "sensor.b_p": U(0, "W"), "select.bm": S("Eco", { options: ["Eco", "Fast"] }) });
     const cfg = { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range" }],
       chargers: [{ name: "Wall A", connected: "sensor.a_st", charging: "sensor.a_st", power: "sensor.a_p" }, { name: "Wall B", connected: "sensor.b_st", charging: "sensor.b_st", power: "sensor.b_p", mode: "select.bm" }] };
     const sub = (el) => (el.shadowRoot.querySelector(".head .sub") || { textContent: "" }).textContent.trim().toLowerCase();
     const mk = async (a, b) => { const el = mount("sf-hangar-card", cfg, "en", two(a, b)); await wait(40); return el; };
     let el = await mk("Charging", "Disconnected");
-    if (el.shadowRoot.querySelectorAll(".borne").length !== 2) fail("deux bornes : deux blocs « borne » attendus");
-    if (sub(el) !== "charging") fail(`deux bornes : « charging » attendu quand l'une charge, obtenu « ${sub(el)} »`);
-    const tx = text(el); if (!/Wall A/.test(tx) || !/Wall B/.test(tx)) fail("deux bornes : les noms de chaque borne sont attendus");
-    if (!/7000 W/.test(tx)) fail("deux bornes : la puissance de la borne A (7000 W) est attendue");
+    if (el.shadowRoot.querySelectorAll(".borne").length !== 2) fail("two chargers: two 'charger' blocks expected");
+    if (sub(el) !== "charging") fail(`two chargers: 'charging' expected when one is charging, got '${sub(el)}'`);
+    const tx = text(el); if (!/Wall A/.test(tx) || !/Wall B/.test(tx)) fail("two chargers: the name of each charger is expected");
+    if (!/7000 W/.test(tx)) fail("two chargers: the power of charger A (7000 W) is expected");
     el.hass = { ...HASS(two("Charging", "Disconnected"), "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40);
     const b = [...el.shadowRoot.querySelectorAll(".seg .btn")].find((x) => /Fast/.test(x.textContent));
-    if (!b) fail("deux bornes : le mode propre à la borne B est absent"); else { b.click(); await wait(20);
-      if (!calls.some((c) => c[0] === "select" && c[2].entity_id === "select.bm" && c[2].option === "Fast")) fail("deux bornes : le mode de la borne B doit appeler select.select_option"); }
+    if (!b) fail("two chargers: charger B's own mode is missing"); else { b.click(); await wait(20);
+      if (!calls.some((c) => c[0] === "select" && c[2].entity_id === "select.bm" && c[2].option === "Fast")) fail("two chargers: charger B's mode must call select.select_option"); }
     el.remove();
-    el = await mk("Disconnected", "Plugged in"); if (sub(el) !== "waiting") fail(`deux bornes : « waiting » attendu (B branchée), obtenu « ${sub(el)} »`); el.remove();
-    el = await mk("Disconnected", "Disconnected"); if (sub(el) !== "idle") fail(`deux bornes : « idle » attendu, obtenu « ${sub(el)} »`); el.remove();
+    el = await mk("Disconnected", "Plugged in"); if (sub(el) !== "waiting") fail(`two chargers: 'waiting' expected (B plugged in), got '${sub(el)}'`); el.remove();
+    el = await mk("Disconnected", "Disconnected"); if (sub(el) !== "idle") fail(`two chargers: 'idle' expected, got '${sub(el)}'`); el.remove();
     const six = mount("sf-hangar-card", { cars: [], chargers: ["a", "b", "c", "d", "e", "f"].map((n) => ({ name: n, power: "sensor.ev" })) }, "en", two("on", "on")); await wait(40);
     if (six.shadowRoot.querySelectorAll(".borne").length !== 4) fail("bornes : 4 maximum attendues"); six.remove();
     const l = mount("sf-launcher-card", { tiles: [{ name: "EV", summary: "vehicles", card: { type: "custom:sf-hangar-card", ...cfg } }] }, "en", two("Charging", "Charging")); await wait(40);
-    if (!/7\.00 kW/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("bornes : la tuile du lanceur devrait afficher la puissance cumulée"); l.remove(); }
-  // 5j. Formats de nombres : la décimale suit la langue du profil (virgule en français), chiffres latins partout, sans séparateur de milliers.
+    if (!/7\.00 kW/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("chargers: the launcher tile should show the summed power"); l.remove(); }
+  // 5j. Number formats: the decimal follows the profile language (comma in French), Latin digits everywhere, no thousands separator.
   { const st = { ...base, "sensor.t1": U(20.5, "°C"), "sensor.p1": U(-1200, "W") };
     const m = async (lang, want) => { const e = mount("sf-machines-card", { tiles: [{ label: "T", entity: "sensor.t1", kind: "value", digits: 1 }] }, lang, st); await wait(40);
-      const got = (e.shadowRoot.querySelector(".tile .v") || { textContent: "" }).textContent.replace(/\s/g, ""); if (!got.startsWith(want)) fail(`nombres [${lang}] : « ${want} » attendu, obtenu « ${got} »`); e.remove(); };
+      const got = (e.shadowRoot.querySelector(".tile .v") || { textContent: "" }).textContent.replace(/\s/g, ""); if (!got.startsWith(want)) fail(`numbers [${lang}]: '${want}' expected, got '${got}'`); e.remove(); };
     await m("en", "20.5"); await m("fr", "20,5"); await m("de", "20,5"); await m("pt-BR", "20,5"); await m("ru", "20,5"); await m("zh", "20.5"); await m("ar", "20.5");
     const b = mount("sf-battery-card", { soc: "sensor.bat_soc", power: "sensor.p1" }, "fr", st); await wait(40);
-    if (!/1,20\s*kW/.test(text(b))) fail("nombres [fr] : « 1,20 kW » attendu dans la carte batterie"); b.remove(); }
-  // 5j-bis. Langue de HA invalide pour Intl (underscore, vide, absurde) : la carte s'affiche quand même (repli, jamais de plantage ni de récursion).
+    if (!/1,20\s*kW/.test(text(b))) fail("numbers [fr]: '1,20 kW' expected in the battery card"); b.remove(); }
+  // 5j-bis. HA language invalid for Intl (underscore, empty, absurd): the card still displays (fallback, never a crash nor recursion).
   for (const bad of ["en_US", "", "xx-INVALID-zz", "!!"]) {
     const e = mount("sf-machines-card", { tiles: [{ label: "T", entity: "sensor.temp", kind: "value", digits: 1 }] }, bad, base); await wait(40);
-    if (!/20\.5/.test(text(e))) fail(`nombres : langue invalide « ${bad} » : valeur 20.5 attendue en repli, obtenu « ${text(e).slice(0, 40)} »`); e.remove(); }
-  // 5k. Accessibilité : boutons clavier (rôle, focus, nom, Entrée / Espace), état des sélecteurs, niveau d'alerte en toutes lettres,
-  //     mouvement réduit, dialogue des popups.
+    if (!/20\.5/.test(text(e))) fail(`numbers: invalid language '${bad}': value 20.5 expected as fallback, got '${text(e).slice(0, 40)}'`); e.remove(); }
+  // 5k. Accessibility: keyboard buttons (role, focus, name, Enter / Space), selector state, alert level spelled out,
+  //     reduced motion, popup dialog.
   { const calls = []; const st = { ...base, "select.cm": S("Eco", { options: ["Eco", "Fast"] }), "sensor.hot": U(95, "°C") };
     const el = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev" }, mode: "select.cm" }, "en", st);
     el.hass = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40);
     const btns = [...el.shadowRoot.querySelectorAll(".seg .btn")];
-    if (!btns.length || !btns.every((b) => b.getAttribute("role") === "button" && b.getAttribute("tabindex") === "0" && b.getAttribute("aria-label"))) fail("accessibilité : les boutons doivent avoir rôle, tabindex et nom accessible");
-    if (btns.length && !btns.some((b) => b.getAttribute("aria-pressed") === "true")) fail("accessibilité : le mode actif doit être aria-pressed=true");
+    if (!btns.length || !btns.every((b) => b.getAttribute("role") === "button" && b.getAttribute("tabindex") === "0" && b.getAttribute("aria-label"))) fail("accessibility: buttons must have role, tabindex and accessible name");
+    if (btns.length && !btns.some((b) => b.getAttribute("aria-pressed") === "true")) fail("accessibility: the active mode must be aria-pressed=true");
     const fast = btns.find((b) => /Fast/.test(b.textContent));
     if (fast) { fast.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })); await wait(20);
-      if (!calls.some((c) => c[2].option === "Fast")) fail("accessibilité : Entrée doit activer le bouton"); }
-    if (!/prefers-reduced-motion/.test(el.shadowRoot.querySelector("style").textContent)) fail("accessibilité : règle prefers-reduced-motion absente");
+      if (!calls.some((c) => c[2].option === "Fast")) fail("accessibility: Enter must activate the button"); }
+    if (!/prefers-reduced-motion/.test(el.shadowRoot.querySelector("style").textContent)) fail("accessibility: prefers-reduced-motion rule missing");
     el.remove();
     const m = mount("sf-machines-card", { tiles: [{ label: "Pump", entity: "sensor.hot", kind: "value", warn: 60, crit: 90 }] }, "en", st); await wait(40);
-    if (!/critical/.test((m.shadowRoot.querySelector(".tile") || { getAttribute: () => "" }).getAttribute("aria-label"))) fail("accessibilité : le niveau critique doit être dit en toutes lettres (aria-label)"); m.remove();
+    if (!/critical/.test((m.shadowRoot.querySelector(".tile") || { getAttribute: () => "" }).getAttribute("aria-label"))) fail("accessibility: the critical level must be spelled out (aria-label)"); m.remove();
     const l = mount("sf-launcher-card", { tiles: [{ name: "Pop", hash: "pop", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en"); await wait(40);
-    const tile = l.shadowRoot.querySelector(".tile"); if (!tile || tile.getAttribute("role") !== "button") fail("accessibilité : la tuile du lanceur doit être un bouton");
+    const tile = l.shadowRoot.querySelector(".tile"); if (!tile || tile.getAttribute("role") !== "button") fail("accessibility: the launcher tile must be a button");
     tile.click(); await wait(120);
     const pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
-    if (!pop || pop.shadowRoot.querySelector(".sheet").getAttribute("role") !== "dialog") fail("accessibilité : le popup doit avoir le rôle dialog");
+    if (!pop || pop.shadowRoot.querySelector(".sheet").getAttribute("role") !== "dialog") fail("accessibility: the popup must have the dialog role");
     if (pop) pop.remove(); l.remove(); }
-  // 5l. Thème : sombre par défaut ; `light` ; `auto` suit le thème de HA ; variable CSS --sf-theme ; popup clair sans double inversion.
+  // 5l. Theme: dark by default; `light`; `auto` follows the HA theme; CSS variable --sf-theme; light popup without double inversion.
   { const th = async (cfg, themes) => { const e = mount("sf-battery-card", { soc: "sensor.bat_soc", ...cfg }, "en"); if (themes) e.hass = { ...HASS(base, "en"), themes }; await wait(40);
       const r = e.getAttribute("theme"); e.remove(); return r; };
-    if (await th({}) !== "dark") fail("thème : sombre par défaut attendu");
-    if (await th({ theme: "light" }) !== "light") fail("thème : light attendu");
-    if (await th({ theme: "auto" }, { darkMode: false }) !== "light") fail("thème : auto + HA clair → light");
-    if (await th({ theme: "auto" }, { darkMode: true }) !== "dark") fail("thème : auto + HA sombre → dark");
+    if (await th({}) !== "dark") fail("theme: dark expected by default");
+    if (await th({ theme: "light" }) !== "light") fail("theme: light expected");
+    if (await th({ theme: "auto" }, { darkMode: false }) !== "light") fail("theme: auto + light HA -> light");
+    if (await th({ theme: "auto" }, { darkMode: true }) !== "dark") fail("theme: auto + dark HA -> dark");
     document.documentElement.style.setProperty("--sf-theme", "light");
-    if (await th({}) !== "light") fail("thème : la variable CSS --sf-theme doit s'appliquer"); document.documentElement.style.removeProperty("--sf-theme");
+    if (await th({}) !== "light") fail("theme: the CSS variable --sf-theme must apply"); document.documentElement.style.removeProperty("--sf-theme");
     const e = mount("sf-battery-card", { soc: "sensor.bat_soc", theme: "light" }, "en"); await wait(40);
-    if (!/invert/.test(getComputedStyle(e).filter)) fail("thème : le filtre d'inversion doit s'appliquer à la carte claire"); e.remove();
+    if (!/invert/.test(getComputedStyle(e).filter)) fail("theme: the inversion filter must apply to the light card"); e.remove();
     window.loadCardHelpers = async () => ({ createCardElement: (c) => { const d = document.createElement("div"); d.className = "std-" + c.type; return d; } });
     const l = mount("sf-launcher-card", { theme: "light", tiles: [{ name: "A", hash: "a", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }, { name: "B", hash: "b", summary: "text", card: { type: "vertical-stack", cards: [] } }] }, "en"); await wait(60);
     const tiles = l.shadowRoot.querySelectorAll(".tile");
     tiles[0].click(); await wait(120);
     let pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
-    if (!pop || pop.getAttribute("theme") !== "light") fail("thème : le popup doit être clair");
-    const inner = pop && pop.shadowRoot.querySelector("sf-battery-card"); if (!inner || inner.getAttribute("theme") !== "light") fail("thème : une carte SF dans un popup clair doit être elle-même en thème clair (ni sombre, ni double inversion)");
-    if (pop && /invert/.test(getComputedStyle(pop.shadowRoot.querySelector(".sheet")).filter)) fail("thème : le panneau du popup clair ne doit plus être inversé (double inversion, containing block)");
+    if (!pop || pop.getAttribute("theme") !== "light") fail("theme: the popup must be light");
+    const inner = pop && pop.shadowRoot.querySelector("sf-battery-card"); if (!inner || inner.getAttribute("theme") !== "light") fail("theme: an SF card in a light popup must itself be in light theme (neither dark nor double inversion)");
+    if (pop && /invert/.test(getComputedStyle(pop.shadowRoot.querySelector(".sheet")).filter)) fail("theme: the light popup panel must no longer be inverted (double inversion, containing block)");
     if (pop) pop.remove(); l._pop = null;
     tiles[1].click(); await wait(150);
     pop = [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).pop();
-    if (!pop || !pop.shadowRoot.querySelector(".body .std-vertical-stack")) fail("thème : une carte non SF dans un popup clair doit s'afficher telle quelle (sans enveloppe ni filtre)");
-    if (pop && pop.shadowRoot.querySelector(".std")) fail("thème : plus d'enveloppe .std attendue");
+    if (!pop || !pop.shadowRoot.querySelector(".body .std-vertical-stack")) fail("theme: a non-SF card in a light popup must display as is (no wrapper or filter)");
+    if (pop && pop.shadowRoot.querySelector(".std")) fail("theme: no more .std wrapper expected");
     if (pop) pop.remove(); l.remove(); }
-  // 5l-bis. Un popup ouvert ne survit jamais à sa carte (même retirée juste après un clic, avant le minuteur de lien direct).
+  // 5l-bis. An open popup never outlives its card (even removed right after a click, before the deep-link timer).
   { const count = () => [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet")).length;
     const before = count();
     const l = mount("sf-launcher-card", { tiles: [{ name: "A", hash: "ghost", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en"); await wait(30);
     l.shadowRoot.querySelector(".tile").click(); await wait(30); l.remove(); await wait(700);
-    if (count() !== before) fail("popup : un popup est resté affiché après le retrait de sa carte");
+    if (count() !== before) fail("popup: a popup stayed displayed after its card was removed");
     history.replaceState(null, "", location.pathname + location.search); }
-  // 5m. Commandes de borne : rien sans `controls: true` ; démarrer / arrêter (arrêt en 2 appuis) ; intensité ± bornée.
+  // 5m. Charger controls: nothing without `controls: true`; start / stop (stop needs 2 presses); bounded current ±.
   { const calls = []; const st = { ...base, "switch.sw": S("off"), "number.cur": S(10, { min: 6, max: 16, step: 1, unit_of_measurement: "A" }), "sensor.cur2": U(10, "A"), "sensor.ev": U(0, "W") };
     const mk = async (charger) => { const e = mount("sf-hangar-card", { cars: [], charger }, "en", st);
       e.hass = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40); return e; };
     let e = await mk({ power: "sensor.ev", switch: "switch.sw", current: "number.cur" });
-    if (e.shadowRoot.querySelector(".ctl")) fail("commandes : rien ne doit s'afficher sans controls: true"); e.remove();
+    if (e.shadowRoot.querySelector(".ctl")) fail("controls: nothing must be displayed without controls: true"); e.remove();
     e = await mk({ power: "sensor.ev", switch: "switch.sw", current: "number.cur", controls: true });
     const start = [...e.shadowRoot.querySelectorAll(".ctl .btn")].find((b) => /Start/.test(b.textContent));
-    if (!start) fail("commandes : bouton Start attendu"); else { start.click(); await wait(20); if (!calls.some((c) => c[0] === "switch" && c[1] === "turn_on")) fail("commandes : Start doit appeler switch.turn_on"); }
+    if (!start) fail("controls: Start button expected"); else { start.click(); await wait(20); if (!calls.some((c) => c[0] === "switch" && c[1] === "turn_on")) fail("controls: Start must call switch.turn_on"); }
     const pm = [...e.shadowRoot.querySelectorAll(".ctlrow .btn")];
-    if (pm.length !== 2) fail("commandes : boutons − et + attendus"); else { pm[1].click(); await wait(20);
-      if (!calls.some((c) => c[1] === "set_value" && c[2].value === 11)) fail("commandes : + doit passer 10 A à 11 A"); }
+    if (pm.length !== 2) fail("controls: − and + buttons expected"); else { pm[1].click(); await wait(20);
+      if (!calls.some((c) => c[1] === "set_value" && c[2].value === 11)) fail("controls: + must go from 10 A to 11 A"); }
     e.remove();
     const st2 = { ...st, "switch.sw": S("on"), "number.cur": S(16, { min: 6, max: 16, step: 1 }) }; calls.length = 0;
     e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", switch: "switch.sw", current: "number.cur", controls: true } }, "en", st2);
     e.hass = { ...HASS(st2, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; await wait(40);
     const stop = [...e.shadowRoot.querySelectorAll(".ctl .btn")].find((b) => /Stop/.test(b.textContent));
-    if (!stop) fail("commandes : bouton Stop attendu"); else { stop.click(); await wait(20);
-      if (calls.some((c) => c[1] === "turn_off")) fail("commandes : l'arrêt doit demander une confirmation (2 appuis)");
-      stop.click(); await wait(20); if (!calls.some((c) => c[0] === "switch" && c[1] === "turn_off")) fail("commandes : le 2e appui doit arrêter la charge"); }
+    if (!stop) fail("controls: Stop button expected"); else { stop.click(); await wait(20);
+      if (calls.some((c) => c[1] === "turn_off")) fail("controls: stopping must ask for a confirmation (2 presses)");
+      stop.click(); await wait(20); if (!calls.some((c) => c[0] === "switch" && c[1] === "turn_off")) fail("controls: the 2nd press must stop the charge"); }
     const plus = [...e.shadowRoot.querySelectorAll(".ctlrow .btn")][1]; calls.length = 0; if (plus) { plus.click(); await wait(20);
-      if (!calls.some((c) => c[2].value === 16)) fail("commandes : l'intensité doit rester bornée au maximum (16 A)"); }
+      if (!calls.some((c) => c[2].value === 16)) fail("controls: the current must stay bounded at the maximum (16 A)"); }
     e.remove();
     e = await mk({ power: "sensor.ev", current: "sensor.cur2", controls: true });
-    if (e.shadowRoot.querySelector(".ctl")) fail("commandes : sans interrupteur ni entité number, aucune commande ne doit apparaître"); e.remove(); }
-  // 5n. Éditeurs : tous se construisent ; « Remplir depuis un appareil » retrouve les entités d'après leur type, sans rien écraser.
+    if (e.shadowRoot.querySelector(".ctl")) fail("controls: without a switch or number entity, no control must appear"); e.remove(); }
+  // 5n. Editors: all of them build; "Fill from a device" finds the entities from their type, without overwriting anything.
   { const hassEd = { states: withIds({ ...base,
       "sensor.car_soc": S(55, { unit_of_measurement: "%", device_class: "battery" }), "sensor.car_range": S(180, { unit_of_measurement: "km", device_class: "distance" }),
       "binary_sensor.car_charging": S("off", { device_class: "battery_charging" }), "sensor.car_wifi_battery": S(3, { unit_of_measurement: "%", device_class: "battery" }),
@@ -392,93 +392,93 @@ __SF.SF_HOOK.tr = (lang, key) => {
     const car = g("dcar", "car"); if (car.soc !== "sensor.car_soc" || car.range !== "sensor.car_range" || car.charging !== "binary_sensor.car_charging" || car.name !== "My EV") fail(`remplissage voiture : ${JSON.stringify(car)}`);
     const wb = g("dwb", "charger"); if (wb.power !== "sensor.wb_power" || wb.connected !== "binary_sensor.wb_plug" || wb.current !== "number.wb_current_limit" || wb.switch !== "switch.wb_charging_enable" || wb.charging !== "sensor.wb_status" || wb.name !== "Garage box") fail(`remplissage borne : ${JSON.stringify(wb)}`);
     const bt = g("dbat", "battery"); if (bt.soc !== "sensor.bat_level" || bt.power !== "sensor.bat_power" || bt.charged_today !== "sensor.bat_charged_today" || bt.discharged_today !== "sensor.bat_discharged_today") fail(`remplissage batterie : ${JSON.stringify(bt)}`);
-    if (Object.keys(g("inconnu", "car")).length > 0) fail("remplissage : un appareil inconnu ne doit rien remplir");
-    const d = { soc: "sensor.mine" }; __SF.sfAutofill(hassEd, d, "dcar", "car"); if (d.soc !== "sensor.mine" || d.range !== "sensor.car_range") fail("remplissage : un champ déjà rempli ne doit jamais être écrasé");
+    if (Object.keys(g("inconnu", "car")).length > 0) fail("auto-fill: an unknown device must fill nothing");
+    const d = { soc: "sensor.mine" }; __SF.sfAutofill(hassEd, d, "dcar", "car"); if (d.soc !== "sensor.mine" || d.range !== "sensor.car_range") fail("auto-fill: an already filled field must never be overwritten");
     for (const tag of Object.keys(FULL)) {
-      const ed = document.createElement(tag + "-editor"); if (!customElements.get(tag + "-editor")) { fail(`${tag} : éditeur absent`); continue; }
+      const ed = document.createElement(tag + "-editor"); if (!customElements.get(tag + "-editor")) { fail(`${tag}: editor missing`); continue; }
       ed.hass = hassEd; ed.setConfig(customElements.get(tag).getStubConfig()); document.body.appendChild(ed); await wait(30);
-      if (!ed.shadowRoot.querySelectorAll("ha-form").length) fail(`${tag} : l'éditeur ne construit aucun formulaire`);
-      const tf = [...ed.shadowRoot.querySelectorAll("ha-form")][0]; if (!JSON.stringify(tf.schema).includes('"name":"theme"')) fail(`${tag} : champ Thème absent de l'éditeur`);
+      if (!ed.shadowRoot.querySelectorAll("ha-form").length) fail(`${tag}: the editor builds no form`);
+      const tf = [...ed.shadowRoot.querySelectorAll("ha-form")][0]; if (!JSON.stringify(tf.schema).includes('"name":"theme"')) fail(`${tag}: Theme field missing from the editor`);
       ed.remove(); }
     const ed = document.createElement("sf-hangar-card-editor"); ed.hass = hassEd; ed.setConfig({ cars: [{}], chargers: [{}] }); document.body.appendChild(ed); await wait(30);
     let emitted = null; ed.addEventListener("config-changed", (ev) => { emitted = ev.detail.config; });
     const forms = [...ed.shadowRoot.querySelectorAll("ha-form")], pickForm = (k) => forms.find((f) => (f.schema || []).some((x) => x.sfFill === k));
-    const cf = pickForm("car"), wf = forms.filter((f) => (f.schema || []).some((x) => x.sfFill === "charger")).pop();   // le dernier = élément de la liste `chargers`
-    if (!cf || !wf) fail("éditeur : champs « Remplir depuis un appareil » absents");
+    const cf = pickForm("car"), wf = forms.filter((f) => (f.schema || []).some((x) => x.sfFill === "charger")).pop();   // the last one = item of the `chargers` list
+    if (!cf || !wf) fail("editor: 'Fill from a device' fields missing");
     else {
       cf.dispatchEvent(new CustomEvent("value-changed", { detail: { value: { ...cf.data, _device: "dcar" } } }));
-      if (!emitted || emitted.cars[0].soc !== "sensor.car_soc" || emitted.cars[0].range !== "sensor.car_range") fail("éditeur : la voiture doit être préremplie depuis l'appareil");
+      if (!emitted || emitted.cars[0].soc !== "sensor.car_soc" || emitted.cars[0].range !== "sensor.car_range") fail("editor: the car must be pre-filled from the device");
       wf.dispatchEvent(new CustomEvent("value-changed", { detail: { value: { ...wf.data, _device: "dwb" } } }));
-      if (!emitted || emitted.chargers[0].power !== "sensor.wb_power" || emitted.chargers[0].name !== "Garage box") fail("éditeur : la borne doit être préremplie depuis l'appareil");
-      if (/_device/.test(JSON.stringify(emitted))) fail("éditeur : le champ technique _device ne doit jamais être enregistré dans la configuration"); }
+      if (!emitted || emitted.chargers[0].power !== "sensor.wb_power" || emitted.chargers[0].name !== "Garage box") fail("editor: the charger must be pre-filled from the device");
+      if (/_device/.test(JSON.stringify(emitted))) fail("editor: the technical _device field must never be saved in the configuration"); }
     ed.remove(); }
-  // 5o. Durcissement (revue contradictoire) : touche maintenue, bouton imbriqué, identifiant vide, interrupteur « pause », bornes d'intensité,
-  //     devinette prudente, URL d'images sûres, relecture de --sf-theme, dates avec une langue invalide.
+  // 5o. Hardening (adversarial review): held key, nested button, empty identifier, "pause" switch, current bounds,
+  //     cautious guessing, safe image URLs, --sf-theme re-reading, dates with an invalid language.
   { const calls = []; const spy = (el, st) => { el.hass = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; };
     const kd = (el, key, repeat) => el.dispatchEvent(new KeyboardEvent("keydown", { key, repeat: !!repeat, bubbles: true, composed: true }));
-    // Touche maintenue : jamais deux appuis comptés, la confirmation d'arrêt n'est pas franchie.
+    // Held key: never two presses counted, the stop confirmation is not crossed.
     const st = { ...base, "switch.sw": S("on"), "sensor.ev": U(0, "W") };
     let e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", switch: "switch.sw", controls: true } }, "en", st); spy(e, st); await wait(40);
     const stop = [...e.shadowRoot.querySelectorAll(".ctl .btn")].find((b) => /Stop/.test(b.textContent));
     kd(stop, "Enter", false); kd(stop, "Enter", true); kd(stop, "Enter", true); await wait(20);
-    if (calls.some((c) => c[1] === "turn_off")) fail("clavier : une touche maintenue ne doit pas franchir la confirmation d'arrêt");
-    kd(stop, "Enter", false); await wait(20); if (!calls.some((c) => c[1] === "turn_off")) fail("clavier : 2 vrais appuis doivent arrêter la charge");
+    if (calls.some((c) => c[1] === "turn_off")) fail("keyboard: a held key must not cross the stop confirmation");
+    kd(stop, "Enter", false); await wait(20); if (!calls.some((c) => c[1] === "turn_off")) fail("keyboard: 2 real presses must stop the charge");
     e.remove();
-    // Identifiant vide / « undefined » : pas de faux bouton.
+    // Empty identifier / "undefined": no fake button.
     e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev" } }, "en", st); await wait(40);
     const dead = [...e.shadowRoot.querySelectorAll("[data-e]")].filter((n) => ["", "undefined"].includes(n.getAttribute("data-e")));
-    if (dead.some((n) => n.getAttribute("role") === "button")) fail("accessibilité : un élément sans entité cible ne doit pas être un bouton"); e.remove();
-    // Interrupteur « pause » : switch_invert inverse l'affichage ET l'action ; l'intensité ne descend jamais sous 0 sans bornes.
+    if (dead.some((n) => n.getAttribute("role") === "button")) fail("accessibility: an element without target entity must not be a button"); e.remove();
+    // "Pause" switch: switch_invert inverts the display AND the action; the current never goes below 0 without bounds.
     calls.length = 0; const stp = { ...base, "switch.pause": S("on"), "number.c": S(1, {}), "sensor.ev": U(0, "W") };
     e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", switch: "switch.pause", switch_invert: true, current: "number.c", controls: true } }, "en", stp); spy(e, stp); await wait(40);
     const sw = [...e.shadowRoot.querySelectorAll(".ctl .btn")].find((b) => /Start|Stop/.test(b.textContent));
-    if (!sw || !/Start/.test(sw.textContent)) fail("interrupteur inversé : switch ON (= pause) doit proposer « Start »");
-    else { sw.click(); await wait(20); if (!calls.some((c) => c[0] === "switch" && c[1] === "turn_off")) fail("interrupteur inversé : démarrer doit éteindre l'interrupteur de pause"); }
+    if (!sw || !/Start/.test(sw.textContent)) fail("inverted switch: switch ON (= pause) must offer 'Start'");
+    else { sw.click(); await wait(20); if (!calls.some((c) => c[0] === "switch" && c[1] === "turn_off")) fail("inverted switch: starting must turn the pause switch off"); }
     const minus = [...e.shadowRoot.querySelectorAll(".ctlrow .btn")][0]; calls.length = 0; if (minus) { minus.click(); await wait(20);
-      if (!calls.some((c) => c[1] === "set_value" && c[2].value === 0)) fail("intensité : sans bornes, la valeur ne doit jamais devenir négative (plancher 0)"); }
+      if (!calls.some((c) => c[1] === "set_value" && c[2].value === 0)) fail("current: without bounds, the value must never become negative (floor 0)"); }
     e.remove();
     const st3 = { ...base, "number.c": S(10, {}) }; calls.length = 0;
     e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", current: "number.c", current_min: 6, current_max: 16, controls: true } }, "en", st3); spy(e, st3); await wait(40);
     const [m3, p3] = [...e.shadowRoot.querySelectorAll(".ctlrow .btn")]; for (let i = 0; i < 1; i++) { m3.click(); } await wait(20);
-    if (!calls.some((c) => c[2].value === 9)) fail("intensité : − doit passer 10 A à 9 A"); e.remove();
-    // Devinette prudente : pas de 12 V, pas d'odomètre, pas de « connectivité », pas d'interrupteur de pause, ambigu = vide.
+    if (!calls.some((c) => c[2].value === 9)) fail("current: − must go from 10 A to 9 A"); e.remove();
+    // Cautious guessing: no 12 V, no odometer, no "connectivity", no pause switch, ambiguous = empty.
     const H = (list, dev) => ({ states: withIds(Object.fromEntries(list.map(([id, st]) => [id, st]))), entities: Object.fromEntries(list.map(([id]) => [id, { entity_id: id, device_id: dev }])), devices: { [dev]: { name: "X" } } });
     const g1 = __SF.sfGuess(H([["sensor.car_12v_battery", S(12, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.car_odometer", S(5000, { unit_of_measurement: "km", device_class: "distance" })]], "d"), "d", "car");
-    if (g1.soc || g1.range) fail(`devinette : batterie 12 V / odomètre ne doivent pas être choisis (${JSON.stringify(g1)})`);
+    if (g1.soc || g1.range) fail(`guessing: 12 V battery / odometer must not be chosen (${JSON.stringify(g1)})`);
     const g2 = __SF.sfGuess(H([["binary_sensor.wb_online", S("on", { device_class: "connectivity" })], ["switch.wb_pause_session", S("off")], ["switch.wb_smart_charging", S("on")]], "d"), "d", "charger");
-    if (g2.connected || g2.switch) fail(`devinette : connectivité / pause / « smart » ne doivent pas devenir branché / interrupteur (${JSON.stringify(g2)})`);
+    if (g2.connected || g2.switch) fail(`guessing: connectivity / pause / 'smart' must not become plugged in / switch (${JSON.stringify(g2)})`);
     const g3 = __SF.sfGuess(H([["sensor.a_soc", S(50, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.b_level", S(60, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.p1", S(1, { unit_of_measurement: "W", device_class: "power" })], ["sensor.p2", S(2, { unit_of_measurement: "W", device_class: "power" })]], "d"), "d", "battery");
-    if (g3.power) fail(`devinette : deux puissances sans préférence = ambigu, rien ne doit être rempli (${JSON.stringify(g3)})`);
+    if (g3.power) fail(`guessing: two powers without preference = ambiguous, nothing must be filled (${JSON.stringify(g3)})`);
     const g4 = __SF.sfGuess({ ...H([["sensor.hid_soc", S(50, { unit_of_measurement: "%", device_class: "battery" })], ["sensor.ok_soc", S(60, { unit_of_measurement: "%", device_class: "battery" })]], "d"), entities: { "sensor.hid_soc": { entity_id: "sensor.hid_soc", device_id: "d", hidden: true }, "sensor.ok_soc": { entity_id: "sensor.ok_soc", device_id: "d" } } }, "d", "battery");
-    if (g4.soc !== "sensor.ok_soc") fail(`devinette : une entité masquée doit être ignorée (${JSON.stringify(g4)})`);
-    // URL d'images : javascript: / data:text refusés, relative acceptée, ? ou & selon l'URL.
-    if (__SF.sfSafeUrl("javascript:alert(1)") || __SF.sfSafeUrl("data:text/html;base64,AAAA") || __SF.sfSafeUrl("//evil.example/x.png")) fail("URL : javascript:, data:text et // doivent être refusés");
-    if (__SF.sfSafeUrl("/api/camera_proxy/camera.x?token=1") !== "/api/camera_proxy/camera.x?token=1" || !__SF.sfSafeUrl("https://a.example/x.jpg")) fail("URL : une URL relative ou https doit être acceptée");
+    if (g4.soc !== "sensor.ok_soc") fail(`guessing: a hidden entity must be ignored (${JSON.stringify(g4)})`);
+    // Image URLs: javascript: / data:text refused, relative accepted, ? or & depending on the URL.
+    if (__SF.sfSafeUrl("javascript:alert(1)") || __SF.sfSafeUrl("data:text/html;base64,AAAA") || __SF.sfSafeUrl("//evil.example/x.png")) fail("URL: javascript:, data:text and // must be refused");
+    if (__SF.sfSafeUrl("/api/camera_proxy/camera.x?token=1") !== "/api/camera_proxy/camera.x?token=1" || !__SF.sfSafeUrl("https://a.example/x.jpg")) fail("URL: a relative or https URL must be accepted");
     const cam = mount("sf-camera-card", { cameras: [{ entity: "camera.front" }] }, "en", { ...base, "camera.front": S("idle", { entity_picture: "javascript:alert(1)" }) }); await wait(60);
-    if (/javascript:/.test(cam.shadowRoot.innerHTML)) fail("sécurité : une entity_picture javascript: ne doit jamais atteindre le DOM"); cam.remove();
-    // Texte venu d'une entité : jamais interprété comme du HTML (unité, nom, état).
+    if (/javascript:/.test(cam.shadowRoot.innerHTML)) fail("security: a javascript: entity_picture must never reach the DOM"); cam.remove();
+    // Text coming from an entity: never interpreted as HTML (unit, name, state).
     const evil = '<img src=x onerror="window.__xss=1">'; window.__xss = 0;
     const xs = { ...base, "sensor.rx": S(100, { unit_of_measurement: evil }), "sensor.tx": S(evil, { friendly_name: evil }) };
     const xe = [mount("sf-hangar-card", { cars: [{ name: evil, soc: "sensor.car_soc", range: "sensor.rx" }], charger: { name: evil } }, "en", xs),
       mount("sf-machines-card", { tiles: [{ label: evil, entity: "sensor.tx", kind: "text" }, { label: "u", entity: "sensor.rx", kind: "value" }] }, "en", xs),
       mount("sf-battery-card", { batteries: [{ name: evil, soc: "sensor.car_soc" }, { name: "b", soc: "sensor.bat_soc" }] }, "en", xs),
       mount("sf-cells-card", {}, "en", { ...xs, "sensor.cc": S(10, { device_class: "battery", friendly_name: evil, unit_of_measurement: "%" }) })]; await wait(80);
-    if (window.__xss) fail("SÉCURITÉ : du HTML venu d'un état / d'un nom d'entité a été exécuté (XSS)");
-    if (xe.some((n) => n.shadowRoot && n.shadowRoot.querySelector('img[src="x"]'))) fail("SÉCURITÉ : du HTML venu d'une entité a créé un élément dans le DOM");
+    if (window.__xss) fail("SECURITY: HTML coming from an entity state / name was executed (XSS)");
+    if (xe.some((n) => n.shadowRoot && n.shadowRoot.querySelector('img[src="x"]'))) fail("SECURITY: HTML coming from an entity created an element in the DOM");
     xe.forEach((n) => n.remove());
-    // Langue invalide : les dates (bandeau, alerte) ne plantent pas non plus.
+    // Invalid language: dates (banner, alert) do not crash either.
     for (const bad of ["en_US", "", "!!"]) { const b = mount("sf-bridge-card", { weather: "weather.home", price: "sensor.price" }, bad, base); await wait(40);
       if (!text(b).trim()) fail(`bandeau : langue invalide « ${bad} » : rendu vide`); b.remove(); }
-    // --sf-theme : relu quand le thème HA change.
+    // --sf-theme: re-read when the HA theme changes.
     document.documentElement.style.setProperty("--sf-theme", "light");
     const tc = mount("sf-battery-card", { soc: "sensor.bat_soc" }, "en"); tc.hass = { ...HASS(base, "en"), themes: { theme: "A", darkMode: true } }; await wait(40);
     const t1 = tc.getAttribute("theme"); document.documentElement.style.setProperty("--sf-theme", "dark");
     tc.hass = { ...HASS(base, "en"), themes: { theme: "B", darkMode: true } }; await wait(450);
-    if (t1 !== "light" || tc.getAttribute("theme") !== "dark") fail(`thème : --sf-theme doit être relue au changement de thème HA (${t1} → ${tc.getAttribute("theme")})`);
+    if (t1 !== "light" || tc.getAttribute("theme") !== "dark") fail(`theme: --sf-theme must be re-read when the HA theme changes (${t1} → ${tc.getAttribute("theme")})`);
     document.documentElement.style.removeProperty("--sf-theme"); tc.remove(); }
-  // 5p. Deuxième tour (chasse aux bugs + audit de sécurité) : injection par la CONFIG, regex piégée, noms géants, confirmation persistante,
-  //     historique des popups, kW, autonomie « 1h60 », libellés accessibles, configs mal typées, caméra.
-  { // -- Injection par la configuration : chaque champ texte est empoisonné, un à la fois, sur les 16 cartes. Rien ne doit s'exécuter.
+  // 5p. Second round (bug hunt + security audit): injection through the CONFIG, trapped regex, giant names, persistent confirmation,
+  //     popup history, kW, "1h60" autonomy, accessible labels, badly typed configs, camera.
+  { // -- Injection through the configuration: every text field is poisoned, one at a time, on the 16 cards. Nothing must run.
     window.__pwn = 0; const payloads = ['x"><img src=x onerror="window.__pwn=1">', "x'><svg onload=window.__pwn=1>", 'x" onfocus="window.__pwn=1" autofocus="'];
     const leaves = (o, path = []) => (o && typeof o === "object") ? Object.entries(o).flatMap(([k, v]) => leaves(v, [...path, k])) : (typeof o === "string" ? [path] : []);
     const setAt = (o, path, v) => { let c = o; path.slice(0, -1).forEach((k) => { c = c[k]; }); c[path[path.length - 1]] = v; };
@@ -492,73 +492,73 @@ __SF.SF_HOOK.tr = (lang, key) => {
           await wait(8);
           if (window.__pwn || (el.shadowRoot && el.shadowRoot.querySelector('img[src="x"], svg[onload]'))) { bad.push(`${tag}.${path.join(".")}`); window.__pwn = 0; }
           el.remove(); } } }
-    if (bad.length) fail(`SÉCURITÉ : injection par la configuration (${bad.length}) : ${[...new Set(bad)].slice(0, 6).join(", ")}`);
-    if (count < 150) fail(`sécurité : le test d'injection n'a couvert que ${count} cas`); }
-  { // -- Expression régulière piégée (ReDoS) : ignorée, pas de gel ; une regex valide fonctionne
+    if (bad.length) fail(`SECURITY: injection through the configuration (${bad.length}): ${[...new Set(bad)].slice(0, 6).join(", ")}`);
+    if (count < 150) fail(`security: the injection test only covered ${count} cases`); }
+  { // -- Trapped regular expression (ReDoS): ignored, no freeze; a valid regex works
     const st = { ...base, "sensor.good_batt": S(40, { device_class: "battery", unit_of_measurement: "%" }), "sensor.other_batt": S(50, { device_class: "battery", unit_of_measurement: "%" }),
       "sensor.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!": S(30, { device_class: "battery", unit_of_measurement: "%" }) };
     const t0 = performance.now();
     const e = mount("sf-cells-card", { include_pattern: "(a+)+$", exclude_pattern: "(.*)*(.*)*(.*)*z" }, "en", st); await wait(40);
-    if (performance.now() - t0 > 1500) fail("sécurité : une regex à quantificateurs imbriqués fige la carte (ReDoS)"); e.remove();
+    if (performance.now() - t0 > 1500) fail("security: a regex with nested quantifiers freezes the card (ReDoS)"); e.remove();
     const ok = mount("sf-cells-card", { include_pattern: "^sensor\\.good" }, "en", st); await wait(40);
-    const n = ok.shadowRoot.querySelectorAll(".cell").length; if (n !== 1) fail(`regex : « ^sensor\\.good » doit garder 1 cellule, obtenu ${n}`); ok.remove();
-    const inv = mount("sf-cells-card", { include_pattern: "([" }, "en", st); await wait(40); if (!text(inv).trim()) fail("regex : une regex invalide ne doit pas casser la carte"); inv.remove();
-    // -- Nom d'entité géant : pas de gel
+    const n = ok.shadowRoot.querySelectorAll(".cell").length; if (n !== 1) fail(`regex: '^sensor\\.good' must keep 1 cell, got ${n}`); ok.remove();
+    const inv = mount("sf-cells-card", { include_pattern: "([" }, "en", st); await wait(40); if (!text(inv).trim()) fail("regex: an invalid regex must not break the card"); inv.remove();
+    // -- Giant entity name: no freeze
     const huge = " ".repeat(60000) + "x"; const t1 = performance.now();
     const g = [mount("sf-cells-card", {}, "en", { ...st, "sensor.big": S(10, { device_class: "battery", unit_of_measurement: "%", friendly_name: huge }) }),
       mount("sf-bridge-card", { weather: "weather.home", leaks: ["binary_sensor.lk"] }, "en", { ...base, "binary_sensor.lk": S("on", { friendly_name: huge }) })]; await wait(60);
-    if (performance.now() - t1 > 1500) fail("sécurité : un nom d'entité géant fige la carte"); g.forEach((x) => x.remove()); }
-  { // -- Climat : une sonde absente ne donne jamais « NaN »
+    if (performance.now() - t1 > 1500) fail("security: a giant entity name freezes the card"); g.forEach((x) => x.remove()); }
+  { // -- Climate: a missing probe never gives "NaN"
     const e = mount("sf-climate-card", { rooms: [{ name: "L", climate: "climate.room", temp: "sensor.absent" }] }, "en", { ...base, "climate.room": S("heat", { hvac_action: "heating", temperature: 20 }) }); await wait(40);
-    if (/NaN|undefined/.test(text(e))) fail("climat : « NaN » affiché quand la température courante est absente"); e.remove(); }
-  { // -- Confirmation d'arrêt : elle survit à un rafraîchissement de la carte (la puissance bouge toutes les quelques secondes)
+    if (/NaN|undefined/.test(text(e))) fail("climate: 'NaN' displayed when the current temperature is missing"); e.remove(); }
+  { // -- Stop confirmation: it survives a card refresh (power moves every few seconds)
     const calls = []; const mk = (p) => ({ ...base, "switch.sw": S("on"), "sensor.pw": U(p, "W") });
     const e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.pw", switch: "switch.sw", controls: true } }, "en", mk(1800));
     const spy = (st) => { e.hass = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return Promise.resolve(); } }; }; spy(mk(1800)); await wait(40);
     const stopBtn = () => [...e.shadowRoot.querySelectorAll(".ctl .btn")].find((b) => /Stop|Stop\?/.test(b.textContent) || /stop/i.test(b.getAttribute("title") || ""));
     stopBtn().click(); await wait(20); spy(mk(1795)); await wait(60);
-    if (!stopBtn().classList.contains("armed")) fail("confirmation : le bouton armé doit le rester après un rafraîchissement de la carte");
+    if (!stopBtn().classList.contains("armed")) fail("confirmation: the armed button must stay armed after a card refresh");
     stopBtn().click(); await wait(20);
-    if (calls.filter((c) => c[1] === "turn_off").length !== 1) fail("confirmation : le 2e appui (après rafraîchissement) doit arrêter la charge une seule fois");
+    if (calls.filter((c) => c[1] === "turn_off").length !== 1) fail("confirmation: the 2nd press (after refresh) must stop the charge exactly once");
     e.remove(); }
-  { // -- Historique : un popup ouvert par lien direct se ferme sans quitter la page ; fermer puis ouvrir une autre tuile aussitôt reste ouvert
+  { // -- History: a popup opened by direct link closes without leaving the page; closing then immediately opening another tile stays open
     const pops = () => [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet"));
     history.pushState(null, "", "#previous"); history.pushState(null, "", "#bat");
     const l = mount("sf-launcher-card", { tiles: [{ name: "B", hash: "bat", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }, { name: "C", hash: "cc", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en");
     await wait(600);
-    const p = pops().pop(); if (!p) fail("historique : le lien direct #bat devrait ouvrir le popup");
+    const p = pops().pop(); if (!p) fail("history: the direct link #bat should open the popup");
     else { p.shadowRoot.querySelector(".bar button").click(); await wait(700);
-      if (location.hash === "#previous") fail("historique : fermer un popup ouvert par lien direct fait reculer la page (quitte le tableau de bord)"); }
+      if (location.hash === "#previous") fail("history: closing a popup opened by direct link goes back in the history (leaves the dashboard)"); }
     history.replaceState(null, "", location.pathname + location.search);
     const tiles = l.shadowRoot.querySelectorAll(".tile"); tiles[0].click(); await wait(120);
     pops().pop().shadowRoot.querySelector(".back").click(); tiles[1].click(); await wait(800);
-    if (pops().length !== 1) fail(`historique : fermer puis ouvrir une autre tuile aussitôt doit laisser 1 popup ouvert, obtenu ${pops().length}`);
+    if (pops().length !== 1) fail(`history: closing then immediately opening another tile must leave 1 popup open, got ${pops().length}`);
     pops().forEach((x) => x.remove()); l.remove(); history.replaceState(null, "", location.pathname + location.search); }
   { // -- Puissance de borne en kW lue en W ; autonomie jamais « 1h60 »
     const e = mount("sf-hangar-card", { cars: [], charger: { connected: "sensor.cc", power: "sensor.kw" } }, "en", { ...base, "sensor.cc": S("off"), "sensor.kw": U(7.2, "kW") }); await wait(40);
-    if (!/7200 W/.test(text(e))) fail("borne : 7,2 kW doit s'afficher « 7200 W »"); if ((e.shadowRoot.querySelector(".head .sub") || { textContent: "" }).textContent.trim().toLowerCase() !== "charging") fail("borne : 7,2 kW sans capteur « en charge » doit compter comme en charge"); e.remove();
+    if (!/7200 W/.test(text(e))) fail("charger: 7.2 kW must display as '7200 W'"); if ((e.shadowRoot.querySelector(".head .sub") || { textContent: "" }).textContent.trim().toLowerCase() !== "charging") fail("charger: 7.2 kW without a 'charging' sensor must count as charging"); e.remove();
     const b = mount("sf-battery-card", { soc: "sensor.s50", power: "sensor.p", capacity_kwh: 10 }, "en", { ...base, "sensor.s50": U(50, "%"), "sensor.p": U(-2500.01, "W") }); await wait(40);
-    if (/\dh60/.test(text(b)) || !/full in 2h00/.test(text(b))) fail(`batterie : autonomie arrondie à « 2h00 » attendue, obtenu « ${(text(b).match(/full in \S+|empty in \S+/) || [""])[0]} »`); b.remove(); }
-  { // -- Accessibilité : libellés avec espaces, pas de faux bouton, commandes de courant seulement si la valeur est un nombre
+    if (/\dh60/.test(text(b)) || !/full in 2h00/.test(text(b))) fail(`battery: autonomy rounded to '2h00' expected, got '${(text(b).match(/full in \S+|empty in \S+/) || [""])[0]}'`); b.remove(); }
+  { // -- Accessibility: labels with spaces, no fake button, current controls only if the value is a number
     const l = mount("sf-ledger-card", { total_cost: "sensor.eur", devices: [] }, "en"); await wait(40);
-    const k = l.shadowRoot.querySelector(".kpi.click"); if (k && /cost\d/i.test(k.getAttribute("aria-label") || "")) fail(`accessibilité : libellé « ${k.getAttribute("aria-label")} » sans espace entre les blocs`); l.remove();
+    const k = l.shadowRoot.querySelector(".kpi.click"); if (k && /cost\d/i.test(k.getAttribute("aria-label") || "")) fail(`accessibility: label '${k.getAttribute("aria-label")}' without space between blocks`); l.remove();
     const m = mount("sf-machines-card", { tiles: [{ label: "NoEnt", kind: "value" }] }, "en"); await wait(40);
-    const tl = m.shadowRoot.querySelector(".tile"); if (tl && tl.getAttribute("role") === "button") fail("accessibilité : une tuile sans entité ne doit pas être un bouton"); m.remove();
+    const tl = m.shadowRoot.querySelector(".tile"); if (tl && tl.getAttribute("role") === "button") fail("accessibility: a tile without entity must not be a button"); m.remove();
     const h = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", current: "number.bad", controls: true } }, "en", { ...base, "number.bad": S("abc", { min: 6, max: 16 }), "sensor.ev": U(0, "W") }); await wait(40);
-    if (h.shadowRoot.querySelector(".ctlrow")) fail("commandes : un état non numérique ne doit pas proposer − / +"); h.remove(); }
-  { // -- Caméra : intervalle borné, relu à chaque setConfig
+    if (h.shadowRoot.querySelector(".ctlrow")) fail("controls: a non-numeric state must not offer − / +"); h.remove(); }
+  { // -- Camera: bounded interval, re-read on every setConfig
     const c = mount("sf-camera-card", { cameras: [], refresh: 0 }, "en"); await wait(20);
-    if (c._every() !== 5) fail(`caméra : refresh 0 doit retomber sur 5 s, obtenu ${c._every()}`);
-    c.setConfig({ cameras: [], refresh: 2 }); if (c._every() !== 2) fail("caméra : setConfig doit relire refresh"); c.remove(); }
-  { // -- Configurations mal typées : jamais d'exception
+    if (c._every() !== 5) fail(`camera: refresh 0 must fall back to 5 s, got ${c._every()}`);
+    c.setConfig({ cameras: [], refresh: 2 }); if (c._every() !== 2) fail("camera: setConfig must re-read refresh"); c.remove(); }
+  { // -- Badly typed configurations: never an exception
     const bad = [["sf-alert-card", { leaks: "binary_sensor.leak", doors: null }], ["sf-bridge-card", { weather: "weather.home", people: "x", doors: "binary_sensor.door" }],
       ["sf-hangar-card", { cars: "x", chargers: [null, { power: "sensor.ev", charging_states: "Charging" }], charger: "oops" }], ["sf-reactor-card", { grid: "sensor.grid", devices: "sensor.ev" }],
       ["sf-climate-card", { rooms: null }], ["sf-console-card", { groups: "x" }], ["sf-camera-card", { cameras: "camera.front" }], ["sf-setpoints-card", { columns: "x", rows: null }],
       ["sf-ledger-card", { devices: "x" }], ["sf-launcher-card", { tiles: null }], ["sf-cells-card", { exclude: "sensor.x" }], ["sf-radiators-card", { radiators: [null] }], ["sf-battery-card", { batteries: [null, { soc: "sensor.bat_soc" }] }]];
-    for (const [tag, cfg] of bad) { try { const e = mount(tag, cfg, "en"); await wait(15); e.remove(); } catch (er) { fail(`${tag} : plante avec une configuration mal typée (${er.message})`); } }
-    try { const e = document.createElement("sf-machines-card"); e.setConfig({ tiles: [] }); document.body.appendChild(e); e.hass = { locale: { language: "en" } }; await wait(20); e.remove(); } catch (er) { fail(`hass sans states : exception (${er.message})`); } }
-  // 5q. Troisième tour : injection CSS par la config, plage du cadran, intervalle caméra, états « constructor », services mal formés,
-  //     éléments HTML natifs dans les popups, chiffres latins pour les dates, typographie.
+    for (const [tag, cfg] of bad) { try { const e = mount(tag, cfg, "en"); await wait(15); e.remove(); } catch (er) { fail(`${tag}: crashes with a badly typed configuration (${er.message})`); } }
+    try { const e = document.createElement("sf-machines-card"); e.setConfig({ tiles: [] }); document.body.appendChild(e); e.hass = { locale: { language: "en" } }; await wait(20); e.remove(); } catch (er) { fail(`hass without states: exception (${er.message})`); } }
+  // 5q. Third round: CSS injection through the config, dial range, camera interval, "constructor" states, malformed services,
+  //     native HTML elements in popups, Latin digits for dates, typography.
   { window.__pwn = 0;
     const evilCss = ['red;}</style><img src=x onerror="window.__pwn=1">', "red;position:fixed;inset:0;z-index:99999;background:url(https://evil.example/p.png)", "red;@import url(https://evil.example/x.css);"];
     const withColors = JSON.parse(JSON.stringify(FULL));
@@ -573,126 +573,126 @@ __SF.SF_HOOK.tr = (lang, key) => {
       const c = JSON.parse(JSON.stringify(cfg)); setAt(c, path, pl); n++;
       const el = mount(tag, c, "en"); await wait(8);
       const html = el.shadowRoot ? el.shadowRoot.innerHTML : "";
-      if (window.__pwn || /position:\s*fixed;inset|evil\.example|<\/style><img/.test(html)) { fail(`SÉCURITÉ : injection CSS par ${tag}.${path.join(".")} (${pl.slice(0, 24)}…)`); window.__pwn = 0; }
+      if (window.__pwn || /position:\s*fixed;inset|evil\.example|<\/style><img/.test(html)) { fail(`SECURITY: CSS injection through ${tag}.${path.join(".")} (${pl.slice(0, 24)}…)`); window.__pwn = 0; }
       el.remove(); }
-    if (n < 20) fail(`sécurité : l'injection CSS n'a couvert que ${n} cas`);
-    // Les valeurs légitimes passent toujours (hex, nom, rgb, var).
+    if (n < 20) fail(`security: the CSS injection test only covered ${n} cases`);
+    // Legitimate values always pass (hex, name, rgb, var).
     for (const ok of ["#00e5ff", "red", "rgb(0, 229, 255)", "var(--primary-color)", "rgba(0,229,255,.5)"]) {
       const e = mount("sf-radiators-card", { ...FULL["sf-radiators-card"], accent: ok }, "en"); await wait(15);
-      if (!new RegExp(ok.replace(/[()]/g, "\\$&").replace(/\./g, "\\.")).test(e.shadowRoot.innerHTML)) fail(`couleur légitime refusée : ${ok}`); e.remove(); }
-    // Plage du cadran : bornée (pas de gel) ; une plage valide est conservée.
+      if (!new RegExp(ok.replace(/[()]/g, "\\$&").replace(/\./g, "\\.")).test(e.shadowRoot.innerHTML)) fail(`legitimate colour refused: ${ok}`); e.remove(); }
+    // Dial range: bounded (no freeze); a valid range is kept.
     const t0 = performance.now(); const big = mount("sf-climate-card", { ...FULL["sf-climate-card"], min: 0, max: 3e8 }, "en"); await wait(40);
-    if (performance.now() - t0 > 2000 || big.shadowRoot.innerHTML.length > 400000) fail("sécurité : min / max du climat non bornés (gel / HTML énorme)"); big.remove();
+    if (performance.now() - t0 > 2000 || big.shadowRoot.innerHTML.length > 400000) fail("security: climate min / max not bounded (freeze / huge HTML)"); big.remove();
     const ok2 = mount("sf-climate-card", { ...FULL["sf-climate-card"], min: 10, max: 25 }, "en"); await wait(40);
-    if (!/>10</.test(ok2.shadowRoot.innerHTML.replace(/\s/g, "")) && ok2._config.min !== 10) fail("climat : une plage valide 10–25 doit être conservée"); ok2.remove();
-    // Caméra : intervalle entre 1 et 3600 s.
-    const cam = mount("sf-camera-card", { cameras: [], refresh: 3e6 }, "en"); await wait(10); if (cam._every() !== 3600) fail(`caméra : refresh 3e6 doit être borné à 3600, obtenu ${cam._every()}`);
-    cam.setConfig({ cameras: [], refresh: -5 }); if (cam._every() !== 5) fail("caméra : refresh négatif doit retomber sur 5"); cam.remove();
-    // États « constructor » / « __proto__ » / « toString » : aucune carte ne plante, aucun « function Object ».
+    if (!/>10</.test(ok2.shadowRoot.innerHTML.replace(/\s/g, "")) && ok2._config.min !== 10) fail("climate: a valid 10–25 range must be kept"); ok2.remove();
+    // Camera: interval between 1 and 3600 s.
+    const cam = mount("sf-camera-card", { cameras: [], refresh: 3e6 }, "en"); await wait(10); if (cam._every() !== 3600) fail(`camera: refresh 3e6 must be bounded to 3600, got ${cam._every()}`);
+    cam.setConfig({ cameras: [], refresh: -5 }); if (cam._every() !== 5) fail("camera: negative refresh must fall back to 5"); cam.remove();
+    // "constructor" / "__proto__" / "toString" states: no card crashes, no "function Object".
     for (const word of ["constructor", "__proto__", "toString", "hasOwnProperty"]) {
       const st = { ...base, "weather.home": S(word, { temperature: 12 }), "climate.room": S(word, { hvac_action: "heating", preset_modes: [word], preset_mode: word, temperature: 20 }), "cover.cv": S(word), "select.sx": S(word, { options: [word, "b"] }) };
       for (const [tag, cfg] of [["sf-bridge-card", { weather: "weather.home", price: "sensor.price" }], ["sf-climate-card", { rooms: [{ name: "L", climate: "climate.room", temp: "sensor.temp" }] }],
         ["sf-radiators-card", { radiators: [{ name: "R", climate: "climate.room" }], preset_labels: {} }], ["sf-console-card", { groups: [{ title: "g", items: [{ kind: "select", entity: "select.sx", label: "s", labels: {} }, { kind: "cover", entity: "cover.cv", label: "c" }] }] }],
         ["sf-machines-card", { tiles: [{ label: "m", entity: "cover.cv", kind: "text", map: {} }] }], ["sf-launcher-card", { tiles: [{ name: "c", summary: "commands", card: { type: "custom:sf-console-card", groups: [{ items: [{ kind: "cover", entity: "cover.cv" }] }] } }] }]]) {
-        try { const e = mount(tag, cfg, "en", st); await wait(15); if (/function Object/.test(text(e))) fail(`${tag} : état « ${word} » : « function Object » affiché`); e.remove(); }
-        catch (er) { fail(`${tag} : état « ${word} » : exception (${er.message})`); } } }
-    // Service mal formé : aucun bouton actif ; service valide : actif.
+        try { const e = mount(tag, cfg, "en", st); await wait(15); if (/function Object/.test(text(e))) fail(`${tag}: state '${word}': 'function Object' displayed`); e.remove(); }
+        catch (er) { fail(`${tag}: state '${word}': exception (${er.message})`); } } }
+    // Malformed service: no active button; valid service: active.
     const co = mount("sf-console-card", { groups: [{ title: "g", items: [{ kind: "action", label: "BAD", service: "a.b;c", data: {} }, { kind: "action", label: "GOOD", service: "scene.turn_on", data: { entity_id: "scene.x" } }] }] }, "en"); await wait(30);
     const acts = [...co.shadowRoot.querySelectorAll(".it")].map((x) => [x.textContent.trim(), x.getAttribute("data-call") || (x.querySelector("[data-call]") || { getAttribute: () => null }).getAttribute("data-call")]);
-    if (acts.some(([lab, dc]) => /BAD/.test(lab) && dc)) fail("sécurité : un service mal formé (a.b;c) ne doit déclencher aucun appel");
-    if (!acts.some(([lab, dc]) => /GOOD/.test(lab) && dc === "scene.turn_on")) fail("console : un service valide doit rester actif"); co.remove();
-    // Popup : `custom:iframe` (élément natif) ne crée jamais d'iframe directement ; l'élément passe par les helpers de HA.
+    if (acts.some(([lab, dc]) => /BAD/.test(lab) && dc)) fail("security: a malformed service (a.b;c) must trigger no call");
+    if (!acts.some(([lab, dc]) => /GOOD/.test(lab) && dc === "scene.turn_on")) fail("console: a valid service must stay active"); co.remove();
+    // Popup: `custom:iframe` (native element) never creates an iframe directly; the element goes through HA's helpers.
     let helperType = null; window.loadCardHelpers = async () => ({ createCardElement: (c) => { helperType = c.type; const d = document.createElement("div"); d.className = "helper-made"; return d; } });
     const lp = mount("sf-launcher-card", { tiles: [{ name: "X", hash: "x1", summary: "text", card: { type: "custom:iframe" } }] }, "en"); await wait(40);
     lp.shadowRoot.querySelector(".tile").click(); await wait(150);
     const pp = [...document.body.children].filter((x) => x.shadowRoot && x.shadowRoot.querySelector(".sheet")).pop();
-    if (pp && pp.shadowRoot.querySelector("iframe")) fail("sécurité : custom:iframe a créé un iframe dans le popup");
-    if (helperType !== "custom:iframe") fail("popup : un type inconnu doit passer par les helpers de HA");
+    if (pp && pp.shadowRoot.querySelector("iframe")) fail("security: custom:iframe created an iframe in the popup");
+    if (helperType !== "custom:iframe") fail("popup: an unknown type must go through HA's helpers");
     if (pp) pp.remove(); lp.remove(); history.replaceState(null, "", location.pathname + location.search);
-    // Dates et heures : chiffres latins même avec ar-SA ; locale avec extension déjà présente sans exception.
+    // Dates and times: Latin digits even with ar-SA; locale with an extension already present without exception.
     for (const lang of ["ar-SA", "de-u-co-phonebk", "fa-IR"]) { const b = mount("sf-bridge-card", { weather: "weather.home", price: "sensor.price" }, lang, base); await wait(30);
-      if (/[٠-٩۰-۹]/.test(text(b))) fail(`dates : chiffres non latins avec la langue ${lang}`); if (!text(b).trim()) fail(`bandeau : rendu vide avec ${lang}`); b.remove(); }
-    // Typographie : espace avant « : » seulement en français.
+      if (/[٠-٩۰-۹]/.test(text(b))) fail(`dates: non-Latin digits with the language ${lang}`); if (!text(b).trim()) fail(`banner: empty render with ${lang}`); b.remove(); }
+    // Typography: space before ":" only in French.
     const dc = async (lang) => { const e = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.ev", decision: "sensor.dec" } }, lang, { ...base, "sensor.dec": S("OK"), "sensor.ev": U(0, "W") }); await wait(30); const x = text(e); e.remove(); return x; };
-    if (/Controller :/.test(await dc("en"))) fail("typographie : « Controller : » (espace française) en anglais"); if (!/Pilote :/.test(await dc("fr"))) fail("typographie : « Pilote : » attendu en français"); }
-  // 5r. Chasse aux bugs, 3e tour : résumés du lanceur sur configs mal typées, hash accentué, thème explicite dans un popup, thème d'une carte rendue
-  //     avant d'être attachée, boutons d'icône nommés, « -0.00 », débordement en allemand, retour d'éditeur, un seul bouton armé, regex, kW / mW.
+    if (/Controller :/.test(await dc("en"))) fail("typography: 'Controller :' (French spacing) in English"); if (!/Pilote :/.test(await dc("fr"))) fail("typography: 'Pilote :' expected in French"); }
+  // 5r. Bug hunt, 3rd round: launcher summaries on badly typed configs, accented hash, explicit theme in a popup, theme of a card rendered
+  //     before being attached, named icon buttons, "-0.00", overflow in German, editor return, a single armed button, regex, kW / mW.
   { const pops = () => [...document.body.children].filter((n) => n.shadowRoot && n.shadowRoot.querySelector(".sheet"));
-    // Résumés du lanceur : une carte de tuile mal typée ne vide jamais le lanceur.
+    // Launcher summaries: a badly typed tile card never empties the launcher.
     for (const [sum, card] of [["vehicles", { type: "custom:sf-hangar-card", cars: "x" }], ["vehicles", { type: "custom:sf-hangar-card", cars: [null, { soc: "sensor.car_soc" }] }], ["commands", { type: "custom:sf-console-card", groups: [null] }],
       ["cameras", { type: "custom:sf-camera-card", cameras: "camera.front" }], ["machines", { type: "custom:sf-machines-card", tiles: [null] }], ["battery", { type: "custom:sf-battery-card", batteries: "x" }]]) {
       const l = mount("sf-launcher-card", { tiles: [{ name: "T", summary: sum, card }] }, "en"); await wait(30);
-      if (!l.shadowRoot.querySelector(".tile")) fail(`lanceur : résumé « ${sum} » sur une carte mal typée : le lanceur est vide`); l.remove(); }
-    // Hash accentué : ouverture, URL, lien direct.
+      if (!l.shadowRoot.querySelector(".tile")) fail(`launcher: summary '${sum}' on a badly typed card: the launcher is empty`); l.remove(); }
+    // Accented hash: opening, URL, direct link.
     history.replaceState(null, "", location.pathname + location.search);
     let l = mount("sf-launcher-card", { tiles: [{ name: "E", hash: "énergie", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en"); await wait(30);
     const h0 = history.length; l.shadowRoot.querySelector(".tile").click(); await wait(100);
-    if (decodeURIComponent(location.hash) !== "#énergie") fail(`hash : « #énergie » attendu dans l'URL, obtenu « ${location.hash} »`);
+    if (decodeURIComponent(location.hash) !== "#énergie") fail(`hash: '#énergie' expected in the URL, got '${location.hash}'`);
     pops().pop().shadowRoot.querySelector(".back").click(); await wait(700);
     l.shadowRoot.querySelector(".tile").click(); await wait(100); pops().pop().shadowRoot.querySelector(".back").click(); await wait(700);
-    if (history.length - h0 > 2) fail(`hash : l'historique grossit à chaque ouverture (${history.length - h0} entrées)`); pops().forEach((x) => x.remove()); l.remove();
+    if (history.length - h0 > 2) fail(`hash: the history grows on every opening (${history.length - h0} entries)`); pops().forEach((x) => x.remove()); l.remove();
     history.replaceState(null, "", location.pathname + location.search); history.pushState(null, "", "#%C3%A9nergie");
     l = mount("sf-launcher-card", { tiles: [{ name: "E", hash: "énergie", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en"); await wait(600);
-    if (!pops().length) fail("hash : le lien direct #%C3%A9nergie doit ouvrir la tuile « énergie »"); pops().forEach((x) => x.remove()); l.remove(); history.replaceState(null, "", location.pathname + location.search);
-    // Thème explicitement sombre sur le lanceur, thème HA clair : la carte SF du popup reste sombre.
+    if (!pops().length) fail("hash: the direct link #%C3%A9nergie must open the 'énergie' tile"); pops().forEach((x) => x.remove()); l.remove(); history.replaceState(null, "", location.pathname + location.search);
+    // Explicitly dark theme on the launcher, light HA theme: the SF card in the popup stays dark.
     document.documentElement.style.setProperty("--sf-theme", "light");
     l = mount("sf-launcher-card", { theme: "dark", tiles: [{ name: "D", hash: "dk", summary: "text", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc" } }] }, "en"); await wait(40);
     l.shadowRoot.querySelector(".tile").click(); await wait(120);
-    const pp = pops().pop(); if (pp && pp.shadowRoot.querySelector("sf-battery-card").getAttribute("theme") !== "dark") fail("thème : un lanceur explicitement sombre doit garder ses cartes de popup sombres");
+    const pp = pops().pop(); if (pp && pp.shadowRoot.querySelector("sf-battery-card").getAttribute("theme") !== "dark") fail("theme: an explicitly dark launcher must keep its popup cards dark");
     pops().forEach((x) => x.remove()); l.remove(); history.replaceState(null, "", location.pathname + location.search);
-    // Carte rendue avant d'être attachée : le thème est relu une fois dans le DOM.
+    // Card rendered before being attached: the theme is re-read once in the DOM.
     const dt = document.createElement("sf-battery-card"); dt.setConfig({ soc: "sensor.bat_soc" }); dt.hass = HASS(base, "en"); await wait(60); document.body.appendChild(dt); await wait(60);
-    if (dt.getAttribute("theme") !== "light") fail("thème : une carte rendue avant d'être attachée doit relire --sf-theme"); dt.remove();
+    if (dt.getAttribute("theme") !== "light") fail("theme: a card rendered before being attached must re-read --sf-theme"); dt.remove();
     document.documentElement.style.removeProperty("--sf-theme");
-    // Boutons d'icône seule : un nom accessible.
+    // Icon-only buttons: an accessible name.
     const cv = mount("sf-console-card", { groups: [{ title: "g", items: [{ kind: "cover", entity: "cover.shutter", label: "Shutter" }] }] }, "en"); await wait(30);
     const unnamed = [...cv.shadowRoot.querySelectorAll('[role="button"]')].filter((b) => !b.getAttribute("aria-label"));
-    if (unnamed.length) fail(`accessibilité : ${unnamed.length} bouton(s) d'icône sans nom accessible`); cv.remove();
-    // « -0.00 » : un petit négatif qui s'arrondit à zéro s'écrit « 0.00 ».
+    if (unnamed.length) fail(`accessibility: ${unnamed.length} icon-only button(s) without accessible name`); cv.remove();
+    // "-0.00": a small negative that rounds to zero is written "0.00".
     const z = mount("sf-machines-card", { tiles: [{ label: "z", entity: "sensor.neg", kind: "value", digits: 2 }] }, "en", { ...base, "sensor.neg": U(-0.001, "W") }); await wait(30);
-    if (/-0\.00/.test(text(z))) fail("nombres : « -0.00 » affiché"); z.remove();
-    // Allemand à 320 px : rien ne dépasse de la carte du bilan.
+    if (/-0\.00/.test(text(z))) fail("numbers: '-0.00' displayed"); z.remove();
+    // German at 320 px: nothing overflows the summary card.
     const box = document.createElement("div"); box.style.width = "320px"; document.body.appendChild(box);
     const led = document.createElement("sf-ledger-card"); led.setConfig({ total_cost: "sensor.eur", solar_fraction: "sensor.fossil", avg_price: "sensor.price", devices: [] }); box.appendChild(led); led.hass = HASS(base, "de"); await wait(60);
     const hud = led.shadowRoot.querySelector(".hud").getBoundingClientRect(); const over = [...led.shadowRoot.querySelectorAll(".kpi")].filter((k) => k.getBoundingClientRect().right > hud.right + 1);
-    if (over.length) fail(`débordement : ${over.length} indicateur(s) du bilan dépassent de la carte en allemand à 320 px`); box.remove();
-    // Éditeur : revenir à une configuration déjà émise n'est pas ignoré.
+    if (over.length) fail(`overflow: ${over.length} indicator(s) of the summary overflow the card in German at 320 px`); box.remove();
+    // Editor: going back to an already emitted configuration is not ignored.
     const ed = document.createElement("sf-hangar-card-editor"); ed.hass = { states: {}, locale: { language: "en" } }; ed.setConfig({ cars: [] }); document.body.appendChild(ed); await wait(30);
     let em = null; ed.addEventListener("config-changed", (ev) => { em = ev.detail.config; });
     const f0 = ed.shadowRoot.querySelector("ha-form"); f0.dispatchEvent(new CustomEvent("value-changed", { detail: { value: { ...f0.data, theme: "light" } } }));
-    if (!em) fail("éditeur : aucune configuration émise"); else {
-      if (/"charger":|"flows":|"chargers":\[\]/.test(JSON.stringify(em))) fail(`éditeur : des objets / listes vides sont injectés dans le YAML émis (${JSON.stringify(em)})`);
+    if (!em) fail("editor: no configuration emitted"); else {
+      if (/"charger":|"flows":|"chargers":\[\]/.test(JSON.stringify(em))) fail(`editor: empty objects / lists are injected into the emitted YAML (${JSON.stringify(em)})`);
       ed.setConfig({ cars: [], theme: "dark" }); ed.setConfig(JSON.parse(JSON.stringify(em)));
-      if (ed._config.theme !== "light") fail("éditeur : revenir à une configuration déjà émise doit être pris en compte"); }
+      if (ed._config.theme !== "light") fail("editor: going back to an already emitted configuration must be taken into account"); }
     ed.remove();
-    // Un seul bouton armé à la fois.
+    // Only one armed button at a time.
     const st2 = { ...base, "switch.a": S("on"), "switch.b": S("on"), "sensor.ev": U(0, "W") };
     const two = mount("sf-hangar-card", { cars: [], chargers: [{ name: "A", power: "sensor.ev", switch: "switch.a", controls: true }, { name: "B", power: "sensor.ev", switch: "switch.b", controls: true }] }, "en", st2); await wait(40);
     const stops = [...two.shadowRoot.querySelectorAll(".ctl .btn")].filter((b) => /Stop/.test(b.textContent)); stops[0].click(); await wait(10); stops[1].click(); await wait(10);
-    if (two.shadowRoot.querySelectorAll(".armed").length !== 1) fail(`confirmation : un seul bouton armé attendu, obtenu ${two.shadowRoot.querySelectorAll(".armed").length}`); two.remove();
-    // Regex : `(a|b){2}` (répétition fixe) acceptée ; une regex risquée refusée avec un avertissement dans la console.
+    if (two.shadowRoot.querySelectorAll(".armed").length !== 1) fail(`confirmation: a single armed button expected, got ${two.shadowRoot.querySelectorAll(".armed").length}`); two.remove();
+    // Regex: `(a|b){2}` (fixed repetition) accepted; a risky regex refused with a console warning.
     const warns = []; const ow = console.warn; console.warn = (...x) => { warns.push(x.join(" ")); };
     const rs = { ...base, "sensor.ab": S(10, { device_class: "battery", unit_of_measurement: "%" }), "sensor.cc": S(20, { device_class: "battery", unit_of_measurement: "%" }) };
     const r1 = mount("sf-cells-card", { include_pattern: "^sensor\\.(a|b){2}$" }, "en", rs); await wait(30); const n1 = r1.shadowRoot.querySelectorAll(".cell").length; r1.remove();
     const r2 = mount("sf-cells-card", { include_pattern: "(a|b)+$" }, "en", rs); await wait(30); r2.remove(); console.warn = ow;
-    if (n1 !== 1) fail(`regex : (a|b){2} doit être acceptée (1 cellule), obtenu ${n1}`); if (!warns.some((w) => /pattern ignored/.test(w))) fail("regex : un motif refusé doit être signalé dans la console");
+    if (n1 !== 1) fail(`regex: (a|b){2} must be accepted (1 cell), got ${n1}`); if (!warns.some((w) => /pattern ignored/.test(w))) fail("regex: a refused pattern must be reported in the console");
     // kW / mW / valeurs absentes.
     const k = mount("sf-hangar-card", { cars: [], charger: { power: "sensor.mw" } }, "en", { ...base, "sensor.mw": U(5000, "mW") }); await wait(30);
-    if (!/\b5 W/.test(text(k))) fail("unités : 5000 mW doit s'afficher « 5 W »"); k.remove();
+    if (!/\b5 W/.test(text(k))) fail("units: 5000 mW must display as '5 W'"); k.remove();
     const kk = mount("sf-battery-card", { soc: "sensor.bat_soc" }, "en"); if (kk.kw(undefined) !== "—" || kk.kw(999.6) !== "1.00 kW") fail(`kw() : « ${kk.kw(undefined)} » / « ${kk.kw(999.6)} »`); kk.remove(); }
-  // 5h. Carte plein format : 4 modes x 11 langues sans débordement à 480 x 480, config vide, états absents / hostiles, bilan du jour, popup.
+  // 5h. Full-screen card: 4 modes x 11 languages without overflow at 480 x 480, empty config, missing / hostile states, day summary, popup.
   { const MODES = ["Matin", "Jour", "Soir", "Nuit"], NS = FULL["sf-ns-card"];
     const box = document.createElement("div"); box.style.cssText = "width:480px;height:480px;position:relative;overflow:hidden"; box.style.setProperty("--sf-ns-height", "480px"); document.body.appendChild(box);
     const mk = async (cfg, states, language, hassExtra) => { const el = document.createElement("sf-ns-card"); el.setConfig(cfg); box.appendChild(el); el.hass = { ...HASS(states, language), ...(hassExtra || {}) }; await wait(60); return el; };
     const noText = (el, lab) => { const t = text(el); if (!t.trim()) fail(`${lab} : rendu vide`); if (/undefined|NaN|\[object|null/.test(t)) fail(`${lab} : texte suspect « ${(t.match(/.{0,20}(undefined|NaN|\[object|null).{0,20}/) || [""])[0]} »`); };
     const overflow = (el, lab) => {
-      const sr = el.shadowRoot, ns = sr.querySelector(".ns"); if (!ns) { fail(`${lab} : zone .ns absente`); return; }
+      const sr = el.shadowRoot, ns = sr.querySelector(".ns"); if (!ns) { fail(`${lab}: .ns area missing`); return; }
       const R0 = ns.getBoundingClientRect();
-      if (Math.abs(R0.height - 480) > 1 || Math.abs(R0.width - 480) > 1) fail(`${lab} : .ns mesure ${Math.round(R0.width)}x${Math.round(R0.height)} au lieu de 480x480`);
+      if (Math.abs(R0.height - 480) > 1 || Math.abs(R0.width - 480) > 1) fail(`${lab}: .ns measures ${Math.round(R0.width)}x${Math.round(R0.height)} instead of 480x480`);
       const clip = [...sr.querySelectorAll(".panel, .tile, .stat, .pill, .btn, .car, .mini, .alert")].filter((e) => e.scrollHeight > e.clientHeight + 1 || e.scrollWidth > e.clientWidth + 1);
-      if (clip.length) fail(`${lab} : contenu rogné dans ${[...new Set(clip.map((e) => e.className.toString().split(" ")[0] + " « " + e.textContent.trim().replace(/\s+/g, " ").slice(0, 30) + " »"))].join(", ")}`);
+      if (clip.length) fail(`${lab}: content clipped in ${[...new Set(clip.map((e) => e.className.toString().split(" ")[0] + " '" + e.textContent.trim().replace(/\s+/g, " ").slice(0, 30) + "'"))].join(", ")}`);
       const out = [...sr.querySelectorAll(".main > *, .dock, .hero, .alerts")].filter((e) => { const r = e.getBoundingClientRect(); return r.bottom > R0.bottom + 1 || r.right > R0.right + 1 || r.left < R0.left - 1 || r.top < R0.top - 1; });
-      if (out.length) fail(`${lab} : ${out.length} bloc(s) sortent de l'écran`);
+      if (out.length) fail(`${lab}: ${out.length} block(s) go off screen`);
     };
     const callWS = async (m) => { const base0 = new Date(); base0.setHours(0, 0, 0, 0); const y0 = base0.getTime() - 86400000, out = {};
       m.statistic_ids.forEach((id) => { out[id] = [...Array(48)].map((_, h) => ({ start: y0 + h * 3600000, change: id === "sensor.kwh_sol" ? 0.5 : id === "sensor.kwh_exp" ? 0.1 : 0.4 })); }); return out; };
@@ -702,66 +702,66 @@ __SF.SF_HOOK.tr = (lang, key) => {
       const el = await mk(NS, { ...base, "input_select.ns_mode": S(m) }, language, conn); await wait(40);
       noText(el, `sf-ns-card [${language}/${m}]`); overflow(el, `sf-ns-card [${language}/${m}]`); el.remove();
     }
-    // une alerte active (fuite + voiture non verrouillée) : la ligne rouge s'intercale sans rien écraser
+    // an active alert (leak + unlocked car): the red line slots in without overwriting anything
     for (const m of MODES) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(m), "binary_sensor.leak": S("on"), "lock.car": S("unlocked"), "sensor.fridge": U(9, "°C") }, "de", conn);
-      if (!el.shadowRoot.querySelector(".alert")) fail(`sf-ns-card [${m}] : l'alerte de fuite n'apparaît pas`); overflow(el, `sf-ns-card alerte [${m}]`); el.remove(); }
-    // mode : noms français ET anglais acceptés ; un nom inconnu / hostile retombe sur l'heure sans planter
-    for (const [v, want] of [["Evening", "soir"], ["night", "nuit"], ["Matin", "matin"]]) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(v) }, "en"); if (!el.shadowRoot.querySelector(".ns." + want)) fail(`sf-ns-card : mode « ${v} » devrait donner .${want}`); el.remove(); }
-    for (const v of ["constructor", "__proto__", "toString", ""]) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(v), "weather.home": S(v, { temperature: "<b>x</b>" }) }, "en"); if (!el.shadowRoot.querySelector(".ns")) fail(`sf-ns-card : état « ${v} » fait planter la carte`); el.remove(); }
-    // configuration vide : « Carte à compléter », pas de plantage
-    { const el = await mk({}, base, "en"); if (!/Card to complete/.test(text(el))) fail("sf-ns-card sans configuration : « Card to complete » attendu"); el.remove();
+      if (!el.shadowRoot.querySelector(".alert")) fail(`sf-ns-card [${m}]: the leak alert does not appear`); overflow(el, `sf-ns-card alerte [${m}]`); el.remove(); }
+    // mode: French AND English names accepted; an unknown / hostile name falls back to the time without crashing
+    for (const [v, want] of [["Evening", "soir"], ["night", "nuit"], ["Matin", "matin"]]) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(v) }, "en"); if (!el.shadowRoot.querySelector(".ns." + want)) fail(`sf-ns-card: mode '${v}' should give .${want}`); el.remove(); }
+    for (const v of ["constructor", "__proto__", "toString", ""]) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(v), "weather.home": S(v, { temperature: "<b>x</b>" }) }, "en"); if (!el.shadowRoot.querySelector(".ns")) fail(`sf-ns-card: state '${v}' crashes the card`); el.remove(); }
+    // empty configuration: "Card to be completed", no crash
+    { const el = await mk({}, base, "en"); if (!/Card to complete/.test(text(el))) fail("sf-ns-card without configuration: 'Card to complete' expected"); el.remove();
       const e2 = await mk({ rooms: [], tiles: [], shortcuts: "x", energy: [], vacuum: "x", cars: "nope" }, base, "en"); e2.remove(); }
     // tout indisponible : aucun « NaN », aucune erreur
     for (const m of MODES) { const dead = Object.fromEntries(Object.keys(base).map((k) => [k, S("unavailable")])); dead["input_select.ns_mode"] = S(m);
       const el = await mk(NS, dead, "en"); noText(el, `sf-ns-card indisponible [${m}]`); el.remove(); }
-    // bilan du jour : consommation, part solaire, coût et comparaison à hier
+    // day summary: consumption, solar share, cost and comparison with yesterday
     { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Soir") }, "en", conn); await wait(80);
-      const t = text(el); if (!/today/i.test(t) || !/kWh/.test(t)) fail(`sf-ns-card : bilan du jour absent (« ${t.slice(0, 120)} »)`); el.remove(); }
-    // pluie : le message d'état de la prévision apparaît le matin
+      const t = text(el); if (!/today/i.test(t) || !/kWh/.test(t)) fail(`sf-ns-card: day summary missing ('${t.slice(0, 120)}')`); el.remove(); }
+    // rain: the forecast status message appears in the morning
     { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Matin") }, "en", conn); await wait(80);
-      if (!/rain (in|around)|raining/.test(text(el))) fail(`sf-ns-card : message de pluie absent (« ${text(el).slice(0, 140)} »)`); el.remove(); }
-    // popup aspirateur : raccourcis + retour base / stop ; un état hostile ne plante pas
+      if (!/rain (in|around)|raining/.test(text(el))) fail(`sf-ns-card: rain message missing ('${text(el).slice(0, 140)}')`); el.remove(); }
+    // vacuum popup: shortcuts + return to base / stop; a hostile state does not crash
     { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Jour"), "vacuum.robot": S("constructor") }, "en"); el._pop = "vac"; el._key = null; el._render();
       const t = text(el); if (!/Return to base/.test(t) || !/Stop/.test(t) || !/Kitchen/.test(t) || !/Robot/.test(t)) fail(`sf-ns-card : popup aspirateur incomplet (« ${t.slice(0, 160)} »)`);
       overflow(el, "sf-ns-card popup"); el.remove(); }
-    // actions : « Tout éteindre » demande deux appuis ; l'appui sur une tuile appelle le bon service
+    // actions: "Turn everything off" needs two presses; pressing a tile calls the right service
     { const calls = []; const el = await mk(NS, { ...base, "input_select.ns_mode": S("Soir") }, "en", { callService: (d, s, x) => { calls.push(`${d}.${s}`); return Promise.resolve(); } });
       const tile = el.shadowRoot.querySelector('.tile[data-e="switch.plug"]'); tile.click(); await wait(10);
-      if (!calls.includes("homeassistant.toggle")) fail(`sf-ns-card : tuile interrupteur → homeassistant.toggle attendu, obtenu ${calls}`);
-      const off = el.shadowRoot.querySelector('[data-act="lights_off"]'); off.click(); await wait(10); if (calls.includes("light.turn_off")) fail("sf-ns-card : « Éteindre » ne doit rien envoyer au premier appui");
-      el.shadowRoot.querySelector('[data-act="lights_off"]').click(); await wait(10); if (!calls.includes("light.turn_off")) fail("sf-ns-card : le second appui sur « Éteindre » doit envoyer light.turn_off");
-      const ar = el.shadowRoot.querySelectorAll('[role="button"]'); if (ar.length < 4) fail("sf-ns-card : éléments cliquables sans rôle de bouton"); el.remove(); }
+      if (!calls.includes("homeassistant.toggle")) fail(`sf-ns-card: switch tile -> homeassistant.toggle expected, got ${calls}`);
+      const off = el.shadowRoot.querySelector('[data-act="lights_off"]'); off.click(); await wait(10); if (calls.includes("light.turn_off")) fail("sf-ns-card: 'Éteindre' must send nothing on the first press");
+      el.shadowRoot.querySelector('[data-act="lights_off"]').click(); await wait(10); if (!calls.includes("light.turn_off")) fail("sf-ns-card: the second press on 'Éteindre' must send light.turn_off");
+      const ar = el.shadowRoot.querySelectorAll('[role="button"]'); if (ar.length < 4) fail("sf-ns-card: clickable elements without a button role"); el.remove(); }
     box.remove(); }
-  // 5b. Thèmes d'événements : décor présent le bon jour, absent si désactivé, jamais en mode Nuit, jamais sur l'alerte rouge.
+  // 5b. Event themes: decoration present on the right day, absent if disabled, never in Night mode, never on the red alert.
   { window.SF_EVENTS = true;
     const evBox = document.createElement("div"); document.body.appendChild(evBox);
     const mkEv = async (tag, cfg, ev) => { const el = document.createElement(tag); el.setConfig(cfg); evBox.appendChild(el); if (ev !== undefined) el._ev = () => ev; el.hass = HASS(base, "en"); await wait(60); return el; };
     for (const ev of ["halloween", "noel"]) {
       const el = await mkEv("sf-machines-card", FULL["sf-machines-card"], ev), r = el.shadowRoot;
-      if (!r.querySelector(".hud.ev-" + ev) || !r.querySelector(".evx")) fail(`thème ${ev} : décor absent sur sf-machines-card`);
+      if (!r.querySelector(".hud.ev-" + ev) || !r.querySelector(".evx")) fail(`theme ${ev}: decoration missing on sf-machines-card`);
       const ns = await mkEv("sf-ns-card", { ...FULL["sf-ns-card"], mode_entity: undefined }, ev);
       ns._mode = null; ns.mode = () => "Jour"; ns._render();
-      if (!ns.shadowRoot.querySelector(".evd")) fail(`thème ${ev} : décor absent sur sf-ns-card`);
+      if (!ns.shadowRoot.querySelector(".evd")) fail(`theme ${ev}: decoration missing on sf-ns-card`);
       ns.mode = () => "Nuit"; ns._key = null; ns._render();
-      if (ns.shadowRoot.querySelector(".evd")) fail(`thème ${ev} : décor présent en mode Nuit`);
+      if (ns.shadowRoot.querySelector(".evd")) fail(`theme ${ev}: decoration present in Night mode`);
     }
    const off = await mkEv("sf-machines-card", { ...FULL["sf-machines-card"], events: false }, undefined);
-    if (off.shadowRoot.querySelector(".evx") || off._ev() !== null) fail("events: false n'a pas désactivé le thème");
+    if (off.shadowRoot.querySelector(".evx") || off._ev() !== null) fail("events: false did not disable the theme");
     window.SF_EVENTS = false; evBox.remove(); }
-  // 5c. Régression 2026-11-03 : le marquage rouge des champs obligatoires ne doit JAMAIS boucler. `:scope > style` ne trouvait rien dans un
-  // ShadowRoot : chaque passage ajoutait un <style>, l'observateur se relançait sur sa propre mutation et l'onglet se figeait dès qu'on
-  // choisissait une entité (appli iPhone et Chrome). Après une mutation du formulaire, il doit rester UN seul <style sf-red>.
+  // 5c. Regression 2026-11-03: the red marking of required fields must NEVER loop. `:scope > style` matched nothing inside a
+  // ShadowRoot: every pass added a <style>, the observer re-triggered itself on its own mutation and the tab froze as soon as an
+  // entity was picked (iPhone app and Chrome). After a form mutation, exactly ONE <style sf-red> must remain.
   { const form = document.createElement("div"); const sr = form.attachShadow({ mode: "open" });
     const req = document.createElement("div"); req.required = true; sr.appendChild(req); document.body.appendChild(form);
     window.__SF.sfRedReq(form); await wait(150);
-    sr.appendChild(document.createElement("span")); await wait(150);   // le sélecteur d'entité se redessine
+    sr.appendChild(document.createElement("span")); await wait(150);   // the entity picker redraws
     sr.appendChild(document.createElement("span")); await wait(150);
     const n = sr.querySelectorAll("style[sf-red]").length;
-    if (n !== 1) fail(`marquage rouge : ${n} balises <style> après redessin (1 attendue) — boucle de l'observateur`);
-    if (!req.hasAttribute("sf-req")) fail("marquage rouge : le champ obligatoire n'est pas marqué");
+    if (n !== 1) fail(`red marking: ${n} <style> tags after redraw (1 expected) — observer loop`);
+    if (!req.hasAttribute("sf-req")) fail("red marking: the required field is not marked");
     form.remove(); }
-  // 5d. Robustesse : aucune minuterie ne survit au retrait d'une carte, et des mises à jour de `hass` en rafale restent bon marché
-  // (HA rappelle `hass` à chaque changement d'état de la maison : une carte qui boucle ou fuit se verrait tout de suite).
+  // 5d. Robustness: no timer survives a card's removal, and bursts of `hass` updates stay cheap
+  // (HA calls `hass` on every state change of the house: a card that loops or leaks would show immediately).
   { const live = new Set(), si = window.setInterval, ci = window.clearInterval;
     window.setInterval = (f, ms, ...a) => { const id = si(f, ms, ...a); live.add(id); return id; };
     window.clearInterval = (id) => { live.delete(id); ci(id); };
@@ -773,19 +773,19 @@ __SF.SF_HOOK.tr = (lang, key) => {
       }
       await wait(60);
       const ms = performance.now() - t0;
-      if (ms > 6000) fail(`robustesse : 100 mises à jour de hass sur ${els.length} cartes ont pris ${Math.round(ms)} ms (boucle ou rendu trop lourd ?)`);
+      if (ms > 6000) fail(`robustness: 100 hass updates on ${els.length} cards took ${Math.round(ms)} ms (loop or render too heavy?)`);
       els.forEach((el) => el.remove()); await wait(60);
-      if (live.size) fail(`robustesse : ${live.size} minuterie(s) setInterval encore actives après le retrait des cartes (fuite)`);
+      if (live.size) fail(`robustness: ${live.size} setInterval timer(s) still active after the cards were removed (leak)`);
     } finally { window.setInterval = si; window.clearInterval = ci; live.forEach((id) => ci(id)); } }
-  // 5e. Carte NSPanel : un abonnement aux prévisions qui échoue n'est pas retenté à chaque mise à jour de `hass` (plusieurs par seconde).
+  // 5e. NSPanel card: a failing forecast subscription is not retried on every `hass` update (several per second).
   { let calls = 0;
     const h = { ...HASS(base, "fr"), connection: { subscribeMessage: () => { calls++; return Promise.reject(new Error("pas de prévision horaire")); } } };
     const el = document.createElement("sf-ns-card"); el.setConfig({ ...FULL["sf-ns-card"], weather: "weather.test" }); document.body.appendChild(el);
     for (let i = 0; i < 40; i++) { el.hass = { ...h }; await wait(5); }
-    if (calls > 2) fail(`NSPanel : ${calls} abonnements météo tentés en 40 mises à jour de hass (retente à chaque fois)`);
+    if (calls > 2) fail(`NSPanel: ${calls} weather subscriptions attempted in 40 hass updates (retries every time)`);
     el.remove(); }
-  // 5f. Cycles connexion / déconnexion (HA déplace les cartes en mode édition) : les minuteries ne s'empilent pas, tout est nettoyé à la fin ;
-  // et un éditeur imbriqué reçoit les mises à jour de `hass`.
+  // 5f. Connect / disconnect cycles (HA moves cards in edit mode): timers do not stack, everything is cleaned up at the end;
+  // and a nested editor receives the `hass` updates.
   { const live = new Set(), si = window.setInterval, ci = window.clearInterval;
     window.setInterval = (f, ms, ...a) => { const id = si(f, ms, ...a); live.add(id); return id; };
     window.clearInterval = (id) => { live.delete(id); ci(id); };
@@ -793,88 +793,88 @@ __SF.SF_HOOK.tr = (lang, key) => {
       for (const tag of Object.keys(FULL)) {
         const el = mount(tag, FULL[tag], "fr");
         for (let i = 0; i < 6; i++) { el.remove(); document.body.appendChild(el); }
-        if (live.size > 2) fail(`cycles connexion : ${tag} laisse ${live.size} minuteries actives après 6 déplacements (empilement)`);
+        if (live.size > 2) fail(`connect cycles: ${tag} leaves ${live.size} active timers after 6 moves (stacking)`);
         el.remove(); await wait(20);
-        if (live.size) { fail(`cycles connexion : ${tag} garde ${live.size} minuterie(s) après retrait`); live.forEach((id) => ci(id)); live.clear(); }
+        if (live.size) { fail(`connect cycles: ${tag} keeps ${live.size} timer(s) after removal`); live.forEach((id) => ci(id)); live.clear(); }
       }
       const ed = document.createElement("sf-launcher-card-editor"); ed.hass = { states: {}, locale: { language: "fr" } };
       ed.setConfig({ tiles: [{ name: "A", card: { type: "custom:sf-machines-card", tiles: [{ entity: "sensor.x" }] } }] }); document.body.appendChild(ed); await wait(30);
       const sub = [...ed.shadowRoot.querySelectorAll("*")].find((e) => e.localName === "sf-machines-card-editor");
       const H2 = { states: { "sensor.y": { state: "1", attributes: {} } }, locale: { language: "fr" } };
-      if (!sub) fail("éditeur imbriqué : sf-machines-card-editor introuvable dans l'éditeur du lanceur");
-      else { ed.hass = H2; if (sub._hass !== H2) fail("éditeur imbriqué : hass n'est pas propagé aux éditeurs de cartes imbriquées"); }
+      if (!sub) fail("nested editor: sf-machines-card-editor not found in the launcher editor");
+      else { ed.hass = H2; if (sub._hass !== H2) fail("nested editor: hass is not propagated to the editors of nested cards"); }
       ed.remove();
     } finally { window.setInterval = si; window.clearInterval = ci; live.forEach((id) => ci(id)); } }
-  // 5g. Carte de tendance : données (historique / statistiques), plages, échecs sans rafale de requêtes, données hostiles, survol.
+  // 5g. Trend card: data (history / statistics), ranges, failures without request bursts, hostile data, hover.
   { const now = Date.now(), calls = [];
     const hist = (n, f) => Array.from({ length: n }, (_, i) => ({ s: String(f(i)), lu: (now - 86400000 + (i * 86400000) / n) / 1000 }));
     const mk = (over) => { const h = { ...HASS({ ...base, "sensor.temp_a": { state: "21.5", attributes: { unit_of_measurement: "°C", friendly_name: "A" } },
       "sensor.temp_b": { state: "48", attributes: { unit_of_measurement: "%", friendly_name: "B" } } }, "fr"),
       callWS: async (m) => { calls.push(m); return over(m); } }; return h; };
     const draw = async (cfg, hass, ms = 80) => { const el = document.createElement("sf-trend-card"); el.setConfig(cfg); document.body.appendChild(el); el.hass = hass; await wait(ms); return el; };
-    // a. historique 24 h : deux séries, unités différentes -> une courbe par ligne ; légende, valeurs actuelles, boutons de plage.
+    // a. 24 h history: two series, different units -> one curve per row; legend, current values, range buttons.
     calls.length = 0;
     const a = await draw({ series: [{ entity: "sensor.temp_a" }, { entity: "sensor.temp_b" }] }, mk(() => ({ "sensor.temp_a": hist(50, (i) => 18 + (i % 7)), "sensor.temp_b": hist(50, (i) => 40 + (i % 9)) })));
     const ra = a.shadowRoot;
-    if (calls.length !== 1 || calls[0].type !== "history/history_during_period") fail(`tendance : 1 appel d'historique attendu, reçu ${JSON.stringify(calls.map((c) => c.type))}`);
-    if (ra.querySelectorAll(".ln2").length !== 2 || ra.querySelectorAll(".plot").length !== 2) fail("tendance : unités différentes = 2 graphes avec une courbe chacun");
-    if (ra.querySelectorAll(".lg .it").length !== 2 || !/21[.,]5/.test(ra.querySelector(".lg").textContent)) fail("tendance : légende ou valeur actuelle absente");
+    if (calls.length !== 1 || calls[0].type !== "history/history_during_period") fail(`trend: 1 history call expected, got ${JSON.stringify(calls.map((c) => c.type))}`);
+    if (ra.querySelectorAll(".ln2").length !== 2 || ra.querySelectorAll(".plot").length !== 2) fail("trend: different units = 2 charts with one curve each");
+    if (ra.querySelectorAll(".lg .it").length !== 2 || !/21[.,]5/.test(ra.querySelector(".lg").textContent)) fail("trend: legend or current value missing");
     if (ra.querySelectorAll(".rg").length !== 3 || !ra.querySelector(".rg.on")) fail("tendance : boutons de plage 6 h / 24 h / 7 j absents");
-    // b. survol : valeur à l'instant visé.
+    // b. hover: value at the targeted instant.
     const pl = ra.querySelector(".plot"); pl.getBoundingClientRect = () => ({ left: 0, width: 200, top: 0, height: 100, right: 200, bottom: 100 });
     pl.dispatchEvent(new PointerEvent("pointermove", { clientX: 100, bubbles: true }));
-    if (!pl.classList.contains("hov") || !pl.querySelector(".ro").textContent.trim()) fail("tendance : le survol n'affiche pas de valeur");
+    if (!pl.classList.contains("hov") || !pl.querySelector(".ro").textContent.trim()) fail("trend: hovering does not show a value");
     a.remove();
-    // c. même unité -> superposées ; plage 7 j -> statistiques ; statistiques vides -> repli sur l'historique.
+    // c. same unit -> overlaid; 7 d range -> statistics; empty statistics -> fall back to the history.
     calls.length = 0;
     const c1 = await draw({ hours: 168, series: [{ entity: "sensor.temp_a" }, { entity: "sensor.temp_a", color: "#ff7043" }] }, mk((m) => m.type.startsWith("recorder") ? { "sensor.temp_a": [] } : { "sensor.temp_a": hist(30, (i) => 20 + (i % 4)) }));
-    if (c1.shadowRoot.querySelectorAll(".plot").length !== 1) fail("tendance : même unité = un seul graphe superposé");
+    if (c1.shadowRoot.querySelectorAll(".plot").length !== 1) fail("trend: same unit = a single overlaid chart");
     if (!calls.some((c) => c.type === "recorder/statistics_during_period") || !calls.some((c) => c.type === "history/history_during_period")) fail(`tendance : 7 j = statistiques puis repli historique (${JSON.stringify(calls.map((c) => c.type))})`);
-    if (!c1.shadowRoot.querySelector(".ln2")) fail("tendance : le repli sur l'historique n'a rien tracé");
-    // d. changement de plage au clic : nouvel appel, pas de boucle.
+    if (!c1.shadowRoot.querySelector(".ln2")) fail("trend: the fallback to the history drew nothing");
+    // d. range change on click: a new call, no loop.
     calls.length = 0;
     const d1 = await draw({ series: [{ entity: "sensor.temp_a" }] }, mk(() => ({ "sensor.temp_a": hist(20, (i) => i) })));
     d1.shadowRoot.querySelector('[data-rg="6"]').click(); await wait(80);
-    if (calls.length !== 2 || !d1.shadowRoot.querySelector('.rg.on[data-rg="6"]')) fail(`tendance : changer de plage = un nouvel appel (appels : ${calls.length})`);
+    if (calls.length !== 2 || !d1.shadowRoot.querySelector('.rg.on[data-rg="6"]')) fail(`trend: changing the range = one new call (calls: ${calls.length})`);
     d1.remove(); c1.remove();
-    // e. échec du serveur : message « Aucune donnée », et AU PLUS une nouvelle tentative par minute malgré les mises à jour de hass en rafale.
+    // e. server failure: "No data" message, and AT MOST one new attempt per minute despite bursts of hass updates.
     calls.length = 0;
     const bad = mk(() => { throw new Error("boum"); });
     const e1 = await draw({ series: [{ entity: "sensor.temp_a" }] }, bad);
     for (let i = 0; i < 40; i++) { e1.hass = { ...bad }; await wait(4); }
-    if (calls.length > 1) fail(`tendance : ${calls.length} requêtes après un échec (retente à chaque mise à jour de hass)`);
-    if (!/Aucune donnée/.test(e1.shadowRoot.textContent)) fail("tendance : message d'échec absent");
+    if (calls.length > 1) fail(`trend: ${calls.length} requests after a failure (retries on every hass update)`);
+    if (!/Aucune donnée/.test(e1.shadowRoot.textContent)) fail("trend: failure message missing");
     e1.remove();
-    // f. données hostiles : 60 000 points, valeurs non numériques, NaN, entités mal formées -> rendu borné et rapide, rien d'injecté.
+    // f. hostile data: 60,000 points, non-numeric values, NaN, malformed entities -> bounded and fast render, nothing injected.
     calls.length = 0;
     const big = Array.from({ length: 60000 }, (_, i) => ({ s: i % 7 === 0 ? "unavailable" : String(i % 100), lu: (now - 86400000 + i * 1440) / 1000 }));
     const t0 = performance.now();
     const f1 = await draw({ series: [{ entity: "sensor.temp_a", name: "<img src=x onerror=window.__pwn=1>" }, { entity: "x\"><b>", name: "bad" }] }, mk(() => ({ "sensor.temp_a": big })), 150);
     const path = f1.shadowRoot.querySelector(".ln2"), npts = path ? (path.getAttribute("d").match(/[ML]/g) || []).length : 0;
-    if (!path || npts > 240) fail(`tendance : ${npts} points tracés pour 60 000 reçus (240 maximum attendus)`);
+    if (!path || npts > 240) fail(`trend: ${npts} points drawn for 60,000 received (240 maximum expected)`);
     if (performance.now() - t0 > 1500) fail("tendance : rendu de 60 000 points trop lent");
-    if (f1.shadowRoot.querySelector("img") || window.__pwn) fail("tendance : un nom d'entité hostile a été injecté dans le HTML");
-    if (calls.length && calls[0].entity_ids && calls[0].entity_ids.some((x) => /[<>"]/.test(x))) fail("tendance : un identifiant mal formé a été envoyé au serveur");
+    if (f1.shadowRoot.querySelector("img") || window.__pwn) fail("trend: a hostile entity name was injected into the HTML");
+    if (calls.length && calls[0].entity_ids && calls[0].entity_ids.some((x) => /[<>"]/.test(x))) fail("trend: a malformed identifier was sent to the server");
     f1.remove();
-    // h. série stable (un seul point, son état au début de la fenêtre) : la ligne est prolongée jusqu'à maintenant ; point antérieur au début ramené dans la fenêtre.
+    // h. stable series (a single point, its state at the start of the window): the line is extended up to now; a point before the start is brought back into the window.
     const sp = await draw({ hours: 24, series: [{ entity: "sensor.temp_a" }] }, mk(() => ({ "sensor.temp_a": [{ s: "21.5", lu: (Date.now() - 90000000) / 1000 }] })));
     const dd = sp.shadowRoot.querySelector(".ln2"); const nn = dd ? (dd.getAttribute("d").match(/[ML]/g) || []).length : 0;
-    if (nn < 2) fail(`tendance : une série stable (1 seul point) doit tracer une ligne (points tracés : ${nn})`);
+    if (nn < 2) fail(`trend: a stable series (a single point) must draw a line (points drawn: ${nn})`);
     sp.remove();
-    // i. second axe : deux échelles, étiquettes à droite, même graphe ; sans axis right : aucune étiquette à droite.
+    // i. second axis: two scales, labels on the right, same chart; without axis right: no label on the right.
     const hv = (f) => hist(40, f);
     const ax = await draw({ series: [{ entity: "sensor.temp_a", name: "A" }, { entity: "sensor.temp_b", name: "B", axis: "right" }] }, mk(() => ({ "sensor.temp_a": hv((i) => 20 + (i % 3)), "sensor.temp_b": hv((i) => 1000 + (i % 50)) })));
-    if (ax.shadowRoot.querySelectorAll(".plot").length !== 1 || ax.shadowRoot.querySelectorAll(".yl.r").length !== 2 || ax.shadowRoot.querySelectorAll(".yl.l").length !== 2) fail(`tendance : second axe = 1 graphe, 2 étiquettes à droite et 2 à gauche (reçu ${ax.shadowRoot.querySelectorAll(".plot").length} graphe(s), ${ax.shadowRoot.querySelectorAll(".yl.r").length} à droite)`);
-    const dpaths = [...ax.shadowRoot.querySelectorAll(".ln2")].map((e) => e.getAttribute("d")); if (dpaths.length !== 2 || dpaths[0] === dpaths[1]) fail("tendance : deux courbes distinctes attendues avec le second axe");
+    if (ax.shadowRoot.querySelectorAll(".plot").length !== 1 || ax.shadowRoot.querySelectorAll(".yl.r").length !== 2 || ax.shadowRoot.querySelectorAll(".yl.l").length !== 2) fail(`trend: second axis = 1 chart, 2 labels on the right and 2 on the left (got ${ax.shadowRoot.querySelectorAll(".plot").length} chart(s), ${ax.shadowRoot.querySelectorAll(".yl.r").length} on the right)`);
+    const dpaths = [...ax.shadowRoot.querySelectorAll(".ln2")].map((e) => e.getAttribute("d")); if (dpaths.length !== 2 || dpaths[0] === dpaths[1]) fail("trend: two distinct curves expected with the second axis");
     ax.remove();
     const nax = await draw({ series: [{ entity: "sensor.temp_a" }, { entity: "sensor.temp_a", axis: "right" }] }, mk(() => ({ "sensor.temp_a": hv((i) => 20 + (i % 3)) })));
     nax.remove();
-    // g. couleurs : jamais deux séries de la même teinte quand l'une est choisie explicitement.
+    // g. colours: never two series of the same hue when one is chosen explicitly.
     const g1 = await draw({ series: [{ entity: "sensor.temp_a", color: "#ffb300" }, { entity: "sensor.temp_b" }, { entity: "sensor.temp_a" }] }, mk(() => ({})), 40);
     const bg = [...g1.shadowRoot.querySelectorAll(".lg .it .dt")].map((e) => e.style.background);
-    if (bg.length !== 3 || new Set(bg).size !== bg.length) fail(`tendance : couleurs en double dans la légende (${bg.join(" | ")})`);
+    if (bg.length !== 3 || new Set(bg).size !== bg.length) fail(`trend: duplicate colours in the legend (${bg.join(" | ")})`);
     g1.remove(); }
-  // 5h. Ligne de temps : phrases lisibles, jours, fusion des répétitions, échec sans rafale, données hostiles, ton des alertes.
+  // 5h. Timeline: readable sentences, days, merging of repeats, failure without bursts, hostile data, tone of alerts.
   { const now = Date.now(), calls = [], sec = (m) => (now - m * 60000) / 1000;
     const mk = (over) => ({ ...HASS({ ...base, "binary_sensor.door": { state: "off", attributes: { device_class: "door", friendly_name: "Door" } },
       "alarm_control_panel.home": { state: "disarmed", attributes: { friendly_name: "Alarm" } }, "binary_sensor.leak": { state: "off", attributes: { device_class: "moisture", friendly_name: "Leak" } } }, "fr"),
@@ -885,49 +885,49 @@ __SF.SF_HOOK.tr = (lang, key) => {
       { entity_id: "binary_sensor.leak", state: "on", when: sec(50) }, { entity_id: "binary_sensor.door", state: "on", when: now - 100 }];   // dernier : horodatage en millisecondes
     const a = await draw({ entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarme" }] }, mk(() => EV));
     const ra = a.shadowRoot, rows = [...ra.querySelectorAll(".row")], txt = ra.textContent;
-    if (calls.length !== 1 || calls[0].type !== "logbook/get_events" || calls[0].entity_ids.length !== 2) fail(`ligne de temps : appel du journal inattendu (${JSON.stringify(calls[0])})`);
-    if (rows.length !== 4) fail(`ligne de temps : 4 lignes attendues (ouvert, fermé, déclenchée, ouvert), reçu ${rows.length} : ${rows.map((r) => r.textContent.trim().slice(0, 40)).join(" / ")}`);
-    if (!/ouvert/.test(txt) || !/fermé/.test(txt) || !/déclenchée/.test(txt)) fail("ligne de temps : phrases « ouvert / fermé / déclenchée » absentes");
-    if (/indisponible/.test(txt) || /Leak|fuite/.test(txt)) fail("ligne de temps : un état indisponible ou une entité non suivie est affiché");
-    if (!/Alarme/.test(txt)) fail("ligne de temps : le nom choisi n'est pas utilisé");
-    if (!ra.querySelector(".day") || !/Aujourd/.test(ra.querySelector(".day").textContent)) fail("ligne de temps : séparateur de jour « Aujourd'hui » absent");
-    const alarmRow = rows.find((r) => /déclenchée/.test(r.textContent)); if (!alarmRow || !/255, ?51, ?85|#ff3355/i.test(alarmRow.getAttribute("style") || "")) fail("ligne de temps : l'alarme déclenchée n'est pas en rouge");
+    if (calls.length !== 1 || calls[0].type !== "logbook/get_events" || calls[0].entity_ids.length !== 2) fail(`timeline: unexpected logbook call (${JSON.stringify(calls[0])})`);
+    if (rows.length !== 4) fail(`timeline: 4 rows expected (open, closed, triggered, open), got ${rows.length}: ${rows.map((r) => r.textContent.trim().slice(0, 40)).join(" / ")}`);
+    if (!/ouvert/.test(txt) || !/fermé/.test(txt) || !/déclenchée/.test(txt)) fail("timeline: sentences 'ouvert / fermé / déclenchée' missing");
+    if (/indisponible/.test(txt) || /Leak|fuite/.test(txt)) fail("timeline: an unavailable state or an untracked entity is displayed");
+    if (!/Alarme/.test(txt)) fail("timeline: the chosen name is not used");
+    if (!ra.querySelector(".day") || !/Aujourd/.test(ra.querySelector(".day").textContent)) fail("timeline: day separator 'Aujourd\'hui' missing");
+    const alarmRow = rows.find((r) => /déclenchée/.test(r.textContent)); if (!alarmRow || !/255, ?51, ?85|#ff3355/i.test(alarmRow.getAttribute("style") || "")) fail("timeline: the triggered alarm is not red");
     a.remove();
-    // fusion des répétitions : trois « ouvert » consécutifs d'états différents entre deux -> × 2 seulement si consécutifs identiques
+    // merging repeats: three consecutive "open" with different states in between -> × 2 only if identical and consecutive
     const g = await draw({ entities: ["binary_sensor.door"] }, mk(() => [{ entity_id: "binary_sensor.door", state: "on", when: sec(30) }, { entity_id: "binary_sensor.door", state: "off", when: sec(20) }, { entity_id: "binary_sensor.door", state: "on", when: sec(10) }]));
-    if (g.shadowRoot.querySelectorAll(".row").length !== 3) fail("ligne de temps : des changements d'état distincts ne doivent pas être fusionnés");
+    if (g.shadowRoot.querySelectorAll(".row").length !== 3) fail("timeline: distinct state changes must not be merged");
     g.remove();
-    // filtres par entité : seuls les états choisis, et un intervalle minimal entre deux événements (détecteur qui clignote)
+    // per-entity filters: only the chosen states, and a minimum interval between two events (flickering detector)
     const fl = [20, 19, 18, 10, 9, 5, 4].map((m, i) => ({ entity_id: "binary_sensor.door", state: i % 2 ? "off" : "on", when: sec(m) }));   // on 20, off 19, on 18, off 10, on 9, off 5, on 4 (minutes)
     const f1 = await draw({ group: false, entities: [{ entity: "binary_sensor.door", states: ["on"], min_gap: 5 }] }, mk(() => fl));
-    const nf1 = f1.shadowRoot.querySelectorAll(".row").length; if (nf1 !== 3) fail(`ligne de temps : états [on] + intervalle 5 min = 3 lignes (on à -20, -9, -4), reçu ${nf1}`);
+    const nf1 = f1.shadowRoot.querySelectorAll(".row").length; if (nf1 !== 3) fail(`timeline: states [on] + 5 min interval = 3 rows (on at -20, -9, -4), got ${nf1}`);
     f1.remove();
     const f2 = await draw({ group: false, entities: [{ entity: "binary_sensor.door", states: "off" }] }, mk(() => fl));
-    if (f2.shadowRoot.querySelectorAll(".row").length !== 3 || /ouvert/.test(f2.shadowRoot.textContent)) fail("ligne de temps : « states: off » = seulement les 3 événements fermé");
+    if (f2.shadowRoot.querySelectorAll(".row").length !== 3 || /ouvert/.test(f2.shadowRoot.textContent)) fail("timeline: 'states: off' = only the 3 closed events");
     f2.remove();
-    // sans fusion : deux relevés identiques d'affilée ne sont pas un changement d'état
+    // without merging: two identical readings in a row are not a state change
     const g2 = await draw({ group: false, entities: ["binary_sensor.door"] }, mk(() => [{ entity_id: "binary_sensor.door", state: "on", when: sec(30) }, { entity_id: "binary_sensor.door", state: "on", when: sec(20) }]));
-    if (g2.shadowRoot.querySelectorAll(".row").length !== 1) fail("ligne de temps : deux états identiques consécutifs affichés comme deux changements");
+    if (g2.shadowRoot.querySelectorAll(".row").length !== 1) fail("timeline: two identical consecutive states displayed as two changes");
     g2.remove();
-    // échec : « Aucun événement » et au plus une requête malgré 40 mises à jour de hass
+    // failure: "No events" and at most one request despite 40 hass updates
     calls.length = 0;
     const bad = mk(() => { throw new Error("boum"); });
     const e1 = await draw({ entities: ["binary_sensor.door"] }, bad);
     for (let i = 0; i < 40; i++) { e1.hass = { ...bad }; await wait(4); }
-    if (calls.length > 1) fail(`ligne de temps : ${calls.length} requêtes après un échec`);
-    if (!/Aucun événement/.test(e1.shadowRoot.textContent)) fail("ligne de temps : message d'échec absent");
+    if (calls.length > 1) fail(`timeline: ${calls.length} requests after a failure`);
+    if (!/Aucun événement/.test(e1.shadowRoot.textContent)) fail("timeline: failure message missing");
     e1.remove();
-    // données hostiles : 100 000 événements, entités mal formées, horodatages absurdes, nom piégé ; limite respectée
+    // hostile data: 100,000 events, malformed entities, absurd timestamps, trapped name; limit respected
     calls.length = 0;
     const big = Array.from({ length: 100000 }, (_, i) => ({ entity_id: "binary_sensor.door", state: i % 2 ? "on" : "off", when: sec(1000 - i / 100) })).concat([{ entity_id: 5, state: "on", when: 1 }, { entity_id: "binary_sensor.door", state: "on", when: "pas une date" }, null, "x"]);
     const t0 = performance.now();
     const h1 = await draw({ limit: 12, entities: [{ entity: "binary_sensor.door", name: "<img src=x onerror=window.__pwn=1>" }, "x\"><b>", { entity: "nul" }] }, mk(() => big), 200);
-    if (h1.shadowRoot.querySelectorAll(".row").length !== 12) fail(`ligne de temps : limite de 12 lignes non respectée (${h1.shadowRoot.querySelectorAll(".row").length})`);
-    if (performance.now() - t0 > 2000) fail("ligne de temps : 100 000 événements rendus trop lentement");
-    if (h1.shadowRoot.querySelector("img") || window.__pwn) fail("ligne de temps : nom hostile injecté dans le HTML");
-    if (calls[0].entity_ids.length !== 1) fail(`ligne de temps : identifiants invalides envoyés au serveur (${JSON.stringify(calls[0].entity_ids)})`);
+    if (h1.shadowRoot.querySelectorAll(".row").length !== 12) fail(`timeline: limit of 12 rows not respected (${h1.shadowRoot.querySelectorAll(".row").length})`);
+    if (performance.now() - t0 > 2000) fail("timeline: 100,000 events rendered too slowly");
+    if (h1.shadowRoot.querySelector("img") || window.__pwn) fail("timeline: hostile name injected into the HTML");
+    if (calls[0].entity_ids.length !== 1) fail(`timeline: invalid identifiers sent to the server (${JSON.stringify(calls[0].entity_ids)})`);
     h1.remove(); }
-  // 5i. Carte santé : règles (états, seuils, ancienneté, indisponible), gravité, regroupement, verdict, données hostiles, plafond de contrôles.
+  // 5i. Health card: rules (states, thresholds, age, unavailable), severity, grouping, verdict, hostile data, check cap.
   { const ago = (m) => new Date(Date.now() - m * 60000).toISOString(), S = (state, a, lu) => ({ state, attributes: a || {}, last_updated: lu || ago(1) });
     const st = { ...base, "binary_sensor.net": S("off"), "binary_sensor.wifi": S("off"), "sensor.ups": S("20", { unit_of_measurement: "%" }), "sensor.hot": S("85", { unit_of_measurement: "°C" }),
       "binary_sensor.leak": S("on"), "sensor.old": S("1", {}, ago(300)), "sensor.fresh": S("1", {}, ago(5)), "binary_sensor.fine": S("on") };
@@ -938,62 +938,62 @@ __SF.SF_HOOK.tr = (lang, key) => {
       { name: "Fantôme", entity: "sensor.ghost" }];
     const a = await draw({ checks: ck, show_ok: true }), r = a.shadowRoot, txt = r.textContent;
     const rows = [...r.querySelectorAll(".hr")].map((x) => x.querySelector(".nm").textContent);
-    // anomalies attendues : Internet, Wifi (états), Onduleur (min), Four (max), Fuite (bad), Vieux (ancienneté), Fantôme (indisponible : entité absente) = 7 ; Récent et Bon = normaux ; « sensor.nexiste.pas » invalide ignoré
-    if (rows.length !== 7) fail(`santé : 7 anomalies attendues, reçu ${rows.length} (${rows.join(", ")})`);
-    if (!/7 anomalies/.test(txt)) fail("santé : verdict « 7 anomalies » absent");
+    // expected anomalies: Internet, Wifi (states), UPS (min), Oven (max), Leak (bad), Old (age), Ghost (unavailable: missing entity) = 7; Recent and Good = normal; invalid "sensor.nexiste.pas" ignored
+    if (rows.length !== 7) fail(`health: 7 anomalies expected, got ${rows.length} (${rows.join(", ")})`);
+    if (!/7 anomalies/.test(txt)) fail("health: verdict '7 anomalies' missing");
     const at = (n) => rows.indexOf(n);
-    if (!(at("Internet") < at("Onduleur") && at("Fuite") < at("Onduleur") && at("Fuite") < at("Four") && at("Fuite") < at("Vieux"))) fail(`santé : les critiques (réseau, fuite) doivent précéder les simples avertissements (${rows.join(", ")})`);
-    if (at("Wifi") !== at("Internet") + 1) fail(`santé : le Wifi doit suivre Internet dans le groupe Réseau (${rows.join(", ")})`);
-    if (!/Réseau · 2 anomalies/.test(txt)) fail("santé : en-tête de groupe « Réseau · 2 anomalies » absent");
-    if (!/sous le minimum/.test(txt) || !/au-dessus du maximum/.test(txt) || !/pas de mise à jour depuis 5 h/.test(txt) || !/indisponible/.test(txt)) fail("santé : motifs (minimum / maximum / ancienneté / indisponible) absents");
-    const oks = [...r.querySelectorAll(".okc")].map((x) => x.textContent); if (oks.length !== 2 || !oks.includes("Bon") || !oks.includes("Récent")) fail(`santé : contrôles normaux attendus (Bon, Récent), reçu ${oks.join(",")}`);
+    if (!(at("Internet") < at("Onduleur") && at("Fuite") < at("Onduleur") && at("Fuite") < at("Four") && at("Fuite") < at("Vieux"))) fail(`health: critical ones (network, leak) must precede plain warnings (${rows.join(", ")})`);
+    if (at("Wifi") !== at("Internet") + 1) fail(`health: Wifi must follow Internet in the Network group (${rows.join(", ")})`);
+    if (!/Réseau · 2 anomalies/.test(txt)) fail("health: group header 'Réseau · 2 anomalies' missing");
+    if (!/sous le minimum/.test(txt) || !/au-dessus du maximum/.test(txt) || !/pas de mise à jour depuis 5 h/.test(txt) || !/indisponible/.test(txt)) fail("health: reasons (minimum / maximum / age / unavailable) missing");
+    const oks = [...r.querySelectorAll(".okc")].map((x) => x.textContent); if (oks.length !== 2 || !oks.includes("Bon") || !oks.includes("Récent")) fail(`health: normal checks expected (Bon, Récent), got ${oks.join(",")}`);
     a.remove();
     // tout va bien
     const b = await draw({ checks: [{ entity: "binary_sensor.fine", ok: ["on"] }, { entity: "sensor.fresh", stale: 60 }] });
-    if (!/Tout va bien/.test(b.shadowRoot.textContent) || b.shadowRoot.querySelector(".hr")) fail("santé : « Tout va bien » attendu sans anomalie"); b.remove();
-    // hostile : noms piégés, ok / seuils absurdes, 500 contrôles (plafond 60), entités mal formées
+    if (!/Tout va bien/.test(b.shadowRoot.textContent) || b.shadowRoot.querySelector(".hr")) fail("health: 'Tout va bien' expected without anomaly"); b.remove();
+    // hostile: trapped names, absurd ok / thresholds, 500 checks (cap 60), malformed entities
     const many = Array.from({ length: 500 }, (_, i) => ({ name: `<img src=x onerror=window.__pwn=1>${i}`, entity: "sensor.ghost", ok: "on", min: "abc", max: {}, stale: "x" })).concat([{ entity: "x\"><b>" }, null, 5, { entity: "nul" }]);
     const t0 = performance.now(), h = await draw({ checks: many });
-    if (h.shadowRoot.querySelectorAll(".hr").length !== 60) fail(`santé : plafond de 60 contrôles non respecté (${h.shadowRoot.querySelectorAll(".hr").length})`);
-    if (h.shadowRoot.querySelector("img") || window.__pwn) fail("santé : nom hostile injecté dans le HTML");
-    if (performance.now() - t0 > 1500) fail("santé : rendu de 500 contrôles trop lent");
+    if (h.shadowRoot.querySelectorAll(".hr").length !== 60) fail(`health: cap of 60 checks not respected (${h.shadowRoot.querySelectorAll(".hr").length})`);
+    if (h.shadowRoot.querySelector("img") || window.__pwn) fail("health: hostile name injected into the HTML");
+    if (performance.now() - t0 > 1500) fail("health: rendering 500 checks is too slow");
     h.remove(); }
-  // 5j. Carte assistant : phases (Assist + correspondance personnalisée), lignes, boutons, texte hostile, minuterie ; lanceur : mode adaptatif.
+  // 5j. Assistant card: phases (Assist + custom mapping), rows, buttons, hostile text, timer; launcher: adaptive mode.
   { const ago = (m) => new Date(Date.now() - m * 60000).toISOString(), S = (state, a, lc) => ({ state, attributes: a || {}, last_changed: lc || ago(3), last_updated: lc || ago(3) });
     const mk = (extra, over) => HASS({ ...base, "assist_satellite.kitchen": S("listening"), "sensor.as_req": S("allume le salon"), "sensor.as_res": S("<img src=x onerror=window.__pwn=1>"), "sensor.as_act": S("unavailable"), "sensor.as_rep": S("Voilà"), ...extra }, "fr");
     const draw = async (cfg, hass) => { const el = document.createElement("sf-assistant-card"); el.setConfig(cfg); document.body.appendChild(el); el.hass = hass; await wait(60); return el; };
     const cfg = { state: "assist_satellite.kitchen", request: "sensor.as_req", action: "sensor.as_act", result: "sensor.as_res", reply: "sensor.as_rep", actions: [{ name: "Stop", service: "script.stop", confirm: "Arrêter ?" }, { name: "Mauvais", service: "pas un service" }] };
     const a = await draw(cfg, mk()), ra = a.shadowRoot;
-    if (!/À l'écoute/.test(ra.textContent)) fail("assistant : phase « À l'écoute » absente pour l'état Assist listening");
-    if (ra.querySelectorAll(".ln").length !== 4 || !/allume le salon/.test(ra.textContent) || !/il y a 3 min/.test(ra.textContent)) fail("assistant : lignes demande / action / résultat / réponse ou âge absents");
-    if (ra.querySelector("img") || window.__pwn) fail("assistant : texte d'entité hostile injecté dans le HTML");
-    if (ra.querySelectorAll(".acts .btn").length !== 1 || !ra.querySelector(".acts .btn").getAttribute("data-call") || !ra.querySelector(".acts .btn").getAttribute("data-confirm")) fail("assistant : bouton d'action (service valide + confirmation) absent, ou service invalide accepté");
+    if (!/À l'écoute/.test(ra.textContent)) fail("assistant: phase 'À l'écoute' missing for the Assist state listening");
+    if (ra.querySelectorAll(".ln").length !== 4 || !/allume le salon/.test(ra.textContent) || !/il y a 3 min/.test(ra.textContent)) fail("assistant: request / action / result / reply rows or age missing");
+    if (ra.querySelector("img") || window.__pwn) fail("assistant: hostile entity text injected into the HTML");
+    if (ra.querySelectorAll(".acts .btn").length !== 1 || !ra.querySelector(".acts .btn").getAttribute("data-call") || !ra.querySelector(".acts .btn").getAttribute("data-confirm")) fail("assistant: action button (valid service + confirmation) missing, or invalid service accepted");
     for (const [st, want] of [["idle", "Au repos"], ["processing", "Réfléchit"], ["responding", "Répond"], ["error", "Erreur"], ["unavailable", "Au repos"]]) {
-      a.hass = mk({ "assist_satellite.kitchen": S(st) }); await wait(40); if (!ra.textContent.includes(want)) fail(`assistant : l'état « ${st} » devrait afficher « ${want} »`); }
+      a.hass = mk({ "assist_satellite.kitchen": S(st) }); await wait(40); if (!ra.textContent.includes(want)) fail(`assistant: state '${st}' should display '${want}'`); }
     a.setConfig({ ...cfg, phases: { busy: "acting", constructor: "error", "__proto__": "speaking" } }); a.hass = mk({ "assist_satellite.kitchen": S("busy") }); await wait(40);
-    if (!/Exécute/.test(ra.textContent)) fail("assistant : correspondance personnalisée busy -> acting ignorée");
-    a.hass = mk({ "assist_satellite.kitchen": S("constructor") }); await wait(40); if (!/Erreur/.test(ra.textContent)) fail("assistant : correspondance explicite constructor -> error ignorée");
-    a.hass = mk({ "assist_satellite.kitchen": S("toString") }); await wait(40); if (!/Au repos/.test(ra.textContent)) fail("assistant : un état comme « toString » ne doit pas casser la correspondance (retour au repos)");
+    if (!/Exécute/.test(ra.textContent)) fail("assistant: custom mapping busy -> acting ignored");
+    a.hass = mk({ "assist_satellite.kitchen": S("constructor") }); await wait(40); if (!/Erreur/.test(ra.textContent)) fail("assistant: explicit mapping constructor -> error ignored");
+    a.hass = mk({ "assist_satellite.kitchen": S("toString") }); await wait(40); if (!/Au repos/.test(ra.textContent)) fail("assistant: a state such as 'toString' must not break the mapping (back to idle)");
     a.hass = mk({ "sensor.as_req": S("x".repeat(5000)) }); await wait(40);
-    if ((ra.querySelector(".ln .v").textContent || "").length > 400) fail("assistant : un texte d'entité de 5 000 caractères n'est pas borné");
+    if ((ra.querySelector(".ln .v").textContent || "").length > 400) fail("assistant: a 5,000-character entity text is not bounded");
     a.remove();
-    // lanceur : mode adaptatif (tuiles du mode courant en tête et mises en avant ; sans mode_entity ou mode inconnu : ordre inchangé)
+    // launcher: adaptive mode (tiles of the current mode first and highlighted; without mode_entity or unknown mode: order unchanged)
     const tiles = [{ name: "A", modes: ["Jour"] }, { name: "B", modes: "Soir" }, { name: "C" }];
     const L = async (cfg, st) => { const el = document.createElement("sf-launcher-card"); el.setConfig({ tiles, ...cfg }); document.body.appendChild(el); el.hass = HASS({ ...base, ...st }, "fr"); await wait(60); return el; };
     const names = (el) => [...el.shadowRoot.querySelectorAll(".tile .top")].map((e) => e.textContent.replace(/\W/g, "").trim());
-    const l0 = await L({}, {}); if (names(l0).join() !== "A,B,C" || l0.shadowRoot.querySelector(".prio")) fail("lanceur : sans mode_entity l'ordre ou l'aspect a changé"); l0.remove();
+    const l0 = await L({}, {}); if (names(l0).join() !== "A,B,C" || l0.shadowRoot.querySelector(".prio")) fail("launcher: without mode_entity the order or appearance changed"); l0.remove();
     const l1 = await L({ mode_entity: "input_select.m" }, { "input_select.m": S("soir") });
-    if (names(l1).join() !== "B,A,C" || l1.shadowRoot.querySelectorAll(".prio").length !== 1) fail(`lanceur : mode « soir » = B en tête et mise en avant (reçu ${names(l1).join()})`);
+    if (names(l1).join() !== "B,A,C" || l1.shadowRoot.querySelectorAll(".prio").length !== 1) fail(`launcher: mode 'soir' = B first and highlighted (got ${names(l1).join()})`);
     l1.hass = HASS({ ...base, "input_select.m": S("Jour") }, "fr"); await wait(60);
-    if (names(l1).join() !== "A,B,C") fail(`lanceur : le changement de mode doit réordonner (reçu ${names(l1).join()})`);
+    if (names(l1).join() !== "A,B,C") fail(`launcher: a mode change must reorder (got ${names(l1).join()})`);
     l1.hass = HASS({ ...base, "input_select.m": S("unavailable") }, "fr"); await wait(60);
     if (names(l1).join() !== "A,B,C" || l1.shadowRoot.querySelector(".prio")) fail("lanceur : mode indisponible = ordre d'origine, aucune mise en avant");
     l1.remove();
-    const l2 = await L({ mode_entity: "input_select.m" }, { "input_select.m": S("nuit") }); if (names(l2).join() !== "A,B,C" || l2.shadowRoot.querySelector(".prio")) fail("lanceur : mode sans tuile associée = rien ne change"); l2.remove(); }
+    const l2 = await L({ mode_entity: "input_select.m" }, { "input_select.m": S("nuit") }); if (names(l2).join() !== "A,B,C" || l2.shadowRoot.querySelector(".prio")) fail("launcher: a mode without associated tile = nothing changes"); l2.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
-  } catch (e) { fail(`le test a planté : ${e && e.stack || e}`); }
+  } catch (e) { fail(`the test crashed: ${e && e.stack || e}`); }
   finally {
   const out = document.createElement("pre"); out.id = "result";
   out.textContent = JSON.stringify({ ok: failures.length === 0, failures });

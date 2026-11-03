@@ -1,7 +1,7 @@
 name: E2E on a real Home Assistant
-# Démarre un vrai Home Assistant en conteneur et pilote son frontend avec Playwright (éprouvé le 2026-11-03 : vert sur la version corrigée,
-# rouge « GEL » sur v1.10.0). Détecte les gels et erreurs que les tests simulés (test/run.sh) ne peuvent pas voir.
-# Automatique à chaque push / pull request qui touche les cartes ou les tests ; lançable à la main (version de HA, version de SF-Cards au choix).
+# Starts a real Home Assistant in a container and drives its frontend with Playwright (proven on 2026-11-03: green on the fixed version,
+# red "FREEZE" on v1.10.0). Detects the freezes and errors that the simulated tests (test/run.sh) cannot see.
+# Automatic on every push / pull request that touches the cards or the tests; can be run by hand (HA version and SF-Cards version of your choice).
 on:
   push:
     branches: [main]
@@ -14,7 +14,7 @@ on:
         description: "Image Home Assistant (ex. 2026.10, stable, beta)"
         default: "stable"
       sf_ref:
-        description: "Version de SF-Cards à tester (tag ou commit, ex. v1.10.0). Vide = dist/sf-cards.js du commit courant. Sert à vérifier que le test détecte un ancien bug."
+        description: "SF-Cards version to test (tag or commit, e.g. v1.10.0). Empty = dist/sf-cards.js of the current commit. Used to check that the test detects an old bug."
         default: ""
 concurrency:
   group: ha-e2e-${{ github.ref }}
@@ -28,14 +28,14 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - name: Configuration Home Assistant de test
+      - name: Test Home Assistant configuration
         env:
           SF_REF: ${{ inputs.sf_ref }}
         run: |
           mkdir -p ha-config/www
           if [ -n "$SF_REF" ]; then
             git show "$SF_REF:dist/sf-cards.js" > ha-config/www/sf-cards.js
-            echo "SF-Cards testé : $SF_REF ($(git rev-parse --short "$SF_REF"))"
+            echo "SF-Cards tested: $SF_REF ($(git rev-parse --short "$SF_REF"))"
           else
             cp dist/sf-cards.js ha-config/www/sf-cards.js
           fi
@@ -54,15 +54,15 @@ jobs:
                   device_class: temperature
                   state: "19.0"
           YAML
-      - name: Démarrer Home Assistant
+      - name: Start Home Assistant
         run: docker run -d --name ha -p 8123:8123 -v "$PWD/ha-config:/config" "ghcr.io/home-assistant/home-assistant:${{ inputs.ha_version || 'stable' }}"
-      - name: Installer Playwright
+      - name: Install Playwright
         run: |
           npm init -y >/dev/null
           npm i --no-audit --no-fund playwright
           npx playwright install --with-deps chromium
       - name: Test E2E
         run: node test/e2e/run.mjs
-      - name: Journal de Home Assistant (en cas d'échec)
+      - name: Home Assistant log (on failure)
         if: failure()
         run: docker logs ha 2>&1 | tail -80
