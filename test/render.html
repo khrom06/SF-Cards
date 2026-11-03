@@ -744,6 +744,18 @@ __SF.SF_HOOK.tr = (lang, key) => {
    const off = await mkEv("sf-machines-card", { ...FULL["sf-machines-card"], events: false }, undefined);
     if (off.shadowRoot.querySelector(".evx") || off._ev() !== null) fail("events: false n'a pas désactivé le thème");
     window.SF_EVENTS = false; evBox.remove(); }
+  // 5c. Régression 2026-11-03 : le marquage rouge des champs obligatoires ne doit JAMAIS boucler. `:scope > style` ne trouvait rien dans un
+  // ShadowRoot : chaque passage ajoutait un <style>, l'observateur se relançait sur sa propre mutation et l'onglet se figeait dès qu'on
+  // choisissait une entité (appli iPhone et Chrome). Après une mutation du formulaire, il doit rester UN seul <style sf-red>.
+  { const form = document.createElement("div"); const sr = form.attachShadow({ mode: "open" });
+    const req = document.createElement("div"); req.required = true; sr.appendChild(req); document.body.appendChild(form);
+    window.__SF.sfRedReq(form); await wait(150);
+    sr.appendChild(document.createElement("span")); await wait(150);   // le sélecteur d'entité se redessine
+    sr.appendChild(document.createElement("span")); await wait(150);
+    const n = sr.querySelectorAll("style[sf-red]").length;
+    if (n !== 1) fail(`marquage rouge : ${n} balises <style> après redessin (1 attendue) — boucle de l'observateur`);
+    if (!req.hasAttribute("sf-req")) fail("marquage rouge : le champ obligatoire n'est pas marqué");
+    form.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);

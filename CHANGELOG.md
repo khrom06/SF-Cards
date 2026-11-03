@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+### Fixed
+- Card editor: choosing an entity could freeze the page (browser tab or iOS app). The red "required field" marking re-triggered its own observer in an endless loop because `:scope > style` never matches inside a shadow root. Regression test added.
+
 ## [1.10.0]
 ### Added
 - `sf-setpoints-card`: **setpoint editor**. Tap a value to open an editor with a slider and large − / + buttons (range and step read from the `input_number`), then *Apply*. Choose the scope: this value only, the whole program (column) or the whole room (row). Works on phones, where the inline − / + buttons are hidden. 6 new translated strings (11 languages).

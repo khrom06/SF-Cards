@@ -3279,7 +3279,9 @@ function sfRedReq(form) {
   const css = `[sf-req]{position:relative;display:block;box-shadow:inset 3px 0 0 ${SF_RED};padding-left:6px}[sf-req]::after{content:"*";position:absolute;top:2px;right:8px;color:${SF_RED};font:700 20px/1 sans-serif;pointer-events:none}`;
   const scan = (root) => {
     if (!root) return;
-    if (!root.querySelector(":scope > style[sf-red]")) { const st = document.createElement("style"); st.setAttribute("sf-red", ""); st.textContent = css; root.prepend(st); }
+    // NB : `:scope > style` ne trouve JAMAIS rien dans un ShadowRoot (Chrome/WebKit) -> un <style> de plus à chaque passage, l'observateur se
+    // relançait sur sa propre mutation et figeait l'onglet dès qu'on choisissait une entité. On teste donc les enfants directement.
+    if (![...root.children].some((c) => c.localName === "style" && c.hasAttribute("sf-red"))) { const st = document.createElement("style"); st.setAttribute("sf-red", ""); st.textContent = css; root.prepend(st); }
     for (const el of root.querySelectorAll("*")) {
       if (el.required === true || el.hasAttribute("required")) el.setAttribute("sf-req", "");
       else if (el.hasAttribute("sf-req")) el.removeAttribute("sf-req");
@@ -3319,5 +3321,5 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
 console.info("%c SF-CARDS %c v1.8.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
 
 // Accès réservé aux tests automatiques (le fichier est encapsulé : ses fonctions ne sont plus globales).
-if (window.__SF_TEST) window.__SF = { SF_T, SF_HOOK, sfGuess, sfAutofill, sfSafeUrl, sfNormConfig, SF_REQ };
+if (window.__SF_TEST) window.__SF = { SF_T, SF_HOOK, sfGuess, sfAutofill, sfSafeUrl, sfNormConfig, SF_REQ, sfRedReq };
 })();
