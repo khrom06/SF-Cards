@@ -28,10 +28,10 @@
 
 (function () {
 if (window.SF_CARDS_VERSION) {   // ressource déclarée deux fois (HACS + fichier manuel…) : la première version chargée reste active, on le dit clairement
-  console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.10.1) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
+  console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.11.0) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
   return;
 }
-window.SF_CARDS_VERSION = "1.10.1";
+window.SF_CARDS_VERSION = "1.11.0";
 
 // Embedded fonts (OFL 1.1, see THIRD_PARTY_NOTICES.md). Orbitron is a variable font.
 if (!document.getElementById("sf-hud-fonts")) {
@@ -3825,7 +3825,7 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
   }
 }
 
-console.info("%c SF-CARDS %c v1.10.1 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
+console.info("%c SF-CARDS %c v1.11.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
 
 // Accès réservé aux tests automatiques (le fichier est encapsulé : ses fonctions ne sont plus globales).
 if (window.__SF_TEST) window.__SF = { SF_T, SF_HOOK, sfGuess, sfAutofill, sfSafeUrl, sfNormConfig, SF_REQ, sfRedReq };

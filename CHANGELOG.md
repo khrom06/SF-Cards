@@ -2,7 +2,7 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.11.0]
 ### Added
 - `sf-assistant-card`: **state of an assistant**, read-only — phase (idle / listening / thinking / running / replying / error), last request, current action, result, last reply, optional action buttons. Works out of the box with Assist satellites; `phases` maps any other entity. Text capped, ages refreshed every minute, visual editor and 11 languages included.
 - `sf-launcher-card`: **adaptive mode** — `mode_entity` + per-tile `modes`: tiles matching the current mode (Morning / Day / Evening / Night…) move first and are highlighted. No effect without `mode_entity` (existing dashboards are unchanged).
