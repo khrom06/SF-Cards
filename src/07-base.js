@@ -31,7 +31,7 @@ class SfBase extends HTMLElement {
       this.shadowRoot.querySelectorAll("[data-call]").forEach((el) =>
         el.addEventListener("click", (ev) => { ev.stopPropagation(); this._onCall(el); }));
       if (this.afterRender) this.afterRender();
-      this._a11y(this.shadowRoot);
+      this._a11y(this.shadowRoot); sfSvgVars(this.shadowRoot);
       if (this._armed && Date.now() < this._armed.until) {   // the HTML was rewritten: re-arm the same button
         const el = [...this.shadowRoot.querySelectorAll("[data-confirm]")].find((e) => `${e.dataset.call}|${e.dataset.d || ""}` === this._armed.key);
         if (el && !el.classList.contains("armed")) this._arm(el, this._armed.until - Date.now());

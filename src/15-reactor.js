@@ -55,8 +55,8 @@ class SfReactorCard extends SfBase {
       @keyframes breathe { 50% { transform: scale(1.08); filter: brightness(1.25); } }
       .core .txt { position:absolute; inset:0; display:grid; place-items:center; text-align:center; pointer-events:none; }
       .core .txt b { display:block; font-family:Orbitron,sans-serif; font-size:clamp(14px, 2.2vw, 22px); color:var(--sf-strong);
-        text-shadow:0 0 10px #000, 0 0 6px var(--cc); }
-      .core .txt span { font-size:9px; letter-spacing:.2em; color:var(--sf-strong); text-shadow:0 0 6px #000; }
+        text-shadow:0 0 10px var(--sf-halo), 0 0 6px var(--cc); }
+      .core .txt span { font-size:9px; letter-spacing:.2em; color:var(--sf-strong); text-shadow:0 0 6px var(--sf-halo); }
       .foot { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:6px; }
       .foot > div { padding:8px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
       .foot .v { font-family:Orbitron,sans-serif; font-size:16px; color:var(--sf-strong); margin-top:3px; }`;
@@ -143,7 +143,7 @@ class SfReactorCard extends SfBase {
       return `<path class="ln bg" d="${this.esc(d)}" vector-effect="non-scaling-stroke"/>` +
         (on ? `<path class="ln fx ${this.esc(rev ? "rev" : "")}" d="${this.esc(d)}" stroke="${this.esc(color)}" style="--d:${this.esc(this._dur(w))};filter:drop-shadow(0 0 2px ${this.esc(color)})" vector-effect="non-scaling-stroke"/>` : "");
     };
-    let svg = (hasSolar ? line("solar", "core", solar, SF_C.amber) : "") + line("grid", "core", grid, exporting ? SF_C.green : "#ff7a45", exporting);
+    let svg = (hasSolar ? line("solar", "core", solar, SF_C.amber) : "") + line("grid", "core", grid, exporting ? SF_C.green : "var(--sf-orange)", exporting);
     const nodes = [];
     devs.forEach((d, i) => {
       const w = d.__bat ? d.w : this.watts(d.entity);
@@ -151,7 +151,7 @@ class SfReactorCard extends SfBase {
       nodes.push(this._node(pts[`d${i}`], d.name, d.icon, w, d.color || SF_C.cyan, d.entity));
     });
     if (hasSolar) nodes.push(this._node(pts.solar, this.t("common.solar"), "mdi:solar-power-variant", solar, SF_C.amber, c.solar));
-    nodes.push(this._node(pts.grid, exporting ? this.t("reactor.export") : this.t("common.grid"), "mdi:transmission-tower", grid === null ? null : Math.abs(grid), exporting ? SF_C.green : "#ff7a45", c.grid));
+    nodes.push(this._node(pts.grid, exporting ? this.t("reactor.export") : this.t("common.grid"), "mdi:transmission-tower", grid === null ? null : Math.abs(grid), exporting ? SF_C.green : "var(--sf-orange)", c.grid));
 
     const fossil = this.num(c.fossil), price = this.num(c.price);
     // Footer: only the indicators whose entities are configured.

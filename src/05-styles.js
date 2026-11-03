@@ -8,12 +8,14 @@ const SF_C = {
 const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; --sf-green:#2bff88; --sf-grey:#5b6b7d; --sf-text:#cfefff; --sf-dim:#7fa3bd;
     --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff; --sf-white:#fff;
     --sf-bg0:#0d2440; --sf-bg1:#06101d; --sf-bg2:#03080f; --sf-bg-rgb:3 8 15; --sf-scrim-rgb:1 4 9; --sf-sheet0:#071426; --sf-shade-rgb:0 0 0; --sf-on-accent:#03080f;
-    --sf-alert0:#4a0714; --sf-alert1:#1a0308; --sf-alert2:#0a0104;`;
+    --sf-alert0:#4a0714; --sf-alert1:#1a0308; --sf-alert2:#0a0104;
+    --sf-orange:#ff7a45; --sf-heat:#ff7043; --sf-cool:#4fc3f7; --sf-dry:#ffca28; --sf-fan:#66bb6a; --sf-auto:#b388ff; --sf-pink:#ff4fd8; --sf-yellow:#ffd54f; --sf-halo:#000;`;
 // Light palette: accents re-tuned for contrast on a light surface (>= 4.5:1 against white for text), neutral overlays darken instead of lighten.
 const SF_VARS_LIGHT = `--sf-cyan:#00798f; --sf-amber:#a85f00; --sf-red:#c8173d; --sf-green:#08783f; --sf-grey:#6a7b8b; --sf-text:#1c3a4e; --sf-dim:#4f6c84;
     --sf-cyan-rgb:0 121 143; --sf-amber-rgb:168 95 0; --sf-red-rgb:200 23 61; --sf-green-rgb:8 120 63; --sf-fg-rgb:4 40 62; --sf-strong:#04141f; --sf-white:#fff;
     --sf-bg0:#fbfdff; --sf-bg1:#eef5fb; --sf-bg2:#e2edf6; --sf-bg-rgb:255 255 255; --sf-scrim-rgb:206 220 232; --sf-sheet0:#f6fafd; --sf-shade-rgb:40 90 125; --sf-on-accent:#fff;
-    --sf-alert0:#ffe1e7; --sf-alert1:#ffd0d9; --sf-alert2:#ffc2ce;`;
+    --sf-alert0:#ffe1e7; --sf-alert1:#ffd0d9; --sf-alert2:#ffc2ce;
+    --sf-orange:#b8430f; --sf-heat:#bf3f16; --sf-cool:#0a6f9c; --sf-dry:#8a6600; --sf-fan:#2a7a2e; --sf-auto:#6a3bc4; --sf-pink:#a80f78; --sf-yellow:#7d6200; --sf-halo:rgb(255 255 255 / .85);`;
 
 const SF_CSS = `
   :host { display:block; ${SF_VARS_DARK} }

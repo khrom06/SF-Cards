@@ -1063,6 +1063,12 @@ __SF.SF_HOOK.tr = (lang, key) => {
     // editor banner
     const ed = document.createElement("sf-health-card-editor"); ed.hass = HASS(base, "fr"); ed.setConfig({ title: "x", checkz: [] }); document.body.appendChild(ed); await wait(30);
     const wb = ed.shadowRoot.querySelector(".warnings"); if (!wb || wb.hidden || !/did you mean 'checks'/.test(wb.textContent)) fail("validation: the editor must show a warning banner for a probable typo"); ed.remove(); }
+  // 5p. Theme tokens in SVG: a var() in a presentation attribute is copied into the inline style (works in every engine) after each render.
+  { const el = mount("sf-battery-card", { soc: "sensor.bat_soc", power: "sensor.bat_p" }, "en"); await wait(50);
+    const circles = [...el.shadowRoot.querySelectorAll("[stroke],[fill]")].filter((x) => /var\(/.test(x.getAttribute("stroke") || "") || /var\(/.test(x.getAttribute("fill") || ""));
+    if (!circles.length) fail("svg tokens: the battery gauge is expected to use a var() stroke");
+    for (const c of circles) for (const a of ["stroke", "fill"]) { const v = c.getAttribute(a); if (v && /var\(/.test(v) && c.style.getPropertyValue(a) !== v) fail(`svg tokens: ${a}="${v}" must be copied into the inline style`); }
+    el.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`translation problem: ${m}`);
   for (const e of window.__errors) fail(`JavaScript error: ${e}`);

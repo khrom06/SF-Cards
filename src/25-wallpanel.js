@@ -534,7 +534,7 @@ class SfNsCard extends SfBase {
     const key = html.replace(/<div class="hm">[^<]*<\/div>/, "").replace(/left:[\d.]+%/, "");
     if (key === this._key) { this._tick(); return; }
     this._key = key;
-    this.shadowRoot.innerHTML = html;
+    this.shadowRoot.innerHTML = html; sfSvgVars(this.shadowRoot);
     this._bind();
     this._a11yNs(this.shadowRoot);
   }

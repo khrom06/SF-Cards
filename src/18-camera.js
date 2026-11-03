@@ -39,8 +39,8 @@ class SfCameraCard extends SfBase {
                     radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.55)); }
       .ov { position:absolute; inset:0; z-index:2; pointer-events:none; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; }
       .ov .t, .ov .b { display:flex; justify-content:space-between; align-items:center; gap:8px; }
-      .tag { font-family:Orbitron,sans-serif; font-size:11px; letter-spacing:.18em; color:var(--sf-strong); text-shadow:0 0 6px #000, 0 0 8px ${SF_C.cyan}; }
-      .rec { font-size:10px; color:${SF_C.red}; letter-spacing:.14em; display:flex; align-items:center; gap:5px; text-shadow:0 0 4px #000; }
+      .tag { font-family:Orbitron,sans-serif; font-size:11px; letter-spacing:.18em; color:var(--sf-strong); text-shadow:0 0 6px var(--sf-halo), 0 0 8px ${SF_C.cyan}; }
+      .rec { font-size:10px; color:${SF_C.red}; letter-spacing:.14em; display:flex; align-items:center; gap:5px; text-shadow:0 0 4px var(--sf-halo); }
       .rec::before { content:""; width:8px; height:8px; border-radius:50%; background:${SF_C.red}; box-shadow:0 0 8px ${SF_C.red}; animation: blink 1s infinite; }
       .pill { font-size:10px; padding:3px 8px; border-radius:10px; background:rgba(0,0,0,.55); border:1px solid rgb(var(--sf-cyan-rgb) / .35); color:${SF_C.text}; }
       .pill.hot { border-color:${SF_C.amber}; color:${SF_C.amber}; }

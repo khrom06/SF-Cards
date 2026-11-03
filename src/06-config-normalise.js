@@ -34,6 +34,14 @@ function sfNormConfig(tag, c) {
 // Regular expression coming from the configuration: ignored if too long, invalid or with nested quantifiers (e.g. `(a+)+`, `(.*)*`) that
 // could freeze the browser (ReDoS). Compiled only once.
 // decoded URL #hash ("#%C3%A9nergie" = "énergie"), to compare it with the tiles' `hash`.
+// A CSS custom property inside an SVG presentation attribute (stroke="var(--sf-cyan)") is not honoured by every browser engine: the same value is
+// copied into the inline style, which always accepts var(). Called after each render of a card.
+function sfSvgVars(root) {
+  if (!root) return;
+  root.querySelectorAll('[stroke*="var("],[fill*="var("],[stop-color*="var("],[flood-color*="var("]').forEach((el) => {
+    for (const a of ["stroke", "fill", "stop-color", "flood-color"]) { const v = el.getAttribute(a); if (v && v.includes("var(")) el.style.setProperty(a, v); }
+  });
+}
 function sfHash() { const h = location.hash.slice(1); try { return decodeURIComponent(h); } catch (e) { return h; } }
 const _sfRe = {};
 function sfRegex(src) {

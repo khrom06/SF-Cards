@@ -11,9 +11,9 @@
  * extras: [{ label, entity, icon, timer?, stop? }]   # switches/scripts under the rooms; timer = displayed timer, stop = entities turned off by a press
  */
 const SF_HVAC = Object.assign(Object.create(null), {
-  heat: ["Chauffe", "#ff7043", "mdi:fire"], cool: ["Refroidit", "#4fc3f7", "mdi:snowflake"],
-  dry: ["Déshumidifie", "#ffca28", "mdi:water-percent"], fan_only: ["Ventile", "#66bb6a", "mdi:fan"],
-  heat_cool: ["Auto", "#b388ff", "mdi:autorenew"], off: ["Éteint", SF_C.grey, "mdi:power"],
+  heat: ["Chauffe", "var(--sf-heat)", "mdi:fire"], cool: ["Refroidit", "var(--sf-cool)", "mdi:snowflake"],
+  dry: ["Déshumidifie", "var(--sf-dry)", "mdi:water-percent"], fan_only: ["Ventile", "var(--sf-fan)", "mdi:fan"],
+  heat_cool: ["Auto", "var(--sf-auto)", "mdi:autorenew"], off: ["Éteint", SF_C.grey, "mdi:power"],
 });
 class SfClimateCard extends SfBase {
   defaults() { return { rooms: [], extras: [], switch_script: "", min: 15, max: 30 }; }
@@ -63,7 +63,7 @@ class SfClimateCard extends SfBase {
     let marks = "";
     for (let v = c.min; v <= c.max; v += 1) {
       const a = ang(v), [x0, y0] = p(a, 47), [x1, y1] = p(a, v % 5 === 0 ? 41 : 44);
-      marks += `<line x1="${this.esc(x0)}" y1="${this.esc(y0)}" x2="${this.esc(x1)}" y2="${this.esc(y1)}" stroke="rgba(255,255,255,${this.esc(v % 5 === 0 ? .35 : .12)})" stroke-width="1"/>`;
+      marks += `<line x1="${this.esc(x0)}" y1="${this.esc(y0)}" x2="${this.esc(x1)}" y2="${this.esc(y1)}" stroke="rgb(var(--sf-fg-rgb) / ${this.esc(v % 5 === 0 ? .35 : .12)})" stroke-width="1"/>`;
     }
     let tg = "";
     if (tgt !== null) { const a = ang(tgt), [x, y] = p(a, 53); tg = `<circle cx="${this.esc(x)}" cy="${this.esc(y)}" r="3.2" fill="${SF_C.cyan}" style="filter:drop-shadow(0 0 3px ${SF_C.cyan})"/>`; }

@@ -193,7 +193,7 @@ class SfHangarCard extends SfBase {
     const f = this._config.flows; if (!f) return "";
     const cell = (lbl, id, col) => { const w = this.watts(id); return `<div class="click" data-e="${this.esc(id)}"><div class="lbl">${lbl}</div><div class="val" style="color:${this.esc(col)}">${this.kw(w)}</div></div>`; };
     const cells = [f.solar && cell(this.t("common.solar"), f.solar, SF_C.amber), f.home && cell(this.t("hangar.home_excl_ev"), f.home, SF_C.cyan),
-      f.surplus && cell(this.t("hangar.surplus"), f.surplus, (this.watts(f.surplus) ?? 0) >= 0 ? SF_C.green : "#ff7a45")].filter(Boolean);
+      f.surplus && cell(this.t("hangar.surplus"), f.surplus, (this.watts(f.surplus) ?? 0) >= 0 ? SF_C.green : "var(--sf-orange)")].filter(Boolean);
     return cells.length ? `<div class="fl3" style="grid-template-columns:repeat(${this.esc(cells.length)},minmax(0,1fr))">${cells.join("")}</div>` : "";
   }
 }

@@ -12,7 +12,7 @@
  * height: 150
  * series: [{ entity: sensor.x, name: Salon, color: "var(--sf-cyan)", unit: "°C", digits: 1 }]
  */
-const SF_TREND_COLORS = [SF_C.cyan, SF_C.amber, SF_C.green, "#b388ff", "#ff7043", "#4fc3f7", "#ff4fd8", "#ffd54f"];
+const SF_TREND_COLORS = [SF_C.cyan, SF_C.amber, SF_C.green, "var(--sf-auto)", "var(--sf-heat)", "var(--sf-cool)", "var(--sf-pink)", "var(--sf-yellow)"];
 const SF_TREND_MAX_SERIES = 8, SF_TREND_POINTS = 240;
 // Reduces a series [[t, v], …] to at most n points (mean per time slice); empty slices are simply absent from the curve.
 function sfTrendReduce(pts, t0, t1, n = SF_TREND_POINTS) {
@@ -117,7 +117,7 @@ class SfTrendCard extends SfBase {
       .gl.nowl { stroke:rgb(var(--sf-amber-rgb) / .55); stroke-dasharray:3 4; }
       .ln2 { fill:none; stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
       .ar { stroke:none; opacity:.14; }
-      .yl { position:absolute; left:6px; font-size:9.5px; color:${SF_C.dim}; pointer-events:none; text-shadow:0 0 4px #000; }
+      .yl { position:absolute; left:6px; font-size:9.5px; color:${SF_C.dim}; pointer-events:none; text-shadow:0 0 4px var(--sf-halo); }
       .yl.hi { top:3px; } .yl.lo { bottom:3px; } .yl.r { left:auto; right:6px; }
       .cur { position:absolute; top:0; bottom:0; width:1px; background:${SF_C.cyan}; opacity:0; pointer-events:none; }
       .ro { position:absolute; top:4px; right:6px; font-size:10.5px; padding:3px 7px; border-radius:6px; background:rgb(var(--sf-bg-rgb) / .88); border:1px solid rgb(var(--sf-cyan-rgb) / .3); opacity:0; pointer-events:none; white-space:pre; }

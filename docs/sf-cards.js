@@ -736,12 +736,14 @@ const SF_C = {
 const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; --sf-green:#2bff88; --sf-grey:#5b6b7d; --sf-text:#cfefff; --sf-dim:#7fa3bd;
     --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff; --sf-white:#fff;
     --sf-bg0:#0d2440; --sf-bg1:#06101d; --sf-bg2:#03080f; --sf-bg-rgb:3 8 15; --sf-scrim-rgb:1 4 9; --sf-sheet0:#071426; --sf-shade-rgb:0 0 0; --sf-on-accent:#03080f;
-    --sf-alert0:#4a0714; --sf-alert1:#1a0308; --sf-alert2:#0a0104;`;
+    --sf-alert0:#4a0714; --sf-alert1:#1a0308; --sf-alert2:#0a0104;
+    --sf-orange:#ff7a45; --sf-heat:#ff7043; --sf-cool:#4fc3f7; --sf-dry:#ffca28; --sf-fan:#66bb6a; --sf-auto:#b388ff; --sf-pink:#ff4fd8; --sf-yellow:#ffd54f; --sf-halo:#000;`;
 // Light palette: accents re-tuned for contrast on a light surface (>= 4.5:1 against white for text), neutral overlays darken instead of lighten.
 const SF_VARS_LIGHT = `--sf-cyan:#00798f; --sf-amber:#a85f00; --sf-red:#c8173d; --sf-green:#08783f; --sf-grey:#6a7b8b; --sf-text:#1c3a4e; --sf-dim:#4f6c84;
     --sf-cyan-rgb:0 121 143; --sf-amber-rgb:168 95 0; --sf-red-rgb:200 23 61; --sf-green-rgb:8 120 63; --sf-fg-rgb:4 40 62; --sf-strong:#04141f; --sf-white:#fff;
     --sf-bg0:#fbfdff; --sf-bg1:#eef5fb; --sf-bg2:#e2edf6; --sf-bg-rgb:255 255 255; --sf-scrim-rgb:206 220 232; --sf-sheet0:#f6fafd; --sf-shade-rgb:40 90 125; --sf-on-accent:#fff;
-    --sf-alert0:#ffe1e7; --sf-alert1:#ffd0d9; --sf-alert2:#ffc2ce;`;
+    --sf-alert0:#ffe1e7; --sf-alert1:#ffd0d9; --sf-alert2:#ffc2ce;
+    --sf-orange:#b8430f; --sf-heat:#bf3f16; --sf-cool:#0a6f9c; --sf-dry:#8a6600; --sf-fan:#2a7a2e; --sf-auto:#6a3bc4; --sf-pink:#a80f78; --sf-yellow:#7d6200; --sf-halo:rgb(255 255 255 / .85);`;
 
 const SF_CSS = `
   :host { display:block; ${SF_VARS_DARK} }
@@ -829,6 +831,14 @@ function sfNormConfig(tag, c) {
 // Regular expression coming from the configuration: ignored if too long, invalid or with nested quantifiers (e.g. `(a+)+`, `(.*)*`) that
 // could freeze the browser (ReDoS). Compiled only once.
 // decoded URL #hash ("#%C3%A9nergie" = "énergie"), to compare it with the tiles' `hash`.
+// A CSS custom property inside an SVG presentation attribute (stroke="var(--sf-cyan)") is not honoured by every browser engine: the same value is
+// copied into the inline style, which always accepts var(). Called after each render of a card.
+function sfSvgVars(root) {
+  if (!root) return;
+  root.querySelectorAll('[stroke*="var("],[fill*="var("],[stop-color*="var("],[flood-color*="var("]').forEach((el) => {
+    for (const a of ["stroke", "fill", "stop-color", "flood-color"]) { const v = el.getAttribute(a); if (v && v.includes("var(")) el.style.setProperty(a, v); }
+  });
+}
 function sfHash() { const h = location.hash.slice(1); try { return decodeURIComponent(h); } catch (e) { return h; } }
 const _sfRe = {};
 function sfRegex(src) {
@@ -879,7 +889,7 @@ class SfBase extends HTMLElement {
       this.shadowRoot.querySelectorAll("[data-call]").forEach((el) =>
         el.addEventListener("click", (ev) => { ev.stopPropagation(); this._onCall(el); }));
       if (this.afterRender) this.afterRender();
-      this._a11y(this.shadowRoot);
+      this._a11y(this.shadowRoot); sfSvgVars(this.shadowRoot);
       if (this._armed && Date.now() < this._armed.until) {   // the HTML was rewritten: re-arm the same button
         const el = [...this.shadowRoot.querySelectorAll("[data-confirm]")].find((e) => `${e.dataset.call}|${e.dataset.d || ""}` === this._armed.key);
         if (el && !el.classList.contains("armed")) this._arm(el, this._armed.until - Date.now());
@@ -1379,7 +1389,7 @@ class SfHangarCard extends SfBase {
     const f = this._config.flows; if (!f) return "";
     const cell = (lbl, id, col) => { const w = this.watts(id); return `<div class="click" data-e="${this.esc(id)}"><div class="lbl">${lbl}</div><div class="val" style="color:${this.esc(col)}">${this.kw(w)}</div></div>`; };
     const cells = [f.solar && cell(this.t("common.solar"), f.solar, SF_C.amber), f.home && cell(this.t("hangar.home_excl_ev"), f.home, SF_C.cyan),
-      f.surplus && cell(this.t("hangar.surplus"), f.surplus, (this.watts(f.surplus) ?? 0) >= 0 ? SF_C.green : "#ff7a45")].filter(Boolean);
+      f.surplus && cell(this.t("hangar.surplus"), f.surplus, (this.watts(f.surplus) ?? 0) >= 0 ? SF_C.green : "var(--sf-orange)")].filter(Boolean);
     return cells.length ? `<div class="fl3" style="grid-template-columns:repeat(${this.esc(cells.length)},minmax(0,1fr))">${cells.join("")}</div>` : "";
   }
 }
@@ -1814,8 +1824,8 @@ class SfReactorCard extends SfBase {
       @keyframes breathe { 50% { transform: scale(1.08); filter: brightness(1.25); } }
       .core .txt { position:absolute; inset:0; display:grid; place-items:center; text-align:center; pointer-events:none; }
       .core .txt b { display:block; font-family:Orbitron,sans-serif; font-size:clamp(14px, 2.2vw, 22px); color:var(--sf-strong);
-        text-shadow:0 0 10px #000, 0 0 6px var(--cc); }
-      .core .txt span { font-size:9px; letter-spacing:.2em; color:var(--sf-strong); text-shadow:0 0 6px #000; }
+        text-shadow:0 0 10px var(--sf-halo), 0 0 6px var(--cc); }
+      .core .txt span { font-size:9px; letter-spacing:.2em; color:var(--sf-strong); text-shadow:0 0 6px var(--sf-halo); }
       .foot { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:6px; }
       .foot > div { padding:8px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
       .foot .v { font-family:Orbitron,sans-serif; font-size:16px; color:var(--sf-strong); margin-top:3px; }`;
@@ -1902,7 +1912,7 @@ class SfReactorCard extends SfBase {
       return `<path class="ln bg" d="${this.esc(d)}" vector-effect="non-scaling-stroke"/>` +
         (on ? `<path class="ln fx ${this.esc(rev ? "rev" : "")}" d="${this.esc(d)}" stroke="${this.esc(color)}" style="--d:${this.esc(this._dur(w))};filter:drop-shadow(0 0 2px ${this.esc(color)})" vector-effect="non-scaling-stroke"/>` : "");
     };
-    let svg = (hasSolar ? line("solar", "core", solar, SF_C.amber) : "") + line("grid", "core", grid, exporting ? SF_C.green : "#ff7a45", exporting);
+    let svg = (hasSolar ? line("solar", "core", solar, SF_C.amber) : "") + line("grid", "core", grid, exporting ? SF_C.green : "var(--sf-orange)", exporting);
     const nodes = [];
     devs.forEach((d, i) => {
       const w = d.__bat ? d.w : this.watts(d.entity);
@@ -1910,7 +1920,7 @@ class SfReactorCard extends SfBase {
       nodes.push(this._node(pts[`d${i}`], d.name, d.icon, w, d.color || SF_C.cyan, d.entity));
     });
     if (hasSolar) nodes.push(this._node(pts.solar, this.t("common.solar"), "mdi:solar-power-variant", solar, SF_C.amber, c.solar));
-    nodes.push(this._node(pts.grid, exporting ? this.t("reactor.export") : this.t("common.grid"), "mdi:transmission-tower", grid === null ? null : Math.abs(grid), exporting ? SF_C.green : "#ff7a45", c.grid));
+    nodes.push(this._node(pts.grid, exporting ? this.t("reactor.export") : this.t("common.grid"), "mdi:transmission-tower", grid === null ? null : Math.abs(grid), exporting ? SF_C.green : "var(--sf-orange)", c.grid));
 
     const fossil = this.num(c.fossil), price = this.num(c.price);
     // Footer: only the indicators whose entities are configured.
@@ -1949,9 +1959,9 @@ class SfReactorCard extends SfBase {
  * extras: [{ label, entity, icon, timer?, stop? }]   # switches/scripts under the rooms; timer = displayed timer, stop = entities turned off by a press
  */
 const SF_HVAC = Object.assign(Object.create(null), {
-  heat: ["Chauffe", "#ff7043", "mdi:fire"], cool: ["Refroidit", "#4fc3f7", "mdi:snowflake"],
-  dry: ["Déshumidifie", "#ffca28", "mdi:water-percent"], fan_only: ["Ventile", "#66bb6a", "mdi:fan"],
-  heat_cool: ["Auto", "#b388ff", "mdi:autorenew"], off: ["Éteint", SF_C.grey, "mdi:power"],
+  heat: ["Chauffe", "var(--sf-heat)", "mdi:fire"], cool: ["Refroidit", "var(--sf-cool)", "mdi:snowflake"],
+  dry: ["Déshumidifie", "var(--sf-dry)", "mdi:water-percent"], fan_only: ["Ventile", "var(--sf-fan)", "mdi:fan"],
+  heat_cool: ["Auto", "var(--sf-auto)", "mdi:autorenew"], off: ["Éteint", SF_C.grey, "mdi:power"],
 });
 class SfClimateCard extends SfBase {
   defaults() { return { rooms: [], extras: [], switch_script: "", min: 15, max: 30 }; }
@@ -2001,7 +2011,7 @@ class SfClimateCard extends SfBase {
     let marks = "";
     for (let v = c.min; v <= c.max; v += 1) {
       const a = ang(v), [x0, y0] = p(a, 47), [x1, y1] = p(a, v % 5 === 0 ? 41 : 44);
-      marks += `<line x1="${this.esc(x0)}" y1="${this.esc(y0)}" x2="${this.esc(x1)}" y2="${this.esc(y1)}" stroke="rgba(255,255,255,${this.esc(v % 5 === 0 ? .35 : .12)})" stroke-width="1"/>`;
+      marks += `<line x1="${this.esc(x0)}" y1="${this.esc(y0)}" x2="${this.esc(x1)}" y2="${this.esc(y1)}" stroke="rgb(var(--sf-fg-rgb) / ${this.esc(v % 5 === 0 ? .35 : .12)})" stroke-width="1"/>`;
     }
     let tg = "";
     if (tgt !== null) { const a = ang(tgt), [x, y] = p(a, 53); tg = `<circle cx="${this.esc(x)}" cy="${this.esc(y)}" r="3.2" fill="${SF_C.cyan}" style="filter:drop-shadow(0 0 3px ${SF_C.cyan})"/>`; }
@@ -2208,8 +2218,8 @@ class SfCameraCard extends SfBase {
                     radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.55)); }
       .ov { position:absolute; inset:0; z-index:2; pointer-events:none; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; }
       .ov .t, .ov .b { display:flex; justify-content:space-between; align-items:center; gap:8px; }
-      .tag { font-family:Orbitron,sans-serif; font-size:11px; letter-spacing:.18em; color:var(--sf-strong); text-shadow:0 0 6px #000, 0 0 8px ${SF_C.cyan}; }
-      .rec { font-size:10px; color:${SF_C.red}; letter-spacing:.14em; display:flex; align-items:center; gap:5px; text-shadow:0 0 4px #000; }
+      .tag { font-family:Orbitron,sans-serif; font-size:11px; letter-spacing:.18em; color:var(--sf-strong); text-shadow:0 0 6px var(--sf-halo), 0 0 8px ${SF_C.cyan}; }
+      .rec { font-size:10px; color:${SF_C.red}; letter-spacing:.14em; display:flex; align-items:center; gap:5px; text-shadow:0 0 4px var(--sf-halo); }
       .rec::before { content:""; width:8px; height:8px; border-radius:50%; background:${SF_C.red}; box-shadow:0 0 8px ${SF_C.red}; animation: blink 1s infinite; }
       .pill { font-size:10px; padding:3px 8px; border-radius:10px; background:rgba(0,0,0,.55); border:1px solid rgb(var(--sf-cyan-rgb) / .35); color:${SF_C.text}; }
       .pill.hot { border-color:${SF_C.amber}; color:${SF_C.amber}; }
@@ -2387,7 +2397,7 @@ class SfLedgerCard extends SfBase {
       const tot = this.num(d.total), e = this.num(d.edf) || 0, s = this.num(d.solar) || 0, cost = this.num(d.cost);
       return `<div class="dev click" data-e="${this.esc(d.total)}"><div>${this.icon(d.icon || "mdi:flash", 16, SF_C.cyan)} ${this.esc(d.name)}
           <div class="lbl" style="margin-top:2px;text-transform:none">${tot === null ? "—" : this.nf(tot, 1) + " kWh"}</div></div>
-        <div class="bar"><i style="width:${this.esc((s / max) * 100)}%;background:${SF_C.amber};box-shadow:0 0 8px ${SF_C.amber}"></i><i style="width:${this.esc((e / max) * 100)}%;background:#ff7a45"></i></div>
+        <div class="bar"><i style="width:${this.esc((s / max) * 100)}%;background:${SF_C.amber};box-shadow:0 0 8px ${SF_C.amber}"></i><i style="width:${this.esc((e / max) * 100)}%;background:var(--sf-orange)"></i></div>
         <div class="val" style="text-align:right">${cost === null ? "—" : this.nf(cost, 2) + " €"}</div></div>`;
     }).join("");
     const fr = this.num(c.solar_fraction), tc = this.num(c.total_cost), ap = this.num(c.avg_price);
@@ -2398,7 +2408,7 @@ class SfLedgerCard extends SfBase {
       <div class="seg">${seg}</div>
       <div class="kpis" style="grid-template-columns:repeat(${this.esc(Math.max(1, kp.length))},minmax(0,1fr))">${kp.map((k) => `<div class="kpi click" data-e="${this.esc(k[0])}"><div class="lbl">${this.t(k[1])}</div><div class="v" style="${this.esc(k[3])}">${k[2]}</div></div>`).join("")}
       </div>${devs}
-      <div class="legend">${hasSolar ? `<span><i style="background:${SF_C.amber}"></i>${this.t("ledger.solar")}</span>` : ""}<span><i style="background:#ff7a45"></i>${this.t("common.grid")}</span><span>${this.t("ledger.estimates")}</span></div>`);
+      <div class="legend">${hasSolar ? `<span><i style="background:${SF_C.amber}"></i>${this.t("ledger.solar")}</span>` : ""}<span><i style="background:var(--sf-orange)"></i>${this.t("common.grid")}</span><span>${this.t("ledger.estimates")}</span></div>`);
   }
   getCardSize() { return 6; }
 }
@@ -2468,11 +2478,6 @@ const SF_POP_CSS = `
   :host { ${SF_VARS_DARK} }
   :host([theme="light"]) { ${SF_VARS_LIGHT} }
   @media (prefers-reduced-motion: reduce) { .back, .sheet { transition:none !important; } }
-  :host([theme="light"]) .sheet { background: linear-gradient(180deg, #f3f8fc 0%, #e3edf5 100%); border-color:rgba(0,110,150,.45); box-shadow:0 -10px 40px rgba(0,90,130,.22); }
-  :host([theme="light"]) .back { background:rgba(180,200,215,.55); }
-  :host([theme="light"]) .grab { background:rgba(0,110,150,.45); }
-  :host([theme="light"]) .bar { color:#0a5d7a; }
-  :host([theme="light"]) .bar button { border-color:rgba(0,110,150,.4); background:rgba(0,110,150,.08); color:#0b3a4d; }
   .back { position:fixed; inset:0; z-index:9998; background:rgb(var(--sf-scrim-rgb) / .66); backdrop-filter:blur(6px);
     -webkit-backdrop-filter:blur(6px); opacity:0; transition:opacity .25s; }
   .sheet { position:fixed; z-index:9999; left:0; right:0; bottom:0; max-height:92vh; display:flex; flex-direction:column;
@@ -3411,7 +3416,7 @@ class SfNsCard extends SfBase {
     const key = html.replace(/<div class="hm">[^<]*<\/div>/, "").replace(/left:[\d.]+%/, "");
     if (key === this._key) { this._tick(); return; }
     this._key = key;
-    this.shadowRoot.innerHTML = html;
+    this.shadowRoot.innerHTML = html; sfSvgVars(this.shadowRoot);
     this._bind();
     this._a11yNs(this.shadowRoot);
   }
@@ -3443,7 +3448,7 @@ class SfNsCard extends SfBase {
  * height: 150
  * series: [{ entity: sensor.x, name: Salon, color: "var(--sf-cyan)", unit: "°C", digits: 1 }]
  */
-const SF_TREND_COLORS = [SF_C.cyan, SF_C.amber, SF_C.green, "#b388ff", "#ff7043", "#4fc3f7", "#ff4fd8", "#ffd54f"];
+const SF_TREND_COLORS = [SF_C.cyan, SF_C.amber, SF_C.green, "var(--sf-auto)", "var(--sf-heat)", "var(--sf-cool)", "var(--sf-pink)", "var(--sf-yellow)"];
 const SF_TREND_MAX_SERIES = 8, SF_TREND_POINTS = 240;
 // Reduces a series [[t, v], …] to at most n points (mean per time slice); empty slices are simply absent from the curve.
 function sfTrendReduce(pts, t0, t1, n = SF_TREND_POINTS) {
@@ -3548,7 +3553,7 @@ class SfTrendCard extends SfBase {
       .gl.nowl { stroke:rgb(var(--sf-amber-rgb) / .55); stroke-dasharray:3 4; }
       .ln2 { fill:none; stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
       .ar { stroke:none; opacity:.14; }
-      .yl { position:absolute; left:6px; font-size:9.5px; color:${SF_C.dim}; pointer-events:none; text-shadow:0 0 4px #000; }
+      .yl { position:absolute; left:6px; font-size:9.5px; color:${SF_C.dim}; pointer-events:none; text-shadow:0 0 4px var(--sf-halo); }
       .yl.hi { top:3px; } .yl.lo { bottom:3px; } .yl.r { left:auto; right:6px; }
       .cur { position:absolute; top:0; bottom:0; width:1px; background:${SF_C.cyan}; opacity:0; pointer-events:none; }
       .ro { position:absolute; top:4px; right:6px; font-size:10.5px; padding:3px 7px; border-radius:6px; background:rgb(var(--sf-bg-rgb) / .88); border:1px solid rgb(var(--sf-cyan-rgb) / .3); opacity:0; pointer-events:none; white-space:pre; }

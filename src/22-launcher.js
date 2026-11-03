@@ -23,11 +23,6 @@ const SF_POP_CSS = `
   :host { ${SF_VARS_DARK} }
   :host([theme="light"]) { ${SF_VARS_LIGHT} }
   @media (prefers-reduced-motion: reduce) { .back, .sheet { transition:none !important; } }
-  :host([theme="light"]) .sheet { background: linear-gradient(180deg, #f3f8fc 0%, #e3edf5 100%); border-color:rgba(0,110,150,.45); box-shadow:0 -10px 40px rgba(0,90,130,.22); }
-  :host([theme="light"]) .back { background:rgba(180,200,215,.55); }
-  :host([theme="light"]) .grab { background:rgba(0,110,150,.45); }
-  :host([theme="light"]) .bar { color:#0a5d7a; }
-  :host([theme="light"]) .bar button { border-color:rgba(0,110,150,.4); background:rgba(0,110,150,.08); color:#0b3a4d; }
   .back { position:fixed; inset:0; z-index:9998; background:rgb(var(--sf-scrim-rgb) / .66); backdrop-filter:blur(6px);
     -webkit-backdrop-filter:blur(6px); opacity:0; transition:opacity .25s; }
   .sheet { position:fixed; z-index:9999; left:0; right:0; bottom:0; max-height:92vh; display:flex; flex-direction:column;

@@ -29,7 +29,7 @@ class SfLedgerCard extends SfBase {
       const tot = this.num(d.total), e = this.num(d.edf) || 0, s = this.num(d.solar) || 0, cost = this.num(d.cost);
       return `<div class="dev click" data-e="${this.esc(d.total)}"><div>${this.icon(d.icon || "mdi:flash", 16, SF_C.cyan)} ${this.esc(d.name)}
           <div class="lbl" style="margin-top:2px;text-transform:none">${tot === null ? "—" : this.nf(tot, 1) + " kWh"}</div></div>
-        <div class="bar"><i style="width:${this.esc((s / max) * 100)}%;background:${SF_C.amber};box-shadow:0 0 8px ${SF_C.amber}"></i><i style="width:${this.esc((e / max) * 100)}%;background:#ff7a45"></i></div>
+        <div class="bar"><i style="width:${this.esc((s / max) * 100)}%;background:${SF_C.amber};box-shadow:0 0 8px ${SF_C.amber}"></i><i style="width:${this.esc((e / max) * 100)}%;background:var(--sf-orange)"></i></div>
         <div class="val" style="text-align:right">${cost === null ? "—" : this.nf(cost, 2) + " €"}</div></div>`;
     }).join("");
     const fr = this.num(c.solar_fraction), tc = this.num(c.total_cost), ap = this.num(c.avg_price);
@@ -40,7 +40,7 @@ class SfLedgerCard extends SfBase {
       <div class="seg">${seg}</div>
       <div class="kpis" style="grid-template-columns:repeat(${this.esc(Math.max(1, kp.length))},minmax(0,1fr))">${kp.map((k) => `<div class="kpi click" data-e="${this.esc(k[0])}"><div class="lbl">${this.t(k[1])}</div><div class="v" style="${this.esc(k[3])}">${k[2]}</div></div>`).join("")}
       </div>${devs}
-      <div class="legend">${hasSolar ? `<span><i style="background:${SF_C.amber}"></i>${this.t("ledger.solar")}</span>` : ""}<span><i style="background:#ff7a45"></i>${this.t("common.grid")}</span><span>${this.t("ledger.estimates")}</span></div>`);
+      <div class="legend">${hasSolar ? `<span><i style="background:${SF_C.amber}"></i>${this.t("ledger.solar")}</span>` : ""}<span><i style="background:var(--sf-orange)"></i>${this.t("common.grid")}</span><span>${this.t("ledger.estimates")}</span></div>`);
   }
   getCardSize() { return 6; }
 }
