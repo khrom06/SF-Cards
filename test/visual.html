@@ -1,0 +1,23 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Visual regression page: renders ONE card (?tag=sf-xxx-card&theme=dark|light) at a fixed width with a frozen clock; test/visual.mjs screenshots it. -->
+<body style="margin:0;padding:12px;width:560px;background:#050b14">
+<script>
+{ const Real = Date, FIXED = Real.parse("2026-06-15T10:00:00Z");
+  class FDate extends Real { constructor(...a) { if (a.length) super(...a); else super(FIXED); } static now() { return FIXED; } }
+  window.Date = FDate;
+  let seed = 12345; Math.random = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
+class FakeIcon extends HTMLElement { connectedCallback() { this.style.cssText = "display:inline-block;width:1em;height:1em;background:currentColor;border-radius:3px;opacity:.5;vertical-align:middle"; } }
+customElements.define("ha-icon", FakeIcon);   // a plain square stands in for the icon font (deterministic, no network)
+window.requestAnimationFrame = (f) => setTimeout(f, 0);
+</script>
+<script src="../dist/sf-cards.js"></script>
+<script src="fixtures.js"></script>
+<script>
+const q = new URLSearchParams(location.search), tag = q.get("tag"), theme = q.get("theme") || "dark";
+document.body.style.background = theme === "light" ? "#e9f0f6" : "#050b14";
+const el = document.createElement(tag); el.setConfig({ ...FULL[tag], theme }); document.body.appendChild(el); el.hass = HASS(base, "fr");
+// Freeze everything that moves so that the screenshot is deterministic: CSS animations / transitions and SVG (SMIL) animations.
+setTimeout(() => { const roots = [el.shadowRoot]; for (const r of roots) { if (!r) continue; const st = document.createElement("style"); st.textContent = "*,*::before,*::after{animation:none!important;transition:none!important}"; r.appendChild(st);
+  r.querySelectorAll("svg").forEach((s) => { try { s.pauseAnimations(); s.setCurrentTime(0); } catch (e) {} }); } }, 50);
+</script>
