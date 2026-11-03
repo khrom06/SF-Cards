@@ -37,7 +37,9 @@ function ws(token) {
 }
 
 const tags = Object.keys(FULL);
+const EDIT_TAGS = ["sf-trend-card", "sf-timeline-card", "sf-health-card", "sf-assistant-card", "sf-launcher-card"].filter((t) => FULL[t]);
 const dashConfig = { views: [{ title: "e2e", path: "e2e", type: "masonry", cards: tags.map((t) => ({ type: "custom:" + t, ...FULL[t] })) },
+  ...EDIT_TAGS.map((t) => ({ title: "ed " + t, path: "ed-" + t, type: "masonry", cards: [{ type: "custom:" + t, ...FULL[t] }] })),
   { title: "pick", path: "pick", type: "masonry", cards: [{ type: "custom:sf-machines-card", title: "Pick", tiles: [{ label: "A", entity: "sensor.e2e_temp_a", kind: "value", digits: 1 }] }] }] };
 
 async function main() {
@@ -82,6 +84,22 @@ async function main() {
     const picked = await page.evaluate(() => { const f = (root, p, acc = []) => { root.querySelectorAll("*").forEach((e) => { if (p(e)) acc.push(e); if (e.shadowRoot) f(e.shadowRoot, p, acc); }); return acc; }; const e = f(document, (x) => x.localName === "ha-entity-picker")[0]; return e && (e.value || null); });
     log("entité choisie :", picked);
     if (picked !== "sensor.e2e_temp_b") fails.push(`éditeur : l'entité choisie n'est pas prise en compte (valeur : ${picked})`);
+  }
+  // 3. Éditeur de chaque nouvelle carte : s'ouvre, ne gèle pas, et un choix d'entité dans son vrai sélecteur n'y change rien de grave.
+  for (const tag of EDIT_TAGS) {
+    try {
+      await page.goto(HA + "/e2e-test/ed-" + tag + "?edit=1", { waitUntil: "domcontentloaded" }); await sleep(4000); await alive("mode édition " + tag);
+      try { await page.getByRole("button", { name: /^edit$/i }).first().click({ timeout: 8000 }); } catch { fails.push(`${tag} : bouton « Edit » introuvable`); continue; }
+      await sleep(3000); await alive("ouverture de l'éditeur " + tag);
+      const n = await page.evaluate((t) => { const f = (root, p, acc = []) => { root.querySelectorAll("*").forEach((e) => { if (p(e)) acc.push(e); if (e.shadowRoot) f(e.shadowRoot, p, acc); }); return acc; }; return f(document, (e) => e.localName === t + "-editor").length; }, tag);
+      if (!n) { fails.push(`${tag} : éditeur absent de la boîte de dialogue`); continue; }
+      await page.locator(`${tag}-editor details summary`).first().click({ timeout: 4000 }).catch(() => {}); await sleep(600);
+      const picker = page.locator(`${tag}-editor ha-entity-picker`).first();
+      if (await picker.count()) { try { await picker.click({ timeout: 4000 }); await sleep(700); await page.keyboard.type("e2e temp"); await sleep(700); await page.keyboard.press("ArrowDown"); await page.keyboard.press("Enter"); } catch (e) { /* sélecteur non interactif : sans gravité */ } }
+      await sleep(2000); await alive("choix d'une entité dans l'éditeur " + tag);
+      log("éditeur OK :", tag);
+      await page.keyboard.press("Escape"); await sleep(500);
+    } catch (e) { if (e.message === "freeze") throw e; fails.push(`${tag} : ${String(e.message).split("\n")[0]}`); }
   }
   if (errs.length) fails.push(...[...new Set(errs)].slice(0, 8).map((e) => "erreur JS : " + e));
   await browser.close();
