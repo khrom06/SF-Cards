@@ -65,7 +65,7 @@ class SfBridgeCard extends SfBase {
       .member { display:flex; align-items:center; gap:7px; padding:4px 12px 4px 4px; border-radius:20px;
         background:rgb(var(--sf-fg-rgb) / .03); border:1px solid rgb(var(--sf-fg-rgb) / .08); font-size:12px; }
       .member .av { width:24px; height:24px; border-radius:50%; display:grid; place-items:center;
-        font-family:Orbitron,sans-serif; font-size:11px; color:#03080f; }
+        font-family:Orbitron,sans-serif; font-size:11px; color:var(--sf-on-accent); }
       .member.away { opacity:.45; }
       .crew .right { margin-left:auto; font-size:11px; color:${SF_C.dim}; }`;
   }

@@ -734,7 +734,9 @@ const SF_C = {
   grey: "var(--sf-grey)", text: "var(--sf-text)", dim: "var(--sf-dim)",
 };
 const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; --sf-green:#2bff88; --sf-grey:#5b6b7d; --sf-text:#cfefff; --sf-dim:#7fa3bd;
-    --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff; --sf-white:#fff;`;
+    --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff; --sf-white:#fff;
+    --sf-bg0:#0d2440; --sf-bg1:#06101d; --sf-bg2:#03080f; --sf-bg-rgb:3 8 15; --sf-scrim-rgb:1 4 9; --sf-sheet0:#071426; --sf-shade-rgb:0 0 0; --sf-on-accent:#03080f;
+    --sf-alert0:#4a0714; --sf-alert1:#1a0308; --sf-alert2:#0a0104;`;
 
 const SF_CSS = `
   :host { display:block; ${SF_VARS_DARK} }
@@ -747,7 +749,7 @@ const SF_CSS = `
   :host([theme="light"]) img, :host([theme="light"]) video, :host([theme="light"]) canvas { filter: invert(1) hue-rotate(180deg); }
   :host([dir="rtl"]) svg, :host([dir="rtl"]) .stage, :host([dir="rtl"]) .core, :host([dir="rtl"]) .dial, :host([dir="rtl"]) .ring, :host([dir="rtl"]) .gauge .ring { direction:ltr; }
   .hud { position:relative; overflow:hidden; border-radius:14px; padding:16px 18px 18px;
-    background: radial-gradient(ellipse at 50% -20%, #0d2440 0%, #06101d 60%, #03080f 100%);
+    background: radial-gradient(ellipse at 50% -20%, var(--sf-bg0) 0%, var(--sf-bg1) 60%, var(--sf-bg2) 100%);
     border:1px solid rgb(var(--sf-cyan-rgb) / .22); color:${SF_C.text};
     font-family:'B612 Mono', ui-monospace, monospace; font-size:13px;
     box-shadow: inset 0 0 40px rgb(var(--sf-cyan-rgb) / .06), 0 0 22px rgb(var(--sf-cyan-rgb) / .07); }
@@ -1097,7 +1099,7 @@ class SfAlertCard extends SfBase {
   css() {
     return `
       .alert .hud, .hud.alert { border-color:rgb(var(--sf-red-rgb) / .7);
-        background: radial-gradient(ellipse at 50% 0%, #4a0714 0%, #1a0308 65%, #0a0104 100%);
+        background: radial-gradient(ellipse at 50% 0%, var(--sf-alert0) 0%, var(--sf-alert1) 65%, var(--sf-alert2) 100%);
         animation: pulse 1.1s infinite; }
       .hud.alert .c { border-color:${SF_C.red}; }
       .hud.alert .head { color:${SF_C.red}; text-shadow:0 0 10px rgb(var(--sf-red-rgb) / .8); }
@@ -1671,7 +1673,7 @@ class SfBridgeCard extends SfBase {
       .member { display:flex; align-items:center; gap:7px; padding:4px 12px 4px 4px; border-radius:20px;
         background:rgb(var(--sf-fg-rgb) / .03); border:1px solid rgb(var(--sf-fg-rgb) / .08); font-size:12px; }
       .member .av { width:24px; height:24px; border-radius:50%; display:grid; place-items:center;
-        font-family:Orbitron,sans-serif; font-size:11px; color:#03080f; }
+        font-family:Orbitron,sans-serif; font-size:11px; color:var(--sf-on-accent); }
       .member.away { opacity:.45; }
       .crew .right { margin-left:auto; font-size:11px; color:${SF_C.dim}; }`;
   }
@@ -1787,7 +1789,7 @@ class SfReactorCard extends SfBase {
       @keyframes flow { to { stroke-dashoffset: -32; } }
       .node { position:absolute; transform:translate(-50%,-50%); text-align:center; width:88px; }
       .node .ic { width:46px; height:46px; margin:0 auto 4px; border-radius:50%; display:grid; place-items:center;
-        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .12), rgba(0,0,0,.4));
+        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .12), rgb(var(--sf-shade-rgb) / .4));
         border:1px solid currentColor; box-shadow: 0 0 12px -2px currentColor, inset 0 0 10px -4px currentColor; }
       .node .n { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:${SF_C.dim}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .node .w { font-family:Orbitron,sans-serif; font-size:13px; color:var(--sf-strong); }
@@ -1954,7 +1956,7 @@ class SfClimateCard extends SfBase {
       .modes { margin-bottom:14px; }
       .rooms { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
       .room { position:relative; padding:12px 12px 10px; border-radius:12px; overflow:hidden;
-        background: linear-gradient(165deg, color-mix(in srgb, var(--hc) 16%, transparent), rgba(3,8,15,.6));
+        background: linear-gradient(165deg, color-mix(in srgb, var(--hc) 16%, transparent), rgb(var(--sf-bg-rgb) / .6));
         border:1px solid color-mix(in srgb, var(--hc) 45%, transparent); }
       .room.active { animation: glow 2.4s ease-in-out infinite; }
       @keyframes glow { 50% { box-shadow: 0 0 22px -4px var(--hc), inset 0 0 18px -8px var(--hc); } }
@@ -2466,10 +2468,10 @@ const SF_POP_CSS = `
   :host([theme="light"]) .grab { background:rgba(0,110,150,.45); }
   :host([theme="light"]) .bar { color:#0a5d7a; }
   :host([theme="light"]) .bar button { border-color:rgba(0,110,150,.4); background:rgba(0,110,150,.08); color:#0b3a4d; }
-  .back { position:fixed; inset:0; z-index:9998; background:rgba(1,4,9,.66); backdrop-filter:blur(6px);
+  .back { position:fixed; inset:0; z-index:9998; background:rgb(var(--sf-scrim-rgb) / .66); backdrop-filter:blur(6px);
     -webkit-backdrop-filter:blur(6px); opacity:0; transition:opacity .25s; }
   .sheet { position:fixed; z-index:9999; left:0; right:0; bottom:0; max-height:92vh; display:flex; flex-direction:column;
-    background: linear-gradient(180deg, #071426 0%, #03080f 100%); border-top:1px solid rgb(var(--sf-cyan-rgb) / .45);
+    background: linear-gradient(180deg, var(--sf-sheet0) 0%, var(--sf-bg2) 100%); border-top:1px solid rgb(var(--sf-cyan-rgb) / .45);
     border-radius:22px 22px 0 0; box-shadow:0 -10px 40px rgb(var(--sf-cyan-rgb) / .18);
     transform:translateY(105%); transition:transform .32s cubic-bezier(.2,.9,.25,1);
     padding-bottom: env(safe-area-inset-bottom); }
@@ -2526,7 +2528,7 @@ class SfLauncherCard extends SfBase {
     return `
       .tiles { display:grid; grid-template-columns: repeat(var(--cols), 1fr); gap:10px; font-family:'B612 Mono', ui-monospace, monospace; }
       .tile { position:relative; padding:12px 12px 11px; border-radius:14px; cursor:pointer; overflow:hidden;
-        background: linear-gradient(155deg, color-mix(in srgb, var(--tc) 18%, transparent), rgba(3,8,15,.8));
+        background: linear-gradient(155deg, color-mix(in srgb, var(--tc) 18%, transparent), rgb(var(--sf-bg-rgb) / .8));
         border:1px solid color-mix(in srgb, var(--tc) 45%, transparent); -webkit-tap-highlight-color:transparent;
         transition: transform .12s; }
       .tile:active { transform:scale(.97); }
@@ -3544,7 +3546,7 @@ class SfTrendCard extends SfBase {
       .yl { position:absolute; left:6px; font-size:9.5px; color:${SF_C.dim}; pointer-events:none; text-shadow:0 0 4px #000; }
       .yl.hi { top:3px; } .yl.lo { bottom:3px; } .yl.r { left:auto; right:6px; }
       .cur { position:absolute; top:0; bottom:0; width:1px; background:${SF_C.cyan}; opacity:0; pointer-events:none; }
-      .ro { position:absolute; top:4px; right:6px; font-size:10.5px; padding:3px 7px; border-radius:6px; background:rgba(3,8,15,.88); border:1px solid rgb(var(--sf-cyan-rgb) / .3); opacity:0; pointer-events:none; white-space:pre; }
+      .ro { position:absolute; top:4px; right:6px; font-size:10.5px; padding:3px 7px; border-radius:6px; background:rgb(var(--sf-bg-rgb) / .88); border:1px solid rgb(var(--sf-cyan-rgb) / .3); opacity:0; pointer-events:none; white-space:pre; }
       .plot.hov .cur, .plot.hov .ro { opacity:1; }
       .xl { display:flex; justify-content:space-between; font-size:9.5px; color:${SF_C.dim}; margin:0 0 8px; }
       .lg { display:flex; flex-wrap:wrap; gap:6px 16px; }
@@ -3883,7 +3885,7 @@ class SfAssistantCard extends SfBase {
     return `
       .as { display:flex; align-items:center; gap:14px; padding:2px 2px 12px; }
       .orb { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; flex:none; color:var(--pc); border:1.5px solid var(--pc);
-        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .14), rgba(0,0,0,.4)); box-shadow:0 0 14px -2px var(--pc), inset 0 0 12px -4px var(--pc); }
+        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .14), rgb(var(--sf-shade-rgb) / .4)); box-shadow:0 0 14px -2px var(--pc), inset 0 0 12px -4px var(--pc); }
       .orb.live { animation: orbp 1.6s ease-in-out infinite; }
       @keyframes orbp { 50% { box-shadow:0 0 24px 0 var(--pc), inset 0 0 14px -2px var(--pc); } }
       .ph { font-family:Orbitron,sans-serif; font-size:15px; letter-spacing:.06em; color:var(--pc); }
@@ -4560,7 +4562,7 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
   }
 }
 
-console.info("%c SF-CARDS %c v1.13.0 ", "color:#03080f;background:var(--sf-cyan);font-weight:700", "color:var(--sf-cyan);background:#03080f");
+console.info("%c SF-CARDS %c v1.13.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
 
 /* ============================================================== VALIDATION */
 /*

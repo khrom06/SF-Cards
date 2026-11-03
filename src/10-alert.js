@@ -14,7 +14,7 @@ class SfAlertCard extends SfBase {
   css() {
     return `
       .alert .hud, .hud.alert { border-color:rgb(var(--sf-red-rgb) / .7);
-        background: radial-gradient(ellipse at 50% 0%, #4a0714 0%, #1a0308 65%, #0a0104 100%);
+        background: radial-gradient(ellipse at 50% 0%, var(--sf-alert0) 0%, var(--sf-alert1) 65%, var(--sf-alert2) 100%);
         animation: pulse 1.1s infinite; }
       .hud.alert .c { border-color:${SF_C.red}; }
       .hud.alert .head { color:${SF_C.red}; text-shadow:0 0 10px rgb(var(--sf-red-rgb) / .8); }

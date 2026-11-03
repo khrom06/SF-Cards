@@ -120,7 +120,7 @@ class SfTrendCard extends SfBase {
       .yl { position:absolute; left:6px; font-size:9.5px; color:${SF_C.dim}; pointer-events:none; text-shadow:0 0 4px #000; }
       .yl.hi { top:3px; } .yl.lo { bottom:3px; } .yl.r { left:auto; right:6px; }
       .cur { position:absolute; top:0; bottom:0; width:1px; background:${SF_C.cyan}; opacity:0; pointer-events:none; }
-      .ro { position:absolute; top:4px; right:6px; font-size:10.5px; padding:3px 7px; border-radius:6px; background:rgba(3,8,15,.88); border:1px solid rgb(var(--sf-cyan-rgb) / .3); opacity:0; pointer-events:none; white-space:pre; }
+      .ro { position:absolute; top:4px; right:6px; font-size:10.5px; padding:3px 7px; border-radius:6px; background:rgb(var(--sf-bg-rgb) / .88); border:1px solid rgb(var(--sf-cyan-rgb) / .3); opacity:0; pointer-events:none; white-space:pre; }
       .plot.hov .cur, .plot.hov .ro { opacity:1; }
       .xl { display:flex; justify-content:space-between; font-size:9.5px; color:${SF_C.dim}; margin:0 0 8px; }
       .lg { display:flex; flex-wrap:wrap; gap:6px 16px; }

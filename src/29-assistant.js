@@ -40,7 +40,7 @@ class SfAssistantCard extends SfBase {
     return `
       .as { display:flex; align-items:center; gap:14px; padding:2px 2px 12px; }
       .orb { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; flex:none; color:var(--pc); border:1.5px solid var(--pc);
-        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .14), rgba(0,0,0,.4)); box-shadow:0 0 14px -2px var(--pc), inset 0 0 12px -4px var(--pc); }
+        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .14), rgb(var(--sf-shade-rgb) / .4)); box-shadow:0 0 14px -2px var(--pc), inset 0 0 12px -4px var(--pc); }
       .orb.live { animation: orbp 1.6s ease-in-out infinite; }
       @keyframes orbp { 50% { box-shadow:0 0 24px 0 var(--pc), inset 0 0 14px -2px var(--pc); } }
       .ph { font-family:Orbitron,sans-serif; font-size:15px; letter-spacing:.06em; color:var(--pc); }

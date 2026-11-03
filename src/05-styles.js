@@ -6,7 +6,9 @@ const SF_C = {
   grey: "var(--sf-grey)", text: "var(--sf-text)", dim: "var(--sf-dim)",
 };
 const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; --sf-green:#2bff88; --sf-grey:#5b6b7d; --sf-text:#cfefff; --sf-dim:#7fa3bd;
-    --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff; --sf-white:#fff;`;
+    --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff; --sf-white:#fff;
+    --sf-bg0:#0d2440; --sf-bg1:#06101d; --sf-bg2:#03080f; --sf-bg-rgb:3 8 15; --sf-scrim-rgb:1 4 9; --sf-sheet0:#071426; --sf-shade-rgb:0 0 0; --sf-on-accent:#03080f;
+    --sf-alert0:#4a0714; --sf-alert1:#1a0308; --sf-alert2:#0a0104;`;
 
 const SF_CSS = `
   :host { display:block; ${SF_VARS_DARK} }
@@ -19,7 +21,7 @@ const SF_CSS = `
   :host([theme="light"]) img, :host([theme="light"]) video, :host([theme="light"]) canvas { filter: invert(1) hue-rotate(180deg); }
   :host([dir="rtl"]) svg, :host([dir="rtl"]) .stage, :host([dir="rtl"]) .core, :host([dir="rtl"]) .dial, :host([dir="rtl"]) .ring, :host([dir="rtl"]) .gauge .ring { direction:ltr; }
   .hud { position:relative; overflow:hidden; border-radius:14px; padding:16px 18px 18px;
-    background: radial-gradient(ellipse at 50% -20%, #0d2440 0%, #06101d 60%, #03080f 100%);
+    background: radial-gradient(ellipse at 50% -20%, var(--sf-bg0) 0%, var(--sf-bg1) 60%, var(--sf-bg2) 100%);
     border:1px solid rgb(var(--sf-cyan-rgb) / .22); color:${SF_C.text};
     font-family:'B612 Mono', ui-monospace, monospace; font-size:13px;
     box-shadow: inset 0 0 40px rgb(var(--sf-cyan-rgb) / .06), 0 0 22px rgb(var(--sf-cyan-rgb) / .07); }

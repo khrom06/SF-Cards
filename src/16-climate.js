@@ -22,7 +22,7 @@ class SfClimateCard extends SfBase {
       .modes { margin-bottom:14px; }
       .rooms { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
       .room { position:relative; padding:12px 12px 10px; border-radius:12px; overflow:hidden;
-        background: linear-gradient(165deg, color-mix(in srgb, var(--hc) 16%, transparent), rgba(3,8,15,.6));
+        background: linear-gradient(165deg, color-mix(in srgb, var(--hc) 16%, transparent), rgb(var(--sf-bg-rgb) / .6));
         border:1px solid color-mix(in srgb, var(--hc) 45%, transparent); }
       .room.active { animation: glow 2.4s ease-in-out infinite; }
       @keyframes glow { 50% { box-shadow: 0 0 22px -4px var(--hc), inset 0 0 18px -8px var(--hc); } }

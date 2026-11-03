@@ -34,7 +34,7 @@ class SfReactorCard extends SfBase {
       @keyframes flow { to { stroke-dashoffset: -32; } }
       .node { position:absolute; transform:translate(-50%,-50%); text-align:center; width:88px; }
       .node .ic { width:46px; height:46px; margin:0 auto 4px; border-radius:50%; display:grid; place-items:center;
-        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .12), rgba(0,0,0,.4));
+        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .12), rgb(var(--sf-shade-rgb) / .4));
         border:1px solid currentColor; box-shadow: 0 0 12px -2px currentColor, inset 0 0 10px -4px currentColor; }
       .node .n { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:${SF_C.dim}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .node .w { font-family:Orbitron,sans-serif; font-size:13px; color:var(--sf-strong); }
