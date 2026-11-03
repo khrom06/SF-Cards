@@ -40,6 +40,7 @@ const HASS = (states, language) => ({ states: withIds(states), locale: { languag
 
 // Une configuration complète par carte (les identifiants ci-dessus sont fictifs).
 const FULL = {
+  "sf-timeline-card": { title: "Log", hours: 24, entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarm" }] },
   "sf-trend-card": { title: "Trend", hours: 24, series: [{ entity: "sensor.temp_a", name: "A" }, { entity: "sensor.temp_b", name: "B", color: "#ffb300" }] },
   "sf-alert-card": { leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], alarm: "alarm_control_panel.home", hide_sim: true },
   "sf-hangar-card": { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range", target: "sensor.car_target", charging: "binary_sensor.charging" }],
@@ -858,6 +859,51 @@ __SF.SF_HOOK.tr = (lang, key) => {
     const bg = [...g1.shadowRoot.querySelectorAll(".lg .it .dt")].map((e) => e.style.background);
     if (bg.length !== 3 || new Set(bg).size !== bg.length) fail(`tendance : couleurs en double dans la légende (${bg.join(" | ")})`);
     g1.remove(); }
+  // 5h. Ligne de temps : phrases lisibles, jours, fusion des répétitions, échec sans rafale, données hostiles, ton des alertes.
+  { const now = Date.now(), calls = [], sec = (m) => (now - m * 60000) / 1000;
+    const mk = (over) => ({ ...HASS({ ...base, "binary_sensor.door": { state: "off", attributes: { device_class: "door", friendly_name: "Door" } },
+      "alarm_control_panel.home": { state: "disarmed", attributes: { friendly_name: "Alarm" } }, "binary_sensor.leak": { state: "off", attributes: { device_class: "moisture", friendly_name: "Leak" } } }, "fr"),
+      callWS: async (m) => { calls.push(m); return over(m); } });
+    const draw = async (cfg, hass, ms = 80) => { const el = document.createElement("sf-timeline-card"); el.setConfig(cfg); document.body.appendChild(el); el.hass = hass; await wait(ms); return el; };
+    const EV = [{ entity_id: "binary_sensor.door", state: "on", when: sec(300) }, { entity_id: "binary_sensor.door", state: "on", when: sec(299) }, { entity_id: "binary_sensor.door", state: "off", when: sec(290) },
+      { entity_id: "alarm_control_panel.home", state: "triggered", when: sec(200) }, { entity_id: "binary_sensor.door", state: "unavailable", when: sec(100) },
+      { entity_id: "binary_sensor.leak", state: "on", when: sec(50) }, { entity_id: "binary_sensor.door", state: "on", when: now - 100 }];   // dernier : horodatage en millisecondes
+    const a = await draw({ entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarme" }] }, mk(() => EV));
+    const ra = a.shadowRoot, rows = [...ra.querySelectorAll(".row")], txt = ra.textContent;
+    if (calls.length !== 1 || calls[0].type !== "logbook/get_events" || calls[0].entity_ids.length !== 2) fail(`ligne de temps : appel du journal inattendu (${JSON.stringify(calls[0])})`);
+    if (rows.length !== 4) fail(`ligne de temps : 4 lignes attendues (ouvert, fermé, déclenchée, ouvert), reçu ${rows.length} : ${rows.map((r) => r.textContent.trim().slice(0, 40)).join(" / ")}`);
+    if (!/ouvert/.test(txt) || !/fermé/.test(txt) || !/déclenchée/.test(txt)) fail("ligne de temps : phrases « ouvert / fermé / déclenchée » absentes");
+    if (/indisponible/.test(txt) || /Leak|fuite/.test(txt)) fail("ligne de temps : un état indisponible ou une entité non suivie est affiché");
+    if (!/Alarme/.test(txt)) fail("ligne de temps : le nom choisi n'est pas utilisé");
+    if (!ra.querySelector(".day") || !/Aujourd/.test(ra.querySelector(".day").textContent)) fail("ligne de temps : séparateur de jour « Aujourd'hui » absent");
+    const alarmRow = rows.find((r) => /déclenchée/.test(r.textContent)); if (!alarmRow || !/255, ?51, ?85|#ff3355/i.test(alarmRow.getAttribute("style") || "")) fail("ligne de temps : l'alarme déclenchée n'est pas en rouge");
+    a.remove();
+    // fusion des répétitions : trois « ouvert » consécutifs d'états différents entre deux -> × 2 seulement si consécutifs identiques
+    const g = await draw({ entities: ["binary_sensor.door"] }, mk(() => [{ entity_id: "binary_sensor.door", state: "on", when: sec(30) }, { entity_id: "binary_sensor.door", state: "off", when: sec(20) }, { entity_id: "binary_sensor.door", state: "on", when: sec(10) }]));
+    if (g.shadowRoot.querySelectorAll(".row").length !== 3) fail("ligne de temps : des changements d'état distincts ne doivent pas être fusionnés");
+    g.remove();
+    // sans fusion : deux relevés identiques d'affilée ne sont pas un changement d'état
+    const g2 = await draw({ group: false, entities: ["binary_sensor.door"] }, mk(() => [{ entity_id: "binary_sensor.door", state: "on", when: sec(30) }, { entity_id: "binary_sensor.door", state: "on", when: sec(20) }]));
+    if (g2.shadowRoot.querySelectorAll(".row").length !== 1) fail("ligne de temps : deux états identiques consécutifs affichés comme deux changements");
+    g2.remove();
+    // échec : « Aucun événement » et au plus une requête malgré 40 mises à jour de hass
+    calls.length = 0;
+    const bad = mk(() => { throw new Error("boum"); });
+    const e1 = await draw({ entities: ["binary_sensor.door"] }, bad);
+    for (let i = 0; i < 40; i++) { e1.hass = { ...bad }; await wait(4); }
+    if (calls.length > 1) fail(`ligne de temps : ${calls.length} requêtes après un échec`);
+    if (!/Aucun événement/.test(e1.shadowRoot.textContent)) fail("ligne de temps : message d'échec absent");
+    e1.remove();
+    // données hostiles : 100 000 événements, entités mal formées, horodatages absurdes, nom piégé ; limite respectée
+    calls.length = 0;
+    const big = Array.from({ length: 100000 }, (_, i) => ({ entity_id: "binary_sensor.door", state: i % 2 ? "on" : "off", when: sec(1000 - i / 100) })).concat([{ entity_id: 5, state: "on", when: 1 }, { entity_id: "binary_sensor.door", state: "on", when: "pas une date" }, null, "x"]);
+    const t0 = performance.now();
+    const h1 = await draw({ limit: 12, entities: [{ entity: "binary_sensor.door", name: "<img src=x onerror=window.__pwn=1>" }, "x\"><b>", { entity: "nul" }] }, mk(() => big), 200);
+    if (h1.shadowRoot.querySelectorAll(".row").length !== 12) fail(`ligne de temps : limite de 12 lignes non respectée (${h1.shadowRoot.querySelectorAll(".row").length})`);
+    if (performance.now() - t0 > 2000) fail("ligne de temps : 100 000 événements rendus trop lentement");
+    if (h1.shadowRoot.querySelector("img") || window.__pwn) fail("ligne de temps : nom hostile injecté dans le HTML");
+    if (calls[0].entity_ids.length !== 1) fail(`ligne de temps : identifiants invalides envoyés au serveur (${JSON.stringify(calls[0].entity_ids)})`);
+    h1.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);

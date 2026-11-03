@@ -42,7 +42,7 @@
 
 ## Features
 
-- **17 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
+- **18 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone or on a wall tablet; idle devices can be hidden automatically and the number of displayed devices is capped.
@@ -96,6 +96,7 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-hangar-card`](#sf-hangar-card) | EV(s) + shared charger, charge‑mode selector, energy flows |
 | [`sf-machines-card`](#sf-machines-card) | Status tiles: values with thresholds, on/off, toggles with timers |
 | [`sf-cells-card`](#sf-cells-card) | Weakest sensor batteries first, discovered automatically |
+| [`sf-timeline-card`](#sf-timeline-card) | Latest state changes of the chosen entities, grouped by day, in plain words (read-only) |
 | [`sf-trend-card`](#sf-trend-card) | History curves (read-only): range buttons, several series on one chart or one line each, hover / touch readout |
 | [`sf-battery-card`](#sf-battery-card) | Home battery: level, flow, estimated time, daily energy, mode — only shows what you configure |
 | [`sf-radiators-card`](#sf-radiators-card) | Radiators: preset, setpoint, heating state and daily energy — works without a temperature probe |
@@ -330,6 +331,25 @@ limit: 12                # default 16
 exclude: [sensor.some_battery]
 include_pattern: ""      # optional regex on the entity id (a group with alternatives repeated with + or * is refused, see the console)
 exclude_pattern: ""      # optional regex: ignore matching entity ids
+```
+
+### sf-timeline-card
+
+Read-only timeline of the latest state changes of the entities you choose (Home Assistant's logbook), grouped by day, with a plain sentence per entity type: door open / closed, motion detected, leak detected, alarm armed (home / away / night) or triggered, lock, presence… Alerts are coloured (red: leak, smoke, alarm triggered; amber: opening, unlocked). Nothing is computed or decided — it only shows the log. Loaded once, refreshed at most every 60 s; after an error, at most one retry per minute.
+
+```yaml
+type: custom:sf-timeline-card
+title: Timeline            # optional
+hours: 24                  # window shown
+limit: 30                  # maximum number of events
+group: true                # merge identical consecutive events ("× 3")
+hide_unavailable: true
+entities:                  # up to 40: an entity id, or an object
+  - binary_sensor.front_door
+  - entity: alarm_control_panel.home
+    name: Alarm            # optional
+    icon: mdi:shield-home  # optional
+    color: "#ffb300"       # optional
 ```
 
 ### sf-trend-card
