@@ -18,6 +18,8 @@ window.addEventListener("error", (e) => window.__errors.push(e.message));
 <script src="../dist/sf-cards.js"></script>
 <script src="fixtures.js"></script>
 <script>
+// visible text of a markup string (CSS excluded)
+const textOf = (m) => { const d = document.createElement("div"); d.innerHTML = m; return d.textContent.replace(/\s+/g, " "); };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 // cyrb53: small, fast, deterministic 53-bit string hash (not cryptographic; only used to detect changes)
 const hash = (str) => { let h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
@@ -30,7 +32,7 @@ const hash = (str) => { let h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (let i = 0; i 
     el.hass = HASS(base, lang); await wait(8);
     // two hashes per render: the markup without <style> ("structure + text") and the CSS, so that a CSS-only change is told apart from a content change
     const full = el.shadowRoot ? el.shadowRoot.innerHTML : "", css = (full.match(/<style>[\s\S]*?<\/style>/g) || []).join(""), markup = full.replace(/<style>[\s\S]*?<\/style>/g, "");
-    out[`${tag}|${lang}|${theme}`] = hash(markup + "|" + (el.getAttribute("theme") || "") + "|" + (el.getAttribute("dir") || "")) + "." + hash(css) + "." + hash(el.shadowRoot ? el.shadowRoot.textContent.replace(/\s+/g, " ") : ""); el.remove();
+    out[`${tag}|${lang}|${theme}`] = hash(markup + "|" + (el.getAttribute("theme") || "") + "|" + (el.getAttribute("dir") || "")) + "." + hash(css) + "." + hash(textOf(markup)); el.remove();
   }
   const pre = document.createElement("pre"); pre.id = "result"; pre.textContent = JSON.stringify({ errors: window.__errors, hashes: out }); document.body.appendChild(pre);
 })();
