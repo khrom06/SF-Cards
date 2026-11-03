@@ -11,6 +11,7 @@ class SfBase extends HTMLElement {
     if (!this.shadowRoot) this.attachShadow({ mode: "open" });
     this._dirty = true;
     this._schedule();
+    sfWarnConfig(this.localName, config);   // non-blocking: console warning about probable typos / wrong types
   }
   set hass(hass) {
     this._hass = hass;

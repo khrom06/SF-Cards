@@ -35,6 +35,12 @@ class SfEditorBase extends HTMLElement {
     if (!b) { b = document.createElement("div"); b.className = "req"; const w = root.querySelector("div"); if (w) w.prepend(b); }
     b.hidden = !miss.length;
     b.textContent = miss.length ? `${this._t("editor.missing_required_fields")} : ${miss.map((m) => this._t(m)).join(" · ")}` : "";
+    // probable mistakes (typos, wrong types / ranges): informative only, never blocks saving
+    const warns = sfValidate(sfCanon(this.localName.replace(/-editor$/, "")), this._config || {});
+    let w = root.querySelector(".warnings");
+    if (!w) { w = document.createElement("div"); w.className = "warnings"; const wr = root.querySelector("div"); if (wr) wr.prepend(w); }
+    w.hidden = !warns.length;
+    w.textContent = warns.length ? warns.slice(0, 6).map((x) => `${x.path}: ${x.msg}`).join(" · ") : "";
   }
   _emit() {
     this._banner();

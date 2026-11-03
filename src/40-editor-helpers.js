@@ -10,6 +10,8 @@
 const SF_ED_CSS = `
   .req { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid #ffb300; background:rgba(255,179,0,.12); color:#ffb300; font-size:12px; line-height:1.5; }
   .req[hidden] { display:none; }
+  .warnings { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid rgba(255,179,0,.5); background:rgba(255,179,0,.06); color:#ffd36b; font-size:12px; line-height:1.5; }
+  .warnings[hidden] { display:none; }
   :host { display:block; }
   h3 { margin:18px 0 6px; font-size:14px; font-weight:600; color:var(--primary-text-color); }
   h3:first-child { margin-top:4px; }

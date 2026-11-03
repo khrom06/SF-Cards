@@ -1048,6 +1048,33 @@ __SF.SF_HOOK.tr = (lang, key) => {
     await L3.run("k2", bad); if (calls !== 2) fail("loader: a different key must not be blocked by another key's failure");
     await wait(100); await L3.run("k", ok); if (calls !== 3 || L3.data.error) fail("loader: the same key must be retried after the retry delay");
     L3.reset(); if (L3.data !== null) fail("loader: reset must clear the data"); }
+  // 5o. Configuration validation: no false alarm on any valid full config; typos, wrong types, ranges, choices and entity ids are reported;
+  // far-away unknown keys are not; console warning once; editor banner; never throws.
+  { const V = window.__SF.sfValidate;
+    for (const [tag, cfg] of Object.entries(FULL)) { const w = V(tag, cfg); if (w.length) fail(`validation: false alarm on the full config of ${tag}: ${w.map((x) => x.path + " " + x.msg).join(" | ")}`); }
+    const has = (w, p, re) => w.some((x) => x.path === p && re.test(x.msg));
+    let w = V("sf-trend-card", { title: "T", hieght: 100, series: [{ entity: "sensor.a", digitz: 1 }, { entity: "not an entity" }], height: "tall", layout: "diagonal", hours: 99999 });
+    if (!has(w, "hieght", /did you mean 'height'/)) fail("validation: a typo of a top-level option must suggest the right one");
+    if (!has(w, "series[0].digitz", /did you mean 'digits'/)) fail("validation: a typo inside a list item must be reported with its path");
+    if (!has(w, "series[1].entity", /not an entity id/)) fail("validation: a malformed entity id must be reported");
+    if (!has(w, "height", /expected a number/) || !has(w, "layout", /not one of/) || !has(w, "hours", /outside/)) fail(`validation: wrong type / unlisted choice / out-of-range number must be reported (${JSON.stringify(w.map((x) => x.path))})`);
+    w = V("sf-trend-card", { title: "T", my_custom_flag: true, series: [{ entity: "sensor.a", something_else_entirely: 1 }] });
+    if (w.length) fail(`validation: far-away unknown keys must NOT be flagged (no false alarm on YAML-only options): ${JSON.stringify(w)}`);
+    w = V("sf-trend-card", { series: ["sensor.a", null, 5], hours: "24", window: "today" }); if (w.length) fail(`validation: tolerated shapes (string items, numeric strings) must not be flagged: ${JSON.stringify(w)}`);
+    w = V("sf-health-card", { checks: [{ entity: "sensor.a", severiti: "critical", min: "abc" }] });
+    if (!has(w, "checks[0].severiti", /severity/) || !has(w, "checks[0].min", /expected a number/)) fail(`validation: health card item checks (${JSON.stringify(w)})`);
+    // never throws, bounded output
+    for (const bad of [null, undefined, 5, "x", [], { series: 5 }, { series: [[]] }, { checks: [{ entity: { a: 1 } }] }, Object.fromEntries(Array.from({ length: 500 }, (_, i) => ["opt" + i, i]))]) { try { const r = V("sf-trend-card", bad); if (r.length > 20) fail("validation: output must be bounded"); } catch (e) { fail("validation: threw on a hostile config: " + e.message); } }
+    if (V("sf-unknown-card", { a: 1 }).length) fail("validation: an unknown tag must give no warnings");
+    // console warning: once per distinct set, the card still renders
+    const warns = [], oldWarn = console.warn; console.warn = (...a) => warns.push(a.join(" "));
+    const mkv = () => { const el = document.createElement("sf-health-card"); el.setConfig({ title: "x", checkz: [{ entity: "sensor.a" }] }); document.body.appendChild(el); el.hass = HASS(base, "fr"); return el; };
+    const v1 = mkv(), v2 = mkv(); await wait(30); console.warn = oldWarn;
+    if (warns.filter((x) => /SF Cards \(sf-health-card\)/.test(x)).length !== 1) fail(`validation: exactly one console warning expected for two identical configs (got ${warns.length})`);
+    if (!v1.shadowRoot.querySelector(".hud")) fail("validation: a card with warnings must still render"); v1.remove(); v2.remove();
+    // editor banner
+    const ed = document.createElement("sf-health-card-editor"); ed.hass = HASS(base, "fr"); ed.setConfig({ title: "x", checkz: [] }); document.body.appendChild(ed); await wait(30);
+    const wb = ed.shadowRoot.querySelector(".warnings"); if (!wb || wb.hidden || !/did you mean 'checks'/.test(wb.textContent)) fail("validation: the editor must show a warning banner for a probable typo"); ed.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`translation problem: ${m}`);
   for (const e of window.__errors) fail(`JavaScript error: ${e}`);

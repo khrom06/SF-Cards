@@ -2,11 +2,14 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.13.0]
 ### Changed
 - The library is now written as modules in `src/` and built into the single `dist/sf-cards.js` (byte-for-byte concatenation); `./test/run.sh` also checks 440 render snapshots (every card, language and theme) so that behaviour-preserving refactorings can be proven.
+- **Translation ids**: every UI text has a neutral namespaced id (e.g. `health.all_good`) with its eleven translations on one table line; the French text still works as a legacy key. Nothing changes on screen (render snapshots identical in all 11 languages).
+- The three cards that load data (trend, timeline, mini-curves) share one guarded `SfLoader` (one run at a time, validity period, failure back-off).
 ### Added
 - **Friendly card names**: `sf-energy-flow-card` (was `sf-reactor-card`), `sf-vehicles-card` (`sf-hangar-card`), `sf-home-banner-card` (`sf-bridge-card`), `sf-controls-card` (`sf-console-card`), `sf-presence-card` (`sf-radar-card`). The original names keep working (same card, options and editor); the card picker lists the friendly names.
+- **Configuration validation** (non-blocking): probable typos (`hieght` → did you mean `height`?), wrong types, out-of-range numbers, unlisted choices and malformed entity ids are reported in the browser console and in a banner of the visual editor; the card still works as configured. Derived from the editor specs; options the specs do not describe are never flagged.
 
 ## [1.12.0]
 ### Added
