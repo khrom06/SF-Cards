@@ -16,7 +16,8 @@ const res = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, "&").repla
 if (res.errors.length) { console.error("FAIL: JavaScript errors while rendering: " + res.errors.slice(0, 3).join(" | ")); process.exit(1); }
 if (process.argv.includes("--update")) { fs.writeFileSync(file, JSON.stringify(res.hashes, null, 1) + "\n"); console.log(`snapshots updated: ${Object.keys(res.hashes).length} renders`); process.exit(0); }
 const want = JSON.parse(fs.readFileSync(file, "utf8")), diff = [];
-let cssOnly = 0;
-for (const k of new Set([...Object.keys(want), ...Object.keys(res.hashes)])) if (want[k] !== res.hashes[k]) { diff.push(k); if (want[k] && res.hashes[k] && want[k].split(".")[0] === res.hashes[k].split(".")[0]) cssOnly++; }
-if (diff.length) { console.error(`FAIL: ${diff.length} render(s) differ from test/snapshots.json (${cssOnly} with the CSS only, ${diff.length - cssOnly} with the markup/text; e.g. ${diff.slice(0, 4).join(", ")}). If the change is intended: node test/snapshots.mjs --update`); process.exit(1); }
+// each value = "<markup hash>.<css hash>.<visible text hash>"
+let cssOnly = 0, textChanged = 0;
+for (const k of new Set([...Object.keys(want), ...Object.keys(res.hashes)])) if (want[k] !== res.hashes[k]) { diff.push(k); const a = (want[k] || "").split("."), b = (res.hashes[k] || "").split("."); if (a[0] === b[0]) cssOnly++; if (a[2] !== b[2]) textChanged++; }
+if (diff.length) { console.error(`FAIL: ${diff.length} render(s) differ from test/snapshots.json (${cssOnly} CSS only; visible TEXT changed in ${textChanged}; e.g. ${diff.slice(0, 4).join(", ")}). If the change is intended: node test/snapshots.mjs --update`); process.exit(1); }
 console.log(`OK: ${Object.keys(want).length} renders identical to the snapshots`);
