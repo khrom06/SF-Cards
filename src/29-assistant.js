@@ -40,18 +40,18 @@ class SfAssistantCard extends SfBase {
     return `
       .as { display:flex; align-items:center; gap:14px; padding:2px 2px 12px; }
       .orb { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; flex:none; color:var(--pc); border:1.5px solid var(--pc);
-        background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.14), rgba(0,0,0,.4)); box-shadow:0 0 14px -2px var(--pc), inset 0 0 12px -4px var(--pc); }
+        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .14), rgba(0,0,0,.4)); box-shadow:0 0 14px -2px var(--pc), inset 0 0 12px -4px var(--pc); }
       .orb.live { animation: orbp 1.6s ease-in-out infinite; }
       @keyframes orbp { 50% { box-shadow:0 0 24px 0 var(--pc), inset 0 0 14px -2px var(--pc); } }
       .ph { font-family:Orbitron,sans-serif; font-size:15px; letter-spacing:.06em; color:var(--pc); }
       .ph small { display:block; font-family:'B612 Mono',monospace; font-size:10px; letter-spacing:0; color:${SF_C.dim}; margin-top:2px; }
-      .ln { display:grid; grid-template-columns: 74px 1fr; gap:8px; padding:6px 4px; border-top:1px solid rgba(0,229,255,.08); cursor:pointer; }
+      .ln { display:grid; grid-template-columns: 74px 1fr; gap:8px; padding:6px 4px; border-top:1px solid rgb(var(--sf-cyan-rgb) / .08); cursor:pointer; }
       .ln .k { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:${SF_C.dim}; padding-top:2px; }
       .ln .v { min-width:0; font-size:12px; overflow-wrap:anywhere; color:${SF_C.text}; }
       .ln .v small { display:block; font-size:9.5px; color:${SF_C.dim}; margin-top:2px; }
       .acts { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
       .acts .btn { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:8px; cursor:pointer; font-size:11px; color:${SF_C.cyan};
-        border:1px solid rgba(0,229,255,.3); background:rgba(0,229,255,.05); }
+        border:1px solid rgb(var(--sf-cyan-rgb) / .3); background:rgb(var(--sf-cyan-rgb) / .05); }
       .acts .btn.armed { color:${SF_C.red}; border-color:${SF_C.red}; }`;
   }
   render() {

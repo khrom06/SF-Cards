@@ -40,7 +40,7 @@ class SfClimateCard extends SfBase {
       .ctl .tg { text-align:center; font-family:Orbitron,sans-serif; font-size:15px; color:#fff; }
       .ctl .tg small { display:block; font-family:'B612 Mono',monospace; font-size:8px; letter-spacing:.2em; color:${SF_C.dim}; }
       .pw.on { color:var(--hc); border-color:var(--hc); box-shadow:0 0 10px -2px var(--hc); }
-      .extras { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px dashed rgba(0,229,255,.18); }`;
+      .extras { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px dashed rgb(var(--sf-cyan-rgb) / .18); }`;
   }
   _arc(cx, cy, r, a0, a1) {
     const p = (a) => [cx + r * Math.cos((a * Math.PI) / 180), cy + r * Math.sin((a * Math.PI) / 180)];
@@ -77,7 +77,7 @@ class SfClimateCard extends SfBase {
         <span class="btn pw ${this.esc(on ? "on" : "")}" title="${this.esc(this.t("climate.turn_the_room_on_off"))}" ${c.switch_script ? this.call(c.switch_script, { regulation: r.regul, climat: r.climate }) : this.call(on ? "climate.turn_off" : "climate.turn_on", { entity_id: r.climate })}>${this.icon("mdi:power", 15)}</span></span></div>
       <div class="dial click" data-e="${this.esc(r.climate)}">
         <svg viewBox="0 0 120 112">${marks}
-          <path d="${this.esc(this._arc(60, 60, 50, A0, A1))}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="6" stroke-linecap="round"/>
+          <path d="${this.esc(this._arc(60, 60, 50, A0, A1))}" fill="none" stroke="rgb(var(--sf-fg-rgb) / .07)" stroke-width="6" stroke-linecap="round"/>
           ${t !== null ? `<path d="${this.esc(this._arc(60, 60, 50, A0, Math.max(A0 + 1, ang(t))))}" fill="none" stroke="${this.esc(hc)}" stroke-width="6" stroke-linecap="round" style="filter:drop-shadow(0 0 4px ${this.esc(hc)})"/>` : ""}
           ${tg}</svg>
         <div class="t"><b>${t === null ? "—" : this.nf(Number(t), 1)}°</b>

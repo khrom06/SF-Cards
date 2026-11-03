@@ -13,28 +13,28 @@ class SfAlertCard extends SfBase {
   defaults() { return { leaks: [], doors: [] }; }
   css() {
     return `
-      .alert .hud, .hud.alert { border-color:rgba(255,51,85,.7);
+      .alert .hud, .hud.alert { border-color:rgb(var(--sf-red-rgb) / .7);
         background: radial-gradient(ellipse at 50% 0%, #4a0714 0%, #1a0308 65%, #0a0104 100%);
         animation: pulse 1.1s infinite; }
       .hud.alert .c { border-color:${SF_C.red}; }
-      .hud.alert .head { color:${SF_C.red}; text-shadow:0 0 10px rgba(255,51,85,.8); }
+      .hud.alert .head { color:${SF_C.red}; text-shadow:0 0 10px rgb(var(--sf-red-rgb) / .8); }
       .hud.alert .dot { background:${SF_C.red}; box-shadow:0 0 10px ${SF_C.red}; animation-duration:.6s; }
-      @keyframes pulse { 50% { box-shadow: inset 0 0 60px rgba(255,51,85,.35), 0 0 30px rgba(255,51,85,.45); } }
+      @keyframes pulse { 50% { box-shadow: inset 0 0 60px rgb(var(--sf-red-rgb) / .35), 0 0 30px rgb(var(--sf-red-rgb) / .45); } }
       .big { font-family:Orbitron,sans-serif; font-weight:700; font-size:26px; letter-spacing:.08em;
-        color:#fff; text-shadow:0 0 14px rgba(255,51,85,.9); margin:4px 0 10px; }
-      .snap { width:100%; border-radius:10px; border:1px solid rgba(255,51,85,.6); display:block; margin-top:6px; }
+        color:#fff; text-shadow:0 0 14px rgb(var(--sf-red-rgb) / .9); margin:4px 0 10px; }
+      .snap { width:100%; border-radius:10px; border:1px solid rgb(var(--sf-red-rgb) / .6); display:block; margin-top:6px; }
       .calm { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
       .calm .state { font-family:Orbitron,sans-serif; font-size:18px; color:${SF_C.green};
-        text-shadow:0 0 10px rgba(43,255,136,.6); letter-spacing:.1em; }
+        text-shadow:0 0 10px rgb(var(--sf-green-rgb) / .6); letter-spacing:.1em; }
       .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
       .chip::before { content:""; display:inline-block; width:6px; height:6px; border-radius:50%; background:currentColor; margin-right:6px; vertical-align:1px; }
       .chip.leak::before { border-radius:50% 50% 50% 0; transform:rotate(-45deg); }
       .chip { padding:4px 9px; border-radius:20px; font-size:10px; letter-spacing:.08em;
-        border:1px solid rgba(0,229,255,.25); background:rgba(0,229,255,.05); }
-      .chip.on { border-color:${SF_C.red}; color:${SF_C.red}; background:rgba(255,51,85,.1); }
-      .chip.mute { border-color:${SF_C.amber}; color:${SF_C.amber}; background:rgba(255,179,0,.08); }
-      .chip.ok { color:${SF_C.green}; border-color:rgba(43,255,136,.35); }
-      .sim { margin-left:auto; background:none; border:1px solid rgba(0,229,255,.35); color:${SF_C.dim};
+        border:1px solid rgb(var(--sf-cyan-rgb) / .25); background:rgb(var(--sf-cyan-rgb) / .05); }
+      .chip.on { border-color:${SF_C.red}; color:${SF_C.red}; background:rgb(var(--sf-red-rgb) / .1); }
+      .chip.mute { border-color:${SF_C.amber}; color:${SF_C.amber}; background:rgb(var(--sf-amber-rgb) / .08); }
+      .chip.ok { color:${SF_C.green}; border-color:rgb(var(--sf-green-rgb) / .35); }
+      .sim { margin-left:auto; background:none; border:1px solid rgb(var(--sf-cyan-rgb) / .35); color:${SF_C.dim};
         font-family:'B612 Mono',monospace; font-size:10px; letter-spacing:.1em; padding:5px 10px;
         border-radius:6px; cursor:pointer; }
       .sim:hover { color:${SF_C.cyan}; border-color:${SF_C.cyan}; }`;

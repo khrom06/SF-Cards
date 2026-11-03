@@ -22,7 +22,7 @@ class SfRadiatorsCard extends SfBase {
       .head, .hud .c { color:var(--ac); border-color:var(--ac); text-shadow:0 0 8px color-mix(in srgb, var(--ac) 60%, transparent); }
       .dot { background:var(--ac); box-shadow:0 0 8px var(--ac); }
       .list { display:grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap:10px; }
-      .rad { padding:11px 12px 12px; border-radius:12px; background:rgba(255,255,255,.03);
+      .rad { padding:11px 12px 12px; border-radius:12px; background:rgb(var(--sf-fg-rgb) / .03);
         border:1px solid color-mix(in srgb, var(--ac) 22%, transparent); }
       .rad.heat { border-color:color-mix(in srgb, var(--ac) 70%, transparent); background:color-mix(in srgb, var(--ac) 9%, transparent);
         box-shadow:0 0 16px -6px var(--ac); }
@@ -44,7 +44,7 @@ class SfRadiatorsCard extends SfBase {
       .ctl .tg small { display:block; font-size:9px; letter-spacing:.14em; color:${SF_C.dim}; }
       .ctl .tg b { font-family:Orbitron,sans-serif; font-size:20px; color:#fff; text-shadow:0 0 10px var(--ac); }
       .meta { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:10px; color:${SF_C.dim}; }
-      .meta .bar { flex:1; height:4px; border-radius:2px; background:rgba(255,255,255,.07); overflow:hidden; }
+      .meta .bar { flex:1; height:4px; border-radius:2px; background:rgb(var(--sf-fg-rgb) / .07); overflow:hidden; }
       .meta .bar i { display:block; height:100%; background:var(--ac); box-shadow:0 0 6px var(--ac); border-radius:2px; transition:width 1s; }
       .warn { color:${SF_C.amber}; }`;
   }

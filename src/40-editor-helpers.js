@@ -8,9 +8,9 @@
  * the editor modifies the config in place and only removes the values emptied by the user.
  */
 const SF_ED_CSS = `
-  .req { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid #ffb300; background:rgba(255,179,0,.12); color:#ffb300; font-size:12px; line-height:1.5; }
+  .req { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid var(--sf-amber); background:rgb(var(--sf-amber-rgb) / .12); color:var(--sf-amber); font-size:12px; line-height:1.5; }
   .req[hidden] { display:none; }
-  .warnings { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid rgba(255,179,0,.5); background:rgba(255,179,0,.06); color:#ffd36b; font-size:12px; line-height:1.5; }
+  .warnings { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid rgb(var(--sf-amber-rgb) / .5); background:rgb(var(--sf-amber-rgb) / .06); color:#ffd36b; font-size:12px; line-height:1.5; }
   .warnings[hidden] { display:none; }
   :host { display:block; }
   h3 { margin:18px 0 6px; font-size:14px; font-weight:600; color:var(--primary-text-color); }
@@ -56,7 +56,7 @@ const sfO = (name) => ({ name, selector: { object: {} } });
 const sfG = (...schema) => ({ type: "grid", name: "", schema });
 
 const SF_LABELS = {
-  _device: "Remplir depuis un appareil (complète les champs vides)", theme: "Thème", name: "Nom", label: "Libellé", icon: "Icône", color: "Couleur (ex. #00e5ff)", title: "Titre", subtitle: "Sous-titre",
+  _device: "Remplir depuis un appareil (complète les champs vides)", theme: "Thème", name: "Nom", label: "Libellé", icon: "Icône", color: "Couleur (ex. var(--sf-cyan))", title: "Titre", subtitle: "Sous-titre",
   entity: "Entité", sub: "Texte sous le titre", unit: "Unité", digits: "Décimales", warn: "Seuil d'alerte (orange)",
   crit: "Seuil critique (rouge)", max: "Valeur maximale", min: "Minimum", timer: "Minuteur (affiche le temps restant)",
   stop: "Entités coupées par un appui pendant le minuteur", hash: "Lien du panneau (#…)", columns: "Colonnes",

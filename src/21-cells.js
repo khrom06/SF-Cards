@@ -13,7 +13,7 @@ class SfCellsCard extends SfBase {
     return `
       .cells { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:8px; }
       .cell { display:grid; grid-template-columns: 26px 1fr; gap:8px; align-items:center; padding:7px 9px; border-radius:8px;
-        background:rgba(0,229,255,.03); border:1px solid rgba(0,229,255,.1); }
+        background:rgb(var(--sf-cyan-rgb) / .03); border:1px solid rgb(var(--sf-cyan-rgb) / .1); }
       .bat { position:relative; width:14px; height:24px; border:1.5px solid currentColor; border-radius:3px; margin:0 auto; }
       .bat::before { content:""; position:absolute; top:-4px; left:3px; width:5px; height:3px; background:currentColor; border-radius:1px 1px 0 0; }
       .bat i { position:absolute; left:1.5px; right:1.5px; bottom:1.5px; border-radius:1px; background:currentColor; box-shadow:0 0 6px currentColor; }

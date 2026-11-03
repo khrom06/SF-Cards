@@ -20,15 +20,15 @@ class SfRadarCard extends SfBase {
       .radar { position:relative; width:100%; aspect-ratio:1; }
       .radar svg { position:absolute; inset:0; width:100%; height:100%; }
       .sweep { position:absolute; inset:4%; border-radius:50%;
-        background: conic-gradient(from 0deg, rgba(0,229,255,.32), rgba(0,229,255,0) 22%, transparent 100%);
+        background: conic-gradient(from 0deg, rgb(var(--sf-cyan-rgb) / .32), rgb(var(--sf-cyan-rgb) / 0) 22%, transparent 100%);
         animation: spin 4.5s linear infinite; mask: radial-gradient(circle, #000 69%, transparent 70%); }
       @keyframes spin { to { transform: rotate(360deg); } }
-      .ringl { fill:none; stroke:rgba(0,229,255,.22); stroke-dasharray:3 4; }
-      .cross { stroke:rgba(0,229,255,.12); }
+      .ringl { fill:none; stroke:rgb(var(--sf-cyan-rgb) / .22); stroke-dasharray:3 4; }
+      .cross { stroke:rgb(var(--sf-cyan-rgb) / .12); }
       .rl { font-size:2.6px; fill:${SF_C.dim}; letter-spacing:.18em; }
       .blip { transition: opacity .5s; }
       .legend .row { display:flex; justify-content:space-between; gap:10px; padding:5px 0;
-        border-bottom:1px solid rgba(0,229,255,.08); font-size:12px; }
+        border-bottom:1px solid rgb(var(--sf-cyan-rgb) / .08); font-size:12px; }
       .legend h4 { margin:10px 0 4px; font-family:Orbitron,sans-serif; font-weight:500; font-size:10px;
         letter-spacing:.18em; color:${SF_C.cyan}; }
       .legend h4:first-child { margin-top:0; }

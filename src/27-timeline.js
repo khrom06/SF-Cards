@@ -10,7 +10,7 @@
  * limit: 30            # maximum number of events
  * group: true          # merges identical consecutive repeats ("× 3")
  * hide_unavailable: true
- * entities: [binary_sensor.door, { entity: alarm_control_panel.home, name: Alarme, icon: "mdi:shield-home", color: "#ffb300" }]
+ * entities: [binary_sensor.door, { entity: alarm_control_panel.home, name: Alarme, icon: "mdi:shield-home", color: "var(--sf-amber)" }]
  */
 const SF_TL_MAX_ENTITIES = 40, SF_TL_RAW_MAX = 2000;
 const SF_TL_BIN = {   // binary_sensor by device_class: ["on" sentence, "off" sentence, "on" icon, "off" icon, "on" tone (warn / bad / ok)]
@@ -77,7 +77,7 @@ class SfTimelineCard extends SfBase {
       .day { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:${SF_C.dim}; margin:10px 0 4px; }
       .day:first-child { margin-top:0; }
       .row { display:grid; grid-template-columns: 44px 22px 1fr; gap:8px; align-items:center; padding:5px 4px; border-radius:6px; cursor:pointer; }
-      .row:hover { background:rgba(0,229,255,.05); }
+      .row:hover { background:rgb(var(--sf-cyan-rgb) / .05); }
       .row .tm { font-size:11px; color:${SF_C.dim}; font-variant-numeric:tabular-nums; }
       .row .ic { display:grid; place-items:center; }
       .row .tx { min-width:0; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

@@ -31,7 +31,7 @@ class SfCameraCard extends SfBase {
     return `
       .cams { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:12px; }
       .cam { position:relative; aspect-ratio:16/9; border-radius:10px; overflow:hidden; background:#000;
-        border:1px solid rgba(0,229,255,.25); }
+        border:1px solid rgb(var(--sf-cyan-rgb) / .25); }
       .cam img { width:100%; height:100%; object-fit:cover; display:block; opacity:0; transition:opacity .4s; filter:saturate(.85) contrast(1.05); }
       .cam img.ok { opacity:1; }
       .cam::before { content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
@@ -42,7 +42,7 @@ class SfCameraCard extends SfBase {
       .tag { font-family:Orbitron,sans-serif; font-size:11px; letter-spacing:.18em; color:#fff; text-shadow:0 0 6px #000, 0 0 8px ${SF_C.cyan}; }
       .rec { font-size:10px; color:${SF_C.red}; letter-spacing:.14em; display:flex; align-items:center; gap:5px; text-shadow:0 0 4px #000; }
       .rec::before { content:""; width:8px; height:8px; border-radius:50%; background:${SF_C.red}; box-shadow:0 0 8px ${SF_C.red}; animation: blink 1s infinite; }
-      .pill { font-size:10px; padding:3px 8px; border-radius:10px; background:rgba(0,0,0,.55); border:1px solid rgba(0,229,255,.35); color:${SF_C.text}; }
+      .pill { font-size:10px; padding:3px 8px; border-radius:10px; background:rgba(0,0,0,.55); border:1px solid rgb(var(--sf-cyan-rgb) / .35); color:${SF_C.text}; }
       .pill.hot { border-color:${SF_C.amber}; color:${SF_C.amber}; }
       .pill.red { border-color:${SF_C.red}; color:${SF_C.red}; }
       .ret { position:absolute; left:50%; top:50%; width:46px; height:46px; transform:translate(-50%,-50%); z-index:2; pointer-events:none; opacity:.55; }

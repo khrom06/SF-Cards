@@ -30,18 +30,18 @@ const SF_POP_CSS = `
   .back { position:fixed; inset:0; z-index:9998; background:rgba(1,4,9,.66); backdrop-filter:blur(6px);
     -webkit-backdrop-filter:blur(6px); opacity:0; transition:opacity .25s; }
   .sheet { position:fixed; z-index:9999; left:0; right:0; bottom:0; max-height:92vh; display:flex; flex-direction:column;
-    background: linear-gradient(180deg, #071426 0%, #03080f 100%); border-top:1px solid rgba(0,229,255,.45);
-    border-radius:22px 22px 0 0; box-shadow:0 -10px 40px rgba(0,229,255,.18);
+    background: linear-gradient(180deg, #071426 0%, #03080f 100%); border-top:1px solid rgb(var(--sf-cyan-rgb) / .45);
+    border-radius:22px 22px 0 0; box-shadow:0 -10px 40px rgb(var(--sf-cyan-rgb) / .18);
     transform:translateY(105%); transition:transform .32s cubic-bezier(.2,.9,.25,1);
     padding-bottom: env(safe-area-inset-bottom); }
   @media (min-width: 900px) { .sheet { left:50%; right:auto; width:860px; margin-left:-430px; bottom:4vh; border-radius:22px;
-    border:1px solid rgba(0,229,255,.45); max-height:88vh; } }
+    border:1px solid rgb(var(--sf-cyan-rgb) / .45); max-height:88vh; } }
   .open .back { opacity:1; } .open .sheet { transform:none; }
-  .grab { width:44px; height:5px; border-radius:3px; background:rgba(0,229,255,.45); margin:9px auto 2px; }
+  .grab { width:44px; height:5px; border-radius:3px; background:rgb(var(--sf-cyan-rgb) / .45); margin:9px auto 2px; }
   .bar { display:flex; align-items:center; gap:10px; padding:0 14px 6px; color:${SF_C.cyan};
     font:700 12px Orbitron, sans-serif; letter-spacing:.2em; text-transform:uppercase; }
-  .bar button { margin-left:auto; width:36px; height:36px; border-radius:50%; border:1px solid rgba(0,229,255,.35);
-    background:rgba(0,229,255,.08); color:${SF_C.text}; font-size:18px; cursor:pointer; }
+  .bar button { margin-left:auto; width:36px; height:36px; border-radius:50%; border:1px solid rgb(var(--sf-cyan-rgb) / .35);
+    background:rgb(var(--sf-cyan-rgb) / .08); color:${SF_C.text}; font-size:18px; cursor:pointer; }
   .body { overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 10px 14px; overscroll-behavior:contain; }
 `;
 class SfLauncherCard extends SfBase {

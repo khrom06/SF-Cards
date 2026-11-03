@@ -28,13 +28,13 @@ class SfReactorCard extends SfBase {
       .stage { position:relative; width:100%; aspect-ratio: 16 / 9; min-height:260px; }
       .stage svg { position:absolute; inset:0; width:100%; height:100%; }
       .ln { fill:none; stroke-width:2; stroke-linecap:round; }
-      .ln.bg { stroke:rgba(255,255,255,.06); stroke-width:6; }
+      .ln.bg { stroke:rgb(var(--sf-fg-rgb) / .06); stroke-width:6; }
       .ln.fx { stroke-dasharray: 2 14; animation: flow var(--d, 2s) linear infinite; }
       .ln.rev { animation-direction: reverse; }
       @keyframes flow { to { stroke-dashoffset: -32; } }
       .node { position:absolute; transform:translate(-50%,-50%); text-align:center; width:88px; }
       .node .ic { width:46px; height:46px; margin:0 auto 4px; border-radius:50%; display:grid; place-items:center;
-        background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.12), rgba(0,0,0,.4));
+        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .12), rgba(0,0,0,.4));
         border:1px solid currentColor; box-shadow: 0 0 12px -2px currentColor, inset 0 0 10px -4px currentColor; }
       .node .n { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:${SF_C.dim}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .node .w { font-family:Orbitron,sans-serif; font-size:13px; color:#fff; }
@@ -58,7 +58,7 @@ class SfReactorCard extends SfBase {
         text-shadow:0 0 10px #000, 0 0 6px var(--cc); }
       .core .txt span { font-size:9px; letter-spacing:.2em; color:#fff; text-shadow:0 0 6px #000; }
       .foot { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:6px; }
-      .foot > div { padding:8px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); text-align:center; }
+      .foot > div { padding:8px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
       .foot .v { font-family:Orbitron,sans-serif; font-size:16px; color:#fff; margin-top:3px; }`;
   }
   _dur(w) { // the more powerful, the faster the flow

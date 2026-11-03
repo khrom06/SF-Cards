@@ -11,12 +11,12 @@ class SfLedgerCard extends SfBase {
   css() {
     return `
       .kpis { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin:12px 0 16px; }
-      .kpi { padding:10px 12px; border-radius:10px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.14); }
+      .kpi { padding:10px 12px; border-radius:10px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .14); }
       .kpi .v { font-family:Orbitron,sans-serif; font-size:22px; color:#fff; margin-top:4px; }
       .dev { display:grid; grid-template-columns: 150px 1fr 90px; gap:12px; align-items:center; padding:8px 0;
-        border-bottom:1px solid rgba(0,229,255,.08); }
+        border-bottom:1px solid rgb(var(--sf-cyan-rgb) / .08); }
       @media (max-width: 560px) { .dev { grid-template-columns: 1fr; gap:6px; } }
-      .bar { height:12px; border-radius:6px; background:rgba(255,255,255,.06); overflow:hidden; display:flex; }
+      .bar { height:12px; border-radius:6px; background:rgb(var(--sf-fg-rgb) / .06); overflow:hidden; display:flex; }
       .bar i { display:block; height:100%; transition: width 1s; }
       .legend { display:flex; gap:14px; font-size:10px; color:${SF_C.dim}; margin-top:10px; }
       .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }`;

@@ -10,7 +10,7 @@
  * ranges: [6, 24, 168]      # boutons de plage, en heures ([] = aucun bouton)
  * layout: auto              # auto (overlaid if same unit) | combined | separate
  * height: 150
- * series: [{ entity: sensor.x, name: Salon, color: "#00e5ff", unit: "°C", digits: 1 }]
+ * series: [{ entity: sensor.x, name: Salon, color: "var(--sf-cyan)", unit: "°C", digits: 1 }]
  */
 const SF_TREND_COLORS = [SF_C.cyan, SF_C.amber, SF_C.green, "#b388ff", "#ff7043", "#4fc3f7", "#ff4fd8", "#ffd54f"];
 const SF_TREND_MAX_SERIES = 8, SF_TREND_POINTS = 240;
@@ -109,18 +109,18 @@ class SfTrendCard extends SfBase {
   css() {
     return `
       .rgs { display:flex; gap:6px; margin:0 0 10px; flex-wrap:wrap; }
-      .rg { font:inherit; font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; color:${SF_C.dim}; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.18); }
-      .rg.on { color:${SF_C.cyan}; border-color:${SF_C.cyan}; background:rgba(0,229,255,.12); }
+      .rg { font:inherit; font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; color:${SF_C.dim}; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .18); }
+      .rg.on { color:${SF_C.cyan}; border-color:${SF_C.cyan}; background:rgb(var(--sf-cyan-rgb) / .12); }
       .plot { position:relative; margin-bottom:6px; touch-action:pan-y; }
-      .plot svg { width:100%; display:block; border-radius:6px; background:rgba(0,229,255,.025); }
-      .gl { stroke:rgba(0,229,255,.12); stroke-width:1; vector-effect:non-scaling-stroke; }
-      .gl.nowl { stroke:rgba(255,179,0,.55); stroke-dasharray:3 4; }
+      .plot svg { width:100%; display:block; border-radius:6px; background:rgb(var(--sf-cyan-rgb) / .025); }
+      .gl { stroke:rgb(var(--sf-cyan-rgb) / .12); stroke-width:1; vector-effect:non-scaling-stroke; }
+      .gl.nowl { stroke:rgb(var(--sf-amber-rgb) / .55); stroke-dasharray:3 4; }
       .ln2 { fill:none; stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
       .ar { stroke:none; opacity:.14; }
       .yl { position:absolute; left:6px; font-size:9.5px; color:${SF_C.dim}; pointer-events:none; text-shadow:0 0 4px #000; }
       .yl.hi { top:3px; } .yl.lo { bottom:3px; } .yl.r { left:auto; right:6px; }
       .cur { position:absolute; top:0; bottom:0; width:1px; background:${SF_C.cyan}; opacity:0; pointer-events:none; }
-      .ro { position:absolute; top:4px; right:6px; font-size:10.5px; padding:3px 7px; border-radius:6px; background:rgba(3,8,15,.88); border:1px solid rgba(0,229,255,.3); opacity:0; pointer-events:none; white-space:pre; }
+      .ro { position:absolute; top:4px; right:6px; font-size:10.5px; padding:3px 7px; border-radius:6px; background:rgba(3,8,15,.88); border:1px solid rgb(var(--sf-cyan-rgb) / .3); opacity:0; pointer-events:none; white-space:pre; }
       .plot.hov .cur, .plot.hov .ro { opacity:1; }
       .xl { display:flex; justify-content:space-between; font-size:9.5px; color:${SF_C.dim}; margin:0 0 8px; }
       .lg { display:flex; flex-wrap:wrap; gap:6px 16px; }

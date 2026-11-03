@@ -39,31 +39,31 @@ class SfBridgeCard extends SfBase {
       .hud.bridge { padding:22px 26px 20px; min-height:170px; }
       .floor { position:absolute; left:-50%; right:-50%; bottom:-40%; height:120%; pointer-events:none;
         transform: perspective(260px) rotateX(72deg); transform-origin:50% 100%; opacity:.55;
-        background-image: linear-gradient(rgba(0,229,255,.35) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(0,229,255,.35) 1px, transparent 1px);
+        background-image: linear-gradient(rgb(var(--sf-cyan-rgb) / .35) 1px, transparent 1px),
+                          linear-gradient(90deg, rgb(var(--sf-cyan-rgb) / .35) 1px, transparent 1px);
         background-size: 46px 46px; animation: travel 3s linear infinite;
         mask-image: linear-gradient(to top, #000 0%, transparent 75%); -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 75%); }
       @keyframes travel { to { background-position: 0 46px, 0 0; } }
       .horizon { position:absolute; left:0; right:0; top:58%; height:2px; pointer-events:none;
-        background: linear-gradient(90deg, transparent, rgba(0,229,255,.8), transparent); filter: blur(1px); }
+        background: linear-gradient(90deg, transparent, rgb(var(--sf-cyan-rgb) / .8), transparent); filter: blur(1px); }
       .top { position:relative; display:grid; grid-template-columns: auto 1fr auto; gap:28px; align-items:center; }
       @media (max-width: 900px) { .top { grid-template-columns: 1fr; gap:14px; } }
       .clock { font-family:Orbitron,sans-serif; font-weight:700; font-size:54px; line-height:1; color:#fff;
-        text-shadow: 0 0 18px rgba(0,229,255,.75), 0 0 2px #fff; letter-spacing:.04em; }
+        text-shadow: 0 0 18px rgb(var(--sf-cyan-rgb) / .75), 0 0 2px #fff; letter-spacing:.04em; }
       .clock .s { font-size:22px; color:${SF_C.cyan}; margin-left:4px; }
       .date { margin-top:6px; letter-spacing:.24em; text-transform:uppercase; font-size:11px; color:${SF_C.dim}; }
       .status { text-align:center; }
       .status .big { font-family:Orbitron,sans-serif; font-weight:700; letter-spacing:.18em; font-size:17px; }
       .status .chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:10px; }
       .an { padding:5px 10px; border-radius:20px; font-size:11px; border:1px solid; }
-      .an.red { color:${SF_C.red}; border-color:rgba(255,51,85,.6); background:rgba(255,51,85,.1); animation: blink 1.2s infinite; }
-      .an.amber { color:${SF_C.amber}; border-color:rgba(255,179,0,.5); background:rgba(255,179,0,.08); }
+      .an.red { color:${SF_C.red}; border-color:rgb(var(--sf-red-rgb) / .6); background:rgb(var(--sf-red-rgb) / .1); animation: blink 1.2s infinite; }
+      .an.amber { color:${SF_C.amber}; border-color:rgb(var(--sf-amber-rgb) / .5); background:rgb(var(--sf-amber-rgb) / .08); }
       .meta { display:grid; grid-template-columns: repeat(2, minmax(120px, auto)); gap:10px 22px; }
       .meta .v { font-family:Orbitron,sans-serif; font-size:15px; color:#fff; margin-top:2px; display:flex; align-items:center; gap:6px; }
       .crew { position:relative; display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; padding-top:12px;
-        border-top:1px solid rgba(0,229,255,.14); align-items:center; }
+        border-top:1px solid rgb(var(--sf-cyan-rgb) / .14); align-items:center; }
       .member { display:flex; align-items:center; gap:7px; padding:4px 12px 4px 4px; border-radius:20px;
-        background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); font-size:12px; }
+        background:rgb(var(--sf-fg-rgb) / .03); border:1px solid rgb(var(--sf-fg-rgb) / .08); font-size:12px; }
       .member .av { width:24px; height:24px; border-radius:50%; display:grid; place-items:center;
         font-family:Orbitron,sans-serif; font-size:11px; color:#03080f; }
       .member.away { opacity:.45; }
@@ -103,7 +103,7 @@ class SfBridgeCard extends SfBase {
     const status = an.length
       ? `<div class="big" style="color:${this.esc(reds ? SF_C.red : SF_C.amber)}">${this.t("bridge.s_n_issue_s", { s: this.t(reds ? "ALERTE" : "VIGILANCE"), n: an.length })}</div>
          <div class="chips">${an.map(([k, t, id]) => `<span class="an ${this.esc(k)} click" data-e="${this.esc(id)}">${this.esc(t)}</span>`).join("")}</div>`
-      : `<div class="big" style="color:${SF_C.green};text-shadow:0 0 12px rgba(43,255,136,.6)">${this.t("bridge.all_normal")}</div>
+      : `<div class="big" style="color:${SF_C.green};text-shadow:0 0 12px rgb(var(--sf-green-rgb) / .6)">${this.t("bridge.all_normal")}</div>
          <div class="lbl" style="margin-top:8px">${this.t("bridge.doors_closed_no_leaks_mains_ok")}</div>`;
 
     const w = this.st(c.weather);

@@ -42,14 +42,14 @@ class SfBatteryCard extends SfBase {
       .st { font-family:Orbitron,sans-serif; font-size:15px; letter-spacing:.1em; }
       .sub { margin-top:4px; font-size:11px; color:${SF_C.dim}; line-height:1.5; }
       .bats { margin-top:14px; display:grid; gap:6px; }
-      .bats .b { display:grid; grid-template-columns: 1fr auto; gap:2px 10px; align-items:center; padding:7px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); }
+      .bats .b { display:grid; grid-template-columns: 1fr auto; gap:2px 10px; align-items:center; padding:7px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); }
       .bats .n { font-size:12px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .bats .p { font-size:11px; text-align:end; }
-      .bats .lv { height:5px; border-radius:3px; background:rgba(255,255,255,.08); overflow:hidden; display:block; }
+      .bats .lv { height:5px; border-radius:3px; background:rgb(var(--sf-fg-rgb) / .08); overflow:hidden; display:block; }
       .bats .lv i { display:block; height:100%; border-radius:3px; }
       .bats .pc { font-family:Orbitron,sans-serif; font-size:12px; text-align:end; color:#fff; }
       .stats { display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:8px; margin-top:14px; }
-      .stats > div { padding:8px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); text-align:center; }
+      .stats > div { padding:8px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
       .stats .v { font-family:Orbitron,sans-serif; font-size:15px; color:#fff; margin-top:3px; }
       .modes { margin-top:14px; text-align:center; } .modes .lbl { margin-bottom:6px; } .modes .seg { justify-content:center; }`;
   }
@@ -81,7 +81,7 @@ class SfBatteryCard extends SfBase {
     const modes = m && (m.attributes.options || []).length ? `<div class="modes"><div class="lbl">${this.t("common.mode")}</div><div class="seg">${m.attributes.options.map((o) =>
       `<span class="btn ${this.esc(m.state === o ? "on" : "")}" ${this.call(`${c.mode.split(".")[0]}.select_option`, { entity_id: c.mode, option: o })}>${this.esc(o)}</span>`).join("")}</div></div>` : "";
     return this.frame(this.esc(c.title || this.t("common.battery_2")), soc === null ? "" : `${Math.round(soc)} %`, `
-      <div class="gauge"><div class="ring click" data-e="${this.esc(agg.firstId)}"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="${this.esc(R)}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/>
+      <div class="gauge"><div class="ring click" data-e="${this.esc(agg.firstId)}"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="${this.esc(R)}" fill="none" stroke="rgb(var(--sf-fg-rgb) / .08)" stroke-width="9"/>
           <circle cx="66" cy="66" r="${this.esc(R)}" fill="none" stroke="${this.esc(col)}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${this.esc((C * pct) / 100)} ${this.esc(C)}" style="filter:drop-shadow(0 0 5px ${this.esc(col)})"/></svg>
           <div class="t"><b>${soc === null ? "—" : Math.round(soc)}<span style="font-size:14px">%</span></b><small>${this.t("battery.level")}</small></div></div>
         <div><div class="st" style="color:${this.esc(idle ? SF_C.dim : bw > 0 ? SF_C.amber : SF_C.green)}">${this.icon(idle ? "mdi:battery-heart-variant" : bw > 0 ? "mdi:battery-arrow-down" : "mdi:battery-arrow-up", 20)} ${state}</div>

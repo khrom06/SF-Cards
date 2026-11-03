@@ -22,7 +22,7 @@ function sfEvOn(el, id, kind, custom) {
  *     range: sensor.x          # km or mi (see distance_unit)
  *     target: sensor.x         # charge cible (%), facultatif
  *     charging: binary_sensor.x | sensor.x   # optional; same statuses as the charger (charging_states: optional list)
- *     color: "#00e5ff"
+ *     color: "var(--sf-cyan)"
  * distance_unit: auto          # auto (sensor unit) | km | mi (converts if needed)
  * charger:
  *   name: Garage               # facultatif
@@ -50,33 +50,33 @@ class SfHangarCard extends SfBase {
       .bay.stack .cars { display:grid; gap:8px; }
       .bay.stack svg { width:100%; max-width:108px; height:auto; }
       .bay.stack .bornes { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-top:12px; }
-      .bay.stack .borne { padding:8px 6px; border-radius:10px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); }
+      .bay.stack .borne { padding:8px 6px; border-radius:10px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); }
       .bay.stack .flow { width:70px; }
       .car { text-align:center; }
       .car .name { font-family:Orbitron,sans-serif; letter-spacing:.14em; font-size:12px; margin-top:4px; }
       .car .km { font-size:11px; color:${SF_C.dim}; margin-top:2px; }
-      .ring-bg { fill:none; stroke:rgba(255,255,255,.07); stroke-width:7; }
+      .ring-bg { fill:none; stroke:rgb(var(--sf-fg-rgb) / .07); stroke-width:7; }
       .ring { fill:none; stroke-width:7; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%;
         transition: stroke-dashoffset 1s ease; }
       .soc { font-family:Orbitron,sans-serif; font-size:20px; fill:#fff; }
-      .tick { stroke:rgba(0,229,255,.25); stroke-width:1; }
+      .tick { stroke:rgb(var(--sf-cyan-rgb) / .25); stroke-width:1; }
       .borne { text-align:center; min-width:92px; }
       .borne .plug { font-size:26px; display:flex; justify-content:center; }
-      .flow { width:90px; height:4px; margin:8px auto; border-radius:2px; background:rgba(255,255,255,.08); overflow:hidden; }
+      .flow { width:90px; height:4px; margin:8px auto; border-radius:2px; background:rgb(var(--sf-fg-rgb) / .08); overflow:hidden; }
       .flow.on::before { content:""; display:block; width:40%; height:100%;
         background: linear-gradient(90deg, transparent, ${SF_C.green}, transparent); animation: run 1.1s linear infinite; }
       @keyframes run { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
-      .note { margin-top:14px; padding-top:10px; border-top:1px dashed rgba(0,229,255,.18);
+      .note { margin-top:14px; padding-top:10px; border-top:1px dashed rgb(var(--sf-cyan-rgb) / .18);
         display:flex; justify-content:center; align-items:center; text-align:center; gap:4px 16px; flex-wrap:wrap; font-size:11px; }
       .modes { margin-top:12px; text-align:center; }
       .modes .lbl { margin-bottom:6px; }
       .modes .seg { justify-content:center; }
       .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; margin-top:6px;
-        border:1px solid rgba(43,255,136,.45); color:${SF_C.green}; }
+        border:1px solid rgb(var(--sf-green-rgb) / .45); color:${SF_C.green}; }
       .warnbox { margin-top:10px; padding:9px 12px; border-radius:8px; font-size:11.5px; line-height:1.4; text-align:center;
-        color:${SF_C.amber}; border:1px solid rgba(255,179,0,.55); background:rgba(255,179,0,.09); animation: blink 2s infinite; }
+        color:${SF_C.amber}; border:1px solid rgb(var(--sf-amber-rgb) / .55); background:rgb(var(--sf-amber-rgb) / .09); animation: blink 2s infinite; }
       .fl3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:12px; }
-      .fl3 > div { padding:7px 9px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); text-align:center; }
+      .fl3 > div { padding:7px 9px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
       .tgt { stroke:#fff; stroke-width:2; }`;
   }
   _ring(car) {

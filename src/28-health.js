@@ -46,11 +46,11 @@ class SfHealthCard extends SfBase {
       .pill2 { font-size:10px; padding:2px 8px; border-radius:10px; border:1px solid currentColor; }
       .grp { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:${SF_C.dim}; margin:10px 0 3px; }
       .hr { display:grid; grid-template-columns: 22px minmax(0,1fr) minmax(0,max-content); gap:8px; align-items:center; padding:6px 4px; border-radius:6px; cursor:pointer; }
-      .hr:hover { background:rgba(0,229,255,.05); }
+      .hr:hover { background:rgb(var(--sf-cyan-rgb) / .05); }
       .hr .nm { min-width:0; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:${SF_C.text}; }
       .hr .why { font-size:10.5px; color:${SF_C.dim}; text-align:right; max-width:62vw; overflow-wrap:anywhere; }
       .oks { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
-      .okc { font-size:10px; padding:2px 8px; border-radius:10px; color:${SF_C.green}; border:1px solid rgba(43,255,136,.35); background:rgba(43,255,136,.05); cursor:pointer; }`;
+      .okc { font-size:10px; padding:2px 8px; border-radius:10px; color:${SF_C.green}; border:1px solid rgb(var(--sf-green-rgb) / .35); background:rgb(var(--sf-green-rgb) / .05); cursor:pointer; }`;
   }
   render() {
     const c = this._config, all = this._checks().map((k) => ({ k, ...this._eval(k) }));

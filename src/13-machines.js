@@ -62,11 +62,11 @@ class SfMachinesCard extends SfBase {
     return `
       .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap:10px; }
       .tile { position:relative; padding:10px 11px 12px; border-radius:10px;
-        background: linear-gradient(160deg, rgba(0,229,255,.07), rgba(0,229,255,.015));
-        border:1px solid rgba(0,229,255,.16); }
+        background: linear-gradient(160deg, rgb(var(--sf-cyan-rgb) / .07), rgb(var(--sf-cyan-rgb) / .015));
+        border:1px solid rgb(var(--sf-cyan-rgb) / .16); }
       .tile .v { font-family:Orbitron,sans-serif; font-size:19px; margin-top:6px; }
       .tile .u { font-size:10px; color:${SF_C.dim}; margin-left:3px; }
-      .bar { height:3px; margin-top:8px; border-radius:2px; background:rgba(255,255,255,.07); overflow:hidden; }
+      .bar { height:3px; margin-top:8px; border-radius:2px; background:rgb(var(--sf-fg-rgb) / .07); overflow:hidden; }
       .bar i { display:block; height:100%; border-radius:2px; transition: width 1s; }
       .led { position:absolute; top:10px; right:10px; width:7px; height:7px; border-radius:50%; }
       .spk { display:block; width:100%; height:22px; margin-top:8px; }

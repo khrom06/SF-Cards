@@ -748,17 +748,17 @@ const SF_CSS = `
   :host([dir="rtl"]) svg, :host([dir="rtl"]) .stage, :host([dir="rtl"]) .core, :host([dir="rtl"]) .dial, :host([dir="rtl"]) .ring, :host([dir="rtl"]) .gauge .ring { direction:ltr; }
   .hud { position:relative; overflow:hidden; border-radius:14px; padding:16px 18px 18px;
     background: radial-gradient(ellipse at 50% -20%, #0d2440 0%, #06101d 60%, #03080f 100%);
-    border:1px solid rgba(0,229,255,.22); color:${SF_C.text};
+    border:1px solid rgb(var(--sf-cyan-rgb) / .22); color:${SF_C.text};
     font-family:'B612 Mono', ui-monospace, monospace; font-size:13px;
-    box-shadow: inset 0 0 40px rgba(0,229,255,.06), 0 0 22px rgba(0,229,255,.07); }
+    box-shadow: inset 0 0 40px rgb(var(--sf-cyan-rgb) / .06), 0 0 22px rgb(var(--sf-cyan-rgb) / .07); }
   .hud::after { content:""; position:absolute; inset:0; pointer-events:none;
-    background: repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 3px); }
+    background: repeating-linear-gradient(0deg, rgb(var(--sf-fg-rgb) / .022) 0 1px, transparent 1px 3px); }
   .c { position:absolute; width:14px; height:14px; border-color:${SF_C.cyan}; border-style:solid; opacity:.8; }
   .c.tl { top:6px; left:6px; border-width:2px 0 0 2px; } .c.tr { top:6px; right:6px; border-width:2px 2px 0 0; }
   .c.bl { bottom:6px; left:6px; border-width:0 0 2px 2px; } .c.br { bottom:6px; right:6px; border-width:0 2px 2px 0; }
   .head { display:flex; align-items:center; gap:10px; margin-bottom:14px;
     font-family:Orbitron, sans-serif; font-weight:700; font-size:12px; letter-spacing:.22em;
-    text-transform:uppercase; color:${SF_C.cyan}; text-shadow:0 0 8px rgba(0,229,255,.6); }
+    text-transform:uppercase; color:${SF_C.cyan}; text-shadow:0 0 8px rgb(var(--sf-cyan-rgb) / .6); }
   .head .sub { margin-left:auto; font-family:'B612 Mono',monospace; font-weight:400;
     letter-spacing:.08em; font-size:10px; color:${SF_C.dim}; text-shadow:none; }
   .dot { width:8px; height:8px; border-radius:50%; background:${SF_C.cyan};
@@ -772,16 +772,16 @@ const SF_CSS = `
   [data-call] { cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
     transition: transform .12s, box-shadow .2s, background .2s, border-color .2s, color .2s; }
   [data-call]:active { transform:scale(.95); }
-  [data-call].sent { box-shadow:0 0 0 2px ${SF_C.cyan}, 0 0 18px rgba(0,229,255,.7) !important; }
-  [data-call].fail { box-shadow:0 0 0 2px ${SF_C.red}, 0 0 18px rgba(255,51,85,.7) !important; }
+  [data-call].sent { box-shadow:0 0 0 2px ${SF_C.cyan}, 0 0 18px rgb(var(--sf-cyan-rgb) / .7) !important; }
+  [data-call].fail { box-shadow:0 0 0 2px ${SF_C.red}, 0 0 18px rgb(var(--sf-red-rgb) / .7) !important; }
   [data-call].armed { border-color:${SF_C.amber} !important; color:${SF_C.amber} !important;
-    background:rgba(255,179,0,.14) !important; animation: blink .5s infinite; }
+    background:rgb(var(--sf-amber-rgb) / .14) !important; animation: blink .5s infinite; }
   .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:7px 11px;
-    border-radius:8px; border:1px solid rgba(0,229,255,.25); background:rgba(0,229,255,.05);
+    border-radius:8px; border:1px solid rgb(var(--sf-cyan-rgb) / .25); background:rgb(var(--sf-cyan-rgb) / .05);
     color:${SF_C.text}; font-family:'B612 Mono',monospace; font-size:11px; letter-spacing:.06em; }
   .btn:hover { border-color:${SF_C.cyan}; color:#fff; }
-  .btn.on { border-color:${SF_C.cyan}; background:rgba(0,229,255,.18); color:#fff;
-    box-shadow: inset 0 0 12px rgba(0,229,255,.25), 0 0 10px rgba(0,229,255,.25); }
+  .btn.on { border-color:${SF_C.cyan}; background:rgb(var(--sf-cyan-rgb) / .18); color:#fff;
+    box-shadow: inset 0 0 12px rgb(var(--sf-cyan-rgb) / .25), 0 0 10px rgb(var(--sf-cyan-rgb) / .25); }
   .seg { display:flex; flex-wrap:wrap; gap:6px; }
 `;
 
@@ -1096,28 +1096,28 @@ class SfAlertCard extends SfBase {
   defaults() { return { leaks: [], doors: [] }; }
   css() {
     return `
-      .alert .hud, .hud.alert { border-color:rgba(255,51,85,.7);
+      .alert .hud, .hud.alert { border-color:rgb(var(--sf-red-rgb) / .7);
         background: radial-gradient(ellipse at 50% 0%, #4a0714 0%, #1a0308 65%, #0a0104 100%);
         animation: pulse 1.1s infinite; }
       .hud.alert .c { border-color:${SF_C.red}; }
-      .hud.alert .head { color:${SF_C.red}; text-shadow:0 0 10px rgba(255,51,85,.8); }
+      .hud.alert .head { color:${SF_C.red}; text-shadow:0 0 10px rgb(var(--sf-red-rgb) / .8); }
       .hud.alert .dot { background:${SF_C.red}; box-shadow:0 0 10px ${SF_C.red}; animation-duration:.6s; }
-      @keyframes pulse { 50% { box-shadow: inset 0 0 60px rgba(255,51,85,.35), 0 0 30px rgba(255,51,85,.45); } }
+      @keyframes pulse { 50% { box-shadow: inset 0 0 60px rgb(var(--sf-red-rgb) / .35), 0 0 30px rgb(var(--sf-red-rgb) / .45); } }
       .big { font-family:Orbitron,sans-serif; font-weight:700; font-size:26px; letter-spacing:.08em;
-        color:#fff; text-shadow:0 0 14px rgba(255,51,85,.9); margin:4px 0 10px; }
-      .snap { width:100%; border-radius:10px; border:1px solid rgba(255,51,85,.6); display:block; margin-top:6px; }
+        color:#fff; text-shadow:0 0 14px rgb(var(--sf-red-rgb) / .9); margin:4px 0 10px; }
+      .snap { width:100%; border-radius:10px; border:1px solid rgb(var(--sf-red-rgb) / .6); display:block; margin-top:6px; }
       .calm { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
       .calm .state { font-family:Orbitron,sans-serif; font-size:18px; color:${SF_C.green};
-        text-shadow:0 0 10px rgba(43,255,136,.6); letter-spacing:.1em; }
+        text-shadow:0 0 10px rgb(var(--sf-green-rgb) / .6); letter-spacing:.1em; }
       .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
       .chip::before { content:""; display:inline-block; width:6px; height:6px; border-radius:50%; background:currentColor; margin-right:6px; vertical-align:1px; }
       .chip.leak::before { border-radius:50% 50% 50% 0; transform:rotate(-45deg); }
       .chip { padding:4px 9px; border-radius:20px; font-size:10px; letter-spacing:.08em;
-        border:1px solid rgba(0,229,255,.25); background:rgba(0,229,255,.05); }
-      .chip.on { border-color:${SF_C.red}; color:${SF_C.red}; background:rgba(255,51,85,.1); }
-      .chip.mute { border-color:${SF_C.amber}; color:${SF_C.amber}; background:rgba(255,179,0,.08); }
-      .chip.ok { color:${SF_C.green}; border-color:rgba(43,255,136,.35); }
-      .sim { margin-left:auto; background:none; border:1px solid rgba(0,229,255,.35); color:${SF_C.dim};
+        border:1px solid rgb(var(--sf-cyan-rgb) / .25); background:rgb(var(--sf-cyan-rgb) / .05); }
+      .chip.on { border-color:${SF_C.red}; color:${SF_C.red}; background:rgb(var(--sf-red-rgb) / .1); }
+      .chip.mute { border-color:${SF_C.amber}; color:${SF_C.amber}; background:rgb(var(--sf-amber-rgb) / .08); }
+      .chip.ok { color:${SF_C.green}; border-color:rgb(var(--sf-green-rgb) / .35); }
+      .sim { margin-left:auto; background:none; border:1px solid rgb(var(--sf-cyan-rgb) / .35); color:${SF_C.dim};
         font-family:'B612 Mono',monospace; font-size:10px; letter-spacing:.1em; padding:5px 10px;
         border-radius:6px; cursor:pointer; }
       .sim:hover { color:${SF_C.cyan}; border-color:${SF_C.cyan}; }`;
@@ -1202,7 +1202,7 @@ function sfEvOn(el, id, kind, custom) {
  *     range: sensor.x          # km or mi (see distance_unit)
  *     target: sensor.x         # charge cible (%), facultatif
  *     charging: binary_sensor.x | sensor.x   # optional; same statuses as the charger (charging_states: optional list)
- *     color: "#00e5ff"
+ *     color: "var(--sf-cyan)"
  * distance_unit: auto          # auto (sensor unit) | km | mi (converts if needed)
  * charger:
  *   name: Garage               # facultatif
@@ -1230,33 +1230,33 @@ class SfHangarCard extends SfBase {
       .bay.stack .cars { display:grid; gap:8px; }
       .bay.stack svg { width:100%; max-width:108px; height:auto; }
       .bay.stack .bornes { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-top:12px; }
-      .bay.stack .borne { padding:8px 6px; border-radius:10px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); }
+      .bay.stack .borne { padding:8px 6px; border-radius:10px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); }
       .bay.stack .flow { width:70px; }
       .car { text-align:center; }
       .car .name { font-family:Orbitron,sans-serif; letter-spacing:.14em; font-size:12px; margin-top:4px; }
       .car .km { font-size:11px; color:${SF_C.dim}; margin-top:2px; }
-      .ring-bg { fill:none; stroke:rgba(255,255,255,.07); stroke-width:7; }
+      .ring-bg { fill:none; stroke:rgb(var(--sf-fg-rgb) / .07); stroke-width:7; }
       .ring { fill:none; stroke-width:7; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%;
         transition: stroke-dashoffset 1s ease; }
       .soc { font-family:Orbitron,sans-serif; font-size:20px; fill:#fff; }
-      .tick { stroke:rgba(0,229,255,.25); stroke-width:1; }
+      .tick { stroke:rgb(var(--sf-cyan-rgb) / .25); stroke-width:1; }
       .borne { text-align:center; min-width:92px; }
       .borne .plug { font-size:26px; display:flex; justify-content:center; }
-      .flow { width:90px; height:4px; margin:8px auto; border-radius:2px; background:rgba(255,255,255,.08); overflow:hidden; }
+      .flow { width:90px; height:4px; margin:8px auto; border-radius:2px; background:rgb(var(--sf-fg-rgb) / .08); overflow:hidden; }
       .flow.on::before { content:""; display:block; width:40%; height:100%;
         background: linear-gradient(90deg, transparent, ${SF_C.green}, transparent); animation: run 1.1s linear infinite; }
       @keyframes run { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
-      .note { margin-top:14px; padding-top:10px; border-top:1px dashed rgba(0,229,255,.18);
+      .note { margin-top:14px; padding-top:10px; border-top:1px dashed rgb(var(--sf-cyan-rgb) / .18);
         display:flex; justify-content:center; align-items:center; text-align:center; gap:4px 16px; flex-wrap:wrap; font-size:11px; }
       .modes { margin-top:12px; text-align:center; }
       .modes .lbl { margin-bottom:6px; }
       .modes .seg { justify-content:center; }
       .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; margin-top:6px;
-        border:1px solid rgba(43,255,136,.45); color:${SF_C.green}; }
+        border:1px solid rgb(var(--sf-green-rgb) / .45); color:${SF_C.green}; }
       .warnbox { margin-top:10px; padding:9px 12px; border-radius:8px; font-size:11.5px; line-height:1.4; text-align:center;
-        color:${SF_C.amber}; border:1px solid rgba(255,179,0,.55); background:rgba(255,179,0,.09); animation: blink 2s infinite; }
+        color:${SF_C.amber}; border:1px solid rgb(var(--sf-amber-rgb) / .55); background:rgb(var(--sf-amber-rgb) / .09); animation: blink 2s infinite; }
       .fl3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:12px; }
-      .fl3 > div { padding:7px 9px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); text-align:center; }
+      .fl3 > div { padding:7px 9px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
       .tgt { stroke:#fff; stroke-width:2; }`;
   }
   _ring(car) {
@@ -1400,15 +1400,15 @@ class SfRadarCard extends SfBase {
       .radar { position:relative; width:100%; aspect-ratio:1; }
       .radar svg { position:absolute; inset:0; width:100%; height:100%; }
       .sweep { position:absolute; inset:4%; border-radius:50%;
-        background: conic-gradient(from 0deg, rgba(0,229,255,.32), rgba(0,229,255,0) 22%, transparent 100%);
+        background: conic-gradient(from 0deg, rgb(var(--sf-cyan-rgb) / .32), rgb(var(--sf-cyan-rgb) / 0) 22%, transparent 100%);
         animation: spin 4.5s linear infinite; mask: radial-gradient(circle, #000 69%, transparent 70%); }
       @keyframes spin { to { transform: rotate(360deg); } }
-      .ringl { fill:none; stroke:rgba(0,229,255,.22); stroke-dasharray:3 4; }
-      .cross { stroke:rgba(0,229,255,.12); }
+      .ringl { fill:none; stroke:rgb(var(--sf-cyan-rgb) / .22); stroke-dasharray:3 4; }
+      .cross { stroke:rgb(var(--sf-cyan-rgb) / .12); }
       .rl { font-size:2.6px; fill:${SF_C.dim}; letter-spacing:.18em; }
       .blip { transition: opacity .5s; }
       .legend .row { display:flex; justify-content:space-between; gap:10px; padding:5px 0;
-        border-bottom:1px solid rgba(0,229,255,.08); font-size:12px; }
+        border-bottom:1px solid rgb(var(--sf-cyan-rgb) / .08); font-size:12px; }
       .legend h4 { margin:10px 0 4px; font-family:Orbitron,sans-serif; font-weight:500; font-size:10px;
         letter-spacing:.18em; color:${SF_C.cyan}; }
       .legend h4:first-child { margin-top:0; }
@@ -1530,11 +1530,11 @@ class SfMachinesCard extends SfBase {
     return `
       .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap:10px; }
       .tile { position:relative; padding:10px 11px 12px; border-radius:10px;
-        background: linear-gradient(160deg, rgba(0,229,255,.07), rgba(0,229,255,.015));
-        border:1px solid rgba(0,229,255,.16); }
+        background: linear-gradient(160deg, rgb(var(--sf-cyan-rgb) / .07), rgb(var(--sf-cyan-rgb) / .015));
+        border:1px solid rgb(var(--sf-cyan-rgb) / .16); }
       .tile .v { font-family:Orbitron,sans-serif; font-size:19px; margin-top:6px; }
       .tile .u { font-size:10px; color:${SF_C.dim}; margin-left:3px; }
-      .bar { height:3px; margin-top:8px; border-radius:2px; background:rgba(255,255,255,.07); overflow:hidden; }
+      .bar { height:3px; margin-top:8px; border-radius:2px; background:rgb(var(--sf-fg-rgb) / .07); overflow:hidden; }
       .bar i { display:block; height:100%; border-radius:2px; transition: width 1s; }
       .led { position:absolute; top:10px; right:10px; width:7px; height:7px; border-radius:50%; }
       .spk { display:block; width:100%; height:22px; margin-top:8px; }
@@ -1645,31 +1645,31 @@ class SfBridgeCard extends SfBase {
       .hud.bridge { padding:22px 26px 20px; min-height:170px; }
       .floor { position:absolute; left:-50%; right:-50%; bottom:-40%; height:120%; pointer-events:none;
         transform: perspective(260px) rotateX(72deg); transform-origin:50% 100%; opacity:.55;
-        background-image: linear-gradient(rgba(0,229,255,.35) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(0,229,255,.35) 1px, transparent 1px);
+        background-image: linear-gradient(rgb(var(--sf-cyan-rgb) / .35) 1px, transparent 1px),
+                          linear-gradient(90deg, rgb(var(--sf-cyan-rgb) / .35) 1px, transparent 1px);
         background-size: 46px 46px; animation: travel 3s linear infinite;
         mask-image: linear-gradient(to top, #000 0%, transparent 75%); -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 75%); }
       @keyframes travel { to { background-position: 0 46px, 0 0; } }
       .horizon { position:absolute; left:0; right:0; top:58%; height:2px; pointer-events:none;
-        background: linear-gradient(90deg, transparent, rgba(0,229,255,.8), transparent); filter: blur(1px); }
+        background: linear-gradient(90deg, transparent, rgb(var(--sf-cyan-rgb) / .8), transparent); filter: blur(1px); }
       .top { position:relative; display:grid; grid-template-columns: auto 1fr auto; gap:28px; align-items:center; }
       @media (max-width: 900px) { .top { grid-template-columns: 1fr; gap:14px; } }
       .clock { font-family:Orbitron,sans-serif; font-weight:700; font-size:54px; line-height:1; color:#fff;
-        text-shadow: 0 0 18px rgba(0,229,255,.75), 0 0 2px #fff; letter-spacing:.04em; }
+        text-shadow: 0 0 18px rgb(var(--sf-cyan-rgb) / .75), 0 0 2px #fff; letter-spacing:.04em; }
       .clock .s { font-size:22px; color:${SF_C.cyan}; margin-left:4px; }
       .date { margin-top:6px; letter-spacing:.24em; text-transform:uppercase; font-size:11px; color:${SF_C.dim}; }
       .status { text-align:center; }
       .status .big { font-family:Orbitron,sans-serif; font-weight:700; letter-spacing:.18em; font-size:17px; }
       .status .chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:10px; }
       .an { padding:5px 10px; border-radius:20px; font-size:11px; border:1px solid; }
-      .an.red { color:${SF_C.red}; border-color:rgba(255,51,85,.6); background:rgba(255,51,85,.1); animation: blink 1.2s infinite; }
-      .an.amber { color:${SF_C.amber}; border-color:rgba(255,179,0,.5); background:rgba(255,179,0,.08); }
+      .an.red { color:${SF_C.red}; border-color:rgb(var(--sf-red-rgb) / .6); background:rgb(var(--sf-red-rgb) / .1); animation: blink 1.2s infinite; }
+      .an.amber { color:${SF_C.amber}; border-color:rgb(var(--sf-amber-rgb) / .5); background:rgb(var(--sf-amber-rgb) / .08); }
       .meta { display:grid; grid-template-columns: repeat(2, minmax(120px, auto)); gap:10px 22px; }
       .meta .v { font-family:Orbitron,sans-serif; font-size:15px; color:#fff; margin-top:2px; display:flex; align-items:center; gap:6px; }
       .crew { position:relative; display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; padding-top:12px;
-        border-top:1px solid rgba(0,229,255,.14); align-items:center; }
+        border-top:1px solid rgb(var(--sf-cyan-rgb) / .14); align-items:center; }
       .member { display:flex; align-items:center; gap:7px; padding:4px 12px 4px 4px; border-radius:20px;
-        background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); font-size:12px; }
+        background:rgb(var(--sf-fg-rgb) / .03); border:1px solid rgb(var(--sf-fg-rgb) / .08); font-size:12px; }
       .member .av { width:24px; height:24px; border-radius:50%; display:grid; place-items:center;
         font-family:Orbitron,sans-serif; font-size:11px; color:#03080f; }
       .member.away { opacity:.45; }
@@ -1709,7 +1709,7 @@ class SfBridgeCard extends SfBase {
     const status = an.length
       ? `<div class="big" style="color:${this.esc(reds ? SF_C.red : SF_C.amber)}">${this.t("bridge.s_n_issue_s", { s: this.t(reds ? "ALERTE" : "VIGILANCE"), n: an.length })}</div>
          <div class="chips">${an.map(([k, t, id]) => `<span class="an ${this.esc(k)} click" data-e="${this.esc(id)}">${this.esc(t)}</span>`).join("")}</div>`
-      : `<div class="big" style="color:${SF_C.green};text-shadow:0 0 12px rgba(43,255,136,.6)">${this.t("bridge.all_normal")}</div>
+      : `<div class="big" style="color:${SF_C.green};text-shadow:0 0 12px rgb(var(--sf-green-rgb) / .6)">${this.t("bridge.all_normal")}</div>
          <div class="lbl" style="margin-top:8px">${this.t("bridge.doors_closed_no_leaks_mains_ok")}</div>`;
 
     const w = this.st(c.weather);
@@ -1781,13 +1781,13 @@ class SfReactorCard extends SfBase {
       .stage { position:relative; width:100%; aspect-ratio: 16 / 9; min-height:260px; }
       .stage svg { position:absolute; inset:0; width:100%; height:100%; }
       .ln { fill:none; stroke-width:2; stroke-linecap:round; }
-      .ln.bg { stroke:rgba(255,255,255,.06); stroke-width:6; }
+      .ln.bg { stroke:rgb(var(--sf-fg-rgb) / .06); stroke-width:6; }
       .ln.fx { stroke-dasharray: 2 14; animation: flow var(--d, 2s) linear infinite; }
       .ln.rev { animation-direction: reverse; }
       @keyframes flow { to { stroke-dashoffset: -32; } }
       .node { position:absolute; transform:translate(-50%,-50%); text-align:center; width:88px; }
       .node .ic { width:46px; height:46px; margin:0 auto 4px; border-radius:50%; display:grid; place-items:center;
-        background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.12), rgba(0,0,0,.4));
+        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .12), rgba(0,0,0,.4));
         border:1px solid currentColor; box-shadow: 0 0 12px -2px currentColor, inset 0 0 10px -4px currentColor; }
       .node .n { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:${SF_C.dim}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .node .w { font-family:Orbitron,sans-serif; font-size:13px; color:#fff; }
@@ -1811,7 +1811,7 @@ class SfReactorCard extends SfBase {
         text-shadow:0 0 10px #000, 0 0 6px var(--cc); }
       .core .txt span { font-size:9px; letter-spacing:.2em; color:#fff; text-shadow:0 0 6px #000; }
       .foot { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:6px; }
-      .foot > div { padding:8px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); text-align:center; }
+      .foot > div { padding:8px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
       .foot .v { font-family:Orbitron,sans-serif; font-size:16px; color:#fff; margin-top:3px; }`;
   }
   _dur(w) { // the more powerful, the faster the flow
@@ -1972,7 +1972,7 @@ class SfClimateCard extends SfBase {
       .ctl .tg { text-align:center; font-family:Orbitron,sans-serif; font-size:15px; color:#fff; }
       .ctl .tg small { display:block; font-family:'B612 Mono',monospace; font-size:8px; letter-spacing:.2em; color:${SF_C.dim}; }
       .pw.on { color:var(--hc); border-color:var(--hc); box-shadow:0 0 10px -2px var(--hc); }
-      .extras { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px dashed rgba(0,229,255,.18); }`;
+      .extras { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px dashed rgb(var(--sf-cyan-rgb) / .18); }`;
   }
   _arc(cx, cy, r, a0, a1) {
     const p = (a) => [cx + r * Math.cos((a * Math.PI) / 180), cy + r * Math.sin((a * Math.PI) / 180)];
@@ -2009,7 +2009,7 @@ class SfClimateCard extends SfBase {
         <span class="btn pw ${this.esc(on ? "on" : "")}" title="${this.esc(this.t("climate.turn_the_room_on_off"))}" ${c.switch_script ? this.call(c.switch_script, { regulation: r.regul, climat: r.climate }) : this.call(on ? "climate.turn_off" : "climate.turn_on", { entity_id: r.climate })}>${this.icon("mdi:power", 15)}</span></span></div>
       <div class="dial click" data-e="${this.esc(r.climate)}">
         <svg viewBox="0 0 120 112">${marks}
-          <path d="${this.esc(this._arc(60, 60, 50, A0, A1))}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="6" stroke-linecap="round"/>
+          <path d="${this.esc(this._arc(60, 60, 50, A0, A1))}" fill="none" stroke="rgb(var(--sf-fg-rgb) / .07)" stroke-width="6" stroke-linecap="round"/>
           ${t !== null ? `<path d="${this.esc(this._arc(60, 60, 50, A0, Math.max(A0 + 1, ang(t))))}" fill="none" stroke="${this.esc(hc)}" stroke-width="6" stroke-linecap="round" style="filter:drop-shadow(0 0 4px ${this.esc(hc)})"/>` : ""}
           ${tg}</svg>
         <div class="t"><b>${t === null ? "—" : this.nf(Number(t), 1)}°</b>
@@ -2067,10 +2067,10 @@ class SfConsoleCard extends SfBase {
       .groups { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
       .grp h4 { margin:0 0 8px; font-family:Orbitron,sans-serif; font-weight:500; font-size:10px; letter-spacing:.2em;
         color:${SF_C.cyan}; display:flex; align-items:center; gap:6px; }
-      .grp h4::after { content:""; flex:1; height:1px; background:linear-gradient(90deg, rgba(0,229,255,.35), transparent); }
+      .grp h4::after { content:""; flex:1; height:1px; background:linear-gradient(90deg, rgb(var(--sf-cyan-rgb) / .35), transparent); }
       .items { display:grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap:8px; }
       .it { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:10px;
-        border-radius:10px; border:1px solid rgba(0,229,255,.16); background:rgba(0,229,255,.035); min-height:62px; }
+        border-radius:10px; border:1px solid rgb(var(--sf-cyan-rgb) / .16); background:rgb(var(--sf-cyan-rgb) / .035); min-height:62px; }
       .it .nm { font-size:11px; color:${SF_C.text}; line-height:1.2; }
       .it .sv { font-size:10px; color:${SF_C.dim}; }
       .it.on { border-color:var(--ac, ${SF_C.amber}); background: linear-gradient(160deg, color-mix(in srgb, var(--ac, ${SF_C.amber}) 22%, transparent), transparent);
@@ -2194,7 +2194,7 @@ class SfCameraCard extends SfBase {
     return `
       .cams { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:12px; }
       .cam { position:relative; aspect-ratio:16/9; border-radius:10px; overflow:hidden; background:#000;
-        border:1px solid rgba(0,229,255,.25); }
+        border:1px solid rgb(var(--sf-cyan-rgb) / .25); }
       .cam img { width:100%; height:100%; object-fit:cover; display:block; opacity:0; transition:opacity .4s; filter:saturate(.85) contrast(1.05); }
       .cam img.ok { opacity:1; }
       .cam::before { content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
@@ -2205,7 +2205,7 @@ class SfCameraCard extends SfBase {
       .tag { font-family:Orbitron,sans-serif; font-size:11px; letter-spacing:.18em; color:#fff; text-shadow:0 0 6px #000, 0 0 8px ${SF_C.cyan}; }
       .rec { font-size:10px; color:${SF_C.red}; letter-spacing:.14em; display:flex; align-items:center; gap:5px; text-shadow:0 0 4px #000; }
       .rec::before { content:""; width:8px; height:8px; border-radius:50%; background:${SF_C.red}; box-shadow:0 0 8px ${SF_C.red}; animation: blink 1s infinite; }
-      .pill { font-size:10px; padding:3px 8px; border-radius:10px; background:rgba(0,0,0,.55); border:1px solid rgba(0,229,255,.35); color:${SF_C.text}; }
+      .pill { font-size:10px; padding:3px 8px; border-radius:10px; background:rgba(0,0,0,.55); border:1px solid rgb(var(--sf-cyan-rgb) / .35); color:${SF_C.text}; }
       .pill.hot { border-color:${SF_C.amber}; color:${SF_C.amber}; }
       .pill.red { border-color:${SF_C.red}; color:${SF_C.red}; }
       .ret { position:absolute; left:50%; top:50%; width:46px; height:46px; transform:translate(-50%,-50%); z-index:2; pointer-events:none; opacity:.55; }
@@ -2249,14 +2249,14 @@ class SfSetpointsCard extends SfBase {
     return `
       table { width:100%; border-collapse:separate; border-spacing:0 6px; }
       th { font-family:Orbitron,sans-serif; font-weight:500; font-size:10px; letter-spacing:.16em; text-align:center; padding:4px; }
-      td { padding:6px 4px; background:rgba(0,229,255,.03); border-top:1px solid rgba(0,229,255,.1); border-bottom:1px solid rgba(0,229,255,.1); }
-      td:first-child { border-left:1px solid rgba(0,229,255,.1); border-radius:8px 0 0 8px; padding-left:10px; white-space:nowrap; }
-      td:last-child { border-right:1px solid rgba(0,229,255,.1); border-radius:0 8px 8px 0; }
+      td { padding:6px 4px; background:rgb(var(--sf-cyan-rgb) / .03); border-top:1px solid rgb(var(--sf-cyan-rgb) / .1); border-bottom:1px solid rgb(var(--sf-cyan-rgb) / .1); }
+      td:first-child { border-left:1px solid rgb(var(--sf-cyan-rgb) / .1); border-radius:8px 0 0 8px; padding-left:10px; white-space:nowrap; }
+      td:last-child { border-right:1px solid rgb(var(--sf-cyan-rgb) / .1); border-radius:0 8px 8px 0; }
       .st { display:flex; align-items:center; justify-content:center; gap:4px; }
       .st .btn { padding:3px 8px; }
       .st b { font-family:Orbitron,sans-serif; font-size:14px; min-width:44px; text-align:center; color:#fff; }
       .st b.edit { cursor:pointer; padding:6px 4px; border-radius:6px; }
-      .st b.edit:hover, .st b.edit:focus-visible { background:rgba(0,229,255,.12); outline:none; }
+      .st b.edit:hover, .st b.edit:focus-visible { background:rgb(var(--sf-cyan-rgb) / .12); outline:none; }
       @media (max-width: 640px) { .st .btn { display:none; } .st b { min-width:56px; padding:10px 6px; } }
       .ed { display:flex; flex-direction:column; align-items:center; gap:14px; padding:6px 0 2px; }
       .ed .who { font-size:13px; color:${SF_C.dim}; text-align:center; }
@@ -2363,12 +2363,12 @@ class SfLedgerCard extends SfBase {
   css() {
     return `
       .kpis { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin:12px 0 16px; }
-      .kpi { padding:10px 12px; border-radius:10px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.14); }
+      .kpi { padding:10px 12px; border-radius:10px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .14); }
       .kpi .v { font-family:Orbitron,sans-serif; font-size:22px; color:#fff; margin-top:4px; }
       .dev { display:grid; grid-template-columns: 150px 1fr 90px; gap:12px; align-items:center; padding:8px 0;
-        border-bottom:1px solid rgba(0,229,255,.08); }
+        border-bottom:1px solid rgb(var(--sf-cyan-rgb) / .08); }
       @media (max-width: 560px) { .dev { grid-template-columns: 1fr; gap:6px; } }
-      .bar { height:12px; border-radius:6px; background:rgba(255,255,255,.06); overflow:hidden; display:flex; }
+      .bar { height:12px; border-radius:6px; background:rgb(var(--sf-fg-rgb) / .06); overflow:hidden; display:flex; }
       .bar i { display:block; height:100%; transition: width 1s; }
       .legend { display:flex; gap:14px; font-size:10px; color:${SF_C.dim}; margin-top:10px; }
       .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }`;
@@ -2412,7 +2412,7 @@ class SfCellsCard extends SfBase {
     return `
       .cells { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:8px; }
       .cell { display:grid; grid-template-columns: 26px 1fr; gap:8px; align-items:center; padding:7px 9px; border-radius:8px;
-        background:rgba(0,229,255,.03); border:1px solid rgba(0,229,255,.1); }
+        background:rgb(var(--sf-cyan-rgb) / .03); border:1px solid rgb(var(--sf-cyan-rgb) / .1); }
       .bat { position:relative; width:14px; height:24px; border:1.5px solid currentColor; border-radius:3px; margin:0 auto; }
       .bat::before { content:""; position:absolute; top:-4px; left:3px; width:5px; height:3px; background:currentColor; border-radius:1px 1px 0 0; }
       .bat i { position:absolute; left:1.5px; right:1.5px; bottom:1.5px; border-radius:1px; background:currentColor; box-shadow:0 0 6px currentColor; }
@@ -2469,18 +2469,18 @@ const SF_POP_CSS = `
   .back { position:fixed; inset:0; z-index:9998; background:rgba(1,4,9,.66); backdrop-filter:blur(6px);
     -webkit-backdrop-filter:blur(6px); opacity:0; transition:opacity .25s; }
   .sheet { position:fixed; z-index:9999; left:0; right:0; bottom:0; max-height:92vh; display:flex; flex-direction:column;
-    background: linear-gradient(180deg, #071426 0%, #03080f 100%); border-top:1px solid rgba(0,229,255,.45);
-    border-radius:22px 22px 0 0; box-shadow:0 -10px 40px rgba(0,229,255,.18);
+    background: linear-gradient(180deg, #071426 0%, #03080f 100%); border-top:1px solid rgb(var(--sf-cyan-rgb) / .45);
+    border-radius:22px 22px 0 0; box-shadow:0 -10px 40px rgb(var(--sf-cyan-rgb) / .18);
     transform:translateY(105%); transition:transform .32s cubic-bezier(.2,.9,.25,1);
     padding-bottom: env(safe-area-inset-bottom); }
   @media (min-width: 900px) { .sheet { left:50%; right:auto; width:860px; margin-left:-430px; bottom:4vh; border-radius:22px;
-    border:1px solid rgba(0,229,255,.45); max-height:88vh; } }
+    border:1px solid rgb(var(--sf-cyan-rgb) / .45); max-height:88vh; } }
   .open .back { opacity:1; } .open .sheet { transform:none; }
-  .grab { width:44px; height:5px; border-radius:3px; background:rgba(0,229,255,.45); margin:9px auto 2px; }
+  .grab { width:44px; height:5px; border-radius:3px; background:rgb(var(--sf-cyan-rgb) / .45); margin:9px auto 2px; }
   .bar { display:flex; align-items:center; gap:10px; padding:0 14px 6px; color:${SF_C.cyan};
     font:700 12px Orbitron, sans-serif; letter-spacing:.2em; text-transform:uppercase; }
-  .bar button { margin-left:auto; width:36px; height:36px; border-radius:50%; border:1px solid rgba(0,229,255,.35);
-    background:rgba(0,229,255,.08); color:${SF_C.text}; font-size:18px; cursor:pointer; }
+  .bar button { margin-left:auto; width:36px; height:36px; border-radius:50%; border:1px solid rgb(var(--sf-cyan-rgb) / .35);
+    background:rgb(var(--sf-cyan-rgb) / .08); color:${SF_C.text}; font-size:18px; cursor:pointer; }
   .body { overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 10px 14px; overscroll-behavior:contain; }
 `;
 class SfLauncherCard extends SfBase {
@@ -2724,14 +2724,14 @@ class SfBatteryCard extends SfBase {
       .st { font-family:Orbitron,sans-serif; font-size:15px; letter-spacing:.1em; }
       .sub { margin-top:4px; font-size:11px; color:${SF_C.dim}; line-height:1.5; }
       .bats { margin-top:14px; display:grid; gap:6px; }
-      .bats .b { display:grid; grid-template-columns: 1fr auto; gap:2px 10px; align-items:center; padding:7px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); }
+      .bats .b { display:grid; grid-template-columns: 1fr auto; gap:2px 10px; align-items:center; padding:7px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); }
       .bats .n { font-size:12px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .bats .p { font-size:11px; text-align:end; }
-      .bats .lv { height:5px; border-radius:3px; background:rgba(255,255,255,.08); overflow:hidden; display:block; }
+      .bats .lv { height:5px; border-radius:3px; background:rgb(var(--sf-fg-rgb) / .08); overflow:hidden; display:block; }
       .bats .lv i { display:block; height:100%; border-radius:3px; }
       .bats .pc { font-family:Orbitron,sans-serif; font-size:12px; text-align:end; color:#fff; }
       .stats { display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:8px; margin-top:14px; }
-      .stats > div { padding:8px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); text-align:center; }
+      .stats > div { padding:8px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
       .stats .v { font-family:Orbitron,sans-serif; font-size:15px; color:#fff; margin-top:3px; }
       .modes { margin-top:14px; text-align:center; } .modes .lbl { margin-bottom:6px; } .modes .seg { justify-content:center; }`;
   }
@@ -2763,7 +2763,7 @@ class SfBatteryCard extends SfBase {
     const modes = m && (m.attributes.options || []).length ? `<div class="modes"><div class="lbl">${this.t("common.mode")}</div><div class="seg">${m.attributes.options.map((o) =>
       `<span class="btn ${this.esc(m.state === o ? "on" : "")}" ${this.call(`${c.mode.split(".")[0]}.select_option`, { entity_id: c.mode, option: o })}>${this.esc(o)}</span>`).join("")}</div></div>` : "";
     return this.frame(this.esc(c.title || this.t("common.battery_2")), soc === null ? "" : `${Math.round(soc)} %`, `
-      <div class="gauge"><div class="ring click" data-e="${this.esc(agg.firstId)}"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="${this.esc(R)}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/>
+      <div class="gauge"><div class="ring click" data-e="${this.esc(agg.firstId)}"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="${this.esc(R)}" fill="none" stroke="rgb(var(--sf-fg-rgb) / .08)" stroke-width="9"/>
           <circle cx="66" cy="66" r="${this.esc(R)}" fill="none" stroke="${this.esc(col)}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${this.esc((C * pct) / 100)} ${this.esc(C)}" style="filter:drop-shadow(0 0 5px ${this.esc(col)})"/></svg>
           <div class="t"><b>${soc === null ? "—" : Math.round(soc)}<span style="font-size:14px">%</span></b><small>${this.t("battery.level")}</small></div></div>
         <div><div class="st" style="color:${this.esc(idle ? SF_C.dim : bw > 0 ? SF_C.amber : SF_C.green)}">${this.icon(idle ? "mdi:battery-heart-variant" : bw > 0 ? "mdi:battery-arrow-down" : "mdi:battery-arrow-up", 20)} ${state}</div>
@@ -2797,7 +2797,7 @@ class SfRadiatorsCard extends SfBase {
       .head, .hud .c { color:var(--ac); border-color:var(--ac); text-shadow:0 0 8px color-mix(in srgb, var(--ac) 60%, transparent); }
       .dot { background:var(--ac); box-shadow:0 0 8px var(--ac); }
       .list { display:grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap:10px; }
-      .rad { padding:11px 12px 12px; border-radius:12px; background:rgba(255,255,255,.03);
+      .rad { padding:11px 12px 12px; border-radius:12px; background:rgb(var(--sf-fg-rgb) / .03);
         border:1px solid color-mix(in srgb, var(--ac) 22%, transparent); }
       .rad.heat { border-color:color-mix(in srgb, var(--ac) 70%, transparent); background:color-mix(in srgb, var(--ac) 9%, transparent);
         box-shadow:0 0 16px -6px var(--ac); }
@@ -2819,7 +2819,7 @@ class SfRadiatorsCard extends SfBase {
       .ctl .tg small { display:block; font-size:9px; letter-spacing:.14em; color:${SF_C.dim}; }
       .ctl .tg b { font-family:Orbitron,sans-serif; font-size:20px; color:#fff; text-shadow:0 0 10px var(--ac); }
       .meta { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:10px; color:${SF_C.dim}; }
-      .meta .bar { flex:1; height:4px; border-radius:2px; background:rgba(255,255,255,.07); overflow:hidden; }
+      .meta .bar { flex:1; height:4px; border-radius:2px; background:rgb(var(--sf-fg-rgb) / .07); overflow:hidden; }
       .meta .bar i { display:block; height:100%; background:var(--ac); box-shadow:0 0 6px var(--ac); border-radius:2px; transition:width 1s; }
       .warn { color:${SF_C.amber}; }`;
   }
@@ -2877,7 +2877,7 @@ class SfRadiatorsCard extends SfBase {
  */
 const SF_NS_MODES = {
   Matin: { label: "Matin", greet: "Bonjour", a: "#ffb347", bg: "radial-gradient(ellipse at 50% -10%, #3a2347 0%, #14203a 48%, #050b16 100%)" },
-  Jour:  { label: "Jour",  greet: "Énergie", a: "#00e5ff", bg: "radial-gradient(ellipse at 50% -10%, #0e2f52 0%, #07182c 52%, #03080f 100%)" },
+  Jour:  { label: "Jour",  greet: "Énergie", a: "var(--sf-cyan)", bg: "radial-gradient(ellipse at 50% -10%, #0e2f52 0%, #07182c 52%, #03080f 100%)" },
   Soir:  { label: "Soir",  greet: "Bonsoir", a: "#b388ff", bg: "radial-gradient(ellipse at 50% -10%, #2b1650 0%, #120a2a 52%, #050310 100%)" },
   Nuit:  { label: "Nuit",  greet: "Veille",  a: "#d9573f", bg: "radial-gradient(ellipse at 50% -10%, #130a0c 0%, #070508 52%, #020204 100%)" },
 };
@@ -2897,16 +2897,16 @@ const SF_NS_CSS = `
   .ns { direction:ltr; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; } }
   :host([theme="light"]) { filter: invert(1) hue-rotate(180deg); }
-  [role="button"]:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
+  [role="button"]:focus-visible { outline:2px solid var(--sf-cyan); outline-offset:2px; }
   /* Everything is sized in "u" = 1 vmin (4.8 px on the NSPanel Pro 480 x 480): the layout stays proportional. */
   /* available height: that of --sf-ns-height if defined; otherwise the whole screen in kiosk mode, or the screen minus the HA bar (56 px) */
-  .ns { --H:var(--sf-ns-height, calc(100vh - 56px)); --u:min(1vw, calc(var(--H) / 100)); --a:#00e5ff; position:relative; display:flex; flex-direction:column; gap:calc(var(--u)*1.7);
-    height:var(--H); padding:calc(var(--u)*2) calc(var(--u)*2.2); overflow:hidden; color:#cfefff;
+  .ns { --H:var(--sf-ns-height, calc(100vh - 56px)); --u:min(1vw, calc(var(--H) / 100)); --a:var(--sf-cyan); position:relative; display:flex; flex-direction:column; gap:calc(var(--u)*1.7);
+    height:var(--H); padding:calc(var(--u)*2) calc(var(--u)*2.2); overflow:hidden; color:var(--sf-text);
     font-family:'B612 Mono', ui-monospace, monospace; font-size:calc(var(--u)*2.6); background:var(--bg); transition:background .8s; }
   .ns.full { --H:var(--sf-ns-height, 100vh); }
-  .ns::after { content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px); }
+  .ns::after { content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(0deg, rgb(var(--sf-fg-rgb) / .02) 0 1px, transparent 1px 3px); }
   .ns.nuit { color:#b9a39e; }
-  .ns.nuit .panel { background:rgba(255,255,255,.02); border-color:rgba(217,87,63,.22); box-shadow:none; }
+  .ns.nuit .panel { background:rgb(var(--sf-fg-rgb) / .02); border-color:rgba(217,87,63,.22); box-shadow:none; }
   .hm, .big, .num, .nm { font-family:Orbitron, sans-serif; }
   ha-icon { display:inline-block; line-height:0; }
 
@@ -2919,24 +2919,24 @@ const SF_NS_CSS = `
   .wx { display:flex; align-items:center; gap:calc(var(--u)*1.6); cursor:pointer; text-align:right; }
   .wx ha-icon { --mdc-icon-size:calc(var(--u)*9); color:var(--a); }
   .wx .t { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*7.2); font-weight:600; color:#fff; line-height:1; }
-  .wx .c { font-size:calc(var(--u)*2.3); color:#7fa3bd; margin-top:calc(var(--u)*.6); }
+  .wx .c { font-size:calc(var(--u)*2.3); color:var(--sf-dim); margin-top:calc(var(--u)*.6); }
   .railWrap { position:relative; margin-top:calc(var(--u)*1.2); }
   .rail { display:flex; height:calc(var(--u)*.9); border-radius:99px; overflow:hidden; gap:2px; }
-  .rail i { flex:1 1 0; background:rgba(255,255,255,.09); } .rail i.on { background:var(--a); box-shadow:0 0 calc(var(--u)*1.6) var(--a); }
+  .rail i { flex:1 1 0; background:rgb(var(--sf-fg-rgb) / .09); } .rail i.on { background:var(--a); box-shadow:0 0 calc(var(--u)*1.6) var(--a); }
   .rail b { position:absolute; top:50%; width:calc(var(--u)*2.4); height:calc(var(--u)*2.4); margin:calc(var(--u)*-1.2) 0 0 calc(var(--u)*-1.2);
     border-radius:50%; background:#fff; box-shadow:0 0 calc(var(--u)*2) #fff, 0 0 calc(var(--u)*4) var(--a); }
-  .modeTxt { position:absolute; right:0; top:calc(var(--u)*-3.4); font-size:calc(var(--u)*2.3); letter-spacing:.12em; text-transform:uppercase; color:#7fa3bd; }
+  .modeTxt { position:absolute; right:0; top:calc(var(--u)*-3.4); font-size:calc(var(--u)*2.3); letter-spacing:.12em; text-transform:uppercase; color:var(--sf-dim); }
   .modeTxt b { color:var(--a); font-weight:400; }
 
   /* alerts (2 lines at most) */
   .alerts { flex:0 0 auto; display:flex; flex-direction:column; gap:calc(var(--u)*1); }
   .alert { display:flex; align-items:center; gap:calc(var(--u)*1.6); height:calc(var(--u)*7.2); padding:0 calc(var(--u)*2); border-radius:calc(var(--u)*1.8);
-    border:1px solid #ff3355; background:rgba(255,51,85,.18); color:#ffd9df; font-size:calc(var(--u)*2.8); font-weight:700; letter-spacing:.05em; animation:pulse 1.4s infinite; overflow:hidden; }
-  .alert em { margin-left:auto; flex:0 0 auto; font-style:normal; font-size:calc(var(--u)*2.6); padding:calc(var(--u)*.4) calc(var(--u)*1.4); border-radius:99px; background:rgba(255,255,255,.18); }
+    border:1px solid var(--sf-red); background:rgb(var(--sf-red-rgb) / .18); color:#ffd9df; font-size:calc(var(--u)*2.8); font-weight:700; letter-spacing:.05em; animation:pulse 1.4s infinite; overflow:hidden; }
+  .alert em { margin-left:auto; flex:0 0 auto; font-style:normal; font-size:calc(var(--u)*2.6); padding:calc(var(--u)*.4) calc(var(--u)*1.4); border-radius:99px; background:rgb(var(--sf-fg-rgb) / .18); }
   .alert span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .alert ha-icon { --mdc-icon-size:calc(var(--u)*4.4); color:#ff3355; flex:0 0 auto; }
-  .alert.warn { border-color:#ffb300; background:rgba(255,179,0,.13); color:#ffe9b0; animation:none; } .alert.warn ha-icon { color:#ffb300; }
-  @keyframes pulse { 50% { box-shadow:0 0 calc(var(--u)*4) rgba(255,51,85,.85); } }
+  .alert ha-icon { --mdc-icon-size:calc(var(--u)*4.4); color:var(--sf-red); flex:0 0 auto; }
+  .alert.warn { border-color:var(--sf-amber); background:rgb(var(--sf-amber-rgb) / .13); color:#ffe9b0; animation:none; } .alert.warn ha-icon { color:var(--sf-amber); }
+  @keyframes pulse { 50% { box-shadow:0 0 calc(var(--u)*4) rgb(var(--sf-red-rgb) / .85); } }
 
   /* an alert is displayed: header and figures compacted to keep the main area readable */
   .ns.tight .hm { font-size:calc(var(--u)*9); } .ns.tight .date { margin-top:calc(var(--u)*.4); } .ns.tight .wx .t { font-size:calc(var(--u)*5.6); } .ns.tight .wx ha-icon { --mdc-icon-size:calc(var(--u)*7); }
@@ -2945,14 +2945,14 @@ const SF_NS_CSS = `
   /* main area: grid that fills exactly the remaining space */
   .main { flex:1 1 0; min-height:0; display:grid; gap:calc(var(--u)*1.7); }
   .panel { position:relative; min-width:0; min-height:0; overflow:hidden; border-radius:calc(var(--u)*2.2); padding:calc(var(--u)*1.7) calc(var(--u)*2);
-    border:1px solid rgba(0,229,255,.2); background:rgba(6,16,29,.62); box-shadow:inset 0 0 calc(var(--u)*6) rgba(0,229,255,.05); }
+    border:1px solid rgb(var(--sf-cyan-rgb) / .2); background:rgba(6,16,29,.62); box-shadow:inset 0 0 calc(var(--u)*6) rgb(var(--sf-cyan-rgb) / .05); }
   .ns:not(.nuit) .panel { border-color:color-mix(in srgb, var(--a) 28%, transparent); }
   .col { display:flex; flex-direction:column; justify-content:center; }
-  .lbl { font-size:calc(var(--u)*2.2); letter-spacing:.12em; text-transform:uppercase; color:#7fa3bd; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lbl { font-size:calc(var(--u)*2.2); letter-spacing:.12em; text-transform:uppercase; color:var(--sf-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .tap { cursor:pointer; user-select:none; -webkit-user-select:none; transition:transform .12s, box-shadow .2s, background .2s; }
   .tap:active { transform:scale(.96); }
   .sent { box-shadow:0 0 0 2px var(--a), 0 0 calc(var(--u)*4) var(--a) !important; }
-  .armed { border-color:#ffb300 !important; background:rgba(255,179,0,.22) !important; color:#fff !important; animation:blink .5s infinite; }
+  .armed { border-color:var(--sf-amber) !important; background:rgb(var(--sf-amber-rgb) / .22) !important; color:#fff !important; animation:blink .5s infinite; }
   @keyframes blink { 50% { opacity:.35; } }
 
   /* weather */
@@ -2964,15 +2964,15 @@ const SF_NS_CSS = `
   .rain { display:flex; align-items:flex-end; gap:calc(var(--u)*.7); height:calc(var(--u)*9); margin-bottom:calc(var(--u)*2.6); }
   .rb { flex:1; height:100%; position:relative; display:flex; align-items:flex-end; } .rb i { display:block; width:100%; border-radius:calc(var(--u)*.6); background:rgba(159,195,217,.28); }
   .rb.wet i { background:#4fc3f7; box-shadow:0 0 calc(var(--u)*1.2) #4fc3f7; }
-  .rb span { position:absolute; left:0; bottom:calc(var(--u)*-3); font-size:calc(var(--u)*1.9); color:#7fa3bd; white-space:nowrap; }
-  .wxTop .sub b.rain { color:#4fc3f7; font-weight:600; } .wxTop .sub b.dry { color:#2bff88; font-weight:600; }
+  .rb span { position:absolute; left:0; bottom:calc(var(--u)*-3); font-size:calc(var(--u)*1.9); color:var(--sf-dim); white-space:nowrap; }
+  .wxTop .sub b.rain { color:#4fc3f7; font-weight:600; } .wxTop .sub b.dry { color:var(--sf-green); font-weight:600; }
   .dayB { display:flex; align-items:center; gap:calc(var(--u)*2); height:100%; } .dayB .dv { display:flex; flex-direction:column; flex:0 0 auto; }
-  .dayB .big { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*5.2); font-weight:600; color:#fff; line-height:1; } .dayB .big small { font-size:calc(var(--u)*2.4); color:#7fa3bd; }
+  .dayB .big { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*5.2); font-weight:600; color:#fff; line-height:1; } .dayB .big small { font-size:calc(var(--u)*2.4); color:var(--sf-dim); }
   .dayB .dc { display:flex; flex-wrap:wrap; gap:calc(var(--u)*1); margin-left:auto; justify-content:flex-end; }
   .chip.up { color:#ffb347; background:rgba(255,179,71,.12); }
   .fc { display:flex; justify-content:space-between; }
   .fc > div { flex:1; text-align:center; } .fc ha-icon { --mdc-icon-size:calc(var(--u)*4.6); color:var(--a); }
-  .fc .h { font-size:calc(var(--u)*2.1); color:#7fa3bd; } .fc .n { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*3); color:#fff; }
+  .fc .h { font-size:calc(var(--u)*2.1); color:var(--sf-dim); } .fc .n { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*3); color:#fff; }
 
   /* voitures (anneaux) */
   .cars { display:flex; gap:calc(var(--u)*1.4); height:100%; align-items:center; }
@@ -2981,25 +2981,25 @@ const SF_NS_CSS = `
   .car .nm { margin-top:calc(var(--u)*.6); font-weight:700; font-size:calc(var(--u)*2.4); letter-spacing:.1em; text-transform:uppercase; }
   .car .rg { font-size:calc(var(--u)*2.3); color:#9fc3d9; margin-top:calc(var(--u)*.3); white-space:nowrap; }
   .car .rg ha-icon { --mdc-icon-size:calc(var(--u)*3); vertical-align:-3px; margin-left:calc(var(--u)*.8); }
-  .okc { color:#2bff88; } .badc { color:#ff3355; } .ambc { color:#ffb300; }
+  .okc { color:var(--sf-green); } .badc { color:var(--sf-red); } .ambc { color:var(--sf-amber); }
 
   /* temperature pills */
   .pills { display:flex; gap:calc(var(--u)*1.2); height:100%; }
   .pill { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:calc(var(--u)*2);
-    border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); padding:calc(var(--u)*.8) 0; }
+    border:1px solid rgb(var(--sf-fg-rgb) / .1); background:rgb(var(--sf-fg-rgb) / .04); padding:calc(var(--u)*.8) 0; }
   .pill ha-icon { --mdc-icon-size:calc(var(--u)*4.4); color:var(--a); }
   .pill .num { font-size:calc(var(--u)*3.6); font-weight:600; color:#fff; margin-top:calc(var(--u)*.4); white-space:nowrap; }
-  .pill .num small { font-size:calc(var(--u)*2.2); color:#7fa3bd; font-weight:400; }
+  .pill .num small { font-size:calc(var(--u)*2.2); color:var(--sf-dim); font-weight:400; }
   .pill .lbl { margin-top:calc(var(--u)*.2); max-width:100%; letter-spacing:.08em; }
-  .pill.bad { border-color:#ff3355; background:rgba(255,51,85,.15); } .pill.bad .num { color:#ff8095; }
-  .pill.ok ha-icon { color:#2bff88; }
+  .pill.bad { border-color:var(--sf-red); background:rgb(var(--sf-red-rgb) / .15); } .pill.bad .num { color:#ff8095; }
+  .pill.ok ha-icon { color:var(--sf-green); }
 
   .pills.compact .pill { padding:0; } .pills.compact .pill ha-icon { display:none; } .pills.compact .pill .num { margin-top:0; line-height:1.05; } .pills.compact .pill .lbl { margin-top:calc(var(--u)*.3); font-size:calc(var(--u)*2); }
   .nrow .pill { border:0; background:none; }
   /* boutons */
   .btns { display:flex; gap:calc(var(--u)*1.4); height:100%; }
   .btn { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:calc(var(--u)*.5); border-radius:calc(var(--u)*2.2);
-    border:1px solid rgba(255,255,255,.13); background:rgba(255,255,255,.05); color:#cfefff; font-size:calc(var(--u)*2.2); letter-spacing:.05em; text-align:center; padding:0 calc(var(--u)*.6); }
+    border:1px solid rgb(var(--sf-fg-rgb) / .13); background:rgb(var(--sf-fg-rgb) / .05); color:var(--sf-text); font-size:calc(var(--u)*2.2); letter-spacing:.05em; text-align:center; padding:0 calc(var(--u)*.6); }
   .btn span { max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .btn ha-icon { --mdc-icon-size:calc(var(--u)*5.6); color:var(--a); }
   .dock { flex:0 0 calc(var(--u)*11.5); }
@@ -3012,25 +3012,25 @@ const SF_NS_CSS = `
   .orbC .big { font-size:calc(var(--u)*8.4); font-weight:700; color:#fff; line-height:1; text-shadow:0 0 calc(var(--u)*3) var(--a); }
   .orbC .big small { font-size:calc(var(--u)*3.2); color:var(--a); font-weight:500; }
   .stats { display:flex; flex-direction:column; gap:calc(var(--u)*1.2); min-height:0; }
-  .stat { flex:1 1 0; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:calc(var(--u)*.7); padding:0 calc(var(--u)*1.8); border-radius:calc(var(--u)*2); border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); overflow:hidden; }
+  .stat { flex:1 1 0; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:calc(var(--u)*.7); padding:0 calc(var(--u)*1.8); border-radius:calc(var(--u)*2); border:1px solid rgb(var(--sf-fg-rgb) / .1); background:rgb(var(--sf-fg-rgb) / .04); overflow:hidden; }
   .srow { display:flex; align-items:center; gap:calc(var(--u)*1.2); } .srow ha-icon { --mdc-icon-size:calc(var(--u)*4.2); flex:0 0 auto; }
   .srow .lbl { flex:1 1 auto; min-width:0; }
   .stat .v { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*4.4); font-weight:600; color:#fff; line-height:1; white-space:nowrap; margin-left:auto; }
-  .stat .v small { font-size:calc(var(--u)*2.3); color:#7fa3bd; font-weight:400; }
-  .sbar { height:calc(var(--u)*1); border-radius:99px; background:rgba(255,255,255,.09); overflow:hidden; } .sbar i { display:block; height:100%; border-radius:99px; transition:width .8s; }
+  .stat .v small { font-size:calc(var(--u)*2.3); color:var(--sf-dim); font-weight:400; }
+  .sbar { height:calc(var(--u)*1); border-radius:99px; background:rgb(var(--sf-fg-rgb) / .09); overflow:hidden; } .sbar i { display:block; height:100%; border-radius:99px; transition:width .8s; }
   .ssub { display:flex; align-items:center; gap:calc(var(--u)*1.2); min-height:calc(var(--u)*3.4); overflow:hidden; white-space:nowrap; }
-  .chip { display:inline-flex; align-items:center; gap:calc(var(--u)*.6); font-size:calc(var(--u)*2.2); color:#cfefff; padding:calc(var(--u)*.2) calc(var(--u)*1.2); border-radius:99px; background:rgba(255,255,255,.07); }
-  .chip ha-icon { --mdc-icon-size:calc(var(--u)*3); color:var(--a); } .chip small { font-size:calc(var(--u)*1.8); color:#7fa3bd; }
-  .chip.hc { color:#2bff88; background:rgba(43,255,136,.12); }
-  .sub1 { font-size:calc(var(--u)*2.1); color:#7fa3bd; }
-  .dec { display:flex; align-items:center; gap:calc(var(--u)*1.6); font-size:calc(var(--u)*2.7); color:#cfefff; height:100%; }
-  .dec ha-icon { --mdc-icon-size:calc(var(--u)*5); color:#2bff88; flex:0 0 auto; }
-  .dec span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .dec .r { margin-left:auto; color:#7fa3bd; font-size:calc(var(--u)*2.2); flex:0 0 auto; }
+  .chip { display:inline-flex; align-items:center; gap:calc(var(--u)*.6); font-size:calc(var(--u)*2.2); color:var(--sf-text); padding:calc(var(--u)*.2) calc(var(--u)*1.2); border-radius:99px; background:rgb(var(--sf-fg-rgb) / .07); }
+  .chip ha-icon { --mdc-icon-size:calc(var(--u)*3); color:var(--a); } .chip small { font-size:calc(var(--u)*1.8); color:var(--sf-dim); }
+  .chip.hc { color:var(--sf-green); background:rgb(var(--sf-green-rgb) / .12); }
+  .sub1 { font-size:calc(var(--u)*2.1); color:var(--sf-dim); }
+  .dec { display:flex; align-items:center; gap:calc(var(--u)*1.6); font-size:calc(var(--u)*2.7); color:var(--sf-text); height:100%; }
+  .dec ha-icon { --mdc-icon-size:calc(var(--u)*5); color:var(--sf-green); flex:0 0 auto; }
+  .dec span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .dec .r { margin-left:auto; color:var(--sf-dim); font-size:calc(var(--u)*2.2); flex:0 0 auto; }
 
   /* evening tiles */
   .tiles { display:grid; grid-template-columns:repeat(3, 1fr); grid-auto-rows:1fr; gap:calc(var(--u)*1.7); min-height:0; }
   .tile { position:relative; min-width:0; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:calc(var(--u)*.6);
-    border-radius:calc(var(--u)*2.6); border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); color:#9fc3d9; text-align:center; padding:calc(var(--u)*1); }
+    border-radius:calc(var(--u)*2.6); border:1px solid rgb(var(--sf-fg-rgb) / .12); background:rgb(var(--sf-fg-rgb) / .04); color:#9fc3d9; text-align:center; padding:calc(var(--u)*1); }
   .tile ha-icon { --mdc-icon-size:calc(var(--u)*7.4); flex:0 0 auto; }
   .tile .nm { flex:0 0 auto; line-height:1.35; font-weight:600; font-size:calc(var(--u)*2.6); letter-spacing:.08em; text-transform:uppercase; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .tile .st { flex:0 0 auto; font-size:calc(var(--u)*2.1); opacity:.8; }
@@ -3039,20 +3039,20 @@ const SF_NS_CSS = `
   .cars > .mini { flex:1 1 0; min-width:0; }
   .mini { display:flex; align-items:center; gap:calc(var(--u)*1.6); height:100%; cursor:pointer; }
   .mini .nm { font-weight:700; font-size:calc(var(--u)*2.4); letter-spacing:.08em; text-transform:uppercase; }
-  .bar { flex:1 1 auto; height:calc(var(--u)*1.6); border-radius:99px; background:rgba(255,255,255,.1); overflow:hidden; } .bar i { display:block; height:100%; border-radius:99px; }
+  .bar { flex:1 1 auto; height:calc(var(--u)*1.6); border-radius:99px; background:rgb(var(--sf-fg-rgb) / .1); overflow:hidden; } .bar i { display:block; height:100%; border-radius:99px; }
   .mini .v { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*3.4); font-weight:600; color:#fff; white-space:nowrap; }
   .mini ha-icon { --mdc-icon-size:calc(var(--u)*3.6); }
 
   /* nuit */
   .sentP { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:calc(var(--u)*1.6); }
   .sentRow { display:flex; align-items:center; gap:calc(var(--u)*3); }
-  .sentRow ha-icon { --mdc-icon-size:calc(var(--u)*17); color:#2bff88; filter:drop-shadow(0 0 calc(var(--u)*2.4) rgba(43,255,136,.7)); animation:breathe 4s infinite ease-in-out; }
-  .sentRow.bad ha-icon { color:#ff3355; filter:drop-shadow(0 0 calc(var(--u)*2.4) rgba(255,51,85,.8)); }
+  .sentRow ha-icon { --mdc-icon-size:calc(var(--u)*17); color:var(--sf-green); filter:drop-shadow(0 0 calc(var(--u)*2.4) rgb(var(--sf-green-rgb) / .7)); animation:breathe 4s infinite ease-in-out; }
+  .sentRow.bad ha-icon { color:var(--sf-red); filter:drop-shadow(0 0 calc(var(--u)*2.4) rgb(var(--sf-red-rgb) / .8)); }
   .sentRow .big { font-size:calc(var(--u)*7); font-weight:700; letter-spacing:.18em; color:#e8d8d3; } .sentRow .sub { color:#8a7873; font-size:calc(var(--u)*2.4); margin-top:calc(var(--u)*.6); }
   @keyframes breathe { 50% { opacity:.55; transform:scale(.96); } }
   .dots { display:flex; flex-wrap:wrap; justify-content:center; gap:calc(var(--u)*1.2) calc(var(--u)*2.4); }
   .dt { display:flex; align-items:center; gap:calc(var(--u)*.9); font-size:calc(var(--u)*2.2); color:#9a8883; }
-  .dt i { width:calc(var(--u)*1.8); height:calc(var(--u)*1.8); border-radius:50%; background:#2bff88; box-shadow:0 0 calc(var(--u)*1.6) #2bff88; } .dt.bad i { background:#ff3355; box-shadow:0 0 calc(var(--u)*2) #ff3355; }
+  .dt i { width:calc(var(--u)*1.8); height:calc(var(--u)*1.8); border-radius:50%; background:var(--sf-green); box-shadow:0 0 calc(var(--u)*1.6) var(--sf-green); } .dt.bad i { background:var(--sf-red); box-shadow:0 0 calc(var(--u)*2) var(--sf-red); }
   .goodnight { display:flex; align-items:center; justify-content:center; text-align:center; font-family:Orbitron, sans-serif; font-weight:700; font-size:calc(var(--u)*3); letter-spacing:.1em; padding:0 calc(var(--u)*1);
     text-transform:uppercase; color:#ffd9cf; border-color:rgba(217,87,63,.55) !important; background:rgba(217,87,63,.14) !important; }
 `;
@@ -3160,7 +3160,7 @@ class SfNsCard extends SfBase {
     if (this._mode !== this.mode()) this._schedule(); }
   _call(el, domain, service, data) {
     el.classList.add("sent"); setTimeout(() => el.classList.remove("sent"), 600);
-    this._hass.callService(domain, service, data).catch(() => { el.style.boxShadow = "0 0 0 2px #ff3355"; setTimeout(() => (el.style.boxShadow = ""), 2000); });
+    this._hass.callService(domain, service, data).catch(() => { el.style.boxShadow = "0 0 0 2px var(--sf-red)"; setTimeout(() => (el.style.boxShadow = ""), 2000); });
   }
   _moreInfo(id) { const ev = new Event("hass-more-info", { bubbles: true, composed: true }); ev.detail = { entityId: id }; this.dispatchEvent(ev); }
   _bind() {
@@ -3256,16 +3256,16 @@ class SfNsCard extends SfBase {
   carsBlock() {
     const c = this._config, R = 42, C = 2 * Math.PI * R; if (!c.cars.length) return "";
     const cars = c.cars.map((car) => {
-      const s = this.num(car.soc), rg = this.num(car.range), low = s !== null && s < (car.low || 0), col = low ? "#ff3355" : (car.color || "#00e5ff");
+      const s = this.num(car.soc), rg = this.num(car.range), low = s !== null && s < (car.low || 0), col = low ? "var(--sf-red)" : (car.color || "var(--sf-cyan)");
       const off = s === null ? C : C * (1 - Math.max(0, Math.min(100, s)) / 100);
       let st = "";
       if (car.charging && this.isOn(car.charging)) st += this.ic("mdi:flash").replace("<ha-icon", '<ha-icon class="ambc"');
       if (car.lock && this.st(car.lock)) st += this.st(car.lock).state === "locked" ? this.ic("mdi:lock").replace("<ha-icon", '<ha-icon class="okc"') : this.ic("mdi:lock-open-alert").replace("<ha-icon", '<ha-icon class="badc"');
-      return `<div class="car" data-info="${this.esc(car.soc)}"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="9"/>
+      return `<div class="car" data-info="${this.esc(car.soc)}"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgb(var(--sf-fg-rgb) / .09)" stroke-width="9"/>
         <circle cx="50" cy="50" r="${R}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"
           transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 3px ${col})"/>
         <text x="50" y="58" text-anchor="middle" font-family="Orbitron,sans-serif" font-weight="700" font-size="27" fill="#fff">${s === null ? "—" : Math.round(s)}<tspan font-size="12" fill="#9fc3d9">%</tspan></text></svg>
-        <div class="nm" style="color:${this.esc(car.color || "#00e5ff")}">${this.esc(car.name)}</div><div class="rg">${rg === null ? "—" : Math.round(rg)} km${st}</div></div>`;
+        <div class="nm" style="color:${this.esc(car.color || "var(--sf-cyan)")}">${this.esc(car.name)}</div><div class="rg">${rg === null ? "—" : Math.round(rg)} km${st}</div></div>`;
     }).join("");
     return this.panel(`<div class="cars">${cars}</div>`);
   }
@@ -3284,13 +3284,13 @@ class SfNsCard extends SfBase {
     const grid = this.watts(e.grid); // + = import, − = export
     const R = 44, C = 2 * Math.PI * R, gap = 3;
     const h = Math.min(home, sol), v = Math.min(ev, Math.max(0, sol - h)), x = Math.max(0, sol - h - v);
-    const parts = sol > 30 ? [[h, "#00e5ff"], [v, "#2bff88"], [x, "#ffb300"]] : [[1, "rgba(255,255,255,.12)"]];
+    const parts = sol > 30 ? [[h, "var(--sf-cyan)"], [v, "var(--sf-green)"], [x, "var(--sf-amber)"]] : [[1, "rgb(var(--sf-fg-rgb) / .12)"]];
     const tot = parts.reduce((t, q) => t + q[0], 0) || 1; let acc = 0;
     const arcs = parts.filter((q) => q[0] > 0).map(([val, col]) => { const len = Math.max(0, (val / tot) * C - gap), o = -acc; acc += (val / tot) * C;
       return `<circle cx="50" cy="50" r="${R}" fill="none" stroke="${col}" stroke-width="8" stroke-dasharray="${len.toFixed(1)} ${(C - len).toFixed(1)}" stroke-dashoffset="${o.toFixed(1)}" transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 2px ${col})"/>`; }).join("");
     const ratio = sol > 30 && grid !== null ? Math.round(Math.min(100, ((sol - Math.max(0, -grid)) / sol) * 100)) : null;
     const imp = grid !== null && grid > 20, dec = this.st(e.decision), evc = this.isOn(e.ev_connected);
-    const orb = this.panel(`<div class="orbWrap" data-info="${this.esc(e.solar)}"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="8"/>${arcs}</svg>
+    const orb = this.panel(`<div class="orbWrap" data-info="${this.esc(e.solar)}"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgb(var(--sf-fg-rgb) / .06)" stroke-width="8"/>${arcs}</svg>
       <div class="orbC"><div class="lbl">${this.esc(this.t(sol > 30 ? "solaire" : "nuit"))}</div><div class="big">${this.pw(sol)}</div>${ratio !== null ? `<div class="lbl" style="margin-top:4px">${this.esc(this.t("wallpanel.self_use_n", { n: ratio }))}</div>` : ""}</div></div>`, "orbP");
     // --- three information tiles: each has an icon, a value, a proportional bar and a context line
     const E = e, scale = Math.max(sol, home + ev, Math.abs(grid || 0), 500);
@@ -3309,9 +3309,9 @@ class SfNsCard extends SfBase {
     const subGrid = `${price !== null ? `<span class="chip ${hc ? "hc" : ""}">${this.esc(this.t(hc ? "HC" : "HP"))} ${this.nf(price, 3)} ${this.esc(this.cur())}</span>` : ""}${costH !== null ? `<span class="chip">≈ ${this.nf(costH, 2)} ${this.esc(this.cur())}/h</span>` : ""}${!imp && grid !== null ? `<span class="chip">${this.ic("mdi:transmission-tower-export")}${this.esc(this.t("wallpanel.exporting"))}</span>` : ""}`;
     const tile = (lbl, icon, col, val, frac, sub, info) => `<div class="stat tap" data-info="${this.esc(info)}"><div class="srow">${ico(icon, col)}<span class="lbl">${lbl}</span><span class="v">${val}</span></div>
       <div class="sbar"><i style="width:${Math.max(0, Math.min(100, frac * 100)).toFixed(0)}%;background:${col};box-shadow:0 0 6px ${col}"></i></div><div class="ssub">${sub}</div></div>`;
-    const stats = `<div class="stats">${tile(this.t("wallpanel.home"), "mdi:home-lightning-bolt-outline", "#00e5ff", this.pw(home), home / scale, chipsHome, e.home)}
-      ${tile(this.t("wallpanel.charger"), ev > 20 ? "mdi:ev-plug-type2" : "mdi:ev-station", "#2bff88", this.pw(ev), ev / scale, subEv, e.ev)}
-      ${tile(this.t(imp ? "réseau" : "export"), imp ? "mdi:transmission-tower-import" : "mdi:transmission-tower-export", imp ? "#ff7043" : "#ffb300", this.pw(grid), Math.abs(grid || 0) / scale, subGrid, e.grid)}</div>`;
+    const stats = `<div class="stats">${tile(this.t("wallpanel.home"), "mdi:home-lightning-bolt-outline", "var(--sf-cyan)", this.pw(home), home / scale, chipsHome, e.home)}
+      ${tile(this.t("wallpanel.charger"), ev > 20 ? "mdi:ev-plug-type2" : "mdi:ev-station", "var(--sf-green)", this.pw(ev), ev / scale, subEv, e.ev)}
+      ${tile(this.t(imp ? "réseau" : "export"), imp ? "mdi:transmission-tower-import" : "mdi:transmission-tower-export", imp ? "#ff7043" : "var(--sf-amber)", this.pw(grid), Math.abs(grid || 0) / scale, subGrid, e.grid)}</div>`;
     const decP = e.ev ? this.panel(`<div class="dec">${this.ic(evc ? "mdi:ev-plug-type2" : "mdi:ev-station")}<span>${dec && dec.state !== "unknown" ? this.esc(dec.state) : this.esc(this.t(evc ? "branchée" : "libre"))}</span>
       <span class="r">${this.num(e.ev_day) !== null ? this.f1(this.num(e.ev_day)) + " kWh" : ""}</span></div>`) : "<div></div>";
     return [orb, stats, decP];
@@ -3322,11 +3322,11 @@ class SfNsCard extends SfBase {
     return `<div class="tiles">${list.slice(0, 6).map((x) => { const eid = String(x.entity || ""), on = this.isOn(eid) && !eid.startsWith("scene."), cv = eid.startsWith("cover."), s = this.st(eid);
       const CV = { open: "ouverts", closed: "fermés", opening: "ouverture…", closing: "fermeture…" };
       const txt = this.t(cv ? this.own(CV, s && s.state) || "" : eid.startsWith("scene.") ? "scène" : on ? "allumé" : "éteint");
-      return `<div class="tile tap ${on ? "on" : ""}" style="--tc:${this.esc(x.color || "#00e5ff")}" data-act="toggle" data-e="${this.esc(eid)}">${this.ic(x.icon)}<div class="nm">${this.esc(x.name)}</div><div class="st">${this.esc(txt)}</div></div>`; }).join("")}</div>`;
+      return `<div class="tile tap ${on ? "on" : ""}" style="--tc:${this.esc(x.color || "var(--sf-cyan)")}" data-act="toggle" data-e="${this.esc(eid)}">${this.ic(x.icon)}<div class="nm">${this.esc(x.name)}</div><div class="st">${this.esc(txt)}</div></div>`; }).join("")}</div>`;
   }
   carsMini() {
     const c = this._config; if (!c.cars.length) return "";
-    return this.panel(`<div class="cars" style="gap:calc(var(--u)*3)">${c.cars.map((car) => { const s = this.num(car.soc), low = s !== null && s < (car.low || 0), col = low ? "#ff3355" : (car.color || "#00e5ff");
+    return this.panel(`<div class="cars" style="gap:calc(var(--u)*3)">${c.cars.map((car) => { const s = this.num(car.soc), low = s !== null && s < (car.low || 0), col = low ? "var(--sf-red)" : (car.color || "var(--sf-cyan)");
       const lk = car.lock && this.st(car.lock) ? (this.st(car.lock).state === "locked" ? this.ic("mdi:lock").replace("<ha-icon", '<ha-icon class="okc"') : this.ic("mdi:lock-open-alert").replace("<ha-icon", '<ha-icon class="badc"')) : "";
       return `<div class="mini" data-info="${this.esc(car.soc)}"><span class="nm" style="color:${col}">${this.esc(car.name)}</span><div class="bar"><i style="width:${s === null ? 0 : Math.max(2, Math.min(100, s))}%;background:${col};box-shadow:0 0 8px ${col}"></i></div><span class="v">${s === null ? "—" : Math.round(s)}<small>%</small></span>${lk}</div>`; }).join("")}</div>`);
   }
@@ -3394,10 +3394,10 @@ class SfNsCard extends SfBase {
     else if (mode === "Soir") { const dy = this.dayBlock(); main = this.tilesBlock() + dy + this.carsMini(); grid = `grid-template-columns:1fr;grid-template-rows:1fr ${dy ? H(11) + " " : ""}${H(10.5)}`; }
     else { const n = this.sentinel(); main = n[0] + `<div class="nrow">${n[1]}</div>`; grid = `grid-template-columns:1fr;grid-template-rows:1fr ${H(15)}`; }
     const html = `<style>${SF_NS_CSS}.pop{position:absolute;inset:0;z-index:5;background:rgba(2,6,12,.82);display:flex;align-items:center;justify-content:center;padding:calc(var(--u)*3)}
-      .sheet{width:100%;height:100%;display:flex;flex-direction:column;gap:calc(var(--u)*2);padding:calc(var(--u)*2.4);border-radius:calc(var(--u)*3);border:1px solid var(--a);background:#06101d;box-shadow:0 0 calc(var(--u)*6) rgba(0,229,255,.25)}
+      .sheet{width:100%;height:100%;display:flex;flex-direction:column;gap:calc(var(--u)*2);padding:calc(var(--u)*2.4);border-radius:calc(var(--u)*3);border:1px solid var(--a);background:#06101d;box-shadow:0 0 calc(var(--u)*6) rgb(var(--sf-cyan-rgb) / .25)}
       .shead{display:flex;align-items:center;gap:calc(var(--u)*2);font-family:Orbitron,sans-serif;font-weight:700;font-size:calc(var(--u)*3.4);letter-spacing:.14em;text-transform:uppercase;color:var(--a)}
       .shead ha-icon{--mdc-icon-size:calc(var(--u)*5)} .shead .r{margin-left:auto;font-family:'B612 Mono',monospace;font-weight:400;font-size:calc(var(--u)*2.6);letter-spacing:.04em;text-transform:none;color:#9fc3d9}
-      .shead .x{width:calc(var(--u)*8);height:calc(var(--u)*8);display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgba(255,255,255,.2);color:#fff}
+      .shead .x{width:calc(var(--u)*8);height:calc(var(--u)*8);display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgb(var(--sf-fg-rgb) / .2);color:#fff}
       .btn.big ha-icon{--mdc-icon-size:calc(var(--u)*11)} .btn.big{font-size:calc(var(--u)*2.8)} .nrow{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:calc(var(--u)*1.7);min-height:0} .nrow>.panel{min-height:0}</style>
       <div class="ns ${mode.toLowerCase()}${this._kiosk ? " full" : ""}${a0 ? " tight" : ""}" style="--a:${M.a};--bg:${M.bg}">${this.hero(mode)}${alerts}<div class="main" style="${grid}">${main}</div>${mode === "Nuit" ? "" : this.dock()}${this.popup()}</div>`;
     // no rewrite if nothing changed (otherwise animations and long presses would be cut); the time is excluded from the comparison
@@ -3434,7 +3434,7 @@ class SfNsCard extends SfBase {
  * ranges: [6, 24, 168]      # boutons de plage, en heures ([] = aucun bouton)
  * layout: auto              # auto (overlaid if same unit) | combined | separate
  * height: 150
- * series: [{ entity: sensor.x, name: Salon, color: "#00e5ff", unit: "°C", digits: 1 }]
+ * series: [{ entity: sensor.x, name: Salon, color: "var(--sf-cyan)", unit: "°C", digits: 1 }]
  */
 const SF_TREND_COLORS = [SF_C.cyan, SF_C.amber, SF_C.green, "#b388ff", "#ff7043", "#4fc3f7", "#ff4fd8", "#ffd54f"];
 const SF_TREND_MAX_SERIES = 8, SF_TREND_POINTS = 240;
@@ -3533,18 +3533,18 @@ class SfTrendCard extends SfBase {
   css() {
     return `
       .rgs { display:flex; gap:6px; margin:0 0 10px; flex-wrap:wrap; }
-      .rg { font:inherit; font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; color:${SF_C.dim}; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.18); }
-      .rg.on { color:${SF_C.cyan}; border-color:${SF_C.cyan}; background:rgba(0,229,255,.12); }
+      .rg { font:inherit; font-size:11px; padding:4px 10px; border-radius:12px; cursor:pointer; color:${SF_C.dim}; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .18); }
+      .rg.on { color:${SF_C.cyan}; border-color:${SF_C.cyan}; background:rgb(var(--sf-cyan-rgb) / .12); }
       .plot { position:relative; margin-bottom:6px; touch-action:pan-y; }
-      .plot svg { width:100%; display:block; border-radius:6px; background:rgba(0,229,255,.025); }
-      .gl { stroke:rgba(0,229,255,.12); stroke-width:1; vector-effect:non-scaling-stroke; }
-      .gl.nowl { stroke:rgba(255,179,0,.55); stroke-dasharray:3 4; }
+      .plot svg { width:100%; display:block; border-radius:6px; background:rgb(var(--sf-cyan-rgb) / .025); }
+      .gl { stroke:rgb(var(--sf-cyan-rgb) / .12); stroke-width:1; vector-effect:non-scaling-stroke; }
+      .gl.nowl { stroke:rgb(var(--sf-amber-rgb) / .55); stroke-dasharray:3 4; }
       .ln2 { fill:none; stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
       .ar { stroke:none; opacity:.14; }
       .yl { position:absolute; left:6px; font-size:9.5px; color:${SF_C.dim}; pointer-events:none; text-shadow:0 0 4px #000; }
       .yl.hi { top:3px; } .yl.lo { bottom:3px; } .yl.r { left:auto; right:6px; }
       .cur { position:absolute; top:0; bottom:0; width:1px; background:${SF_C.cyan}; opacity:0; pointer-events:none; }
-      .ro { position:absolute; top:4px; right:6px; font-size:10.5px; padding:3px 7px; border-radius:6px; background:rgba(3,8,15,.88); border:1px solid rgba(0,229,255,.3); opacity:0; pointer-events:none; white-space:pre; }
+      .ro { position:absolute; top:4px; right:6px; font-size:10.5px; padding:3px 7px; border-radius:6px; background:rgba(3,8,15,.88); border:1px solid rgb(var(--sf-cyan-rgb) / .3); opacity:0; pointer-events:none; white-space:pre; }
       .plot.hov .cur, .plot.hov .ro { opacity:1; }
       .xl { display:flex; justify-content:space-between; font-size:9.5px; color:${SF_C.dim}; margin:0 0 8px; }
       .lg { display:flex; flex-wrap:wrap; gap:6px 16px; }
@@ -3649,7 +3649,7 @@ class SfTrendCard extends SfBase {
  * limit: 30            # maximum number of events
  * group: true          # merges identical consecutive repeats ("× 3")
  * hide_unavailable: true
- * entities: [binary_sensor.door, { entity: alarm_control_panel.home, name: Alarme, icon: "mdi:shield-home", color: "#ffb300" }]
+ * entities: [binary_sensor.door, { entity: alarm_control_panel.home, name: Alarme, icon: "mdi:shield-home", color: "var(--sf-amber)" }]
  */
 const SF_TL_MAX_ENTITIES = 40, SF_TL_RAW_MAX = 2000;
 const SF_TL_BIN = {   // binary_sensor by device_class: ["on" sentence, "off" sentence, "on" icon, "off" icon, "on" tone (warn / bad / ok)]
@@ -3716,7 +3716,7 @@ class SfTimelineCard extends SfBase {
       .day { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:${SF_C.dim}; margin:10px 0 4px; }
       .day:first-child { margin-top:0; }
       .row { display:grid; grid-template-columns: 44px 22px 1fr; gap:8px; align-items:center; padding:5px 4px; border-radius:6px; cursor:pointer; }
-      .row:hover { background:rgba(0,229,255,.05); }
+      .row:hover { background:rgb(var(--sf-cyan-rgb) / .05); }
       .row .tm { font-size:11px; color:${SF_C.dim}; font-variant-numeric:tabular-nums; }
       .row .ic { display:grid; place-items:center; }
       .row .tx { min-width:0; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -3811,11 +3811,11 @@ class SfHealthCard extends SfBase {
       .pill2 { font-size:10px; padding:2px 8px; border-radius:10px; border:1px solid currentColor; }
       .grp { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:${SF_C.dim}; margin:10px 0 3px; }
       .hr { display:grid; grid-template-columns: 22px minmax(0,1fr) minmax(0,max-content); gap:8px; align-items:center; padding:6px 4px; border-radius:6px; cursor:pointer; }
-      .hr:hover { background:rgba(0,229,255,.05); }
+      .hr:hover { background:rgb(var(--sf-cyan-rgb) / .05); }
       .hr .nm { min-width:0; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:${SF_C.text}; }
       .hr .why { font-size:10.5px; color:${SF_C.dim}; text-align:right; max-width:62vw; overflow-wrap:anywhere; }
       .oks { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
-      .okc { font-size:10px; padding:2px 8px; border-radius:10px; color:${SF_C.green}; border:1px solid rgba(43,255,136,.35); background:rgba(43,255,136,.05); cursor:pointer; }`;
+      .okc { font-size:10px; padding:2px 8px; border-radius:10px; color:${SF_C.green}; border:1px solid rgb(var(--sf-green-rgb) / .35); background:rgb(var(--sf-green-rgb) / .05); cursor:pointer; }`;
   }
   render() {
     const c = this._config, all = this._checks().map((k) => ({ k, ...this._eval(k) }));
@@ -3883,18 +3883,18 @@ class SfAssistantCard extends SfBase {
     return `
       .as { display:flex; align-items:center; gap:14px; padding:2px 2px 12px; }
       .orb { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; flex:none; color:var(--pc); border:1.5px solid var(--pc);
-        background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.14), rgba(0,0,0,.4)); box-shadow:0 0 14px -2px var(--pc), inset 0 0 12px -4px var(--pc); }
+        background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .14), rgba(0,0,0,.4)); box-shadow:0 0 14px -2px var(--pc), inset 0 0 12px -4px var(--pc); }
       .orb.live { animation: orbp 1.6s ease-in-out infinite; }
       @keyframes orbp { 50% { box-shadow:0 0 24px 0 var(--pc), inset 0 0 14px -2px var(--pc); } }
       .ph { font-family:Orbitron,sans-serif; font-size:15px; letter-spacing:.06em; color:var(--pc); }
       .ph small { display:block; font-family:'B612 Mono',monospace; font-size:10px; letter-spacing:0; color:${SF_C.dim}; margin-top:2px; }
-      .ln { display:grid; grid-template-columns: 74px 1fr; gap:8px; padding:6px 4px; border-top:1px solid rgba(0,229,255,.08); cursor:pointer; }
+      .ln { display:grid; grid-template-columns: 74px 1fr; gap:8px; padding:6px 4px; border-top:1px solid rgb(var(--sf-cyan-rgb) / .08); cursor:pointer; }
       .ln .k { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:${SF_C.dim}; padding-top:2px; }
       .ln .v { min-width:0; font-size:12px; overflow-wrap:anywhere; color:${SF_C.text}; }
       .ln .v small { display:block; font-size:9.5px; color:${SF_C.dim}; margin-top:2px; }
       .acts { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
       .acts .btn { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:8px; cursor:pointer; font-size:11px; color:${SF_C.cyan};
-        border:1px solid rgba(0,229,255,.3); background:rgba(0,229,255,.05); }
+        border:1px solid rgb(var(--sf-cyan-rgb) / .3); background:rgb(var(--sf-cyan-rgb) / .05); }
       .acts .btn.armed { color:${SF_C.red}; border-color:${SF_C.red}; }`;
   }
   render() {
@@ -3955,9 +3955,9 @@ for (const [alias, canon] of Object.entries(SF_ALIAS)) {
  * the editor modifies the config in place and only removes the values emptied by the user.
  */
 const SF_ED_CSS = `
-  .req { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid #ffb300; background:rgba(255,179,0,.12); color:#ffb300; font-size:12px; line-height:1.5; }
+  .req { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid var(--sf-amber); background:rgb(var(--sf-amber-rgb) / .12); color:var(--sf-amber); font-size:12px; line-height:1.5; }
   .req[hidden] { display:none; }
-  .warnings { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid rgba(255,179,0,.5); background:rgba(255,179,0,.06); color:#ffd36b; font-size:12px; line-height:1.5; }
+  .warnings { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid rgb(var(--sf-amber-rgb) / .5); background:rgb(var(--sf-amber-rgb) / .06); color:#ffd36b; font-size:12px; line-height:1.5; }
   .warnings[hidden] { display:none; }
   :host { display:block; }
   h3 { margin:18px 0 6px; font-size:14px; font-weight:600; color:var(--primary-text-color); }
@@ -4003,7 +4003,7 @@ const sfO = (name) => ({ name, selector: { object: {} } });
 const sfG = (...schema) => ({ type: "grid", name: "", schema });
 
 const SF_LABELS = {
-  _device: "Remplir depuis un appareil (complète les champs vides)", theme: "Thème", name: "Nom", label: "Libellé", icon: "Icône", color: "Couleur (ex. #00e5ff)", title: "Titre", subtitle: "Sous-titre",
+  _device: "Remplir depuis un appareil (complète les champs vides)", theme: "Thème", name: "Nom", label: "Libellé", icon: "Icône", color: "Couleur (ex. var(--sf-cyan))", title: "Titre", subtitle: "Sous-titre",
   entity: "Entité", sub: "Texte sous le titre", unit: "Unité", digits: "Décimales", warn: "Seuil d'alerte (orange)",
   crit: "Seuil critique (rouge)", max: "Valeur maximale", min: "Minimum", timer: "Minuteur (affiche le temps restant)",
   stop: "Entités coupées par un appui pendant le minuteur", hash: "Lien du panneau (#…)", columns: "Colonnes",
@@ -4256,7 +4256,7 @@ const SF_SPECS = {
       { key: "cars", title: "Voitures (3 maximum)", add: "Ajouter une voiture", item: "Voiture", itemTitle: (c) => c.name, new: () => ({}), max: 3,
         schema: () => [sfG(sfT("name"), sfT("color")), sfE("soc", "sensor"), sfE("range", "sensor"), sfE("lock", "lock"), sfE("charging"), sfN("low", 0, 100)] },
       { key: "leaks", title: "Capteurs de fuite", add: "Ajouter un capteur", item: "Capteur", itemTitle: (l) => l.name, new: () => ({}), schema: () => [sfT("name"), sfE("entity", "binary_sensor")] },
-      { key: "tiles", title: "Tuiles", add: "Ajouter une tuile", item: "Tuile", itemTitle: (t) => t.name, new: () => ({ icon: "mdi:lightbulb-outline", color: "#ffb300" }), max: 6,
+      { key: "tiles", title: "Tuiles", add: "Ajouter une tuile", item: "Tuile", itemTitle: (t) => t.name, new: () => ({ icon: "mdi:lightbulb-outline", color: "var(--sf-amber)" }), max: 6,
         schema: () => [sfG(sfT("name"), sfI("icon")), sfT("color"), sfE("entity")] },
       { key: "shortcuts", title: "Raccourcis (boutons du matin et fenêtre aspirateur)", add: "Ajouter un raccourci", item: "Raccourci", itemTitle: (x) => x.name, new: () => ({ icon: "mdi:flash" }), schema: () => [sfG(sfT("name"), sfI("icon")), sfE("entity")] },
     ],
@@ -4560,7 +4560,7 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
   }
 }
 
-console.info("%c SF-CARDS %c v1.13.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
+console.info("%c SF-CARDS %c v1.13.0 ", "color:#03080f;background:var(--sf-cyan);font-weight:700", "color:var(--sf-cyan);background:#03080f");
 
 /* ============================================================== VALIDATION */
 /*

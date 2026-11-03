@@ -13,14 +13,14 @@ class SfSetpointsCard extends SfBase {
     return `
       table { width:100%; border-collapse:separate; border-spacing:0 6px; }
       th { font-family:Orbitron,sans-serif; font-weight:500; font-size:10px; letter-spacing:.16em; text-align:center; padding:4px; }
-      td { padding:6px 4px; background:rgba(0,229,255,.03); border-top:1px solid rgba(0,229,255,.1); border-bottom:1px solid rgba(0,229,255,.1); }
-      td:first-child { border-left:1px solid rgba(0,229,255,.1); border-radius:8px 0 0 8px; padding-left:10px; white-space:nowrap; }
-      td:last-child { border-right:1px solid rgba(0,229,255,.1); border-radius:0 8px 8px 0; }
+      td { padding:6px 4px; background:rgb(var(--sf-cyan-rgb) / .03); border-top:1px solid rgb(var(--sf-cyan-rgb) / .1); border-bottom:1px solid rgb(var(--sf-cyan-rgb) / .1); }
+      td:first-child { border-left:1px solid rgb(var(--sf-cyan-rgb) / .1); border-radius:8px 0 0 8px; padding-left:10px; white-space:nowrap; }
+      td:last-child { border-right:1px solid rgb(var(--sf-cyan-rgb) / .1); border-radius:0 8px 8px 0; }
       .st { display:flex; align-items:center; justify-content:center; gap:4px; }
       .st .btn { padding:3px 8px; }
       .st b { font-family:Orbitron,sans-serif; font-size:14px; min-width:44px; text-align:center; color:#fff; }
       .st b.edit { cursor:pointer; padding:6px 4px; border-radius:6px; }
-      .st b.edit:hover, .st b.edit:focus-visible { background:rgba(0,229,255,.12); outline:none; }
+      .st b.edit:hover, .st b.edit:focus-visible { background:rgb(var(--sf-cyan-rgb) / .12); outline:none; }
       @media (max-width: 640px) { .st .btn { display:none; } .st b { min-width:56px; padding:10px 6px; } }
       .ed { display:flex; flex-direction:column; align-items:center; gap:14px; padding:6px 0 2px; }
       .ed .who { font-size:13px; color:${SF_C.dim}; text-align:center; }

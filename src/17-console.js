@@ -22,10 +22,10 @@ class SfConsoleCard extends SfBase {
       .groups { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
       .grp h4 { margin:0 0 8px; font-family:Orbitron,sans-serif; font-weight:500; font-size:10px; letter-spacing:.2em;
         color:${SF_C.cyan}; display:flex; align-items:center; gap:6px; }
-      .grp h4::after { content:""; flex:1; height:1px; background:linear-gradient(90deg, rgba(0,229,255,.35), transparent); }
+      .grp h4::after { content:""; flex:1; height:1px; background:linear-gradient(90deg, rgb(var(--sf-cyan-rgb) / .35), transparent); }
       .items { display:grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap:8px; }
       .it { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:10px;
-        border-radius:10px; border:1px solid rgba(0,229,255,.16); background:rgba(0,229,255,.035); min-height:62px; }
+        border-radius:10px; border:1px solid rgb(var(--sf-cyan-rgb) / .16); background:rgb(var(--sf-cyan-rgb) / .035); min-height:62px; }
       .it .nm { font-size:11px; color:${SF_C.text}; line-height:1.2; }
       .it .sv { font-size:10px; color:${SF_C.dim}; }
       .it.on { border-color:var(--ac, ${SF_C.amber}); background: linear-gradient(160deg, color-mix(in srgb, var(--ac, ${SF_C.amber}) 22%, transparent), transparent);
