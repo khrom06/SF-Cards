@@ -23,7 +23,8 @@
  *   custom:sf-ns-card        — full-screen panel for a wall tablet / NSPanel Pro (480 x 480) that changes with the time of day
  *
  * Fonts (Orbitron, B612 Mono — SIL Open Font License 1.1) are embedded below: no network access needed.
- * Note: user-facing texts and code comments are in French for now.
+ * Note: the French text of each label is also its translation key (see the i18n tables); code comments are in English.
+ *       This file is built from src/ (node scripts/build.mjs) — edit the modules in src/, not this file.
  */
 
 (function () {

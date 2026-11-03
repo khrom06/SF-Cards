@@ -5,6 +5,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
 [ -n "$CHROME" ] || { echo "ERROR: google-chrome/chromium not found"; exit 2; }
+node scripts/build.mjs --check || exit 1
 node --check dist/sf-cards.js || { echo "FAIL: syntax of dist/sf-cards.js"; exit 1; }
 node test/lint.js || exit 1
 OUT="$(timeout 150 "$CHROME" --headless=new --no-sandbox --disable-gpu --allow-file-access-from-files --virtual-time-budget=120000 --dump-dom "file://$PWD/test/render.html" 2>/dev/null)"
