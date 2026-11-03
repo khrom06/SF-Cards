@@ -27,7 +27,7 @@
  */
 
 (function () {
-if (window.SF_CARDS_VERSION) {   // ressource déclarée deux fois (HACS + fichier manuel…) : la première version chargée reste active, on le dit clairement
+if (window.SF_CARDS_VERSION) {   // resource declared twice (HACS + manual file): the first loaded version stays active, and we say so clearly
   console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.11.1) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
   return;
 }
@@ -45,9 +45,9 @@ if (!document.getElementById("sf-hud-fonts")) {
   document.head.appendChild(st);
 }
 
-// --- Internationalisation : le français sert de clé ; langues : fr, en, es, de, nl, it, pt, pl, ru, zh, ar (l'anglais par défaut). ---
+// --- Internationalisation: French is the key; languages: fr, en, es, de, nl, it, pt, pl, ru, zh, ar (English by default). ---
 const SF_T = {"à l'instant":["just now","ahora mismo","gerade eben","zojuist","adesso","agora mesmo","przed chwilą","только что","刚刚","الآن"],"il y a {n} min":["{n} min ago","hace {n} min","vor {n} Min.","{n} min geleden","{n} min fa","há {n} min","{n} min temu","{n} мин назад","{n} 分钟前","قبل {n} دقيقة"],"il y a {n} h":["{n} h ago","hace {n} h","vor {n} Std.","{n} u geleden","{n} h fa","há {n} h","{n} godz. temu","{n} ч назад","{n} 小时前","قبل {n} ساعة"],"il y a {n} j":["{n} d ago","hace {n} d","vor {n} T.","{n} d geleden","{n} g fa","há {n} d","{n} dn. temu","{n} дн. назад","{n} 天前","قبل {n} يوم"],"ALERTE":["ALERT","ALERTA","ALARM","ALARM","ALLARME","ALERTA","ALARM","ТРЕВОГА","警报","تنبيه"],"COUPURE DE COURANT":["POWER CUT","CORTE DE LUZ","STROMAUSFALL","STROOMUITVAL","BLACKOUT","CORTE DE ENERGIA","BRAK PRĄDU","ОТКЛЮЧЕНИЕ ЭЛЕКТРОЭНЕРГИИ","停电","انقطاع الكهرباء"],"Plus de tension en entrée de l'onduleur":["No mains voltage at the UPS input","Sin tensión en la entrada del SAI","Keine Netzspannung am USV-Eingang","Geen netspanning op de ingang van de UPS","Nessuna tensione di rete all'ingresso dell'UPS","Sem tensão da rede na entrada da UPS","Brak napięcia sieciowego na wejściu UPS","Нет напряжения сети на входе ИБП","UPS 输入端无市电电压","لا يوجد جهد كهربائي عند مدخل UPS"],"FUITE D'EAU":["WATER LEAK","FUGA DE AGUA","WASSERLECK","WATERLEK","PERDITA D'ACQUA","FUGA DE ÁGUA","WYCIEK WODY","ПРОТЕЧКА ВОДЫ","漏水","تسرّب مياه"],"INTRUSION":["INTRUSION","INTRUSIÓN","EINBRUCH","INBRAAK","INTRUSIONE","INTRUSÃO","WŁAMANIE","ПРОНИКНОВЕНИЕ","入侵","اقتحام"],"Alarme déclenchée":["Alarm triggered","Alarma activada","Alarm ausgelöst","Alarm afgegaan","Allarme scattato","Alarme disparado","Alarm uruchomiony","Сработала сигнализация","警报已触发","تم تشغيل الإنذار"],"SONNETTE":["DOORBELL","TIMBRE","KLINGEL","DEURBEL","CAMPANELLO","CAMPAINHA","DZWONEK","ЗВОНОК","门铃","جرس الباب"],"simulation locale — rien n'est envoyé":["local simulation — nothing is sent","simulación local — no se envía nada","lokale Simulation — es wird nichts gesendet","lokale simulatie — er wordt niets verstuurd","simulazione locale — non viene inviato nulla","simulação local — nada é enviado","symulacja lokalna — nic nie jest wysyłane","локальная имитация — ничего не отправляется","本地模拟 — 不会发送任何内容","محاكاة محلية — لا يُرسل شيء"],"à {t}":["at {t}","a las {t}","um {t}","om {t}","alle {t}","às {t}","o {t}","в {t}","{t}","في {t}"],"désarmée":["disarmed","desarmada","unscharf","uitgeschakeld","disinserito","desarmado","rozbrojony","снято с охраны","已撤防","غير مفعّل"],"armée (absent)":["armed (away)","armada (ausente)","scharf (abwesend)","ingeschakeld (afwezig)","inserito (fuori casa)","armado (ausente)","uzbrojony (poza domem)","на охране (нет дома)","已布防（离家）","مفعّل (خارج المنزل)"],"armée (présent)":["armed (home)","armada (en casa)","scharf (anwesend)","ingeschakeld (thuis)","inserito (in casa)","armado (em casa)","uzbrojony (w domu)","на охране (дома)","已布防（在家）","مفعّل (في المنزل)"],"armée (nuit)":["armed (night)","armada (noche)","scharf (Nacht)","ingeschakeld (nacht)","inserito (notte)","armado (noite)","uzbrojony (noc)","на охране (ночь)","已布防（夜间）","مفعّل (ليلاً)"],"armement…":["arming…","armando…","wird scharf geschaltet…","inschakelen…","inserimento…","a armar…","uzbrajanie…","постановка на охрану…","正在布防…","جارٍ التفعيل…"],"muet":["no data","sin datos","keine Daten","geen data","nessun dato","sem dados","brak danych","нет данных","无数据","لا بيانات"],"ouverte":["open","abierta","offen","open","aperto","aberto","otwarte","открыто","打开","مفتوح"],"{n} capteur(s) muet(s)":["{n} sensor(s) with no data","{n} sensor(es) sin datos","{n} Sensor(en) ohne Daten","{n} sensor(en) zonder data","{n} sensore/i senza dati","{n} sensor(es) sem dados","{n} czujnik(ów) bez danych","{n} датчик(ов) без данных","{n} 个传感器无数据","{n} مستشعر بدون بيانات"],"veille":["standby","en espera","Bereitschaft","stand-by","in attesa","em espera","czuwanie","ожидание","待机","وضع الاستعداد"],"Sécurité":["Security","Seguridad","Sicherheit","Beveiliging","Sicurezza","Segurança","Bezpieczeństwo","Безопасность","安防","الأمان"],"État":["State","Estado","Status","Status","Stato","Estado","Stan","Состояние","状态","الحالة"],"NORMAL":["NORMAL","NORMAL","NORMAL","NORMAAL","NORMALE","NORMAL","NORMALNIE","НОРМА","正常","عادي"],"simuler une sonnette":["simulate a doorbell","simular un timbre","Klingel simulieren","deurbel simuleren","simula un campanello","simular uma campainha","zasymuluj dzwonek","имитировать звонок","模拟门铃","محاكاة جرس الباب"],"Fuites":["Leaks","Fugas","Lecks","Lekkages","Perdite","Fugas","Wycieki","Протечки","漏水","التسرّبات"],"Ouvrants":["Openings","Aberturas","Öffnungen","Openingen","Aperture","Aberturas","Otwarcia","Проёмы","门窗","الفتحات"],"Alarme":["Alarm","Alarma","Alarm","Alarm","Allarme","Alarme","Alarm","Сигнализация","警报","الإنذار"],"Câble branché":["Cable plugged in","Cable conectado","Kabel angeschlossen","Kabel aangesloten","Cavo collegato","Cabo ligado","Kabel podłączony","Кабель подключён","充电线已连接","الكابل موصول"],"voiture non identifiée par HA":["car not identified by HA","coche no identificado por HA","Fahrzeug von HA nicht erkannt","auto niet herkend door HA","auto non riconosciuta da HA","carro não identificado pelo HA","samochód nierozpoznany przez HA","автомобиль не опознан в HA","HA 未识别该车辆","لم يتعرف HA على السيارة"],"Aucun véhicule branché":["No vehicle plugged in","Ningún vehículo conectado","Kein Fahrzeug angeschlossen","Geen voertuig aangesloten","Nessun veicolo collegato","Nenhum veículo ligado","Brak podłączonego pojazdu","Нет подключённых автомобилей","没有连接车辆","لا توجد مركبة موصولة"],"Véhicules":["Vehicles","Vehículos","Fahrzeuge","Voertuigen","Veicoli","Veículos","Pojazdy","Автомобили","车辆","المركبات"],"charge en cours":["charging","cargando","lädt","aan het laden","in carica","a carregar","ładowanie","идёт зарядка","充电中","قيد الشحن"],"en attente":["waiting","en espera","wartet","wachten","in attesa","à espera","oczekiwanie","ожидание","等待中","في الانتظار"],"au repos":["idle","en reposo","inaktiv","inactief","inattivo","inativo","bezczynny","простой","空闲","خامل"],"Pilote":["Controller","Piloto","Steuerung","Regelaar","Controllore","Controlador","Sterownik","Контроллер","控制器","المتحكم"],"Mode de charge":["Charge mode","Modo de carga","Lademodus","Laadmodus","Modalità di ricarica","Modo de carga","Tryb ładowania","Режим зарядки","充电模式","وضع الشحن"],"Borne":["Charger","Cargador","Ladestation","Laadpaal","Colonnina","Carregador","Stacja ładowania","Зарядная станция","充电桩","الشاحن"],"{n} km d'autonomie":["{n} km range","{n} km de autonomía","{n} km Reichweite","{n} km actieradius","{n} km di autonomia","{n} km de autonomia","zasięg {n} km","запас хода {n} км","续航 {n} 公里","مدى {n} كم"],"EN CHARGE":["CHARGING","CARGANDO","LÄDT","LAADT","IN CARICA","A CARREGAR","ŁADOWANIE","ЗАРЯДКА","充电中","قيد الشحن"],"Solaire":["Solar","Solar","Solar","Zon","Solare","Solar","Słońce","Солнце","太阳能","الطاقة الشمسية"],"Maison hors VE":["Home excl. EV","Casa sin VE","Haus ohne E-Auto","Huis excl. EV","Casa escl. auto","Casa excl. VE","Dom bez EV","Дом без электромобиля","住宅（不含电动车）","المنزل دون السيارة"],"Surplus":["Surplus","Excedente","Überschuss","Overschot","Surplus","Excedente","Nadwyżka","Излишек","盈余","الفائض"],"Radar de présence":["Presence radar","Radar de presencia","Anwesenheitsradar","Aanwezigheidsradar","Radar di presenza","Radar de presença","Radar obecności","Радар присутствия","在家雷达","رادار التواجد"],"3 sources indépendantes":["3 independent sources","3 fuentes independientes","3 unabhängige Quellen","3 onafhankelijke bronnen","3 fonti indipendenti","3 fontes independentes","3 niezależne źródła","3 независимых источника","3 个独立来源","3 مصادر مستقلة"],"RÉSEAU":["NETWORK","RED","NETZ","NETWERK","RETE","REDE","SIEĆ","СЕТЬ","网络","الشبكة"],"VISAGE":["FACE","ROSTRO","GESICHT","GEZICHT","VOLTO","ROSTO","TWARZ","ЛИЦО","人脸","الوجه"],"PIÈCES":["ROOMS","ESTANCIAS","RÄUME","KAMERS","STANZE","DIVISÕES","POKOJE","КОМНАТЫ","房间","الغرف"],"à la maison":["home","en casa","zu Hause","thuis","a casa","em casa","w domu","дома","在家","في المنزل"],"absent·e":["away","ausente","abwesend","weg","assente","ausente","poza domem","нет дома","不在家","خارج المنزل"],"jamais vu·e":["never seen","nunca visto","nie gesehen","nooit gezien","mai visto/a","nunca visto/a","nigdy nie widziano","не замечен(а)","从未见过","لم يُشاهد أبداً"],"occupée":["occupied","ocupada","belegt","bezet","occupata","ocupada","zajęty","занята","有人","مشغولة"],"vide":["empty","vacía","leer","leeg","vuota","vazia","pusty","пуста","无人","فارغة"],"Réseau / GPS":["Network / GPS","Red / GPS","Netzwerk / GPS","Netwerk / GPS","Rete / GPS","Rede / GPS","Sieć / GPS","Сеть / GPS","网络 / GPS","الشبكة / GPS"],"Visage Frigate · dernière vue":["Frigate face · last seen","Rostro Frigate · última vez","Frigate-Gesicht · zuletzt gesehen","Frigate-gezicht · laatst gezien","Volto Frigate · ultimo avvistamento","Rosto Frigate · última vez visto","Twarz Frigate · ostatnio widziano","Лицо Frigate · последнее обнаружение","Frigate 人脸 · 最后一次出现","وجه Frigate · آخر ظهور"],"Capteurs de pièce · sans identité":["Room sensors · no identity","Sensores de estancia · sin identidad","Raumsensoren · ohne Identität","Kamersensoren · zonder identiteit","Sensori di stanza · senza identità","Sensores de divisão · sem identidade","Czujniki pokojowe · bez tożsamości","Датчики комнат · без личности","房间传感器 · 无身份信息","مستشعرات الغرف · بدون هوية"],"Les anneaux ne sont jamais croisés : aucune position n'est déduite.":["Rings are never cross-referenced: no position is inferred.","Los anillos nunca se cruzan: no se deduce ninguna posición.","Die Ringe werden nie verknüpft: es wird keine Position abgeleitet.","De ringen worden nooit gekruist: er wordt geen positie afgeleid.","Gli anelli non vengono mai incrociati: nessuna posizione viene dedotta.","Os anéis nunca são cruzados: nenhuma posição é deduzida.","Pierścienie nigdy nie są ze sobą krzyżowane: żadna pozycja nie jest wnioskowana.","Кольца никогда не пересекаются: положение не выводится.","三个圆环从不交叉比对：不会推断任何位置。","لا تُقاطَع الحلقات أبداً: لا يتم استنتاج أي موقع."],"Équipements":["Equipment","Equipos","Geräte","Apparatuur","Dispositivi","Equipamentos","Urządzenia","Оборудование","设备","الأجهزة"],"{n} capteur(s) sans réponse":["{n} sensor(s) not responding","{n} sensor(es) sin respuesta","{n} Sensor(en) ohne Antwort","{n} sensor(en) reageren niet","{n} sensore/i non risponde/ono","{n} sensor(es) sem resposta","{n} czujnik(ów) nie odpowiada","{n} датчик(ов) не отвечает","{n} 个传感器无响应","{n} مستشعر لا يستجيب"],"tout fonctionne":["all good","todo funciona","alles in Ordnung","alles werkt","tutto funziona","tudo a funcionar","wszystko działa","всё работает","一切正常","كل شيء يعمل"],"Arrêter ?":["Stop?","¿Parar?","Stoppen?","Stoppen?","Fermare?","Parar?","Zatrzymać?","Остановить?","停止？","إيقاف؟"],"Nuit claire":["Clear night","Noche despejada","Klare Nacht","Heldere nacht","Notte serena","Noite limpa","Pogodna noc","Ясная ночь","晴朗的夜晚","ليلة صافية"],"Ensoleillé":["Sunny","Soleado","Sonnig","Zonnig","Soleggiato","Ensolarado","Słonecznie","Солнечно","晴","مشمس"],"Éclaircies":["Partly cloudy","Intervalos nubosos","Teils bewölkt","Half bewolkt","Parzialmente nuvoloso","Parcialmente nublado","Częściowe zachmurzenie","Переменная облачность","多云转晴","غائم جزئياً"],"Nuageux":["Cloudy","Nublado","Bewölkt","Bewolkt","Nuvoloso","Nublado","Pochmurno","Облачно","多云","غائم"],"Pluie":["Rain","Lluvia","Regen","Regen","Pioggia","Chuva","Deszcz","Дождь","雨","مطر"],"Averses":["Showers","Chubascos","Schauer","Buien","Rovesci","Aguaceiros","Przelotne opady","Ливни","阵雨","زخات"],"Brouillard":["Fog","Niebla","Nebel","Mist","Nebbia","Nevoeiro","Mgła","Туман","雾","ضباب"],"Neige":["Snow","Nieve","Schnee","Sneeuw","Neve","Neve","Śnieg","Снег","雪","ثلج"],"Neige fondue":["Sleet","Aguanieve","Schneeregen","Natte sneeuw","Nevischio","Aguaneve","Deszcz ze śniegiem","Мокрый снег","雨夹雪","مطر متجمد"],"Venteux":["Windy","Ventoso","Windig","Winderig","Ventoso","Ventoso","Wietrznie","Ветрено","大风","عاصف"],"Orage":["Thunderstorm","Tormenta","Gewitter","Onweer","Temporale","Trovoada","Burza","Гроза","雷暴","عاصفة رعدية"],"Grêle":["Hail","Granizo","Hagel","Hagel","Grandine","Granizo","Grad","Град","冰雹","برد"],"Alerte météo":["Weather alert","Alerta meteorológica","Wetterwarnung","Weerswaarschuwing","Allerta meteo","Alerta meteorológico","Alert pogodowy","Штормовое предупреждение","天气预警","تنبيه جوي"],"Onduleur muet":["UPS not responding","SAI sin respuesta","USV antwortet nicht","UPS reageert niet","UPS non risponde","UPS sem resposta","UPS nie odpowiada","ИБП не отвечает","UPS 无响应","UPS لا يستجيب"],"Coupure secteur · {v} V":["Power cut · {v} V","Corte de luz · {v} V","Stromausfall · {v} V","Stroomuitval · {v} V","Blackout · {v} V","Corte de energia · {v} V","Brak prądu · {v} V","Отключение сети · {v} В","停电 · {v} V","انقطاع الكهرباء · {v} فولت"],"Fuite · {n}":["Leak · {n}","Fuga · {n}","Leck · {n}","Lek · {n}","Perdita · {n}","Fuga · {n}","Wyciek · {n}","Протечка · {n}","漏水 · {n}","تسرّب · {n}"],"Internet coupé":["Internet down","Internet caído","Internet unterbrochen","Internet uitgevallen","Internet assente","Internet em baixo","Brak internetu","Нет интернета","网络中断","الإنترنت مقطوع"],"{n} ouverte":["{n} open","{n} abierta","{n} offen","{n} open","{n} aperto/a","{n} aberto","{n} otwarte","{n} открыто","{n} 个打开","{n} مفتوح"],"Fuite {n} · muet":["Leak {n} · no data","Fuga {n} · sin datos","Leck {n} · keine Daten","Lek {n} · geen data","Perdita {n} · nessun dato","Fuga {n} · sem dados","Wyciek {n} · brak danych","Протечка {n} · нет данных","漏水 {n} · 无数据","تسرّب {n} · لا بيانات"],"VIGILANCE":["WATCH","VIGILANCIA","ACHTUNG","WAARSCHUWING","ATTENZIONE","VIGILÂNCIA","OSTRZEŻENIE","ВНИМАНИЕ","警戒","يقظة"],"{s} · {n} point(s)":["{s} · {n} issue(s)","{s} · {n} punto(s)","{s} · {n} Meldung(en)","{s} · {n} punt(en)","{s} · {n} problema/i","{s} · {n} problema(s)","{s} · {n} problem(ów)","{s} · проблем: {n}","{s} · {n} 个问题","{s} · {n} مشكلة"],"TOUT EST NORMAL":["ALL NORMAL","TODO NORMAL","ALLES NORMAL","ALLES NORMAAL","TUTTO NORMALE","TUDO NORMAL","WSZYSTKO W NORMIE","ВСЁ В НОРМЕ","一切正常","كل شيء طبيعي"],"portes fermées · aucune fuite · secteur OK":["doors closed · no leaks · mains OK","puertas cerradas · sin fugas · red OK","Türen zu · keine Lecks · Netz OK","deuren dicht · geen lekken · net OK","porte chiuse · nessuna perdita · rete OK","portas fechadas · sem fugas · rede OK","drzwi zamknięte · brak wycieków · sieć OK","двери закрыты · протечек нет · сеть в норме","门已关闭 · 无漏水 · 市电正常","الأبواب مغلقة · لا تسرّبات · الكهرباء سليمة"],"Extérieur":["Outside","Exterior","Außen","Buiten","Esterno","Exterior","Na zewnątrz","Улица","室外","الخارج"],"Tarif":["Tariff","Tarifa","Tarif","Tarief","Tariffa","Tarifa","Taryfa","Тариф","电价","التعرفة"],"HC":["Off-peak","Valle","Niedertarif","Dal","Fuori picco","Vazio","Tania","Ночной","谷时","خارج الذروة"],"HP":["Peak","Punta","Hochtarif","Piek","Picco","Cheias","Szczyt","Дневной","峰时","الذروة"],"{x} dans {h}h{m}":["{x} in {h}h{m}","{x} en {h}h{m}","{x} in {h}h{m}","{x} over {h}u{m}","{x} tra {h}h{m}","{x} em {h}h{m}","{x} za {h}h{m}","{x} через {h}ч{m}","{x}还有 {h} 小时 {m} 分","{x} بعد {h} س {m} د"],"Mode maison":["House mode","Modo de la casa","Hausmodus","Huismodus","Modalità casa","Modo casa","Tryb domu","Режим дома","家庭模式","وضع المنزل"],"Solaire restant":["Solar remaining","Solar restante","Solar verbleibend","Resterende zon","Solare rimanente","Solar restante","Pozostała energia słoneczna","Осталось солнечной энергии","今日剩余太阳能","الطاقة الشمسية المتبقية"],"Présence":["Presence","Presencia","Anwesenheit","Aanwezigheid","Presenza","Presença","Obecność","Присутствие","在家情况","التواجد"],"Injection":["Export","Inyección","Einspeisung","Teruglevering","Immissione","Injeção","Oddawanie","Отдача в сеть","上网（馈电）","التصدير"],"Réseau":["Grid","Red","Netz","Net","Rete","Rede","Sieć","Сеть","电网","الشبكة"],"surplus injecté":["exporting surplus","excedente inyectado","Überschuss eingespeist","overschot wordt teruggeleverd","immissione del surplus","a injetar o excedente","oddawanie nadwyżki","излишки отдаются в сеть","正在向电网输出盈余","تصدير الفائض"],"solaire actif":["solar active","solar activo","Solar aktiv","zon actief","solare attivo","solar ativo","słońce aktywne","солнце активно","太阳能发电中","الطاقة الشمسية نشطة"],"réseau":["grid","red","Netz","net","rete","rede","sieć","сеть","电网","الشبكة"],"{n} au repos":["{n} idle","{n} en reposo","{n} inaktiv","{n} inactief","{n} inattivi","{n} inativos","{n} bezczynnych","{n} в простое","{n} 个空闲","{n} خامل"],"+{n} autres":["+{n} more","+{n} más","+{n} weitere","+{n} meer","+{n} altri","+{n} outros","+{n} więcej","ещё +{n}","另有 {n} 个","+{n} أخرى"],"MAISON":["HOME","CASA","HAUS","HUIS","CASA","CASA","DOM","ДОМ","住宅","المنزل"],"Autonomie solaire":["Solar autonomy","Autonomía solar","Solar-Autarkie","Zonne-autonomie","Autonomia solare","Autonomia solar","Autonomia słoneczna","Солнечная автономность","太阳能自给率","الاكتفاء الشمسي"],"Réseau fossile":["Fossil grid share","Red fósil","Fossiler Netzanteil","Fossiel aandeel net","Quota fossile della rete","Parte fóssil da rede","Udział paliw kopalnych w sieci","Доля ископаемого топлива в сети","电网化石能源占比","حصة الوقود الأحفوري في الشبكة"],"Coût instantané":["Live cost","Coste instantáneo","Aktuelle Kosten","Actuele kosten","Costo istantaneo","Custo instantâneo","Bieżący koszt","Текущая стоимость","实时费用","التكلفة الآنية"],"Chauffe":["Heating","Calentando","Heizt","Verwarmt","Riscalda","A aquecer","Ogrzewa","Нагревает","制热","تدفئة"],"Refroidit":["Cooling","Enfriando","Kühlt","Koelt","Raffredda","A arrefecer","Chłodzi","Охлаждает","制冷","تبريد"],"Déshumidifie":["Drying","Deshumidificando","Entfeuchtet","Ontvochtigt","Deumidifica","A desumidificar","Osusza","Осушает","除湿","إزالة الرطوبة"],"Ventile":["Fan","Ventilando","Lüftet","Ventileert","Ventila","A ventilar","Wentyluje","Вентилирует","送风","تهوية"],"Auto":["Auto","Auto","Auto","Auto","Auto","Auto","Auto","Авто","自动","تلقائي"],"Éteint":["Off","Apagado","Aus","Uit","Spento","Desligado","Wyłączony","Выкл.","关闭","متوقف"],"En veille":["Idle","En espera","Bereit","Inactief","Inattivo","Em espera","Bezczynny","Простой","空闲","خامل"],"fenêtre ouverte":["window open","ventana abierta","Fenster offen","raam open","finestra aperta","janela aberta","okno otwarte","окно открыто","窗户打开","النافذة مفتوحة"],"régulation auto":["auto regulation","regulación automática","Auto-Regelung","automatische regeling","regolazione automatica","regulação automática","regulacja automatyczna","автоматическое регулирование","自动调节","تنظيم تلقائي"],"allumer / éteindre la pièce":["turn the room on / off","encender / apagar la estancia","Raum ein- / ausschalten","kamer aan / uit zetten","accendi / spegni la stanza","ligar / desligar a divisão","włącz / wyłącz pokój","включить / выключить комнату","开启 / 关闭该房间","تشغيل / إيقاف الغرفة"],"CIBLE":["TARGET","OBJETIVO","ZIEL","DOEL","TARGET","ALVO","CEL","ЦЕЛЬ","目标","الهدف"],"{t}° moyen":["{t}° average","{t}° de media","{t}° Durchschnitt","{t}° gemiddeld","{t}° media","{t}° média","{t}° średnio","{t}° в среднем","平均 {t}°","المتوسط {t}°"],"{t}° moy.":["{t}° avg.","{t}° media","{t}° Ø","{t}° gem.","{t}° med.","{t}° méd.","{t}° śr.","{t}° ср.","均 {t}°","متوسط {t}°"],"allumé":["on","encendido","an","aan","acceso","ligado","włączone","включено","开","يعمل"],"éteint":["off","apagado","aus","uit","spento","desligado","wyłączone","выключено","关","متوقف"],"ouverts":["open","abiertas","offen","open","aperte","abertos","otwarte","открыты","已打开","مفتوحة"],"fermés":["closed","cerradas","geschlossen","dicht","chiuse","fechados","zamknięte","закрыты","已关闭","مغلقة"],"ouverture…":["opening…","abriendo…","öffnet…","openen…","apertura…","a abrir…","otwieranie…","открывается…","正在打开…","جارٍ الفتح…"],"fermeture…":["closing…","cerrando…","schließt…","sluiten…","chiusura…","a fechar…","zamykanie…","закрывается…","正在关闭…","جارٍ الإغلاق…"],"à la base":["docked","en la base","an der Station","in dock","alla base","na base","w bazie","на базе","已回充","في القاعدة"],"nettoie":["cleaning","limpiando","reinigt","reinigt","pulisce","a limpar","sprząta","убирает","清扫中","يقوم بالتنظيف"],"retour base":["returning","volviendo","kehrt zurück","keert terug","torna alla base","a regressar à base","wraca do bazy","возвращается на базу","正在回充","يعود إلى القاعدة"],"en pause":["paused","en pausa","pausiert","gepauzeerd","in pausa","em pausa","wstrzymany","пауза","已暂停","متوقف مؤقتاً"],"ERREUR":["ERROR","ERROR","FEHLER","FOUT","ERRORE","ERRO","BŁĄD","ОШИБКА","错误","خطأ"],"chargement…":["loading…","cargando…","lädt…","laden…","caricamento…","a carregar…","ładowanie…","загрузка…","加载中…","جارٍ التحميل…"],"caméra indisponible":["camera unavailable","cámara no disponible","Kamera nicht verfügbar","camera niet beschikbaar","telecamera non disponibile","câmara indisponível","kamera niedostępna","камера недоступна","摄像头不可用","الكاميرا غير متاحة"],"MOUVEMENT":["MOTION","MOVIMIENTO","BEWEGUNG","BEWEGING","MOVIMENTO","MOVIMENTO","RUCH","ДВИЖЕНИЕ","移动","حركة"],"calme":["calm","tranquilo","ruhig","rustig","calmo","calmo","spokój","спокойно","平静","هادئ"],"{n} personne(s)":["{n} person(s)","{n} persona(s)","{n} Person(en)","{n} persoon/personen","{n} persona/e","{n} pessoa(s)","{n} osoba/osoby","{n} чел.","{n} 人","{n} شخص"],"alerte Frigate":["Frigate alert","alerta Frigate","Frigate-Alarm","Frigate-melding","allerta Frigate","alerta Frigate","alert Frigate","тревога Frigate","Frigate 警报","تنبيه Frigate"],"détection":["detection","detección","Erkennung","detectie","rilevamento","deteção","wykrycie","обнаружение","检测","كشف"],"rafraîchi toutes les {n} s · appui = direct":["refreshed every {n} s · tap = live","actualizado cada {n} s · pulsar = directo","alle {n} s aktualisiert · Tippen = Live","elke {n} s vernieuwd · tik = live","aggiornata ogni {n} s · tocca = diretta","atualizado a cada {n} s · toque = direto","odświeżane co {n} s · dotknij = na żywo","обновление каждые {n} с · нажмите = прямой эфир","每 {n} 秒刷新 · 点按 = 实时画面","يُحدَّث كل {n} ث · اضغط = بث مباشر"],"Bilan énergétique":["Energy summary","Balance energético","Energiebilanz","Energieoverzicht","Riepilogo energetico","Resumo energético","Podsumowanie energii","Сводка по энергии","能耗概览","ملخص الطاقة"],"Coût réseau":["Grid cost","Coste de red","Netzkosten","Netkosten","Costo rete","Custo da rede","Koszt z sieci","Стоимость из сети","电网费用","تكلفة الشبكة"],"Prix moyen":["Average price","Precio medio","Durchschnittspreis","Gemiddelde prijs","Prezzo medio","Preço médio","Średnia cena","Средняя цена","平均电价","متوسط السعر"],"solaire":["solar","solar","Solar","zon","solare","solar","słońce","солнце","太阳能","شمسي"],"estimations":["estimates","estimaciones","Schätzungen","schattingen","stime","estimativas","szacunki","оценки","估算值","تقديرات"],"Batteries des capteurs":["Sensor batteries","Baterías de sensores","Sensorbatterien","Sensorbatterijen","Batterie dei sensori","Baterias dos sensores","Baterie czujników","Батареи датчиков","传感器电池","بطاريات المستشعرات"],"{n} capteurs · {m} à remplacer bientôt":["{n} sensors · {m} to replace soon","{n} sensores · {m} por reemplazar pronto","{n} Sensoren · {m} bald zu ersetzen","{n} sensoren · {m} binnenkort vervangen","{n} sensori · {m} da sostituire a breve","{n} sensores · {m} a substituir em breve","{n} czujników · {m} do wymiany wkrótce","{n} датчиков · скоро заменить: {m}","{n} 个传感器 · {m} 个即将需要更换","{n} مستشعر · {m} للاستبدال قريباً"],"Fermer":["Close","Cerrar","Schließen","Sluiten","Chiudi","Fechar","Zamknij","Закрыть","关闭","إغلاق"],"{n} pièce(s) active(s)":["{n} room(s) heating or cooling","{n} estancia(s) activa(s)","{n} aktive(r) Raum/Räume","{n} kamer(s) actief","{n} stanza/e attiva/e","{n} divisão(ões) ativa(s)","{n} aktywnych pokoi","активных комнат: {n}","{n} 个房间正在运行","{n} غرفة نشطة"],"Branchée":["Plugged in","Conectado","Angeschlossen","Aangesloten","Collegata","Ligado","Podłączony","Подключена","已连接","موصول"],"Libre":["Free","Libre","Frei","Vrij","Libera","Livre","Wolny","Свободна","空闲","متاح"],"Mode {m}":["Mode {m}","Modo {m}","Modus {m}","Modus {m}","Modalità {m}","Modo {m}","Tryb {m}","Режим {m}","模式 {m}","الوضع {m}"],"lumières allumées":["lights on","luces encendidas","Lichter an","lampen aan","luci accese","luzes acesas","włączone światła","свет включён","灯亮着","أضواء مضاءة"],"volets {s}":["shutters {s}","persianas {s}","Rollläden {s}","rolluiken {s}","tapparelle {s}","estores {s}","rolety {s}","жалюзи {s}","卷帘 {s}","الستائر {s}"],"{n} mouvement(s)":["{n} motion(s)","{n} movimiento(s)","{n} Bewegung(en)","{n} beweging(en)","{n} movimento/i","{n} movimento(s)","{n} ruch(ów)","движений: {n}","{n} 次移动","{n} حركة"],"Calme":["Calm","Tranquilo","Ruhig","Rustig","Calmo","Calmo","Spokój","Спокойно","平静","هادئ"],"{n} caméras · appui = images":["{n} cameras · tap = images","{n} cámaras · pulsar = imágenes","{n} Kameras · Tippen = Bilder","{n} camera's · tik = beelden","{n} telecamere · tocca = immagini","{n} câmaras · toque = imagens","{n} kamer · dotknij = obrazy","камер: {n} · нажмите = изображения","{n} 个摄像头 · 点按 = 图像","{n} كاميرا · اضغط = صور"],"consommation maison":["home consumption","consumo de la casa","Hausverbrauch","huisverbruik","consumo casa","consumo da casa","zużycie domu","потребление дома","住宅用电","استهلاك المنزل"],"solaire {w}":["solar {w}","solar {w}","Solar {w}","zon {w}","solare {w}","solar {w}","słońce {w}","солнце {w}","太阳能 {w}","الطاقة الشمسية {w}"],"{n} sans réponse":["{n} not responding","{n} sin respuesta","{n} ohne Antwort","{n} reageren niet","{n} non risponde/ono","{n} sem resposta","{n} nie odpowiada","{n} не отвечает","{n} 个无响应","{n} لا يستجيب"],"Consignes":["Setpoints","Consignas","Sollwerte","Streeftemperaturen","Temperature impostate","Temperaturas definidas","Temperatury zadane","Заданные температуры","设定温度","درجات الحرارة المحددة"],"Commandes":["Controls","Controles","Steuerung","Bediening","Comandi","Comandos","Sterowanie","Управление","控制","التحكم"],"Contenu du panneau":["Panel content","Contenido del panel","Panelinhalt","Inhoud van het paneel","Contenuto del pannello","Conteúdo do painel","Zawartość panelu","Содержимое панели","面板内容","محتوى اللوحة"],"Autre carte (YAML ci-dessus)":["Other card (YAML above)","Otra tarjeta (YAML arriba)","Andere Karte (YAML oben)","Andere kaart (YAML hierboven)","Altra scheda (YAML sopra)","Outro cartão (YAML acima)","Inna karta (YAML powyżej)","Другая карточка (YAML выше)","其他卡片（上方 YAML）","بطاقة أخرى (YAML أعلاه)"],"Type de carte du panneau":["Panel card type","Tipo de tarjeta del panel","Kartentyp des Panels","Kaarttype van het paneel","Tipo di scheda del pannello","Tipo de cartão do painel","Typ karty panelu","Тип карточки панели","面板卡片类型","نوع بطاقة اللوحة"],"Supprimer":["Delete","Eliminar","Löschen","Verwijderen","Elimina","Eliminar","Usuń","Удалить","删除","حذف"],"Confirmer ?":["Confirm?","¿Confirmar?","Bestätigen?","Bevestigen?","Confermare?","Confirmar?","Potwierdzić?","Подтвердить?","确认？","تأكيد؟"],"Monter":["Move up","Subir","Nach oben","Omhoog","Su","Subir","W górę","Вверх","上移","أعلى"],"Descendre":["Move down","Bajar","Nach unten","Omlaag","Giù","Descer","W dół","Вниз","下移","أسفل"],"Mode à surveiller (nom exact)":["Mode to watch (exact name)","Modo a vigilar (nombre exacto)","Zu überwachender Modus (genauer Name)","Te bewaken modus (exacte naam)","Modalità da monitorare (nome esatto)","Modo a vigiar (nome exato)","Tryb do monitorowania (dokładna nazwa)","Отслеживаемый режим (точное название)","要监控的模式（准确名称）","الوضع المراد مراقبته (الاسم الدقيق)"],"Message d'avertissement":["Warning message","Mensaje de aviso","Warnhinweis","Waarschuwingsbericht","Messaggio di avviso","Mensagem de aviso","Komunikat ostrzegawczy","Предупреждающее сообщение","警告信息","رسالة التحذير"],"Nom":["Name","Nombre","Name","Naam","Nome","Nome","Nazwa","Название","名称","الاسم"],"Libellé":["Label","Etiqueta","Bezeichnung","Label","Etichetta","Etiqueta","Etykieta","Подпись","标签","التسمية"],"Icône":["Icon","Icono","Symbol","Pictogram","Icona","Ícone","Ikona","Значок","图标","الأيقونة"],"Couleur (ex. #00e5ff)":["Color (e.g. #00e5ff)","Color (p. ej. #00e5ff)","Farbe (z. B. #00e5ff)","Kleur (bijv. #00e5ff)","Colore (es. #00e5ff)","Cor (ex. #00e5ff)","Kolor (np. #00e5ff)","Цвет (напр. #00e5ff)","颜色（例如 #00e5ff）","اللون (مثل #00e5ff)"],"Titre":["Title","Título","Titel","Titel","Titolo","Título","Tytuł","Заголовок","标题","العنوان"],"Sous-titre":["Subtitle","Subtítulo","Untertitel","Ondertitel","Sottotitolo","Subtítulo","Podtytuł","Подзаголовок","副标题","العنوان الفرعي"],"Entité":["Entity","Entidad","Entität","Entiteit","Entità","Entidade","Encja","Сущность","实体","الكيان"],"Texte sous le titre":["Text under the title","Texto bajo el título","Text unter dem Titel","Tekst onder de titel","Testo sotto il titolo","Texto sob o título","Tekst pod tytułem","Текст под заголовком","标题下方文字","نص أسفل العنوان"],"Unité":["Unit","Unidad","Einheit","Eenheid","Unità","Unidade","Jednostka","Единица","单位","الوحدة"],"Décimales":["Decimals","Decimales","Nachkommastellen","Decimalen","Decimali","Casas decimais","Miejsca po przecinku","Знаков после запятой","小数位数","الأرقام العشرية"],"Seuil d'alerte (orange)":["Warning threshold (orange)","Umbral de aviso (naranja)","Warnschwelle (orange)","Waarschuwingsdrempel (oranje)","Soglia di avviso (arancione)","Limite de aviso (laranja)","Próg ostrzegawczy (pomarańczowy)","Порог предупреждения (оранжевый)","警告阈值（橙色）","حد التحذير (برتقالي)"],"Seuil critique (rouge)":["Critical threshold (red)","Umbral crítico (rojo)","Kritische Schwelle (rot)","Kritieke drempel (rood)","Soglia critica (rosso)","Limite crítico (vermelho)","Próg krytyczny (czerwony)","Критический порог (красный)","严重阈值（红色）","الحد الحرج (أحمر)"],"Valeur maximale":["Maximum value","Valor máximo","Maximalwert","Maximumwaarde","Valore massimo","Valor máximo","Wartość maksymalna","Максимальное значение","最大值","القيمة القصوى"],"Minimum":["Minimum","Mínimo","Minimum","Minimum","Minimo","Mínimo","Minimum","Минимум","最小值","الحد الأدنى"],"Minuteur (affiche le temps restant)":["Timer (shows remaining time)","Temporizador (muestra el tiempo restante)","Timer (zeigt die Restzeit)","Timer (toont resterende tijd)","Timer (mostra il tempo rimanente)","Temporizador (mostra o tempo restante)","Minutnik (pokazuje pozostały czas)","Таймер (показывает оставшееся время)","定时器（显示剩余时间）","المؤقت (يعرض الوقت المتبقي)"],"Entités coupées par un appui pendant le minuteur":["Entities turned off by a tap while the timer runs","Entidades apagadas al pulsar durante el temporizador","Entitäten, die bei Antippen während des Timers ausgeschaltet werden","Entiteiten die met een tik worden uitgezet terwijl de timer loopt","Entità spente con un tocco mentre il timer è in corso","Entidades desligadas com um toque enquanto o temporizador corre","Encje wyłączane dotknięciem podczas działania minutnika","Сущности, выключаемые нажатием во время работы таймера","定时器运行时点按即关闭的实体","كيانات تُطفأ بالضغط أثناء عمل المؤقت"],"Lien du panneau (#…)":["Panel link (#…)","Enlace del panel (#…)","Panel-Link (#…)","Paneellink (#…)","Link del pannello (#…)","Ligação do painel (#…)","Link panelu (#…)","Ссылка на панель (#…)","面板链接（#…）","رابط اللوحة (#…)"],"Colonnes":["Columns","Columnas","Spalten","Kolommen","Colonne","Colunas","Kolumny","Столбцы","列数","الأعمدة"],"Interrupteur / lumière":["Switch / light","Interruptor / luz","Schalter / Licht","Schakelaar / lamp","Interruttore / luce","Interruptor / luz","Przełącznik / światło","Выключатель / свет","开关 / 灯","مفتاح / ضوء"],"Lampe avec variation":["Dimmable light","Luz regulable","Dimmbares Licht","Dimbare lamp","Luce dimmerabile","Luz regulável","Światło ściemnialne","Диммируемый свет","可调光灯","ضوء قابل للتعتيم"],"Bouton d'action (service)":["Action button (service)","Botón de acción (servicio)","Aktionstaste (Dienst)","Actieknop (service)","Pulsante azione (servizio)","Botão de ação (serviço)","Przycisk akcji (usługa)","Кнопка действия (служба)","操作按钮（服务）","زر إجراء (خدمة)"],"Valeur à afficher":["Value to display","Valor a mostrar","Anzuzeigender Wert","Weer te geven waarde","Valore da mostrare","Valor a mostrar","Wartość do wyświetlenia","Отображаемое значение","要显示的值","القيمة المراد عرضها"],"Volets":["Shutters","Persianas","Rollläden","Rolluiken","Tapparelle","Estores","Rolety","Жалюзи","卷帘","الستائر"],"Aspirateur":["Vacuum","Aspiradora","Staubsauger","Stofzuiger","Aspirapolvere","Aspirador","Odkurzacz","Пылесос","扫地机器人","المكنسة"],"Réglage + / −":["Adjust + / −","Ajuste + / −","Einstellung + / −","Instelling + / −","Regolazione + / −","Ajuste + / −","Regulacja + / −","Регулировка + / −","调节 + / −","ضبط + / −"],"Choix dans une liste":["Choice from a list","Elección en una lista","Auswahl aus Liste","Keuze uit een lijst","Scelta da un elenco","Escolha numa lista","Wybór z listy","Выбор из списка","从列表中选择","اختيار من قائمة"],"Valeur (avec seuils)":["Value (with thresholds)","Valor (con umbrales)","Wert (mit Schwellen)","Waarde (met drempels)","Valore (con soglie)","Valor (com limites)","Wartość (z progami)","Значение (с порогами)","数值（带阈值）","قيمة (مع حدود)"],"Pourcentage":["Percentage","Porcentaje","Prozent","Percentage","Percentuale","Percentagem","Procent","Процент","百分比","نسبة مئوية"],"Oui / non":["Yes / no","Sí / no","Ja / nein","Ja / nee","Sì / no","Sim / não","Tak / nie","Да / нет","是 / 否","نعم / لا"],"Texte":["Text","Texto","Text","Tekst","Testo","Texto","Tekst","Текст","文本","نص"],"Durée":["Duration","Duración","Dauer","Duur","Durata","Duração","Czas trwania","Длительность","时长","المدة"],"Date / heure":["Date / time","Fecha / hora","Datum / Uhrzeit","Datum / tijd","Data / ora","Data / hora","Data / godzina","Дата / время","日期 / 时间","التاريخ / الوقت"],"Bouton marche / arrêt":["On / off button","Botón de encendido / apagado","Ein-/Aus-Taste","Aan / uit-knop","Pulsante acceso / spento","Botão ligar / desligar","Przycisk włącz / wyłącz","Кнопка вкл. / выкл.","开 / 关按钮","زر تشغيل / إيقاف"],"Alerte":["Alert","Alerta","Alarm","Alarm","Allarme","Alerta","Alert","Тревога","警报","تنبيه"],"Sonnette":["Doorbell","Timbre","Klingel","Deurbel","Campanello","Campainha","Dzwonek","Звонок","门铃","جرس الباب"],"Caméra (photo à la sonnette)":["Camera (photo at the doorbell)","Cámara (foto al timbre)","Kamera (Foto bei Klingel)","Camera (foto bij de deurbel)","Telecamera (foto al campanello)","Câmara (foto na campainha)","Kamera (zdjęcie przy dzwonku)","Камера (фото при звонке)","摄像头（门铃时拍照）","الكاميرا (صورة عند الجرس)"],"Capteurs de fuite d'eau":["Water leak sensors","Sensores de fuga de agua","Wasserleck-Sensoren","Waterlek-sensoren","Sensori di perdita d'acqua","Sensores de fuga de água","Czujniki wycieku wody","Датчики протечки воды","漏水传感器","مستشعرات تسرّب المياه"],"Ouvrants (information)":["Openings (information)","Aberturas (información)","Öffnungen (Information)","Openingen (informatie)","Aperture (informazione)","Aberturas (informação)","Otwarcia (informacja)","Проёмы (информация)","门窗（仅提示）","الفتحات (للعلم)"],"Tension d'entrée de l'onduleur":["UPS input voltage","Tensión de entrada del SAI","USV-Eingangsspannung","Ingangsspanning van de UPS","Tensione di ingresso dell'UPS","Tensão de entrada da UPS","Napięcie wejściowe UPS","Входное напряжение ИБП","UPS 输入电压","جهد دخل UPS"],"Alerte sous (volts)":["Alert below (volts)","Alerta por debajo de (voltios)","Alarm unter (Volt)","Alarm onder (volt)","Allarme sotto (volt)","Alerta abaixo de (volts)","Alarm poniżej (wolty)","Тревога ниже (вольт)","低于此值报警（伏）","تنبيه دون (فولت)"],"Masquer le bouton « simuler une sonnette »":["Hide the \"simulate a doorbell\" button","Ocultar el botón «simular un timbre»","Schaltfläche „Klingel simulieren“ ausblenden","De knop 'deurbel simuleren' verbergen","Nascondi il pulsante «simula un campanello»","Ocultar o botão «simular uma campainha»","Ukryj przycisk „zasymuluj dzwonek”","Скрыть кнопку «имитировать звонок»","隐藏“模拟门铃”按钮","إخفاء زر «محاكاة جرس الباب»"],"Climat":["Climate","Clima","Klima","Klimaat","Clima","Clima","Klimat","Климат","气候","المناخ"],"Mode maison (liste de choix)":["House mode (choice list)","Modo de la casa (lista de opciones)","Hausmodus (Auswahlliste)","Huismodus (keuzelijst)","Modalità casa (elenco di scelta)","Modo casa (lista de escolha)","Tryb domu (lista wyboru)","Режим дома (список выбора)","家庭模式（选择列表）","وضع المنزل (قائمة اختيار)"],"Script marche / arrêt d'une pièce":["Room on / off script","Script de encendido / apagado de estancia","Raum-Ein-/Aus-Skript","Aan/uit-script van een kamer","Script acceso / spento di una stanza","Script ligar / desligar de uma divisão","Skrypt włącz / wyłącz pokój","Скрипт вкл. / выкл. комнаты","房间开关脚本","سكربت تشغيل / إيقاف غرفة"],"Température minimale du cadran":["Dial minimum temperature","Temperatura mínima del dial","Minimaltemperatur der Anzeige","Minimumtemperatuur van de wijzerplaat","Temperatura minima del quadrante","Temperatura mínima do mostrador","Minimalna temperatura tarczy","Минимальная температура шкалы","表盘最低温度","الحد الأدنى لدرجة حرارة القرص"],"Température maximale du cadran":["Dial maximum temperature","Temperatura máxima del dial","Maximaltemperatur der Anzeige","Maximumtemperatuur van de wijzerplaat","Temperatura massima del quadrante","Temperatura máxima do mostrador","Maksymalna temperatura tarczy","Максимальная температура шкалы","表盘最高温度","الحد الأقصى لدرجة حرارة القرص"],"Thermostat":["Thermostat","Termostato","Thermostat","Thermostaat","Termostato","Termóstato","Termostat","Термостат","恒温器","منظم الحرارة"],"Capteur de température":["Temperature sensor","Sensor de temperatura","Temperatursensor","Temperatuursensor","Sensore di temperatura","Sensor de temperatura","Czujnik temperatury","Датчик температуры","温度传感器","مستشعر الحرارة"],"Capteur d'humidité":["Humidity sensor","Sensor de humedad","Feuchtesensor","Vochtigheidssensor","Sensore di umidità","Sensor de humidade","Czujnik wilgotności","Датчик влажности","湿度传感器","مستشعر الرطوبة"],"Consigne (input_number)":["Setpoint (input_number)","Consigna (input_number)","Sollwert (input_number)","Streeftemperatuur (input_number)","Temperatura impostata (input_number)","Temperatura definida (input_number)","Temperatura zadana (input_number)","Заданная температура (input_number)","设定温度（input_number）","درجة الحرارة المحددة (input_number)"],"Régulation automatique (interrupteur)":["Automatic regulation (switch)","Regulación automática (interruptor)","Automatische Regelung (Schalter)","Automatische regeling (schakelaar)","Regolazione automatica (interruttore)","Regulação automática (interruptor)","Regulacja automatyczna (przełącznik)","Автоматическое регулирование (переключатель)","自动调节（开关）","التنظيم التلقائي (مفتاح)"],"Fenêtre (capteur d'ouverture)":["Window (contact sensor)","Ventana (sensor de apertura)","Fenster (Kontaktsensor)","Raam (contactsensor)","Finestra (sensore di contatto)","Janela (sensor de contacto)","Okno (czujnik kontaktronowy)","Окно (датчик открытия)","窗户（接触传感器）","النافذة (مستشعر التلامس)"],"Pièces":["Rooms","Estancias","Räume","Kamers","Stanze","Divisões","Pokoje","Комнаты","房间","الغرف"],"Ajouter une pièce":["Add a room","Añadir una estancia","Raum hinzufügen","Kamer toevoegen","Aggiungi una stanza","Adicionar uma divisão","Dodaj pokój","Добавить комнату","添加房间","إضافة غرفة"],"Pièce":["Room","Estancia","Raum","Kamer","Stanza","Divisão","Pokój","Комната","房间","غرفة"],"Boutons sous les pièces":["Buttons under the rooms","Botones bajo las estancias","Tasten unter den Räumen","Knoppen onder de kamers","Pulsanti sotto le stanze","Botões sob as divisões","Przyciski pod pokojami","Кнопки под комнатами","房间下方的按钮","أزرار أسفل الغرف"],"Ajouter un bouton":["Add a button","Añadir un botón","Taste hinzufügen","Knop toevoegen","Aggiungi un pulsante","Adicionar um botão","Dodaj przycisk","Добавить кнопку","添加按钮","إضافة زر"],"Bouton":["Button","Botón","Taste","Knop","Pulsante","Botão","Przycisk","Кнопка","按钮","زر"],"Largeur (en colonnes)":["Width (in columns)","Ancho (en columnas)","Breite (in Spalten)","Breedte (in kolommen)","Larghezza (in colonne)","Largura (em colunas)","Szerokość (w kolumnach)","Ширина (в столбцах)","宽度（列数）","العرض (بالأعمدة)"],"Service (ex. scene.turn_on)":["Service (e.g. scene.turn_on)","Servicio (p. ej. scene.turn_on)","Dienst (z. B. scene.turn_on)","Service (bijv. scene.turn_on)","Servizio (es. scene.turn_on)","Serviço (ex. scene.turn_on)","Usługa (np. scene.turn_on)","Служба (напр. scene.turn_on)","服务（例如 scene.turn_on）","الخدمة (مثل scene.turn_on)"],"Demander confirmation (texte)":["Ask for confirmation (text)","Pedir confirmación (texto)","Bestätigung verlangen (Text)","Om bevestiging vragen (tekst)","Chiedi conferma (testo)","Pedir confirmação (texto)","Poproś o potwierdzenie (tekst)","Запрашивать подтверждение (текст)","要求确认（文字）","طلب التأكيد (نص)"],"Données du service (YAML)":["Service data (YAML)","Datos del servicio (YAML)","Dienstdaten (YAML)","Servicegegevens (YAML)","Dati del servizio (YAML)","Dados do serviço (YAML)","Dane usługi (YAML)","Данные службы (YAML)","服务数据（YAML）","بيانات الخدمة (YAML)"],"Capteur de batterie":["Battery sensor","Sensor de batería","Batteriesensor","Batterijsensor","Sensore della batteria","Sensor de bateria","Czujnik baterii","Датчик батареи","电池传感器","مستشعر البطارية"],"Raccourcis (YAML)":["Shortcuts (YAML)","Atajos (YAML)","Kurzbefehle (YAML)","Snelkoppelingen (YAML)","Scorciatoie (YAML)","Atalhos (YAML)","Skróty (YAML)","Быстрые действия (YAML)","快捷方式（YAML）","اختصارات (YAML)"],"Type d'élément":["Item type","Tipo de elemento","Elementtyp","Type item","Tipo di elemento","Tipo de elemento","Typ elementu","Тип элемента","项目类型","نوع العنصر"],"Groupes":["Groups","Grupos","Gruppen","Groepen","Gruppi","Grupos","Grupy","Группы","分组","المجموعات"],"Ajouter un groupe":["Add a group","Añadir un grupo","Gruppe hinzufügen","Groep toevoegen","Aggiungi un gruppo","Adicionar um grupo","Dodaj grupę","Добавить группу","添加分组","إضافة مجموعة"],"Groupe":["Group","Grupo","Gruppe","Groep","Gruppo","Grupo","Grupa","Группа","分组","مجموعة"],"Éléments du groupe":["Group items","Elementos del grupo","Gruppenelemente","Items van de groep","Elementi del gruppo","Elementos do grupo","Elementy grupy","Элементы группы","分组项目","عناصر المجموعة"],"Ajouter un élément":["Add an item","Añadir un elemento","Element hinzufügen","Item toevoegen","Aggiungi un elemento","Adicionar um elemento","Dodaj element","Добавить элемент","添加项目","إضافة عنصر"],"Élément":["Item","Elemento","Element","Item","Elemento","Elemento","Element","Элемент","项目","عنصر"],"État considéré normal":["State considered normal","Estado considerado normal","Als normal geltender Status","Status die als normaal geldt","Stato considerato normale","Estado considerado normal","Stan uznawany za normalny","Состояние, считающееся нормальным","视为正常的状态","الحالة المعتبرة طبيعية"],"Texte si anormal":["Text if abnormal","Texto si es anormal","Text bei Abweichung","Tekst bij afwijking","Testo se anomalo","Texto se anormal","Tekst w przypadku nieprawidłowości","Текст при отклонении","异常时的文字","النص عند الخلل"],"Seuil bas (orange)":["Low threshold (orange)","Umbral bajo (naranja)","Untere Schwelle (orange)","Lage drempel (oranje)","Soglia bassa (arancione)","Limite baixo (laranja)","Niski próg (pomarańczowy)","Нижний порог (оранжевый)","低值阈值（橙色）","الحد المنخفض (برتقالي)"],"Alerte quand la valeur est BASSE":["Alert when the value is LOW","Alerta cuando el valor es BAJO","Alarm bei NIEDRIGEM Wert","Waarschuwen wanneer de waarde LAAG is","Avvisa quando il valore è BASSO","Alertar quando o valor for BAIXO","Alarmuj, gdy wartość jest NISKA","Предупреждать, когда значение НИЗКОЕ","数值偏低时报警","تنبيه عندما تكون القيمة منخفضة"],"Traduction des états (YAML)":["State translations (YAML)","Traducción de estados (YAML)","Status-Übersetzungen (YAML)","Vertaling van statussen (YAML)","Traduzione degli stati (YAML)","Tradução dos estados (YAML)","Tłumaczenie stanów (YAML)","Перевод состояний (YAML)","状态翻译（YAML）","ترجمة الحالات (YAML)"],"États normaux (YAML)":["Normal states (YAML)","Estados normales (YAML)","Normale Status (YAML)","Normale statussen (YAML)","Stati normali (YAML)","Estados normais (YAML)","Stany normalne (YAML)","Нормальные состояния (YAML)","正常状态（YAML）","الحالات الطبيعية (YAML)"],"Entités coupées pour arrêter":["Entities turned off to stop","Entidades apagadas para parar","Zum Stoppen ausgeschaltete Entitäten","Entiteiten die worden uitgezet om te stoppen","Entità spente per fermare","Entidades desligadas para parar","Encje wyłączane, aby zatrzymać","Сущности, выключаемые для остановки","为停止而关闭的实体","كيانات تُطفأ للإيقاف"],"Tuiles":["Tiles","Mosaicos","Kacheln","Tegels","Riquadri","Mosaicos","Kafelki","Плитки","磁贴","البلاطات"],"Ajouter une tuile":["Add a tile","Añadir un mosaico","Kachel hinzufügen","Tegel toevoegen","Aggiungi un riquadro","Adicionar um mosaico","Dodaj kafelek","Добавить плитку","添加磁贴","إضافة بلاطة"],"Tuile":["Tile","Mosaico","Kachel","Tegel","Riquadro","Mosaico","Kafelek","Плитка","磁贴","بلاطة"],"Batteries":["Batteries","Baterías","Batterien","Batterijen","Batterie","Baterias","Baterie","Батареи","电池","البطاريات"],"Orange à partir de (%)":["Orange from (%)","Naranja desde (%)","Orange ab (%)","Oranje vanaf (%)","Arancione da (%)","Laranja a partir de (%)","Pomarańczowy od (%)","Оранжевый от (%)","橙色起点（%）","برتقالي بدءاً من (٪)"],"Rouge à partir de (%)":["Red from (%)","Rojo desde (%)","Rot ab (%)","Rood vanaf (%)","Rosso da (%)","Vermelho a partir de (%)","Czerwony od (%)","Красный от (%)","红色起点（%）","أحمر بدءاً من (٪)"],"Nombre de capteurs affichés":["Number of sensors shown","Número de sensores mostrados","Anzahl angezeigter Sensoren","Aantal weergegeven sensoren","Numero di sensori mostrati","Número de sensores mostrados","Liczba wyświetlanych czujników","Количество отображаемых датчиков","显示的传感器数量","عدد المستشعرات المعروضة"],"Ne garder que les entités dont l'identifiant contient (regex)":["Keep only entities whose id matches (regex)","Conservar solo entidades cuyo id coincida (regex)","Nur Entitäten behalten, deren ID passt (Regex)","Alleen entiteiten waarvan de id overeenkomt (regex)","Mantieni solo le entità il cui id corrisponde (regex)","Manter apenas as entidades cujo id corresponde (regex)","Zachowaj tylko encje, których id pasuje (regex)","Оставить только сущности, id которых соответствует (regex)","仅保留 id 匹配的实体（正则）","الاحتفاظ بالكيانات التي يطابق معرّفها فقط (regex)"],"Ignorer les entités dont l'identifiant contient (regex)":["Ignore entities whose id matches (regex)","Ignorar entidades cuyo id coincida (regex)","Entitäten ignorieren, deren ID passt (Regex)","Entiteiten negeren waarvan de id overeenkomt (regex)","Ignora le entità il cui id corrisponde (regex)","Ignorar as entidades cujo id corresponde (regex)","Ignoruj encje, których id pasuje (regex)","Игнорировать сущности, id которых соответствует (regex)","忽略 id 匹配的实体（正则）","تجاهل الكيانات التي يطابق معرّفها (regex)"],"Entités ignorées":["Ignored entities","Entidades ignoradas","Ignorierte Entitäten","Genegeerde entiteiten","Entità ignorate","Entidades ignoradas","Ignorowane encje","Игнорируемые сущности","已忽略的实体","الكيانات المتجاهَلة"],"Panneaux":["Panels","Paneles","Panels","Panelen","Pannelli","Painéis","Panele","Панели","面板","اللوحات"],"Résumé affiché sur la tuile":["Summary shown on the tile","Resumen mostrado en el mosaico","Auf der Kachel angezeigte Zusammenfassung","Samenvatting op de tegel","Riepilogo mostrato sul riquadro","Resumo mostrado no mosaico","Podsumowanie na kafelku","Сводка на плитке","磁贴上显示的摘要","الملخص المعروض على البلاطة"],"Réservé à ces utilisateurs (liste d'identifiants, YAML)":["Restricted to these users (list of ids, YAML)","Reservado a estos usuarios (lista de ids, YAML)","Nur für diese Benutzer (ID-Liste, YAML)","Beperkt tot deze gebruikers (lijst met id's, YAML)","Riservato a questi utenti (elenco di id, YAML)","Reservado a estes utilizadores (lista de ids, YAML)","Ograniczone do tych użytkowników (lista id, YAML)","Только для этих пользователей (список id, YAML)","仅限这些用户（id 列表，YAML）","مقتصر على هؤلاء المستخدمين (قائمة معرّفات، YAML)"],"Carte ouverte dans le panneau (YAML)":["Card opened in the panel (YAML)","Tarjeta abierta en el panel (YAML)","Im Panel geöffnete Karte (YAML)","Kaart die in het paneel opent (YAML)","Scheda aperta nel pannello (YAML)","Cartão aberto no painel (YAML)","Karta otwierana w panelu (YAML)","Карточка, открываемая в панели (YAML)","在面板中打开的卡片（YAML）","البطاقة المفتوحة في اللوحة (YAML)"],"Texte libre sous le titre":["Free text under the title","Texto libre bajo el título","Freitext unter dem Titel","Vrije tekst onder de titel","Testo libero sotto il titolo","Texto livre sob o título","Dowolny tekst pod tytułem","Произвольный текст под заголовком","标题下方的自由文字","نص حر أسفل العنوان"],"Texte libre":["Free text","Texto libre","Freitext","Vrije tekst","Testo libero","Texto livre","Dowolny tekst","Произвольный текст","自由文字","نص حر"],"Climat (températures)":["Climate (temperatures)","Clima (temperaturas)","Klima (Temperaturen)","Klimaat (temperaturen)","Clima (temperature)","Clima (temperaturas)","Klimat (temperatury)","Климат (температуры)","气候（温度）","المناخ (درجات الحرارة)"],"Une pièce":["One room","Una estancia","Ein Raum","Eén kamer","Una stanza","Uma divisão","Jeden pokój","Одна комната","单个房间","غرفة واحدة"],"Caméras":["Cameras","Cámaras","Kameras","Camera's","Telecamere","Câmaras","Kamery","Камеры","摄像头","الكاميرات"],"Énergie":["Energy","Energía","Energie","Energie","Energia","Energia","Energia","Энергия","能源","الطاقة"],"Mode de charge (liste de choix)":["Charge mode (choice list)","Modo de carga (lista de opciones)","Lademodus (Auswahlliste)","Laadmodus (keuzelijst)","Modalità di ricarica (elenco di scelta)","Modo de carga (lista de escolha)","Tryb ładowania (lista wyboru)","Режим зарядки (список выбора)","充电模式（选择列表）","وضع الشحن (قائمة اختيار)"],"Batterie (%)":["Battery (%)","Batería (%)","Batterie (%)","Batterij (%)","Batteria (%)","Bateria (%)","Bateria (%)","Батарея (%)","电池（%）","البطارية (٪)"],"Autonomie (km)":["Range (km)","Autonomía (km)","Reichweite (km)","Actieradius (km)","Autonomia (km)","Autonomia (km)","Zasięg (km)","Запас хода (км)","续航（公里）","المدى (كم)"],"Charge cible (%)":["Target charge (%)","Carga objetivo (%)","Ziel-Ladung (%)","Doellading (%)","Carica obiettivo (%)","Carga alvo (%)","Docelowy poziom naładowania (%)","Целевой заряд (%)","目标电量（%）","مستوى الشحن المستهدف (٪)"],"En charge (capteur)":["Charging (sensor)","Cargando (sensor)","Lädt (Sensor)","Aan het laden (sensor)","In carica (sensore)","A carregar (sensor)","Ładowanie (czujnik)","Идёт зарядка (датчик)","充电中（传感器）","قيد الشحن (مستشعر)"],"Câble branché (capteur)":["Cable plugged in (sensor)","Cable conectado (sensor)","Kabel angeschlossen (Sensor)","Kabel aangesloten (sensor)","Cavo collegato (sensore)","Cabo ligado (sensor)","Kabel podłączony (czujnik)","Кабель подключён (датчик)","充电线已连接（传感器）","الكابل موصول (مستشعر)"],"Puissance (W)":["Power (W)","Potencia (W)","Leistung (W)","Vermogen (W)","Potenza (W)","Potência (W)","Moc (W)","Мощность (Вт)","功率（W）","القدرة (واط)"],"Intensité (A)":["Current (A)","Intensidad (A)","Stromstärke (A)","Stroomsterkte (A)","Corrente (A)","Corrente (A)","Natężenie (A)","Сила тока (А)","电流（A）","التيار (أمبير)"],"Décision du pilote de charge":["Charge controller decision","Decisión del controlador de carga","Entscheidung der Ladesteuerung","Beslissing van de laadregelaar","Decisione del controllore di ricarica","Decisão do controlador de carga","Decyzja sterownika ładowania","Решение контроллера зарядки","充电控制器决策","قرار متحكم الشحن"],"Production solaire":["Solar production","Producción solar","Solarproduktion","Zonne-opwekking","Produzione solare","Produção solar","Produkcja słoneczna","Выработка солнечной энергии","太阳能发电量","الإنتاج الشمسي"],"Consommation maison":["Home consumption","Consumo de la casa","Hausverbrauch","Huisverbruik","Consumo casa","Consumo da casa","Zużycie domu","Потребление дома","住宅用电","استهلاك المنزل"],"Voitures (2 maximum)":["Cars (2 maximum)","Coches (máximo 2)","Fahrzeuge (maximal 2)","Auto's (maximaal 2)","Auto (massimo 2)","Carros (máximo 2)","Samochody (maksymalnie 2)","Автомобили (максимум 2)","车辆（最多 2 辆）","السيارات (حد أقصى 2)"],"Ajouter une voiture":["Add a car","Añadir un coche","Fahrzeug hinzufügen","Auto toevoegen","Aggiungi un'auto","Adicionar um carro","Dodaj samochód","Добавить автомобиль","添加车辆","إضافة سيارة"],"Voiture":["Car","Coche","Fahrzeug","Auto","Auto","Carro","Samochód","Автомобиль","车辆","سيارة"],"Borne de recharge":["Charging station","Punto de recarga","Ladestation","Laadstation","Stazione di ricarica","Posto de carregamento","Stacja ładowania","Зарядная станция","充电站","محطة الشحن"],"Flux d'énergie (facultatif)":["Energy flows (optional)","Flujos de energía (opcional)","Energieflüsse (optional)","Energiestromen (optioneel)","Flussi di energia (facoltativo)","Fluxos de energia (opcional)","Przepływy energii (opcjonalnie)","Потоки энергии (необязательно)","能量流（可选）","تدفقات الطاقة (اختياري)"],"Bandeau d'accueil":["Welcome banner","Banner de bienvenida","Begrüßungsbanner","Welkomstbanner","Banner di benvenuto","Faixa de boas-vindas","Baner powitalny","Приветственный баннер","欢迎横幅","شريط الترحيب"],"Météo":["Weather","Tiempo","Wetter","Weer","Meteo","Meteorologia","Pogoda","Погода","天气","الطقس"],"Température extérieure":["Outdoor temperature","Temperatura exterior","Außentemperatur","Buitentemperatuur","Temperatura esterna","Temperatura exterior","Temperatura zewnętrzna","Температура на улице","室外温度","درجة الحرارة الخارجية"],"Prix du kWh en cours":["Current kWh price","Precio actual del kWh","Aktueller kWh-Preis","Huidige kWh-prijs","Prezzo attuale del kWh","Preço atual do kWh","Aktualna cena kWh","Текущая цена кВт·ч","当前每度电价","سعر الكيلوواط ساعة الحالي"],"Prix heures creuses":["Off-peak price","Precio en horas valle","Niedertarif-Preis","Dalprijs","Prezzo fuori picco","Preço do vazio","Cena w taryfie tańszej","Цена ночного тарифа","谷时电价","سعر خارج الذروة"],"Production solaire restante":["Remaining solar production","Producción solar restante","Verbleibende Solarproduktion","Resterende zonne-opwekking","Produzione solare rimanente","Produção solar restante","Pozostała produkcja słoneczna","Оставшаяся выработка солнечной энергии","今日剩余太阳能发电量","الإنتاج الشمسي المتبقي"],"Tension d'entrée onduleur":["UPS input voltage","Tensión de entrada del SAI","USV-Eingangsspannung","Ingangsspanning UPS","Tensione di ingresso UPS","Tensão de entrada da UPS","Napięcie wejściowe UPS","Входное напряжение ИБП","UPS 输入电压","جهد دخل UPS"],"Connexion internet":["Internet connection","Conexión a internet","Internetverbindung","Internetverbinding","Connessione internet","Ligação à internet","Połączenie z internetem","Подключение к интернету","网络连接","اتصال الإنترنت"],"Capteurs de fuite":["Leak sensors","Sensores de fuga","Lecksensoren","Lekkagesensoren","Sensori di perdita","Sensores de fuga","Czujniki wycieku","Датчики протечки","漏水传感器","مستشعرات التسرّب"],"Plages d'heures creuses":["Off-peak periods","Franjas de horas valle","Niedertarif-Zeiten","Daluren","Fasce fuori picco","Períodos de vazio","Godziny taniej taryfy","Периоды ночного тарифа","谷时时段","فترات خارج الذروة"],"Début (hh:mm)":["Start (hh:mm)","Inicio (hh:mm)","Beginn (hh:mm)","Begin (uu:mm)","Inizio (hh:mm)","Início (hh:mm)","Początek (gg:mm)","Начало (чч:мм)","开始（hh:mm）","البداية (ساعة:دقيقة)"],"Fin (hh:mm)":["End (hh:mm)","Fin (hh:mm)","Ende (hh:mm)","Einde (uu:mm)","Fine (hh:mm)","Fim (hh:mm)","Koniec (gg:mm)","Конец (чч:мм)","结束（hh:mm）","النهاية (ساعة:دقيقة)"],"Plages d'heures creuses (compte à rebours)":["Off-peak periods (countdown)","Franjas de horas valle (cuenta atrás)","Niedertarif-Zeiten (Countdown)","Daluren (aftelling)","Fasce fuori picco (conto alla rovescia)","Períodos de vazio (contagem decrescente)","Godziny taniej taryfy (odliczanie)","Периоды ночного тарифа (обратный отсчёт)","谷时时段（倒计时）","فترات خارج الذروة (عدّ تنازلي)"],"Ajouter une plage":["Add a period","Añadir una franja","Zeitraum hinzufügen","Periode toevoegen","Aggiungi una fascia","Adicionar um período","Dodaj przedział","Добавить период","添加时段","إضافة فترة"],"Plage":["Period","Franja","Zeitraum","Periode","Fascia","Período","Przedział","Период","时段","فترة"],"Personnes (ligne de présence, facultatif)":["People (presence line, optional)","Personas (línea de presencia, opcional)","Personen (Anwesenheitszeile, optional)","Personen (aanwezigheidsregel, optioneel)","Persone (riga di presenza, facoltativo)","Pessoas (linha de presença, opcional)","Osoby (wiersz obecności, opcjonalnie)","Люди (строка присутствия, необязательно)","人员（在家状态行，可选）","الأشخاص (سطر التواجد، اختياري)"],"Ajouter une personne":["Add a person","Añadir una persona","Person hinzufügen","Persoon toevoegen","Aggiungi una persona","Adicionar uma pessoa","Dodaj osobę","Добавить человека","添加人员","إضافة شخص"],"Personne":["Person","Persona","Person","Persoon","Persona","Pessoa","Osoba","Человек","人员","شخص"],"Réseau (positif = soutirage)":["Grid (positive = import)","Red (positivo = consumo)","Netz (positiv = Bezug)","Net (positief = afname)","Rete (positivo = prelievo)","Rede (positivo = consumo)","Sieć (dodatnia = pobór)","Сеть (положительное = потребление)","电网（正值 = 取电）","الشبكة (موجب = سحب)"],"Part d'énergie fossile du réseau":["Fossil share of the grid","Parte fósil de la red","Fossiler Anteil des Netzes","Fossiel aandeel van het net","Quota fossile della rete","Parte fóssil da rede","Udział paliw kopalnych w sieci","Доля ископаемого топлива в сети","电网化石能源占比","حصة الوقود الأحفوري في الشبكة"],"Prix du kWh":["kWh price","Precio del kWh","kWh-Preis","kWh-prijs","Prezzo del kWh","Preço do kWh","Cena kWh","Цена кВт·ч","每度电价","سعر الكيلوواط ساعة"],"Masquer les appareils à l'arrêt":["Hide idle devices","Ocultar los aparatos en reposo","Inaktive Geräte ausblenden","Inactieve apparaten verbergen","Nascondi i dispositivi inattivi","Ocultar dispositivos inativos","Ukryj bezczynne urządzenia","Скрывать устройства в простое","隐藏空闲设备","إخفاء الأجهزة الخاملة"],"Considéré à l'arrêt sous (watts)":["Considered idle below (watts)","Considerado en reposo por debajo de (vatios)","Als inaktiv unter (Watt)","Als inactief beschouwd onder (watt)","Considerato inattivo sotto (watt)","Considerado inativo abaixo de (watts)","Uznawane za bezczynne poniżej (waty)","Считается простоем ниже (Вт)","低于此功率视为空闲（瓦）","تُعتبر خاملة دون (واط)"],"Nombre maximum d'appareils affichés":["Maximum number of devices shown","Número máximo de aparatos mostrados","Maximale Anzahl angezeigter Geräte","Maximaal aantal weergegeven apparaten","Numero massimo di dispositivi mostrati","Número máximo de dispositivos mostrados","Maksymalna liczba wyświetlanych urządzeń","Максимальное число отображаемых устройств","最多显示的设备数","الحد الأقصى لعدد الأجهزة المعروضة"],"Appareils":["Devices","Aparatos","Geräte","Apparaten","Dispositivi","Dispositivos","Urządzenia","Устройства","设备","الأجهزة"],"Ajouter un appareil":["Add a device","Añadir un aparato","Gerät hinzufügen","Apparaat toevoegen","Aggiungi un dispositivo","Adicionar um dispositivo","Dodaj urządzenie","Добавить устройство","添加设备","إضافة جهاز"],"Appareil":["Device","Aparato","Gerät","Apparaat","Dispositivo","Dispositivo","Urządzenie","Устройство","设备","جهاز"],"Consignes (dans l'ordre des colonnes)":["Setpoints (in column order)","Consignas (en el orden de las columnas)","Sollwerte (in Spaltenreihenfolge)","Streeftemperaturen (in volgorde van de kolommen)","Temperature impostate (nell'ordine delle colonne)","Temperaturas definidas (pela ordem das colunas)","Temperatury zadane (w kolejności kolumn)","Заданные температуры (в порядке столбцов)","设定温度（按列顺序）","درجات الحرارة المحددة (بترتيب الأعمدة)"],"Colonnes (ex. Jour, Nuit)":["Columns (e.g. Day, Night)","Columnas (p. ej. Día, Noche)","Spalten (z. B. Tag, Nacht)","Kolommen (bijv. Dag, Nacht)","Colonne (es. Giorno, Notte)","Colunas (ex. Dia, Noite)","Kolumny (np. Dzień, Noc)","Столбцы (напр. День, Ночь)","列（例如 白天、夜间）","الأعمدة (مثل نهار، ليل)"],"Ajouter une colonne":["Add a column","Añadir una columna","Spalte hinzufügen","Kolom toevoegen","Aggiungi una colonna","Adicionar uma coluna","Dodaj kolumnę","Добавить столбец","添加列","إضافة عمود"],"Colonne":["Column","Columna","Spalte","Kolom","Colonna","Coluna","Kolumna","Столбец","列","عمود"],"Bilan":["Summary","Balance","Bilanz","Overzicht","Riepilogo","Resumo","Podsumowanie","Сводка","概览","ملخص"],"Période (liste de choix)":["Period (choice list)","Periodo (lista de opciones)","Zeitraum (Auswahlliste)","Periode (keuzelijst)","Periodo (elenco di scelta)","Período (lista de escolha)","Okres (lista wyboru)","Период (список выбора)","周期（选择列表）","الفترة (قائمة اختيار)"],"Coût total":["Total cost","Coste total","Gesamtkosten","Totale kosten","Costo totale","Custo total","Koszt całkowity","Общая стоимость","总费用","التكلفة الإجمالية"],"Part solaire":["Solar share","Parte solar","Solaranteil","Zonnedeel","Quota solare","Parte solar","Udział słońca","Доля солнца","太阳能占比","الحصة الشمسية"],"Prix moyen du kWh":["Average kWh price","Precio medio del kWh","Durchschnittlicher kWh-Preis","Gemiddelde kWh-prijs","Prezzo medio del kWh","Preço médio do kWh","Średnia cena kWh","Средняя цена кВт·ч","平均每度电价","متوسط سعر الكيلوواط ساعة"],"Consommation totale":["Total consumption","Consumo total","Gesamtverbrauch","Totaal verbruik","Consumo totale","Consumo total","Zużycie całkowite","Общее потребление","总用电量","الاستهلاك الإجمالي"],"Part réseau":["Grid share","Parte de red","Netzanteil","Netdeel","Quota rete","Parte da rede","Udział sieci","Доля сети","电网占比","حصة الشبكة"],"Coût":["Cost","Coste","Kosten","Kosten","Costo","Custo","Koszt","Стоимость","费用","التكلفة"],"Personne (suivi du téléphone)":["Person (phone tracking)","Persona (seguimiento del teléfono)","Person (Handy-Ortung)","Persoon (telefoon volgen)","Persona (tracciamento del telefono)","Pessoa (seguimento do telemóvel)","Osoba (śledzenie telefonu)","Человек (отслеживание телефона)","人员（手机定位）","شخص (تتبع الهاتف)"],"Dernière caméra où la personne a été reconnue":["Last camera where the person was recognised","Última cámara donde se reconoció a la persona","Letzte Kamera, die die Person erkannt hat","Laatste camera waar de persoon is herkend","Ultima telecamera in cui la persona è stata riconosciuta","Última câmara onde a pessoa foi reconhecida","Ostatnia kamera, na której rozpoznano osobę","Последняя камера, где человека опознали","最近识别到此人的摄像头","آخر كاميرا تم التعرف فيها على الشخص"],"Pièces (capteurs de présence)":["Rooms (presence sensors)","Estancias (sensores de presencia)","Räume (Anwesenheitssensoren)","Kamers (aanwezigheidssensoren)","Stanze (sensori di presenza)","Divisões (sensores de presença)","Pokoje (czujniki obecności)","Комнаты (датчики присутствия)","房间（人体存在传感器）","الغرف (مستشعرات التواجد)"],"Rafraîchissement (secondes)":["Refresh (seconds)","Actualización (segundos)","Aktualisierung (Sekunden)","Verversing (seconden)","Aggiornamento (secondi)","Atualização (segundos)","Odświeżanie (sekundy)","Обновление (секунды)","刷新（秒）","التحديث (ثوانٍ)"],"Capteur de mouvement":["Motion sensor","Sensor de movimiento","Bewegungssensor","Bewegingssensor","Sensore di movimento","Sensor de movimento","Czujnik ruchu","Датчик движения","移动传感器","مستشعر الحركة"],"Nombre de personnes":["Number of people","Número de personas","Anzahl Personen","Aantal personen","Numero di persone","Número de pessoas","Liczba osób","Количество людей","人数","عدد الأشخاص"],"Statut de revue Frigate":["Frigate review status","Estado de revisión de Frigate","Frigate-Überprüfungsstatus","Frigate-reviewstatus","Stato di revisione Frigate","Estado de revisão do Frigate","Status przeglądu Frigate","Статус проверки Frigate","Frigate 审核状态","حالة مراجعة Frigate"],"Ajouter une caméra":["Add a camera","Añadir una cámara","Kamera hinzufügen","Camera toevoegen","Aggiungi una telecamera","Adicionar uma câmara","Dodaj kamerę","Добавить камеру","添加摄像头","إضافة كاميرا"],"Caméra":["Camera","Cámara","Kamera","Camera","Telecamera","Câmara","Kamera","Камера","摄像头","كاميرا"],"Personnes":["People","Personas","Personen","Personen","Persone","Pessoas","Osoby","Люди","人员","الأشخاص"],"Radiateurs":["Radiators","Radiadores","Heizkörper","Radiatoren","Radiatori","Radiadores","Grzejniki","Радиаторы","暖气片","المدافئ"],"Hors ligne":["Offline","Sin conexión","Offline","Offline","Offline","Offline","Offline","Не в сети","离线","غير متصل"],"connexion perdue":["connection lost","conexión perdida","Verbindung verloren","verbinding verbroken","connessione persa","ligação perdida","utracono połączenie","связь потеряна","连接丢失","فُقد الاتصال"],"allumer / éteindre le radiateur":["turn the radiator on / off","encender / apagar el radiador","Heizkörper ein / aus","radiator aan / uit zetten","accendi / spegni il radiatore","ligar / desligar o radiador","włącz / wyłącz grzejnik","включить / выключить радиатор","开启 / 关闭暖气片","تشغيل / إيقاف المدفأة"],"CONSIGNE":["SETPOINT","CONSIGNA","SOLL","STREEF","IMPOSTATA","DEFINIDA","ZADANA","ЗАДАНО","设定","المحدد"],"{k} kWh aujourd'hui":["{k} kWh today","{k} kWh hoy","{k} kWh heute","{k} kWh vandaag","{k} kWh oggi","{k} kWh hoje","{k} kWh dziś","{k} кВт·ч сегодня","今日 {k} kWh","{k} كيلوواط ساعة اليوم"],"{n} en chauffe":["{n} heating","{n} calentando","{n} heizen","{n} verwarmen","{n} in riscaldamento","{n} a aquecer","{n} grzeje","греют: {n}","{n} 个在制热","{n} تدفئ"],"Confort":["Comfort","Confort","Komfort","Comfort","Comfort","Conforto","Komfort","Комфорт","舒适","راحة"],"Éco":["Eco","Eco","Eco","Eco","Eco","Eco","Eko","Эко","节能","اقتصادي"],"Absent":["Away","Ausente","Abwesend","Weg","Assente","Ausente","Poza domem","Нет дома","离家","بعيد"],"Hors-gel":["Frost protection","Antiheladas","Frostschutz","Vorstbeveiliging","Antigelo","Anticongelante","Ochrona przed zamarzaniem","Защита от замерзания","防冻","مقاومة التجمد"],"Boost":["Boost","Boost","Boost","Boost","Boost","Boost","Boost","Буст","加速","تعزيز"],"Nuit":["Night","Noche","Nacht","Nacht","Notte","Noite","Noc","Ночь","夜间","ليل"],"Présent":["Home","En casa","Zuhause","Thuis","In casa","Em casa","W domu","Дома","在家","في المنزل"],"Activité":["Activity","Actividad","Aktivität","Activiteit","Attività","Atividade","Aktywność","Активность","活动","نشاط"],"Couleur d'accentuation (ex. #e07a4f)":["Accent colour (e.g. #e07a4f)","Color de acento (p. ej. #e07a4f)","Akzentfarbe (z. B. #e07a4f)","Accentkleur (bijv. #e07a4f)","Colore di accento (es. #e07a4f)","Cor de destaque (ex. #e07a4f)","Kolor akcentu (np. #e07a4f)","Акцентный цвет (напр. #e07a4f)","强调色（例如 #e07a4f）","لون التمييز (مثل #e07a4f)"],"Pas de la consigne (°)":["Setpoint step (°)","Paso de consigna (°)","Schrittweite Soll (°)","Stapgrootte streeftemperatuur (°)","Passo della temperatura impostata (°)","Passo da temperatura definida (°)","Krok temperatury zadanej (°)","Шаг заданной температуры (°)","设定温度步长（°）","خطوة درجة الحرارة المحددة (°)"],"Consommation pleine barre (kWh)":["Full-bar consumption (kWh)","Consumo de barra llena (kWh)","Verbrauch Vollbalken (kWh)","Verbruik volle balk (kWh)","Consumo a barra piena (kWh)","Consumo da barra cheia (kWh)","Zużycie pełnego paska (kWh)","Потребление для полной шкалы (кВт·ч)","满格对应用电量（kWh）","الاستهلاك عند امتلاء الشريط (كيلوواط ساعة)"],"Radiateur (entité climate)":["Radiator (climate entity)","Radiador (entidad climate)","Heizkörper (climate-Entität)","Radiator (climate-entiteit)","Radiatore (entità climate)","Radiador (entidade climate)","Grzejnik (encja climate)","Радиатор (сущность climate)","暖气片（climate 实体）","المدفأة (كيان climate)"],"Consommation du jour (kWh)":["Consumption today (kWh)","Consumo de hoy (kWh)","Verbrauch heute (kWh)","Verbruik vandaag (kWh)","Consumo di oggi (kWh)","Consumo de hoje (kWh)","Zużycie dziś (kWh)","Потребление за сегодня (кВт·ч)","今日用电量（kWh）","استهلاك اليوم (كيلوواط ساعة)"],"Capteur de connexion (facultatif)":["Connection sensor (optional)","Sensor de conexión (opcional)","Verbindungssensor (optional)","Verbindingssensor (optioneel)","Sensore di connessione (facoltativo)","Sensor de ligação (opcional)","Czujnik połączenia (opcjonalnie)","Датчик связи (необязательно)","连接传感器（可选）","مستشعر الاتصال (اختياري)"],"Ajouter un radiateur":["Add a radiator","Añadir un radiador","Heizkörper hinzufügen","Radiator toevoegen","Aggiungi un radiatore","Adicionar um radiador","Dodaj grzejnik","Добавить радиатор","添加暖气片","إضافة مدفأة"],"Radiateur":["Radiator","Radiador","Heizkörper","Radiator","Radiatore","Radiador","Grzejnik","Радиатор","暖气片","مدفأة"],"Programme":["Schedule","Programa","Programm","Programma","Programma","Programa","Program","Расписание","程序","البرنامج"],"Afficher le réglage de consigne ± (désactiver pour un fil pilote)":["Show the ± setpoint control (turn off for pilot-wire heaters)","Mostrar el ajuste de consigna ± (desactivar para hilo piloto)","±-Sollwertregelung anzeigen (bei Pilotdraht ausschalten)","De ±-regeling voor de streeftemperatuur tonen (uitzetten bij pilootdraad)","Mostra il controllo ± della temperatura impostata (disattiva per il filo pilota)","Mostrar o ajuste ± da temperatura definida (desativar para fio piloto)","Pokaż regulację ± temperatury zadanej (wyłącz dla przewodu pilotującego)","Показывать регулировку ± заданной температуры (отключите для управляющего провода)","显示 ± 设定温度调节（导线控制型暖气请关闭）","إظهار ضبط ± لدرجة الحرارة المحددة (عطّله للتحكم بالسلك الموجّه)"],"Noms des préréglages (YAML, ex. away: Hors-gel)":["Preset names (YAML, e.g. away: Frost protection)","Nombres de los preajustes (YAML, p. ej. away: Antiheladas)","Namen der Voreinstellungen (YAML, z. B. away: Frostschutz)","Namen van de voorinstellingen (YAML, bijv. away: Vorstbeveiliging)","Nomi dei preset (YAML, es. away: Antigelo)","Nomes das predefinições (YAML, ex. away: Anticongelante)","Nazwy ustawień wstępnych (YAML, np. away: Ochrona przed zamarzaniem)","Названия пресетов (YAML, напр. away: Защита от замерзания)","预设名称（YAML，例如 away: 防冻）","أسماء الإعدادات المسبقة (YAML، مثل away: مقاومة التجمد)"],"Liste de préréglages (select, facultatif)":["Preset list (select entity, optional)","Lista de preajustes (entidad select, opcional)","Voreinstellungsliste (select-Entität, optional)","Lijst met voorinstellingen (select, optioneel)","Elenco dei preset (select, facoltativo)","Lista de predefinições (select, opcional)","Lista ustawień wstępnych (select, opcjonalnie)","Список пресетов (select, необязательно)","预设列表（select，可选）","قائمة الإعدادات المسبقة (select، اختياري)"],"Préréglages affichés (YAML, dans l'ordre)":["Presets shown (YAML, in order)","Preajustes mostrados (YAML, en orden)","Angezeigte Voreinstellungen (YAML, in Reihenfolge)","Getoonde voorinstellingen (YAML, op volgorde)","Preset mostrati (YAML, in ordine)","Predefinições mostradas (YAML, por ordem)","Wyświetlane ustawienia wstępne (YAML, w kolejności)","Отображаемые пресеты (YAML, по порядку)","显示的预设（YAML，按顺序）","الإعدادات المسبقة المعروضة (YAML، بالترتيب)"],"Aucun":["None","Ninguno","Keine","Geen","Nessuno","Nenhum","Brak","Нет","无","لا شيء"],"États comptés « à la maison » (YAML, ex. home et le nom de votre zone)":["States counted as “home” (YAML, e.g. home and your zone name)","Estados contados como «en casa» (YAML, p. ej. home y el nombre de tu zona)","Als „zu Hause“ gezählte Zustände (YAML, z. B. home und dein Zonenname)","Statussen die als 'thuis' tellen (YAML, bijv. home en de naam van je zone)","Stati contati come «in casa» (YAML, es. home e il nome della tua zona)","Estados contados como «em casa» (YAML, ex. home e o nome da sua zona)","Stany liczone jako „w domu” (YAML, np. home i nazwa Twojej strefy)","Состояния, считающиеся «дома» (YAML, напр. home и название вашей зоны)","视为“在家”的状态（YAML，例如 home 和您的区域名称）","الحالات المعتبرة «في المنزل» (YAML، مثل home واسم منطقتك)"],"Batterie":["Battery","Batería","Batterie","Batterij","Batteria","Bateria","Bateria","Батарея","电池","البطارية"],"Charge":["Charging","Cargando","Laden","Laden","Carica","Carga","Ładowanie","Зарядка","充电","شحن"],"Décharge":["Discharging","Descargando","Entladen","Ontladen","Scarica","Descarga","Rozładowanie","Разрядка","放电","تفريغ"],"Autonomie":["Autonomy","Autonomía","Autarkie","Autonomie","Autonomia","Autonomia","Autonomia","Автономность","续航","المدى"],"NIVEAU":["LEVEL","NIVEL","LADESTAND","NIVEAU","LIVELLO","NÍVEL","POZIOM","УРОВЕНЬ","电量","المستوى"],"Mode":["Mode","Modo","Modus","Modus","Modalità","Modo","Tryb","Режим","模式","الوضع"],"vide dans {h}h{m}":["empty in {h}h{m}","vacía en {h}h{m}","leer in {h}h{m}","leeg over {h}u{m}","vuota tra {h}h{m}","vazia em {h}h{m}","pusta za {h}h{m}","разрядится через {h}ч{m}","{h} 小时 {m} 分后耗尽","تفرغ بعد {h} س {m} د"],"pleine dans {h}h{m}":["full in {h}h{m}","llena en {h}h{m}","voll in {h}h{m}","vol over {h}u{m}","piena tra {h}h{m}","cheia em {h}h{m}","pełna za {h}h{m}","зарядится через {h}ч{m}","{h} 小时 {m} 分后充满","تمتلئ بعد {h} س {m} د"],"Chargé aujourd'hui":["Charged today","Cargado hoy","Heute geladen","Vandaag geladen","Caricata oggi","Carregada hoje","Naładowano dziś","Заряжено сегодня","今日已充电","المشحون اليوم"],"Déchargé aujourd'hui":["Discharged today","Descargado hoy","Heute entladen","Vandaag ontladen","Scaricata oggi","Descarregada hoje","Rozładowano dziś","Разряжено сегодня","今日已放电","المفرَّغ اليوم"],"Santé":["Health","Salud","Zustand","Gezondheid","Salute","Saúde","Kondycja","Состояние здоровья","健康度","الصحة"],"Cycles":["Cycles","Ciclos","Zyklen","Cycli","Cicli","Ciclos","Cykle","Циклы","循环次数","الدورات"],"Niveau de charge (%)":["State of charge (%)","Nivel de carga (%)","Ladestand (%)","Laadniveau (%)","Livello di carica (%)","Nível de carga (%)","Poziom naładowania (%)","Уровень заряда (%)","电量（%）","مستوى الشحن (٪)"],"Puissance (W, positif = décharge)":["Power (W, positive = discharging)","Potencia (W, positivo = descarga)","Leistung (W, positiv = Entladen)","Vermogen (W, positief = ontladen)","Potenza (W, positivo = scarica)","Potência (W, positivo = descarga)","Moc (W, dodatnia = rozładowanie)","Мощность (Вт, положительная = разрядка)","功率（W，正值 = 放电）","القدرة (واط، موجب = تفريغ)"],"Inverser le sens (positif = charge)":["Reverse direction (positive = charging)","Invertir sentido (positivo = carga)","Richtung umkehren (positiv = Laden)","Richting omkeren (positief = laden)","Inverti il senso (positivo = carica)","Inverter o sentido (positivo = carga)","Odwróć kierunek (dodatnia = ładowanie)","Изменить направление (положительная = зарядка)","反转方向（正值 = 充电）","عكس الاتجاه (موجب = شحن)"],"Capacité (kWh, pour estimer l'autonomie)":["Capacity (kWh, to estimate remaining time)","Capacidad (kWh, para estimar la autonomía)","Kapazität (kWh, zur Laufzeitschätzung)","Capaciteit (kWh, om de resterende tijd te schatten)","Capacità (kWh, per stimare il tempo rimanente)","Capacidade (kWh, para estimar o tempo restante)","Pojemność (kWh, do oszacowania pozostałego czasu)","Ёмкость (кВт·ч, для оценки оставшегося времени)","容量（kWh，用于估算剩余时间）","السعة (كيلوواط ساعة، لتقدير الوقت المتبقي)"],"Énergie chargée aujourd'hui (kWh)":["Energy charged today (kWh)","Energía cargada hoy (kWh)","Heute geladene Energie (kWh)","Vandaag geladen energie (kWh)","Energia caricata oggi (kWh)","Energia carregada hoje (kWh)","Energia naładowana dziś (kWh)","Энергия, заряженная сегодня (кВт·ч)","今日充入电量（kWh）","الطاقة المشحونة اليوم (كيلوواط ساعة)"],"Énergie déchargée aujourd'hui (kWh)":["Energy discharged today (kWh)","Energía descargada hoy (kWh)","Heute entladene Energie (kWh)","Vandaag ontladen energie (kWh)","Energia scaricata oggi (kWh)","Energia descarregada hoje (kWh)","Energia rozładowana dziś (kWh)","Энергия, разряженная сегодня (кВт·ч)","今日放出电量（kWh）","الطاقة المفرَّغة اليوم (كيلوواط ساعة)"],"Mode de fonctionnement (liste de choix)":["Operating mode (select list)","Modo de funcionamiento (lista)","Betriebsmodus (Auswahlliste)","Bedrijfsmodus (keuzelijst)","Modalità di funzionamento (elenco di scelta)","Modo de funcionamento (lista de escolha)","Tryb pracy (lista wyboru)","Режим работы (список выбора)","运行模式（选择列表）","وضع التشغيل (قائمة اختيار)"],"État de santé (%)":["State of health (%)","Estado de salud (%)","Zustand (%)","Gezondheidstoestand (%)","Stato di salute (%)","Estado de saúde (%)","Stan zdrowia (%)","Состояние здоровья (%)","健康状态（%）","حالة الصحة (٪)"],"Nombre de cycles":["Cycle count","Número de ciclos","Zyklenzahl","Aantal cycli","Numero di cicli","Número de ciclos","Liczba cykli","Количество циклов","循环次数","عدد الدورات"],"Batterie : puissance (W, positif = décharge)":["Battery: power (W, positive = discharging)","Batería: potencia (W, positivo = descarga)","Batterie: Leistung (W, positiv = Entladen)","Batterij: vermogen (W, positief = ontladen)","Batteria: potenza (W, positivo = scarica)","Bateria: potência (W, positivo = descarga)","Bateria: moc (W, dodatnia = rozładowanie)","Батарея: мощность (Вт, положительная = разрядка)","电池：功率（W，正值 = 放电）","البطارية: القدرة (واط، موجب = تفريغ)"],"Batterie : niveau (%)":["Battery: level (%)","Batería: nivel (%)","Batterie: Ladestand (%)","Batterij: niveau (%)","Batteria: livello (%)","Bateria: nível (%)","Bateria: poziom (%)","Батарея: уровень (%)","电池：电量（%）","البطارية: المستوى (٪)"],"Batterie : inverser le sens":["Battery: reverse direction","Batería: invertir sentido","Batterie: Richtung umkehren","Batterij: richting omkeren","Batteria: inverti il senso","Bateria: inverter o sentido","Bateria: odwróć kierunek","Батарея: изменить направление","电池：反转方向","البطارية: عكس الاتجاه"],"Température":["Temperature","Temperatura","Temperatur","Temperatuur","Temperatura","Temperatura","Temperatura","Температура","温度","درجة الحرارة"],"Heures creuses : une plage par période (2 ou 3 par jour possibles)":["Off-peak hours: one range per period (2 or 3 a day is fine)","Horas valle: un intervalo por periodo (2 o 3 al día)","Nebenzeiten: ein Zeitraum pro Abschnitt (2 oder 3 pro Tag möglich)","Daluren: één bereik per periode (2 of 3 per dag is mogelijk)","Fasce fuori picco: un intervallo per periodo (2 o 3 al giorno possibili)","Horas de vazio: um intervalo por período (2 ou 3 por dia possíveis)","Godziny taniej taryfy: jeden przedział na okres (możliwe 2 lub 3 dziennie)","Ночной тариф: один интервал на период (возможно 2 или 3 в сутки)","谷时：每个时段一个区间（每天可设 2 或 3 个）","ساعات خارج الذروة: نطاق لكل فترة (يمكن 2 أو 3 يومياً)"],"Ajouter une batterie":["Add a battery", "Añadir una batería", "Batterie hinzufügen", "Batterij toevoegen", "Aggiungi una batteria", "Adicionar uma bateria", "Dodaj baterię", "Добавить батарею", "添加电池", "إضافة بطارية"],"Batteries (plusieurs possibles)":["Batteries (several allowed)", "Baterías (se admiten varias)", "Batterien (mehrere möglich)", "Batterijen (meerdere mogelijk)", "Batterie (ne sono ammesse più di una)", "Baterias (são permitidas várias)", "Baterie (można dodać kilka)", "Батареи (можно несколько)", "电池（可添加多个）", "البطاريات (يمكن إضافة أكثر من واحدة)"],"États comptés « branché » (YAML, ex. connected, plugged_in)":["States counted as “plugged in” (YAML, e.g. connected, plugged_in)", "Estados contados como «conectado» (YAML, p. ej. connected, plugged_in)", "Als „angesteckt“ gezählte Zustände (YAML, z. B. connected, plugged_in)", "Statussen die als ‘aangesloten’ tellen (YAML, bijv. connected, plugged_in)", "Stati contati come «collegato» (YAML, es. connected, plugged_in)", "Estados contados como «ligado» (YAML, ex. connected, plugged_in)", "Stany liczone jako „podłączony” (YAML, np. connected, plugged_in)", "Состояния, считающиеся «подключено» (YAML, напр. connected, plugged_in)", "视为“已连接”的状态（YAML，例如 connected、plugged_in）", "الحالات المعتبرة «موصول» (YAML، مثل connected وplugged_in)"],"États comptés « en charge » (YAML, ex. charging)":["States counted as “charging” (YAML, e.g. charging)", "Estados contados como «cargando» (YAML, p. ej. charging)", "Als „lädt“ gezählte Zustände (YAML, z. B. charging)", "Statussen die als ‘laden’ tellen (YAML, bijv. charging)", "Stati contati come «in carica» (YAML, es. charging)", "Estados contados como «a carregar» (YAML, ex. charging)", "Stany liczone jako „ładowanie” (YAML, np. charging)", "Состояния, считающиеся «зарядка» (YAML, напр. charging)", "视为“充电中”的状态（YAML，例如 charging）", "الحالات المعتبرة «قيد الشحن» (YAML، مثل charging)"],"{n} {u} d'autonomie":["{n} {u} range", "{n} {u} de autonomía", "{n} {u} Reichweite", "{n} {u} actieradius", "{n} {u} di autonomia", "{n} {u} de autonomia", "zasięg {n} {u}", "запас хода {n} {u}", "续航 {n} {u}", "مدى {n} {u}"],"Voitures (3 maximum)":["Cars (3 maximum)", "Coches (3 como máximo)", "Autos (maximal 3)", "Auto's (maximaal 3)", "Auto (massimo 3)", "Carros (máximo 3)", "Samochody (maksymalnie 3)", "Автомобили (максимум 3)", "车辆（最多 3 辆）", "السيارات (حد أقصى 3)"],"Unité de distance":["Distance unit", "Unidad de distancia", "Entfernungseinheit", "Afstandseenheid", "Unità di distanza", "Unidade de distância", "Jednostka odległości", "Единица расстояния", "距离单位", "وحدة المسافة"],"Automatique (selon le capteur)":["Automatic (from the sensor)", "Automática (según el sensor)", "Automatisch (laut Sensor)", "Automatisch (volgens de sensor)", "Automatica (dal sensore)", "Automática (conforme o sensor)", "Automatycznie (według czujnika)", "Автоматически (по датчику)", "自动（按传感器）", "تلقائي (حسب المستشعر)"],"Kilomètres":["Kilometres", "Kilómetros", "Kilometer", "Kilometers", "Chilometri", "Quilómetros", "Kilometry", "Километры", "公里", "كيلومتر"],"Miles":["Miles", "Millas", "Meilen", "Mijlen", "Miglia", "Milhas", "Mile", "Мили", "英里", "ميل"],"Bornes de recharge (plusieurs possibles — remplace la borne ci-dessus)":["Charging stations (several allowed — replaces the station above)", "Puntos de carga (se admiten varios — sustituye al de arriba)", "Ladestationen (mehrere möglich — ersetzt die obige)", "Laadpalen (meerdere mogelijk — vervangt de bovenstaande)", "Colonnine di ricarica (ne sono ammesse più di una — sostituisce quella sopra)", "Postos de carregamento (são permitidos vários — substitui o acima)", "Stacje ładowania (można dodać kilka — zastępuje powyższą)", "Зарядные станции (можно несколько — заменяют станцию выше)", "充电桩（可添加多个 — 将替代上方的充电桩）", "محطات الشحن (يمكن إضافة أكثر من واحدة — تستبدل المحطة أعلاه)"],"Ajouter une borne":["Add a station", "Añadir un punto de carga", "Ladestation hinzufügen", "Laadpaal toevoegen", "Aggiungi una colonnina", "Adicionar um posto", "Dodaj stację", "Добавить станцию", "添加充电桩", "إضافة محطة"],"critique":["critical", "crítico", "kritisch", "kritiek", "critico", "crítico", "krytyczny", "критично", "严重", "حرج"],"attention":["warning", "atención", "Warnung", "waarschuwing", "attenzione", "atenção", "ostrzeżenie", "внимание", "警告", "تحذير"],"Thème":["Theme", "Tema", "Design", "Thema", "Tema", "Tema", "Motyw", "Тема", "主题", "السمة"],"Sombre":["Dark", "Oscuro", "Dunkel", "Donker", "Scuro", "Escuro", "Ciemny", "Тёмная", "深色", "داكن"],"Clair":["Light", "Claro", "Hell", "Licht", "Chiaro", "Claro", "Jasny", "Светлая", "浅色", "فاتح"],"Automatique (selon le thème de HA)":["Automatic (follows the HA theme)", "Automático (sigue el tema de HA)", "Automatisch (folgt dem HA-Design)", "Automatisch (volgt het HA-thema)", "Automatico (segue il tema di HA)", "Automático (segue o tema do HA)", "Automatycznie (zgodnie z motywem HA)", "Автоматически (по теме HA)", "自动（跟随 HA 主题）", "تلقائي (حسب سمة HA)"],"Afficher les commandes de la borne (démarrer / arrêter, intensité ±)":["Show the charger controls (start / stop, current ±)", "Mostrar los controles del cargador (iniciar / parar, corriente ±)", "Ladestationssteuerung anzeigen (Start / Stopp, Strom ±)", "Laadpaalbediening tonen (start / stop, stroom ±)", "Mostra i comandi della colonnina (avvio / arresto, corrente ±)", "Mostrar os comandos do posto (iniciar / parar, corrente ±)", "Pokaż sterowanie stacją (start / stop, prąd ±)", "Показать управление станцией (старт / стоп, ток ±)", "显示充电桩控制（启动 / 停止、电流 ±）", "إظهار عناصر تحكم المحطة (بدء / إيقاف، التيار ±)"],"Interrupteur démarrer / arrêter la charge":["Start / stop charging switch", "Interruptor de iniciar / parar la carga", "Schalter zum Starten / Stoppen des Ladens", "Schakelaar om het laden te starten / stoppen", "Interruttore di avvio / arresto della ricarica", "Interruptor para iniciar / parar o carregamento", "Przełącznik start / stop ładowania", "Выключатель старт / стоп зарядки", "启动 / 停止充电开关", "مفتاح بدء / إيقاف الشحن"],"Pas de l'intensité (A)":["Current step (A)", "Paso de corriente (A)", "Stromschritt (A)", "Stroomstap (A)", "Passo della corrente (A)", "Passo da corrente (A)", "Krok natężenia (A)", "Шаг тока (А)", "电流步长（A）", "خطوة التيار (أمبير)"],"Démarrer":["Start", "Iniciar", "Start", "Start", "Avvia", "Iniciar", "Start", "Старт", "启动", "بدء"],"Arrêter":["Stop", "Parar", "Stopp", "Stop", "Arresta", "Parar", "Stop", "Стоп", "停止", "إيقاف"],"Démarrer la charge":["Start charging", "Iniciar la carga", "Laden starten", "Laden starten", "Avvia la ricarica", "Iniciar o carregamento", "Rozpocznij ładowanie", "Начать зарядку", "开始充电", "بدء الشحن"],"Arrêter la charge":["Stop charging", "Parar la carga", "Laden stoppen", "Laden stoppen", "Interrompi la ricarica", "Parar o carregamento", "Zatrzymaj ładowanie", "Остановить зарядку", "停止充电", "إيقاف الشحن"],"Diminuer l'intensité":["Decrease current", "Reducir la corriente", "Strom verringern", "Stroom verlagen", "Riduci la corrente", "Diminuir a corrente", "Zmniejsz natężenie", "Уменьшить ток", "降低电流", "تقليل التيار"],"Augmenter l'intensité":["Increase current", "Aumentar la corriente", "Strom erhöhen", "Stroom verhogen", "Aumenta la corrente", "Aumentar a corrente", "Zwiększ natężenie", "Увеличить ток", "提高电流", "زيادة التيار"],"Remplir depuis un appareil (complète les champs vides)":["Fill from a device (completes the empty fields)", "Rellenar desde un dispositivo (completa los campos vacíos)", "Aus einem Gerät füllen (ergänzt leere Felder)", "Invullen vanuit een apparaat (vult lege velden aan)", "Compila da un dispositivo (completa i campi vuoti)", "Preencher a partir de um dispositivo (completa os campos vazios)", "Wypełnij z urządzenia (uzupełnia puste pola)", "Заполнить из устройства (дополняет пустые поля)", "从设备填充（补全空白字段）", "التعبئة من جهاز (تكمل الحقول الفارغة)"],"Remplissage indisponible : inventaire des entités absent (Home Assistant trop ancien ?)":["Fill unavailable: entity registry missing (Home Assistant too old?)", "Relleno no disponible: falta el inventario de entidades (¿Home Assistant demasiado antiguo?)", "Auto-Ausfüllen nicht verfügbar: Entitätsregister fehlt (Home Assistant zu alt?)", "Invullen niet beschikbaar: entiteitenregister ontbreekt (Home Assistant te oud?)", "Compilazione non disponibile: manca l'inventario delle entità (Home Assistant troppo vecchio?)", "Preenchimento indisponível: falta o inventário de entidades (Home Assistant demasiado antigo?)", "Wypełnianie niedostępne: brak rejestru encji (zbyt stary Home Assistant?)", "Автозаполнение недоступно: нет реестра сущностей (слишком старый Home Assistant?)", "无法填充：缺少实体注册表（Home Assistant 版本过旧？）", "التعبئة غير متاحة: سجل الكيانات مفقود (Home Assistant قديم جداً؟)"],"Remplissage : {n} champ(s) rempli(s) — à vérifier":["Filled {n} field(s) — please check", "Rellenados {n} campo(s) — revísalos", "{n} Feld(er) ausgefüllt — bitte prüfen", "{n} veld(en) ingevuld — controleer ze", "Compilati {n} campo/i — da verificare", "Preenchidos {n} campo(s) — verifique", "Wypełniono pól: {n} — sprawdź", "Заполнено полей: {n} — проверьте", "已填充 {n} 个字段 — 请检查", "تمت تعبئة {n} حقل — يرجى المراجعة"],"Aucune entité reconnue (ou champs déjà remplis) pour cet appareil":["No entity recognised (or fields already filled) for this device", "Ninguna entidad reconocida (o campos ya rellenos) para este dispositivo", "Keine Entität erkannt (oder Felder schon ausgefüllt) für dieses Gerät", "Geen entiteit herkend (of velden al ingevuld) voor dit apparaat", "Nessuna entità riconosciuta (o campi già compilati) per questo dispositivo", "Nenhuma entidade reconhecida (ou campos já preenchidos) para este dispositivo", "Nie rozpoznano encji (lub pola już wypełnione) dla tego urządzenia", "Сущности не распознаны (или поля уже заполнены) для этого устройства", "未识别到此设备的实体（或字段已填写）", "لم يتم التعرف على كيان (أو الحقول معبأة مسبقاً) لهذا الجهاز"],"L'interrupteur est actif quand la charge est en PAUSE (inverser)":["The switch is on when charging is PAUSED (invert)", "El interruptor está activo cuando la carga está en PAUSA (invertir)", "Der Schalter ist aktiv, wenn das Laden PAUSIERT ist (umkehren)", "De schakelaar staat aan als het laden op PAUZE staat (omkeren)", "L'interruttore è attivo quando la ricarica è in PAUSA (inverti)", "O interruptor está ligado quando o carregamento está em PAUSA (inverter)", "Przełącznik jest włączony, gdy ładowanie jest WSTRZYMANE (odwróć)", "Выключатель включён, когда зарядка на ПАУЗЕ (инвертировать)", "充电“暂停”时开关为开（反转）", "المفتاح يعمل عندما يكون الشحن في وضع الإيقاف المؤقت (عكس)"],"Intensité minimale (A)":["Minimum current (A)", "Corriente mínima (A)", "Minimaler Strom (A)", "Minimale stroom (A)", "Corrente minima (A)", "Corrente mínima (A)", "Minimalne natężenie (A)", "Минимальный ток (А)", "最小电流（A）", "الحد الأدنى للتيار (أمبير)"],"Intensité maximale (A)":["Maximum current (A)", "Corriente máxima (A)", "Maximaler Strom (A)", "Maximale stroom (A)", "Corrente massima (A)", "Corrente máxima (A)", "Maksymalne natężenie (A)", "Максимальный ток (А)", "最大电流（A）", "الحد الأقصى للتيار (أمبير)"],"Carte à compléter":["Card to complete", "Tarjeta por completar", "Karte unvollständig", "Kaart onvolledig", "Scheda da completare", "Cartão por completar", "Karta do uzupełnienia", "Карточку нужно дополнить", "卡片待完善", "البطاقة غير مكتملة"],"Champs obligatoires manquants":["Missing required fields", "Faltan campos obligatorios", "Pflichtfelder fehlen", "Verplichte velden ontbreken", "Campi obbligatori mancanti", "Faltam campos obrigatórios", "Brakuje wymaganych pól", "Не заполнены обязательные поля", "缺少必填字段", "حقول إلزامية ناقصة"],"Au moins une source : réseau, solaire, batterie ou appareil":["At least one source: grid, solar, battery or device", "Al menos una fuente: red, solar, batería o dispositivo", "Mindestens eine Quelle: Netz, Solar, Batterie oder Gerät", "Minstens één bron: net, zon, batterij of apparaat", "Almeno una fonte: rete, solare, batteria o dispositivo", "Pelo menos uma fonte: rede, solar, bateria ou dispositivo", "Co najmniej jedno źródło: sieć, słońce, bateria lub urządzenie", "Хотя бы один источник: сеть, солнце, батарея или устройство", "至少一个来源：电网、太阳能、电池或设备", "مصدر واحد على الأقل: الشبكة أو الطاقة الشمسية أو البطارية أو جهاز"],"Niveau de charge (%) ou puissance (W) d'au moins une batterie":["State of charge (%) or power (W) of at least one battery", "Nivel de carga (%) o potencia (W) de al menos una batería", "Ladestand (%) oder Leistung (W) mindestens einer Batterie", "Laadniveau (%) of vermogen (W) van minstens één batterij", "Livello di carica (%) o potenza (W) di almeno una batteria", "Nível de carga (%) ou potência (W) de pelo menos uma bateria", "Poziom naładowania (%) lub moc (W) co najmniej jednej baterii", "Уровень заряда (%) или мощность (Вт) хотя бы одной батареи", "至少一块电池的电量（%）或功率（W）", "مستوى الشحن (٪) أو القدرة (واط) لبطارية واحدة على الأقل"],"Au moins une pièce avec son thermostat (entité climate)":["At least one room with its thermostat (climate entity)", "Al menos una habitación con su termostato (entidad climate)", "Mindestens ein Raum mit Thermostat (climate-Entität)", "Minstens één kamer met thermostaat (climate-entiteit)", "Almeno una stanza con il suo termostato (entità climate)", "Pelo menos uma divisão com o seu termóstato (entidade climate)", "Co najmniej jeden pokój z termostatem (encja climate)", "Хотя бы одна комната с термостатом (сущность climate)", "至少一个带温控器的房间（climate 实体）", "غرفة واحدة على الأقل مع منظم الحرارة (كيان climate)"],"Au moins une voiture ou une borne (puissance, branché, en charge)":["At least one car or charger (power, plugged in, charging)", "Al menos un coche o cargador (potencia, conectado, cargando)", "Mindestens ein Auto oder eine Ladestation (Leistung, angesteckt, lädt)", "Minstens één auto of laadpaal (vermogen, aangesloten, laadt)", "Almeno un'auto o una colonnina (potenza, collegata, in carica)", "Pelo menos um carro ou posto (potência, ligado, a carregar)", "Co najmniej jeden samochód lub stacja (moc, podłączony, ładowanie)", "Хотя бы один автомобиль или станция (мощность, подключено, зарядка)", "至少一辆车或一个充电桩（功率、已连接、充电中）", "سيارة أو محطة شحن واحدة على الأقل (القدرة، موصول، قيد الشحن)"],"Au moins un groupe avec un élément":["At least one group with an item", "Al menos un grupo con un elemento", "Mindestens eine Gruppe mit einem Element", "Minstens één groep met een item", "Almeno un gruppo con un elemento", "Pelo menos um grupo com um elemento", "Co najmniej jedna grupa z elementem", "Хотя бы одна группа с элементом", "至少一个包含项目的分组", "مجموعة واحدة على الأقل تحتوي عنصراً"],"Au moins une tuile":["At least one tile", "Al menos un mosaico", "Mindestens eine Kachel", "Minstens één tegel", "Almeno un riquadro", "Pelo menos um mosaico", "Co najmniej jeden kafelek", "Хотя бы одна плитка", "至少一个磁贴", "بلاطة واحدة على الأقل"],"Au moins un radiateur (entité climate)":["At least one radiator (climate entity)", "Al menos un radiador (entidad climate)", "Mindestens ein Heizkörper (climate-Entität)", "Minstens één radiator (climate-entiteit)", "Almeno un radiatore (entità climate)", "Pelo menos um radiador (entidade climate)", "Co najmniej jeden grzejnik (encja climate)", "Хотя бы один радиатор (сущность climate)", "至少一个暖气片（climate 实体）", "مدفأة واحدة على الأقل (كيان climate)"],"Au moins une caméra":["At least one camera", "Al menos una cámara", "Mindestens eine Kamera", "Minstens één camera", "Almeno una telecamera", "Pelo menos uma câmara", "Co najmniej jedna kamera", "Хотя бы одна камера", "至少一个摄像头", "كاميرا واحدة على الأقل"],"Au moins une pièce":["At least one room", "Al menos una habitación", "Mindestens ein Raum", "Minstens één kamer", "Almeno una stanza", "Pelo menos uma divisão", "Co najmniej jeden pokój", "Хотя бы одна комната", "至少一个房间", "غرفة واحدة على الأقل"],"Au moins un appareil":["At least one device", "Al menos un dispositivo", "Mindestens ein Gerät", "Minstens één apparaat", "Almeno un dispositivo", "Pelo menos um dispositivo", "Co najmniej jedno urządzenie", "Хотя бы одно устройство", "至少一台设备", "جهاز واحد على الأقل"],"Au moins un capteur : fuite, ouvrant, alarme, sonnette ou tension":["At least one sensor: leak, opening, alarm, doorbell or voltage", "Al menos un sensor: fuga, apertura, alarma, timbre o tensión", "Mindestens ein Sensor: Leck, Öffnung, Alarm, Klingel oder Spannung", "Minstens één sensor: lek, opening, alarm, deurbel of spanning", "Almeno un sensore: perdita, apertura, allarme, campanello o tensione", "Pelo menos um sensor: fuga, abertura, alarme, campainha ou tensão", "Co najmniej jeden czujnik: wyciek, otwarcie, alarm, dzwonek lub napięcie", "Хотя бы один датчик: протечка, проём, сигнализация, звонок или напряжение", "至少一个传感器：漏水、门窗、警报、门铃或电压", "مستشعر واحد على الأقل: تسرّب أو فتحة أو إنذار أو جرس أو جهد"],"Au moins une personne ou une pièce":["At least one person or room", "Al menos una persona o habitación", "Mindestens eine Person oder ein Raum", "Minstens één persoon of kamer", "Almeno una persona o stanza", "Pelo menos uma pessoa ou divisão", "Co najmniej jedna osoba lub pokój", "Хотя бы один человек или комната", "至少一个人员或房间", "شخص أو غرفة واحدة على الأقل"],"Appliquer":["Apply","Aplicar","Anwenden","Toepassen","Applica","Aplicar","Zastosuj","Применить","应用","تطبيق"],"Annuler":["Cancel","Cancelar","Abbrechen","Annuleren","Annulla","Cancelar","Anuluj","Отмена","取消","إلغاء"],"Cette valeur":["This value only","Solo este valor","Nur dieser Wert","Alleen deze waarde","Solo questo valore","Só este valor","Tylko ta wartość","Только это значение","仅此值","هذه القيمة فقط"],"Tout le programme":["Whole program","Todo el programa","Ganzes Programm","Heel programma","Intero programma","Todo o programa","Cały program","Вся программа","整个程序","كل البرنامج"],"Toute la pièce":["Whole room","Toda la habitación","Ganzer Raum","Hele kamer","Intera stanza","Todo o cómodo","Cały pokój","Вся комната","整个房间","كل الغرفة"],"Détails":["Details","Detalles","Details","Details","Dettagli","Detalhes","Szczegóły","Подробности","详情","التفاصيل"]};
-// Textes de la carte plein format (sf-ns-card).
+// Texts of the full-screen card (sf-ns-card).
 Object.assign(SF_T, {"Bonjour":["Good morning","Buenos días","Guten Morgen","Goedemorgen","Buongiorno","Bom dia","Dzień dobry","Доброе утро","早上好","صباح الخير"],"Bonsoir":["Good evening","Buenas tardes","Guten Abend","Goedenavond","Buonasera","Boa noite","Dobry wieczór","Добрый вечер","晚上好","مساء الخير"],"Veille":["Standby","En espera","Standby","Stand-by","Standby","Em espera","Czuwanie","Ожидание","待机","وضع الانتظار"],"Matin":["Morning","Mañana","Morgen","Ochtend","Mattina","Manhã","Rano","Утро","早晨","الصباح"],"Jour":["Day","Día","Tag","Dag","Giorno","Dia","Dzień","День","白天","النهار"],"Soir":["Evening","Tarde","Abend","Avond","Sera","Tarde","Wieczór","Вечер","傍晚","المساء"],"nuit":["night","noche","Nacht","nacht","notte","noite","noc","ночь","夜间","ليل"],"Exceptionnel":["Exceptional","Excepcional","Außergewöhnlich","Uitzonderlijk","Eccezionale","Excecional","Wyjątkowa","Исключительная","异常天气","استثنائي"],"Orage et pluie":["Thunderstorm and rain","Tormenta y lluvia","Gewitter und Regen","Onweer en regen","Temporale e pioggia","Trovoada e chuva","Burza z deszczem","Гроза с дождём","雷雨","عاصفة رعدية ومطر"],"Pluie et neige":["Rain and snow","Lluvia y nieve","Regen und Schnee","Regen en sneeuw","Pioggia e neve","Chuva e neve","Deszcz ze śniegiem","Дождь со снегом","雨夹雪","مطر وثلج"],"{n} non verrouillée":["{n} unlocked","{n} sin cerrar","{n} nicht verriegelt","{n} niet vergrendeld","{n} non bloccata","{n} destrancado","{n} niezamknięty","{n} не заперт","{n} 未上锁","{n} غير مقفلة"],"{n} : batterie {p} %":["{n}: battery {p} %","{n}: batería {p} %","{n}: Akku {p} %","{n}: batterij {p} %","{n}: batteria {p} %","{n}: bateria {p} %","{n}: bateria {p} %","{n}: батарея {p} %","{n}：电量 {p} %","{n}: البطارية {p} %"],"{n} froid · {v}°":["{n} cold · {v}°","{n} frío · {v}°","{n} kalt · {v}°","{n} koud · {v}°","{n} freddo · {v}°","{n} frio · {v}°","{n} zimno · {v}°","{n} холодно · {v}°","{n} 偏冷 · {v}°","{n} بارد · {v}°"],"{n} trop chaud · {v}°":["{n} too warm · {v}°","{n} demasiado caliente · {v}°","{n} zu warm · {v}°","{n} te warm · {v}°","{n} troppo caldo · {v}°","{n} demasiado quente · {v}°","{n} za ciepło · {v}°","{n} слишком тепло · {v}°","{n} 过热 · {v}°","{n} حار جداً · {v}°"],"pluie dans {n} min":["rain in {n} min","lluvia en {n} min","Regen in {n} Min.","regen over {n} min","pioggia tra {n} min","chuva em {n} min","deszcz za {n} min","дождь через {n} мин","{n} 分钟后下雨","مطر خلال {n} د"],"pluie vers {h} h":["rain around {h}:00","lluvia hacia las {h} h","Regen gegen {h} Uhr","regen rond {h} uur","pioggia verso le {h}","chuva por volta das {h} h","deszcz około {h}:00","дождь около {h}:00","约 {h} 点下雨","مطر قرابة الساعة {h}"],"pluie en cours":["raining now","lloviendo ahora","es regnet","het regent","sta piovendo","a chover","pada deszcz","идёт дождь","正在下雨","تمطر الآن"],"sec pour {n} h":["dry for {n} h","seco durante {n} h","trocken für {n} Std.","droog voor {n} u","asciutto per {n} h","seco por {n} h","sucho przez {n} godz.","сухо {n} ч","未来 {n} 小时无雨","جاف لمدة {n} س"],"aujourd'hui":["today","hoy","heute","vandaag","oggi","hoje","dziś","сегодня","今天","اليوم"],"{p} % hier":["{p} % vs yesterday","{p} % vs ayer","{p} % ggü. gestern","{p} % t.o.v. gisteren","{p} % rispetto a ieri","{p} % vs. ontem","{p} % vs wczoraj","{p} % к вчера","较昨日 {p} %","{p} % عن أمس"],"autoconso {n} %":["self-use {n} %","autoconsumo {n} %","Eigenverbrauch {n} %","eigen gebruik {n} %","autoconsumo {n} %","autoconsumo {n} %","autokonsumpcja {n} %","собств. потр. {n} %","自用 {n} %","استهلاك ذاتي {n} %"],"maison":["home","casa","Haus","huis","casa","casa","dom","дом","家庭","المنزل"],"borne":["charger","cargador","Ladestation","laadpaal","colonnina","carregador","ładowarka","зарядка","充电桩","الشاحن"],"export":["export","exportación","Einspeisung","teruglevering","immissione","injeção","eksport","отдача","输出","تصدير"],"injecte":["exporting","inyectando","speist ein","levert terug","immette","a injetar","oddaje","отдаёт","输出中","يصدّر"],"consommation de fond":["base load","consumo base","Grundlast","basisverbruik","consumo di base","consumo de fundo","obciążenie podstawowe","фоновое потребление","基础负载","الحمل الأساسي"],"branchée, en attente":["plugged in, waiting","conectado, en espera","angeschlossen, wartet","aangesloten, wacht","collegata, in attesa","ligado, em espera","podłączony, czeka","подключено, ожидание","已连接，等待中","موصول، في الانتظار"],"branchée":["plugged in","conectado","angeschlossen","aangesloten","collegata","ligado","podłączony","подключено","已连接","موصول"],"libre":["free","libre","frei","vrij","libera","livre","wolna","свободна","空闲","متاح"],"Aucune tuile configurée":["No tile configured","Ningún mosaico configurado","Keine Kachel konfiguriert","Geen tegel ingesteld","Nessun riquadro configurato","Nenhum mosaico configurado","Brak skonfigurowanych kafelków","Плитки не настроены","未配置磁贴","لم يتم إعداد أي بلاطة"],"scène":["scene","escena","Szene","scène","scena","cena","scena","сцена","场景","مشهد"],"Éteindre":["Turn off","Apagar","Ausschalten","Uitzetten","Spegni","Desligar","Wyłącz","Выключить","关灯","إطفاء"],"Tout éteindre ?":["Turn everything off?","¿Apagar todo?","Alles ausschalten?","Alles uitzetten?","Spegnere tutto?","Desligar tudo?","Wyłączyć wszystko?","Выключить всё?","全部关闭？","إطفاء كل شيء؟"],"Tamisé":["Dimmed","Tenue","Gedimmt","Gedimd","Soffusa","Suave","Przyciemnione","Приглушённый","柔光","خافت"],"Bonne nuit":["Good night","Buenas noches","Gute Nacht","Welterusten","Buonanotte","Boa noite","Dobranoc","Спокойной ночи","晚安","تصبح على خير"],"Éteindre + fermer ?":["Turn off + close?","¿Apagar + cerrar?","Ausschalten + schließen?","Uitzetten + sluiten?","Spegnere + chiudere?","Desligar + fechar?","Wyłączyć + zamknąć?","Выключить + закрыть?","关灯并关闭？","إطفاء + إغلاق؟"],"Retour base":["Return to base","Volver a la base","Zur Basis","Terug naar basis","Torna alla base","Voltar à base","Powrót do bazy","На базу","回充","العودة للقاعدة"],"Stop":["Stop","Parar","Stopp","Stop","Stop","Parar","Stop","Стоп","停止","إيقاف"],"retourne à la base":["returning to base","volviendo a la base","kehrt zur Basis zurück","keert terug naar basis","torna alla base","a voltar à base","wraca do bazy","возвращается на базу","返回基座","يعود إلى القاعدة"],"erreur":["error","error","Fehler","fout","errore","erro","błąd","ошибка","错误","خطأ"],"R.A.S.":["All clear","Sin novedad","Alles in Ordnung","Alles rustig","Tutto ok","Tudo normal","Wszystko OK","Всё спокойно","一切正常","لا شيء يُذكر"],"voir la bande rouge":["see the red banner","ver la banda roja","siehe rotes Banner","zie de rode balk","vedi la banda rossa","ver a faixa vermelha","zobacz czerwony pasek","см. красную полосу","见红色横幅","انظر الشريط الأحمر"],"la maison veille":["the house is watching","la casa vigila","das Haus wacht","het huis waakt","la casa vigila","a casa vigia","dom czuwa","дом под присмотром","家中守护中","المنزل تحت المراقبة"],"Dehors":["Outside","Exterior","Draußen","Buiten","Fuori","Fora","Na zewnątrz","На улице","室外","الخارج"],"Au moins un élément : météo, énergie, pièce, voiture, tuile ou raccourci":["At least one item: weather, energy, room, car, tile or shortcut","Al menos un elemento: tiempo, energía, estancia, coche, mosaico o acceso directo","Mindestens ein Element: Wetter, Energie, Raum, Fahrzeug, Kachel oder Verknüpfung","Minstens één item: weer, energie, kamer, auto, tegel of snelkoppeling","Almeno un elemento: meteo, energia, stanza, auto, riquadro o scorciatoia","Pelo menos um elemento: meteorologia, energia, divisão, carro, mosaico ou atalho","Co najmniej jeden element: pogoda, energia, pokój, samochód, kafelek lub skrót","Хотя бы один элемент: погода, энергия, комната, автомобиль, плитка или ярлык","至少一项：天气、能源、房间、车辆、磁贴或快捷方式","عنصر واحد على الأقل: الطقس أو الطاقة أو غرفة أو سيارة أو بلاطة أو اختصار"],"Écran plein format":["Full-screen panel","Pantalla completa","Vollbild-Panel","Volledig scherm","Schermo intero","Ecrã inteiro","Panel pełnoekranowy","Полноэкранная панель","全屏面板","لوحة بملء الشاشة"],"Mode (Matin / Jour / Soir / Nuit, liste de choix)":["Mode (Morning / Day / Evening / Night, selector)","Modo (Mañana / Día / Tarde / Noche, lista de opciones)","Modus (Morgen / Tag / Abend / Nacht, Auswahlliste)","Modus (Ochtend / Dag / Avond / Nacht, keuzelijst)","Modalità (Mattina / Giorno / Sera / Notte, elenco)","Modo (Manhã / Dia / Tarde / Noite, lista)","Tryb (Rano / Dzień / Wieczór / Noc, lista wyboru)","Режим (Утро / День / Вечер / Ночь, список выбора)","模式（早晨 / 白天 / 傍晚 / 夜间，选择列表）","الوضع (الصباح / النهار / المساء / الليل، قائمة اختيار)"],"Masquer la barre de Home Assistant (mode kiosque)":["Hide the Home Assistant top bar (kiosk mode)","Ocultar la barra de Home Assistant (modo quiosco)","Home-Assistant-Leiste ausblenden (Kiosk-Modus)","Home Assistant-balk verbergen (kioskmodus)","Nascondi la barra di Home Assistant (modalità chiosco)","Ocultar a barra do Home Assistant (modo quiosque)","Ukryj pasek Home Assistant (tryb kiosku)","Скрыть панель Home Assistant (режим киоска)","隐藏 Home Assistant 顶栏（展台模式）","إخفاء شريط Home Assistant (وضع الكشك)"],"Scène d'ambiance (bouton « Tamisé »)":["Ambience scene (\"Dimmed\" button)","Escena de ambiente (botón «Tenue»)","Stimmungsszene (Schaltfläche „Gedimmt“)","Sfeerscène (knop ‘Gedimd’)","Scena d'atmosfera (pulsante «Soffusa»)","Cena de ambiente (botão «Suave»)","Scena nastrojowa (przycisk „Przyciemnione”)","Сцена атмосферы (кнопка «Приглушённый»)","氛围场景（“柔光”按钮）","مشهد الأجواء (زر «خافت»)"],"Lumières à éteindre (boutons « Éteindre » et « Bonne nuit »)":["Lights to turn off (\"Turn off\" and \"Good night\" buttons)","Luces a apagar (botones «Apagar» y «Buenas noches»)","Auszuschaltende Lichter (Schaltflächen „Ausschalten“ und „Gute Nacht“)","Uit te zetten lampen (knoppen ‘Uitzetten’ en ‘Welterusten’)","Luci da spegnere (pulsanti «Spegni» e «Buonanotte»)","Luzes a desligar (botões «Desligar» e «Boa noite»)","Światła do wyłączenia (przyciski „Wyłącz” i „Dobranoc”)","Лампы для выключения (кнопки «Выключить» и «Спокойной ночи»)","要关闭的灯（“关灯”和“晚安”按钮）","الأضواء المراد إطفاؤها (زرّا «إطفاء» و«تصبح على خير»)"],"Volets (bouton « Volets » et « Bonne nuit »)":["Shutters (\"Shutters\" and \"Good night\" buttons)","Persianas (botones «Persianas» y «Buenas noches»)","Rollläden (Schaltflächen „Rollläden“ und „Gute Nacht“)","Rolluiken (knoppen ‘Rolluiken’ en ‘Welterusten’)","Tapparelle (pulsanti «Tapparelle» e «Buonanotte»)","Estores (botões «Estores» e «Boa noite»)","Rolety (przyciski „Rolety” i „Dobranoc”)","Жалюзи (кнопки «Жалюзи» и «Спокойной ночи»)","卷帘（“卷帘”和“晚安”按钮）","الستائر (زرّا «الستائر» و«تصبح على خير»)"],"Alerte si plus froid que (°)":["Alert if colder than (°)","Alerta si hace menos de (°)","Warnung unter (°)","Waarschuwing onder (°)","Avviso se sotto (°)","Alerta abaixo de (°)","Alert poniżej (°)","Оповещение, если холоднее (°)","低于此温度告警（°）","تنبيه إذا كانت أبرد من (°)"],"Alerte si plus chaud que (°)":["Alert if warmer than (°)","Alerta si hace más de (°)","Warnung über (°)","Waarschuwing boven (°)","Avviso se sopra (°)","Alerta acima de (°)","Alert powyżej (°)","Оповещение, если теплее (°)","高于此温度告警（°）","تنبيه إذا كانت أدفأ من (°)"],"Réfrigérateurs et congélateurs":["Fridges and freezers","Frigoríficos y congeladores","Kühl- und Gefrierschränke","Koelkasten en vriezers","Frigoriferi e congelatori","Frigoríficos e congeladores","Lodówki i zamrażarki","Холодильники и морозильники","冰箱和冷冻柜","الثلاجات والمجمدات"],"Verrou (entité lock)":["Lock (lock entity)","Cerradura (entidad lock)","Schloss (lock-Entität)","Slot (lock-entiteit)","Serratura (entità lock)","Fechadura (entidade lock)","Zamek (encja lock)","Замок (сущность lock)","门锁（lock 实体）","القفل (كيان lock)"],"Alerte sous (%)":["Alert below (%)","Alerta por debajo de (%)","Warnung unter (%)","Waarschuwing onder (%)","Avviso sotto (%)","Alerta abaixo de (%)","Alert poniżej (%)","Оповещение ниже (%)","低于此电量告警（%）","تنبيه دون (٪)"],"Ajouter un capteur":["Add a sensor","Añadir un sensor","Sensor hinzufügen","Sensor toevoegen","Aggiungi un sensore","Adicionar um sensor","Dodaj czujnik","Добавить датчик","添加传感器","إضافة حساس"],"Capteur":["Sensor","Sensor","Sensor","Sensor","Sensore","Sensor","Czujnik","Датчик","传感器","حساس"],"Raccourcis (boutons du matin et fenêtre aspirateur)":["Shortcuts (morning buttons and vacuum window)","Accesos directos (botones de la mañana y ventana de la aspiradora)","Verknüpfungen (Morgen-Schaltflächen und Staubsauger-Fenster)","Snelkoppelingen (ochtendknoppen en stofzuigervenster)","Scorciatoie (pulsanti del mattino e finestra dell'aspirapolvere)","Atalhos (botões da manhã e janela do aspirador)","Skróty (przyciski poranne i okno odkurzacza)","Ярлыки (кнопки утра и окно пылесоса)","快捷方式（早晨按钮和扫地机窗口）","الاختصارات (أزرار الصباح ونافذة المكنسة)"],"Ajouter un raccourci":["Add a shortcut","Añadir un acceso directo","Verknüpfung hinzufügen","Snelkoppeling toevoegen","Aggiungi una scorciatoia","Adicionar um atalho","Dodaj skrót","Добавить ярлык","添加快捷方式","إضافة اختصار"],"Raccourci":["Shortcut","Acceso directo","Verknüpfung","Snelkoppeling","Scorciatoia","Atalho","Skrót","Ярлык","快捷方式","اختصار"],"Consommation de la maison":["Home consumption","Consumo de la casa","Hausverbrauch","Huisverbruik","Consumo della casa","Consumo da casa","Zużycie domu","Потребление дома","家庭用电","استهلاك المنزل"],"Puissance de la borne":["Charger power","Potencia del cargador","Ladeleistung","Laadvermogen","Potenza della colonnina","Potência do carregador","Moc ładowarki","Мощность зарядки","充电桩功率","قدرة الشاحن"],"Décision du pilote de charge (texte)":["Charge controller decision (text)","Decisión del controlador de carga (texto)","Entscheidung der Ladesteuerung (Text)","Beslissing van de laadregeling (tekst)","Decisione del controllo di ricarica (testo)","Decisão do controlador de carga (texto)","Decyzja sterownika ładowania (tekst)","Решение контроллера зарядки (текст)","充电控制器决策（文本）","قرار متحكم الشحن (نص)"],"Énergie de la borne aujourd'hui (kWh)":["Charger energy today (kWh)","Energía del cargador hoy (kWh)","Ladeenergie heute (kWh)","Laadenergie vandaag (kWh)","Energia della colonnina oggi (kWh)","Energia do carregador hoje (kWh)","Energia ładowarki dziś (kWh)","Энергия зарядки сегодня (кВт·ч)","今日充电量（kWh）","طاقة الشاحن اليوم (kWh)"],"Intensité de la borne (A)":["Charger current (A)","Corriente del cargador (A)","Ladestrom (A)","Laadstroom (A)","Corrente della colonnina (A)","Corrente do carregador (A)","Natężenie ładowarki (A)","Ток зарядки (А)","充电电流（A）","تيار الشاحن (A)"],"Part solaire de la charge (kW)":["Solar share of charging (kW)","Parte solar de la carga (kW)","Solaranteil der Ladung (kW)","Zonnedeel van het laden (kW)","Quota solare della ricarica (kW)","Parte solar da carga (kW)","Udział słońca w ładowaniu (kW)","Солнечная доля зарядки (кВт)","充电中的太阳能部分（kW）","الحصة الشمسية من الشحن (kW)"],"Part réseau de la charge (kW)":["Grid share of charging (kW)","Parte de la red en la carga (kW)","Netzanteil der Ladung (kW)","Netdeel van het laden (kW)","Quota di rete della ricarica (kW)","Parte da rede na carga (kW)","Udział sieci w ładowaniu (kW)","Сетевая доля зарядки (кВт)","充电中的电网部分（kW）","حصة الشبكة من الشحن (kW)"],"Heures creuses si le prix est sous":["Off-peak when the price is below","Valle si el precio es inferior a","Niedertarif, wenn der Preis unter … liegt","Daltarief als de prijs onder … ligt","Fascia ridotta se il prezzo è sotto","Vazio se o preço for inferior a","Taryfa nocna, gdy cena jest poniżej","Ночной тариф, если цена ниже","价格低于此值视为谷时","خارج الذروة إذا كان السعر أقل من"],"Appareils suivis (YAML : entity, icon)":["Tracked devices (YAML: entity, icon)","Aparatos seguidos (YAML: entity, icon)","Überwachte Geräte (YAML: entity, icon)","Gevolgde apparaten (YAML: entity, icon)","Dispositivi monitorati (YAML: entity, icon)","Aparelhos acompanhados (YAML: entity, icon)","Śledzone urządzenia (YAML: entity, icon)","Отслеживаемые устройства (YAML: entity, icon)","跟踪的设备（YAML：entity、icon）","الأجهزة المتابعة (YAML: entity, icon)"],"Bilan du jour (YAML : import, export, solar, hp, hc, hc_hours)":["Daily summary (YAML: import, export, solar, hp, hc, hc_hours)","Balance del día (YAML: import, export, solar, hp, hc, hc_hours)","Tagesbilanz (YAML: import, export, solar, hp, hc, hc_hours)","Dagbalans (YAML: import, export, solar, hp, hc, hc_hours)","Bilancio del giorno (YAML: import, export, solar, hp, hc, hc_hours)","Balanço do dia (YAML: import, export, solar, hp, hc, hc_hours)","Bilans dnia (YAML: import, export, solar, hp, hc, hc_hours)","Итоги дня (YAML: import, export, solar, hp, hc, hc_hours)","每日汇总（YAML：import、export、solar、hp、hc、hc_hours）","حصيلة اليوم (YAML: import, export, solar, hp, hc, hc_hours)"],"Devise affichée (ex. €, $, £)":["Currency shown (e.g. €, $, £)","Moneda mostrada (p. ej. €, $, £)","Angezeigte Währung (z. B. €, $, £)","Getoonde valuta (bijv. €, $, £)","Valuta mostrata (es. €, $, £)","Moeda mostrada (ex. €, $, £)","Wyświetlana waluta (np. €, $, £)","Отображаемая валюта (напр. €, $, £)","显示的货币（如 €、$、£）","العملة المعروضة (مثل €، $، £)"]});
 Object.assign(SF_T, {"Tendance": ["Trend", "Tendencia", "Verlauf", "Trend", "Andamento", "Tendência", "Trend", "Тенденция", "趋势", "الاتجاه"], "Aucune donnée": ["No data", "Sin datos", "Keine Daten", "Geen gegevens", "Nessun dato", "Sem dados", "Brak danych", "Нет данных", "无数据", "لا توجد بيانات"], "Chargement…": ["Loading…", "Cargando…", "Wird geladen…", "Laden…", "Caricamento…", "A carregar…", "Ładowanie…", "Загрузка…", "加载中…", "جارٍ التحميل…"], "{n} h": ["{n} h", "{n} h", "{n} Std.", "{n} u", "{n} h", "{n} h", "{n} godz.", "{n} ч", "{n} 小时", "{n} س"], "{n} j": ["{n} d", "{n} d", "{n} T", "{n} d", "{n} g", "{n} d", "{n} d.", "{n} д", "{n} 天", "{n} ي"], "min": ["min", "mín", "min", "min", "min", "mín", "min", "мин", "最小", "أدنى"], "max": ["max", "máx", "max", "max", "max", "máx", "max", "макс", "最大", "أعلى"], "Au moins une série": ["At least one series", "Al menos una serie", "Mindestens eine Reihe", "Minstens één reeks", "Almeno una serie", "Pelo menos uma série", "Co najmniej jedna seria", "Хотя бы один ряд", "至少一个数据系列", "سلسلة واحدة على الأقل"], "Plage affichée au départ (heures)": ["Initial time range (hours)", "Rango inicial (horas)", "Anfangszeitraum (Stunden)", "Beginperiode (uren)", "Intervallo iniziale (ore)", "Intervalo inicial (horas)", "Początkowy zakres (godziny)", "Начальный период (часы)", "初始时间范围（小时）", "النطاق الزمني الأولي (ساعات)"], "Disposition": ["Layout", "Disposición", "Layout", "Indeling", "Disposizione", "Disposição", "Układ", "Расположение", "布局", "التخطيط"], "Hauteur du graphique (px)": ["Chart height (px)", "Altura del gráfico (px)", "Diagrammhöhe (px)", "Grafiekhoogte (px)", "Altezza del grafico (px)", "Altura do gráfico (px)", "Wysokość wykresu (px)", "Высота графика (px)", "图表高度（px）", "ارتفاع الرسم (px)"], "Séries": ["Series", "Series", "Reihen", "Reeksen", "Serie", "Séries", "Serie", "Ряды", "数据系列", "السلاسل"], "Ajouter une série": ["Add a series", "Añadir una serie", "Reihe hinzufügen", "Reeks toevoegen", "Aggiungi una serie", "Adicionar uma série", "Dodaj serię", "Добавить ряд", "添加数据系列", "إضافة سلسلة"], "Série": ["Series", "Serie", "Reihe", "Reeks", "Serie", "Série", "Seria", "Ряд", "数据系列", "سلسلة"], "Automatique (superposées si même unité)": ["Automatic (overlaid if same unit)", "Automático (superpuestas si misma unidad)", "Automatisch (überlagert bei gleicher Einheit)", "Automatisch (over elkaar bij dezelfde eenheid)", "Automatico (sovrapposte se stessa unità)", "Automático (sobrepostas se mesma unidade)", "Automatycznie (nałożone przy tej samej jednostce)", "Авто (вместе при одинаковых единицах)", "自动（单位相同则叠加）", "تلقائي (متراكبة عند تطابق الوحدة)"], "Courbes superposées": ["Overlaid curves", "Curvas superpuestas", "Überlagerte Kurven", "Over elkaar liggende lijnen", "Curve sovrapposte", "Curvas sobrepostas", "Krzywe nałożone", "Наложенные кривые", "叠加曲线", "منحنيات متراكبة"], "Une courbe par ligne": ["One curve per row", "Una curva por fila", "Eine Kurve pro Zeile", "Eén lijn per rij", "Una curva per riga", "Uma curva por linha", "Jedna krzywa na wiersz", "Одна кривая в строке", "每行一条曲线", "منحنى لكل صف"]});
 Object.assign(SF_T, {"ouvert": ["open", "abierto", "offen", "open", "aperto", "aberto", "otwarte", "открыто", "已打开", "مفتوح"], "fermé": ["closed", "cerrado", "geschlossen", "dicht", "chiuso", "fechado", "zamknięte", "закрыто", "已关闭", "مغلق"], "mouvement détecté": ["motion detected", "movimiento detectado", "Bewegung erkannt", "beweging gedetecteerd", "movimento rilevato", "movimento detetado", "wykryto ruch", "обнаружено движение", "检测到移动", "تم رصد حركة"], "plus de mouvement": ["motion cleared", "sin movimiento", "keine Bewegung mehr", "geen beweging meer", "movimento terminato", "sem movimento", "brak ruchu", "движение прекратилось", "移动结束", "توقفت الحركة"], "présence détectée": ["occupancy detected", "presencia detectada", "Anwesenheit erkannt", "aanwezigheid gedetecteerd", "presenza rilevata", "presença detetada", "wykryto obecność", "обнаружено присутствие", "检测到有人", "تم رصد وجود"], "plus de présence": ["occupancy cleared", "sin presencia", "keine Anwesenheit mehr", "geen aanwezigheid meer", "presenza terminata", "sem presença", "brak obecności", "присутствие прекратилось", "无人", "لا يوجد أحد"], "présent": ["home", "en casa", "zu Hause", "thuis", "a casa", "em casa", "w domu", "дома", "在家", "في المنزل"], "absent": ["away", "ausente", "abwesend", "weg", "fuori", "ausente", "poza domem", "не дома", "离家", "غائب"], "fuite détectée": ["leak detected", "fuga detectada", "Leck erkannt", "lek gedetecteerd", "perdita rilevata", "fuga detetada", "wykryto wyciek", "обнаружена протечка", "检测到漏水", "تم رصد تسرب"], "sec": ["dry", "seco", "trocken", "droog", "asciutto", "seco", "sucho", "сухо", "干燥", "جاف"], "fumée détectée": ["smoke detected", "humo detectado", "Rauch erkannt", "rook gedetecteerd", "fumo rilevato", "fumo detetado", "wykryto dym", "обнаружен дым", "检测到烟雾", "تم رصد دخان"], "plus de fumée": ["smoke cleared", "sin humo", "kein Rauch mehr", "geen rook meer", "fumo terminato", "sem fumo", "brak dymu", "дым исчез", "烟雾消失", "زال الدخان"], "connecté": ["connected", "conectado", "verbunden", "verbonden", "connesso", "ligado", "połączony", "подключено", "已连接", "متصل"], "déconnecté": ["disconnected", "desconectado", "getrennt", "verbroken", "disconnesso", "desligado", "rozłączony", "отключено", "已断开", "غير متصل"], "branché": ["plugged in", "enchufado", "eingesteckt", "ingestoken", "collegato", "ligado à ficha", "podłączony", "включено в розетку", "已插上", "موصول"], "débranché": ["unplugged", "desenchufado", "ausgesteckt", "uitgetrokken", "scollegato", "desligado da ficha", "odłączony", "отключено от розетки", "已拔掉", "مفصول"], "en charge": ["charging", "cargando", "lädt", "laadt", "in carica", "a carregar", "ładuje", "заряжается", "充电中", "قيد الشحن"], "charge terminée": ["charge complete", "carga completa", "Ladung abgeschlossen", "laden voltooid", "ricarica completata", "carga concluída", "ładowanie zakończone", "зарядка завершена", "充电完成", "اكتمل الشحن"], "déverrouillé": ["unlocked", "desbloqueado", "entriegelt", "ontgrendeld", "sbloccato", "destrancado", "odblokowany", "разблокировано", "已解锁", "غير مقفل"], "verrouillé": ["locked", "bloqueado", "verriegelt", "vergrendeld", "bloccato", "trancado", "zablokowany", "заблокировано", "已上锁", "مقفل"], "problème": ["problem", "problema", "Problem", "probleem", "problema", "problema", "problem", "проблема", "故障", "مشكلة"], "résolu": ["resolved", "resuelto", "behoben", "opgelost", "risolto", "resolvido", "rozwiązane", "устранено", "已解决", "تم الحل"], "armée (présence)": ["armed (home)", "armada (en casa)", "scharf (zu Hause)", "ingeschakeld (thuis)", "inserito (in casa)", "armado (em casa)", "uzbrojony (w domu)", "на охране (дома)", "已布防（在家）", "مفعّل (في المنزل)"], "armée (absence)": ["armed (away)", "armada (ausente)", "scharf (abwesend)", "ingeschakeld (weg)", "inserito (fuori casa)", "armado (ausente)", "uzbrojony (poza domem)", "на охране (не дома)", "已布防（离家）", "مفعّل (خارج المنزل)"], "armée (vacances)": ["armed (vacation)", "armada (vacaciones)", "scharf (Urlaub)", "ingeschakeld (vakantie)", "inserito (vacanza)", "armado (férias)", "uzbrojony (urlop)", "на охране (отпуск)", "已布防（度假）", "مفعّل (عطلة)"], "déclenchée": ["triggered", "activada", "ausgelöst", "geactiveerd", "scattato", "disparado", "wyzwolony", "сработала", "已触发", "تم التفعيل"], "indisponible": ["unavailable", "no disponible", "nicht verfügbar", "niet beschikbaar", "non disponibile", "indisponível", "niedostępny", "недоступно", "不可用", "غير متاح"], "activé": ["on", "activado", "an", "aan", "attivo", "ativado", "włączony", "включено", "已开启", "مفعّل"], "désactivé": ["off", "desactivado", "aus", "uit", "disattivato", "desativado", "wyłączony", "выключено", "已关闭", "معطّل"], "Aucun événement": ["No events", "Sin eventos", "Keine Ereignisse", "Geen gebeurtenissen", "Nessun evento", "Sem eventos", "Brak zdarzeń", "Нет событий", "无事件", "لا توجد أحداث"], "Hier": ["Yesterday", "Ayer", "Gestern", "Gisteren", "Ieri", "Ontem", "Wczoraj", "Вчера", "昨天", "أمس"], "Aujourd'hui": ["Today", "Hoy", "Heute", "Vandaag", "Oggi", "Hoje", "Dziś", "Сегодня", "今天", "اليوم"], "Journal": ["Timeline", "Cronología", "Verlauf", "Tijdlijn", "Cronologia", "Cronologia", "Oś czasu", "Хроника", "时间线", "السجل"], "Entités suivies": ["Tracked entities", "Entidades seguidas", "Überwachte Entitäten", "Gevolgde entiteiten", "Entità monitorate", "Entidades acompanhadas", "Śledzone encje", "Отслеживаемые сущности", "跟踪的实体", "الكيانات المتابعة"], "Nombre d'événements affichés": ["Number of events shown", "Número de eventos mostrados", "Anzahl angezeigter Ereignisse", "Aantal getoonde gebeurtenissen", "Numero di eventi mostrati", "Número de eventos mostrados", "Liczba wyświetlanych zdarzeń", "Число показанных событий", "显示的事件数", "عدد الأحداث المعروضة"], "Fenêtre affichée (heures)": ["Time window (hours)", "Ventana de tiempo (horas)", "Zeitfenster (Stunden)", "Tijdvenster (uren)", "Finestra temporale (ore)", "Janela de tempo (horas)", "Okno czasu (godziny)", "Окно времени (часы)", "时间窗口（小时）", "النافذة الزمنية (ساعات)"], "Fusionner les répétitions consécutives": ["Merge consecutive repeats", "Fusionar repeticiones consecutivas", "Aufeinanderfolgende Wiederholungen zusammenfassen", "Opeenvolgende herhalingen samenvoegen", "Unisci le ripetizioni consecutive", "Fundir repetições consecutivas", "Scalaj kolejne powtórzenia", "Объединять повторы подряд", "合并连续重复", "دمج التكرارات المتتالية"], "Masquer les états indisponibles": ["Hide unavailable states", "Ocultar estados no disponibles", "Nicht verfügbare Zustände ausblenden", "Niet-beschikbare statussen verbergen", "Nascondi stati non disponibili", "Ocultar estados indisponíveis", "Ukryj stany niedostępne", "Скрывать недоступные состояния", "隐藏不可用状态", "إخفاء الحالات غير المتاحة"], "Ajouter une entité": ["Add an entity", "Añadir una entidad", "Entität hinzufügen", "Entiteit toevoegen", "Aggiungi un'entità", "Adicionar uma entidade", "Dodaj encję", "Добавить сущность", "添加实体", "إضافة كيان"], "Au moins une entité": ["At least one entity", "Al menos una entidad", "Mindestens eine Entität", "Minstens één entiteit", "Almeno un'entità", "Pelo menos uma entidade", "Co najmniej jedna encja", "Хотя бы одна сущность", "至少一个实体", "كيان واحد على الأقل"]});
@@ -55,9 +55,9 @@ Object.assign(SF_T, {"Tout va bien": ["All good", "Todo bien", "Alles in Ordnung
 Object.assign(SF_T, {"Assistant": ["Assistant", "Asistente", "Assistent", "Assistent", "Assistente", "Assistente", "Asystent", "Ассистент", "助手", "المساعد"], "Au repos": ["Idle", "En reposo", "Bereit", "Inactief", "A riposo", "Em repouso", "Bezczynny", "Ожидает", "空闲", "في وضع الراحة"], "À l'écoute": ["Listening", "Escuchando", "Hört zu", "Luistert", "In ascolto", "A ouvir", "Słucha", "Слушает", "正在聆听", "يستمع"], "Réfléchit": ["Thinking", "Pensando", "Denkt nach", "Denkt na", "Sta pensando", "A pensar", "Myśli", "Думает", "思考中", "يفكر"], "Exécute": ["Running", "Ejecutando", "Führt aus", "Voert uit", "In esecuzione", "A executar", "Wykonuje", "Выполняет", "执行中", "ينفّذ"], "Répond": ["Replying", "Respondiendo", "Antwortet", "Antwoordt", "Sta rispondendo", "A responder", "Odpowiada", "Отвечает", "回复中", "يردّ"], "Erreur": ["Error", "Error", "Fehler", "Fout", "Errore", "Erro", "Błąd", "Ошибка", "错误", "خطأ"], "Demande": ["Request", "Solicitud", "Anfrage", "Verzoek", "Richiesta", "Pedido", "Prośba", "Запрос", "请求", "الطلب"], "Action": ["Action", "Acción", "Aktion", "Actie", "Azione", "Ação", "Akcja", "Действие", "动作", "الإجراء"], "Résultat": ["Result", "Resultado", "Ergebnis", "Resultaat", "Risultato", "Resultado", "Wynik", "Результат", "结果", "النتيجة"], "Réponse": ["Reply", "Respuesta", "Antwort", "Antwoord", "Risposta", "Resposta", "Odpowiedź", "Ответ", "回复", "الرد"], "Au moins une entité : état, demande, action, résultat ou réponse": ["At least one entity: state, request, action, result or reply", "Al menos una entidad: estado, solicitud, acción, resultado o respuesta", "Mindestens eine Entität: Zustand, Anfrage, Aktion, Ergebnis oder Antwort", "Minstens één entiteit: status, verzoek, actie, resultaat of antwoord", "Almeno un'entità: stato, richiesta, azione, risultato o risposta", "Pelo menos uma entidade: estado, pedido, ação, resultado ou resposta", "Co najmniej jedna encja: stan, prośba, akcja, wynik lub odpowiedź", "Хотя бы одна сущность: состояние, запрос, действие, результат или ответ", "至少一个实体：状态、请求、动作、结果或回复", "كيان واحد على الأقل: الحالة أو الطلب أو الإجراء أو النتيجة أو الرد"], "Phase (entité dont l'état décrit l'activité)": ["Phase (entity whose state describes the activity)", "Fase (entidad cuyo estado describe la actividad)", "Phase (Entität, deren Zustand die Aktivität beschreibt)", "Fase (entiteit waarvan de status de activiteit beschrijft)", "Fase (entità il cui stato descrive l'attività)", "Fase (entidade cujo estado descreve a atividade)", "Faza (encja, której stan opisuje aktywność)", "Фаза (сущность, чьё состояние описывает активность)", "阶段（其状态描述活动的实体）", "المرحلة (كيان تصف حالته النشاط)"], "Correspondance état → phase (YAML : idle, listening, thinking, acting, speaking, error)": ["State → phase mapping (YAML: idle, listening, thinking, acting, speaking, error)", "Correspondencia estado → fase (YAML: idle, listening, thinking, acting, speaking, error)", "Zuordnung Zustand → Phase (YAML: idle, listening, thinking, acting, speaking, error)", "Koppeling status → fase (YAML: idle, listening, thinking, acting, speaking, error)", "Corrispondenza stato → fase (YAML: idle, listening, thinking, acting, speaking, error)", "Correspondência estado → fase (YAML: idle, listening, thinking, acting, speaking, error)", "Mapowanie stan → faza (YAML: idle, listening, thinking, acting, speaking, error)", "Соответствие состояние → фаза (YAML: idle, listening, thinking, acting, speaking, error)", "状态 → 阶段映射（YAML：idle、listening、thinking、acting、speaking、error）", "ربط الحالة بالمرحلة (YAML: idle, listening, thinking, acting, speaking, error)"], "Dernière demande": ["Last request", "Última solicitud", "Letzte Anfrage", "Laatste verzoek", "Ultima richiesta", "Último pedido", "Ostatnia prośba", "Последний запрос", "最近的请求", "آخر طلب"], "Action en cours": ["Current action", "Acción en curso", "Laufende Aktion", "Huidige actie", "Azione in corso", "Ação em curso", "Bieżąca akcja", "Текущее действие", "当前动作", "الإجراء الحالي"], "Dernier résultat": ["Last result", "Último resultado", "Letztes Ergebnis", "Laatste resultaat", "Ultimo risultato", "Último resultado", "Ostatni wynik", "Последний результат", "最近的结果", "آخر نتيجة"], "Dernière réponse": ["Last reply", "Última respuesta", "Letzte Antwort", "Laatste antwoord", "Ultima risposta", "Última resposta", "Ostatnia odpowiedź", "Последний ответ", "最近的回复", "آخر رد"], "Boutons d'action": ["Action buttons", "Botones de acción", "Aktionsschaltflächen", "Actieknoppen", "Pulsanti di azione", "Botões de ação", "Przyciski akcji", "Кнопки действий", "操作按钮", "أزرار الإجراءات"], "Service (domaine.service)": ["Service (domain.service)", "Servicio (dominio.servicio)", "Dienst (domäne.dienst)", "Service (domein.service)", "Servizio (dominio.servizio)", "Serviço (domínio.serviço)", "Usługa (domena.usługa)", "Служба (домен.служба)", "服务（域.服务）", "الخدمة (النطاق.الخدمة)"], "Entité de mode (met en avant les tuiles du moment)": ["Mode entity (highlights the tiles of the moment)", "Entidad de modo (destaca los mosaicos del momento)", "Modus-Entität (hebt die passenden Kacheln hervor)", "Modus-entiteit (licht de tegels van het moment uit)", "Entità di modalità (evidenzia i riquadri del momento)", "Entidade de modo (destaca os mosaicos do momento)", "Encja trybu (wyróżnia kafelki na dany moment)", "Сущность режима (выделяет плитки момента)", "模式实体（突出当前时段的磁贴）", "كيان الوضع (يبرز بلاطات اللحظة)"], "Modes où la tuile est mise en avant": ["Modes in which the tile is highlighted", "Modos en los que se destaca el mosaico", "Modi, in denen die Kachel hervorgehoben wird", "Modi waarin de tegel wordt uitgelicht", "Modalità in cui il riquadro è evidenziato", "Modos em que o mosaico é destacado", "Tryby, w których kafelek jest wyróżniony", "Режимы, в которых плитка выделяется", "磁贴被突出显示的模式", "الأوضاع التي تُبرز فيها البلاطة"]});
 Object.assign(SF_T, {"États affichés (tous si vide)": ["States shown (all if empty)", "Estados mostrados (todos si vacío)", "Angezeigte Zustände (alle, wenn leer)", "Getoonde statussen (alle als leeg)", "Stati mostrati (tutti se vuoto)", "Estados mostrados (todos se vazio)", "Wyświetlane stany (wszystkie, gdy puste)", "Показываемые состояния (все, если пусто)", "显示的状态（为空则全部）", "الحالات المعروضة (الكل إذا كانت فارغة)"], "Intervalle minimal entre deux événements (minutes)": ["Minimum interval between two events (minutes)", "Intervalo mínimo entre dos eventos (minutos)", "Mindestabstand zwischen zwei Ereignissen (Minuten)", "Minimale tijd tussen twee gebeurtenissen (minuten)", "Intervallo minimo tra due eventi (minuti)", "Intervalo mínimo entre dois eventos (minutos)", "Minimalny odstęp między zdarzeniami (minuty)", "Минимальный интервал между событиями (минуты)", "两次事件的最小间隔（分钟）", "أدنى فاصل بين حدثين (دقائق)"], "Axe": ["Axis", "Eje", "Achse", "As", "Asse", "Eixo", "Oś", "Ось", "坐标轴", "المحور"], "Axe de gauche": ["Left axis", "Eje izquierdo", "Linke Achse", "Linkeras", "Asse sinistro", "Eixo esquerdo", "Oś lewa", "Левая ось", "左轴", "المحور الأيسر"], "Axe de droite (échelle propre)": ["Right axis (own scale)", "Eje derecho (escala propia)", "Rechte Achse (eigene Skala)", "Rechteras (eigen schaal)", "Asse destro (scala propria)", "Eixo direito (escala própria)", "Oś prawa (własna skala)", "Правая ось (своя шкала)", "右轴（独立刻度）", "المحور الأيمن (مقياس خاص)"]});
 const SF_LANGS = { en: 0, es: 1, de: 2, nl: 3, it: 4, pt: 5, pl: 6, ru: 7, zh: 8, ar: 9 };
-// Langue de HA (profil de l'utilisateur) ; langue non gérée -> anglais.
-/* Champs obligatoires : par carte, une fonction qui renvoie les textes (clés de traduction) de ce qui manque. Règles volontairement indulgentes :
- * seule une carte qui n'afficherait rien d'utile est signalée. L'éditeur affiche un bandeau, la carte un message « à compléter ». */
+// HA language (user profile); unsupported language -> English.
+/* Required fields: per card, a function that returns the texts (translation keys) of what is missing. Deliberately lenient rules:
+ * only a card that would show nothing useful is flagged. The editor shows a banner, the card a "to be completed" message. */
 const sfHas = (v) => Array.isArray(v) ? v.length > 0 : !!v;
 const sfBatUsable = (c) => !!(c.soc || c.power || c.entity || (c.batteries || []).some((b) => b && (b.soc || b.power || b.entity)));
 const SF_REQ = {
@@ -80,7 +80,7 @@ const SF_REQ = {
   "sf-radar-card": (c) => (sfHas(c.people) || sfHas(c.rooms)) ? [] : ["Au moins une personne ou une pièce"],
   "sf-ns-card": (c) => { const e = c.energy || {}; return (c.weather || c.outdoor || e.solar || e.grid || e.home || ["rooms", "fridge", "cars", "tiles", "shortcuts", "leaks"].some((k) => sfHas(c[k]))) ? [] : ["Au moins un élément : météo, énergie, pièce, voiture, tuile ou raccourci"]; },
 };
-const SF_HOOK = {};   // crochet de test : appelé à chaque traduction demandée
+const SF_HOOK = {};   // test hook: called for every translation requested
 function sfLang(hass) {
   const l = String((hass && ((hass.locale && hass.locale.language) || hass.language)) || "en").slice(0, 2).toLowerCase();
   return l === "fr" || l in SF_LANGS ? l : "en";
@@ -103,7 +103,7 @@ const SF_CSS = `
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; } }
   [role="button"]:focus-visible, .tile:focus-visible { outline:2px solid ${SF_C.cyan}; outline-offset:2px; border-radius:6px; }
   @media (pointer: coarse) { .btn { min-height:40px; } }
-  /* Thème clair : la même carte, luminosité inversée (les teintes sont conservées) ; les images reprennent leurs vraies couleurs. */
+  /* Light theme: the same card with inverted luminosity (hues are kept); images get their real colours back. */
   :host([theme="light"]) { filter: invert(1) hue-rotate(180deg); }
   :host([theme="light"]) img, :host([theme="light"]) video, :host([theme="light"]) canvas { filter: invert(1) hue-rotate(180deg); }
   :host([dir="rtl"]) svg, :host([dir="rtl"]) .stage, :host([dir="rtl"]) .core, :host([dir="rtl"]) .dial, :host([dir="rtl"]) .ring, :host([dir="rtl"]) .gauge .ring { direction:ltr; }
@@ -158,12 +158,12 @@ const SF_CSS = `
   .seg { display:flex; flex-wrap:wrap; gap:6px; }
 `;
 
-// Une configuration mal typée (une chaîne à la place d'une liste, une entrée vide…) ne doit jamais faire planter la carte : les listes attendues
-// sont normalisées (chaîne → liste d'un élément, vide / null → liste vide, éléments vides retirés). La configuration d'origine n'est pas modifiée.
+// A badly typed configuration (a string instead of a list, an empty entry…) must never crash the card: the expected lists
+// are normalised (string -> one-element list, empty / null -> empty list, empty items removed). The original configuration is not modified.
 const SF_LIST_KEYS = ["leaks", "doors", "people", "rooms", "cars", "chargers", "devices", "tiles", "rows", "groups", "cameras", "extras", "batteries", "radiators",
   "exclude", "connected_states", "charging_states", "hc_windows", "home_states", "fridge", "shortcuts", "lights_off", "series", "checks"];
-// Valeurs CSS venues de la configuration (`color`, `accent`, `span`) : seules les formes sûres passent (hex, nom de couleur, rgb()/hsl(), var(--x),
-// nombre de colonnes) ; sinon la clé est retirée et la carte reprend sa valeur par défaut (pas d'injection de style, de balise ni d'URL).
+// CSS values coming from the configuration (`color`, `accent`, `span`): only safe forms pass (hex, colour name, rgb()/hsl(), var(--x),
+// number of columns); otherwise the key is removed and the card falls back to its default (no style, tag or URL injection).
 const SF_COLOR_OK = /^(#[0-9a-f]{3,8}|[a-z]{3,20}|(?:rgb|hsl)a?\([\d\s.,%\/-]{3,40}\)|var\(--[\w-]{1,40}\))$/i;
 function sfCleanCss(o) {
   if (Array.isArray(o)) return o.map(sfCleanCss);
@@ -181,7 +181,7 @@ function sfCleanCss(o) {
 }
 function sfNormConfig(tag, c) {
   c = sfCleanCss(c);
-  if (tag === "sf-climate-card") {   // plage du cadran bornée (sinon des millions de graduations SVG gèlent l'onglet)
+  if (tag === "sf-climate-card") {   // dial range bounded (otherwise millions of SVG ticks would freeze the tab)
     const lo = Number(c.min), hi = Number(c.max);
     if (!isFinite(lo) || !isFinite(hi) || hi <= lo || hi - lo > 100 || Math.abs(lo) > 1000) { c.min = 15; c.max = 30; }
   }
@@ -192,10 +192,10 @@ function sfNormConfig(tag, c) {
   if (c.charger && typeof c.charger === "object") for (const k of ["connected_states", "charging_states"]) if (k in c.charger && !Array.isArray(c.charger[k])) c.charger = { ...c.charger, [k]: c.charger[k] ? [c.charger[k]] : [] };
   return c;
 }
-// Une URL d'image venue d'une entité (donc d'un tiers) n'est utilisée que si elle est sûre : relative, http(s) ou data:image — jamais javascript:.
-// Expression régulière venue de la configuration : ignorée si trop longue, invalide ou à quantificateurs imbriqués (ex. `(a+)+`, `(.*)*`) qui
-// pourraient figer le navigateur (ReDoS). Compilée une seule fois.
-// #hash de l'URL décodé (« #%C3%A9nergie » = « énergie »), pour le comparer au `hash` des tuiles.
+// An image URL coming from an entity (hence from a third party) is only used if it is safe: relative, http(s) or data:image — never javascript:.
+// Regular expression coming from the configuration: ignored if too long, invalid or with nested quantifiers (e.g. `(a+)+`, `(.*)*`) that
+// could freeze the browser (ReDoS). Compiled only once.
+// decoded URL #hash ("#%C3%A9nergie" = "énergie"), to compare it with the tiles' `hash`.
 function sfHash() { const h = location.hash.slice(1); try { return decodeURIComponent(h); } catch (e) { return h; } }
 const _sfRe = {};
 function sfRegex(src) {
@@ -213,7 +213,7 @@ function sfSafeUrl(u) {
   const x = String(u || "").trim();
   return /^(\/(?!\/)|https?:\/\/|data:image\/(png|jpe?g|gif|webp);base64,)/i.test(x) ? x : "";
 }
-// Thèmes d'événements (Halloween 20/10→01/11, Noël 01→26/12) : décor discret sur tous les cadres. Désactiver : `events: false` sur la carte, ou window.SF_EVENTS = false. Aperçu : ?event=halloween | noel
+// Event themes (Halloween 20/10→01/11, Christmas 01→26/12): discreet decoration on every frame. Disable: `events: false` on the card, or window.SF_EVENTS = false. Preview: ?event=halloween | noel
 const SF_EVSVG = {
   pumpkin: `<svg viewBox="0 0 64 64"><ellipse cx="32" cy="38" rx="26" ry="22" fill="#ff8a1f"/><ellipse cx="19" cy="38" rx="11" ry="21" fill="#ffa84d" opacity=".55"/><ellipse cx="45" cy="38" rx="11" ry="21" fill="#e56f00" opacity=".55"/><rect x="29" y="10" width="6" height="11" rx="2" fill="#4caf50"/><path d="M17 33L26 33L21.5 41ZM38 33L47 33L42.5 41Z M19 47Q32 59 45 47L41 47L38 51L32 48L26 51L23 47Z" fill="#2a0e00"/></svg>`,
   web: `<svg viewBox="0 0 40 40"><g stroke="#d9cdf2" stroke-width=".7" fill="none"><path d="M0 0L40 0M0 0L0 40M0 0L34 34M0 0L40 16M0 0L16 40"/><path d="M10 0Q9 9 0 10M20 0Q18 18 0 20M30 0Q27 27 0 30"/></g></svg>`,
@@ -221,7 +221,7 @@ const SF_EVSVG = {
 };
 class SfBase extends HTMLElement {
   setConfig(config) {
-    if (!config) throw new Error(`${this.localName} : config requise`);
+    if (!config) throw new Error(`${this.localName} : config required`);
     this._config = sfNormConfig(this.localName, this.defaults ? { ...this.defaults(), ...config } : { ...config });
     if (!this.shadowRoot) this.attachShadow({ mode: "open" });
     this._dirty = true;
@@ -235,9 +235,9 @@ class SfBase extends HTMLElement {
     if (this._raf || !this._hass || !this._config) return;
     this._raf = requestAnimationFrame(() => {
       this._raf = null;
-      // HA rappelle `hass` à chaque changement d'état de toute la maison : on ne
-      // réécrit le DOM que si le rendu a réellement changé, sinon les animations
-      // (rotations 3D, flux) repartiraient de zéro plusieurs fois par seconde.
+      // HA calls `hass` on every state change of the whole house: the DOM is only
+      // rewritten if the render really changed, otherwise the animations
+      // (3D rotations, flows) would restart from zero several times per second.
       const rq = SF_REQ[this.localName], miss = rq && this.localName !== "sf-battery-card" ? rq(this._config) : [];
       const body = miss.length ? this.frame(this.esc(this.t("Carte à compléter")), "", `<div style="color:${SF_C.amber};line-height:1.6">${miss.map((m) => `• ${this.esc(this.t(m))}`).join("<br>")}</div>`) : this.render();
       const html = `<style>${SF_CSS}${this.css ? this.css() : ""}</style>${body}`;
@@ -252,25 +252,25 @@ class SfBase extends HTMLElement {
         el.addEventListener("click", (ev) => { ev.stopPropagation(); this._onCall(el); }));
       if (this.afterRender) this.afterRender();
       this._a11y(this.shadowRoot);
-      if (this._armed && Date.now() < this._armed.until) {   // le HTML a été réécrit : on ré-arme le même bouton
+      if (this._armed && Date.now() < this._armed.until) {   // the HTML was rewritten: re-arm the same button
         const el = [...this.shadowRoot.querySelectorAll("[data-confirm]")].find((e) => `${e.dataset.call}|${e.dataset.d || ""}` === this._armed.key);
         if (el && !el.classList.contains("armed")) this._arm(el, this._armed.until - Date.now());
       }
     });
   }
-  // Tout élément cliquable devient un vrai bouton pour le clavier et les lecteurs d'écran : rôle, focus, nom accessible, Entrée / Espace.
+  // Every clickable element becomes a real button for the keyboard and screen readers: role, focus, accessible name, Enter / Space.
   _a11y(root) {
     root.querySelectorAll("[data-call], [data-e], .tile").forEach((el) => {
       if (el.matches("button, a, input")) return;
       const de = el.getAttribute("data-e");
-      if (!el.hasAttribute("data-call") && !el.hasAttribute("data-i") && (!de || de === "undefined" || de === "null")) return;   // rien à ouvrir : pas un bouton
+      if (!el.hasAttribute("data-call") && !el.hasAttribute("data-i") && (!de || de === "undefined" || de === "null")) return;   // nothing to open: not a button
       el.setAttribute("role", "button"); el.setAttribute("tabindex", "0");
       if (!el.getAttribute("aria-label")) {
-        // Texte des blocs séparé par des espaces (sinon « Alarmdisarmed », « 62%LEVEL » dans un lecteur d'écran).
+        // Block text separated by spaces (otherwise "Alarmdisarmed", "62%LEVEL" in a screen reader).
         const parts = [], w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let tn;
         while ((tn = w.nextNode())) { const v = tn.nodeValue.trim(); if (v) parts.push(v); }
         let lab = (el.getAttribute("title") || parts.join(" ")).replace(/\s+/g, " ").trim().slice(0, 90);
-        if (!lab) {   // bouton d'icône seule : le nom de l'icône (« arrow up », « stop ») ou, à défaut, le libellé de sa ligne
+        if (!lab) {   // icon-only button: the icon name ("arrow up", "stop") or, failing that, the label of its row
           const ic = el.querySelector("ha-icon[icon]"), row = el.closest(".it, .rad, .room, .borne");
           const nm = row && row.querySelector(".nm, .name, .lbl");
           lab = [nm && nm.textContent.trim(), ic && ic.getAttribute("icon").replace(/^[a-z]+:/, "").replace(/[-_]+/g, " ")].filter(Boolean).join(" ").slice(0, 90);
@@ -279,19 +279,19 @@ class SfBase extends HTMLElement {
       }
       if (el.matches(".seg .btn")) el.setAttribute("aria-pressed", el.classList.contains("on") ? "true" : "false");
       if (!el._kb) { el._kb = true; el.addEventListener("keydown", (ev) => {
-        // Une touche maintenue (repeat) ne doit jamais franchir une confirmation ; un bouton imbriqué ne déclenche pas son parent.
+        // A held key (repeat) must never get through a confirmation; a nested button does not trigger its parent.
         if (ev.target !== el) return;
         if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); ev.stopPropagation(); if (!ev.repeat) el.click(); }
       }); }
     });
   }
   /*
-   * Pilotage : un élément `data-call="domaine.service"` + `data-d='{json}'` appelle le
-   * service au clic. Avec `data-confirm="texte"`, il faut deux appuis en moins de 4 s
-   * (le premier arme le bouton et affiche le texte) : réservé aux actions lourdes.
+   * Control: an element `data-call="domain.service"` + `data-d='{json}'` calls the
+   * service on click. With `data-confirm="text"`, two presses within 4 s are required
+   * (the first arms the button and shows the text): reserved for heavy actions.
    */
-  // Bouton « armé » (première pression d'une action lourde) : l'état survit aux rafraîchissements de la carte (une puissance qui bouge
-  // redessine le HTML toutes les quelques secondes) pendant les 4 s de la confirmation.
+  // "Armed" button (first press of a heavy action): the state survives card refreshes (a moving power value
+  // redraws the HTML every few seconds) during the 4 s of the confirmation.
   _arm(el, ms) {
     el.classList.add("armed");
     el.dataset.label = el.innerHTML; el.dataset.aria = el.getAttribute("aria-label") || "";
@@ -321,12 +321,12 @@ class SfBase extends HTMLElement {
       setTimeout(() => el.classList.remove("fail"), 2500);
     });
   }
-  // Attributs d'un bouton de pilotage, à insérer dans une balise.
+  // Attributes of a control button, to insert in a tag.
   call(service, data, confirm) {
-    if (!/^[a-z0-9_]+\.[a-z0-9_]+$/i.test(String(service))) return "";   // service mal formé (config) : aucun bouton actif
+    if (!/^[a-z0-9_]+\.[a-z0-9_]+$/i.test(String(service))) return "";   // malformed service (config): no active button
     return `data-call="${this.esc(service)}" data-d="${this.esc(JSON.stringify(data || {}))}"${confirm ? ` data-confirm="${this.esc(confirm)}"` : ""}`;
   }
-  // Basculer une entité selon son domaine (script : lancer).
+  // Toggle an entity according to its domain (script: run).
   toggleCall(id) {
     const d = (id || "").split(".")[0];
     if (d === "script") return this.call("script.turn_on", { entity_id: id });
@@ -335,7 +335,7 @@ class SfBase extends HTMLElement {
     return this.call(["light", "switch", "fan", "input_boolean", "automation"].includes(d) ? `${d}.toggle` : "homeassistant.toggle", { entity_id: id });
   }
   isOn(id) { const s = this.st(id); return !!s && ["on", "open", "home", "playing", "cleaning", "heat", "cool", "dry", "fan_only", "heat_cool"].includes(s.state); }
-  // Puissance en W quelle que soit l'unité déclarée (certains compteurs publient en kW).
+  // Power in W whatever the declared unit (some meters publish in kW).
   watts(id) {
     const n = this.num(id); if (n === null) return null;
     const raw = this.unit(id), u = raw.toLowerCase();
@@ -350,8 +350,8 @@ class SfBase extends HTMLElement {
     ev.detail = { entityId };
     this.dispatchEvent(ev);
   }
-  // Les états viennent parfois d'API externes (car manufacturers' clouds, Frigate…) : tout texte dynamique
-  // passe par esc() avant d'être injecté dans le HTML.
+  // States sometimes come from external APIs (car manufacturers' clouds, Frigate…): every dynamic text
+  // goes through esc() before being injected into the HTML.
   esc(v) {
     return String(v ?? "").replace(/[&<>"']/g, (ch) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
@@ -360,7 +360,7 @@ class SfBase extends HTMLElement {
   ok(id) { const s = this.st(id); return !!s && !["unknown", "unavailable"].includes(s.state); }
   num(id) { if (!this.ok(id)) return null; const n = parseFloat(this.st(id).state); return isNaN(n) ? null : n; }
   unit(id) { const s = this.st(id); return (s && s.attributes.unit_of_measurement) || ""; }
-  // Nombre affiché selon la langue du profil HA (virgule ou point décimal), chiffres latins, sans séparateur de milliers.
+  // Number displayed according to the HA profile language (comma or point decimal), Latin digits, no thousands separator.
   nf(v, d = 0) {
     let n = Number(v); if (!isFinite(n)) return String(v);
     if (Math.abs(n) < 0.5 * Math.pow(10, -(Math.min(20, Math.max(0, d | 0))))) n = 0;   // jamais « -0.00 »
@@ -368,24 +368,24 @@ class SfBase extends HTMLElement {
       const cache = (SfBase._nf = SfBase._nf || {}), key = `${this.loc}|${d}`;
       const f = cache[key] || (cache[key] = new Intl.NumberFormat(this.locLatn, { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: false }));
       return f.format(n).replace(/\u2212/g, "-").replace(/[\u200e\u200f\u061c]/g, "");
-    } catch (e) { return n.toFixed(Math.max(0, Math.min(20, d | 0))); }   // langue inconnue d'Intl ou décimales invalides : repli simple
+    } catch (e) { return n.toFixed(Math.max(0, Math.min(20, d | 0))); }   // unknown Intl language or invalid decimals: simple fallback
   }
   fmt(id, digits = 0) {
     const n = this.num(id);
     if (n === null) return this.ok(id) ? this.esc(this.st(id).state) : "—";
     return `${this.nf(n, digits)}`;
   }
-  // Thème : `theme: dark | light | auto` sur la carte, sinon la variable CSS `--sf-theme` du thème HA (à poser une fois pour toutes les cartes), sinon sombre.
+  // Theme: `theme: dark | light | auto` on the card, otherwise the CSS variable `--sf-theme` of the HA theme (set once for all cards), otherwise dark.
   _theme() {
     let t = (this._config || {}).theme;
     if (!t) {
       const th = this._hass && this._hass.themes, key = th ? `${th.theme}|${th.darkMode}` : "";
-      if (!this.isConnected) { try { t = getComputedStyle(this).getPropertyValue("--sf-theme").trim().replace(/['"]/g, ""); } catch (e) { t = ""; } }   // hors du DOM : lecture sans cache
+      if (!this.isConnected) { try { t = getComputedStyle(this).getPropertyValue("--sf-theme").trim().replace(/['"]/g, ""); } catch (e) { t = ""; } }   // outside the DOM: read without cache
       else if (!this._cssRead || this._cssThemeKey !== key) {
         const first = !this._cssRead;
         this._cssRead = true; this._cssThemeKey = key;
         try { this._cssTheme = getComputedStyle(this).getPropertyValue("--sf-theme").trim().replace(/['"]/g, ""); } catch (e) { this._cssTheme = ""; }
-        // HA applique les variables du thème un instant après avoir publié le changement : on relit une fois, un peu plus tard.
+        // HA applies the theme variables a moment after publishing the change: we read once more, a little later.
         if (!first) setTimeout(() => { this._cssRead = false; this._lastHtml = null; this._schedule(); }, 300);
       }
       if (this.isConnected) t = this._cssTheme;
@@ -393,15 +393,15 @@ class SfBase extends HTMLElement {
     if (t === "auto") t = this._hass && this._hass.themes && this._hass.themes.darkMode === false ? "light" : "dark";
     return t === "light" ? "light" : "dark";
   }
-  // Langue pour les nombres et les dates : chiffres latins partout, même avec une langue comme ar-SA.
+  // Language for numbers and dates: Latin digits everywhere, even with a language such as ar-SA.
   get locLatn() {
     if (this._ll !== this.loc) { this._ll = this.loc; try { this._llv = new Intl.Locale(this.loc, { numberingSystem: "latn" }).toString(); } catch (e) { this._llv = "en"; } }
     return this._llv;
   }
-  // Une carte rendue avant d'être attachée relit son thème dès qu'elle l'est (les variables CSS n'existent pas hors du DOM).
+  // A card rendered before being attached re-reads its theme as soon as it is (CSS variables do not exist outside the DOM).
   connectedCallback() { this._cssRead = false; this._lastHtml = null; this._schedule(); }
   get lang() { return sfLang(this._hass); }
-  // Langue du profil HA, normalisée (« en_US » → « en-US ») et validée : une valeur que les API Intl refusent retombe sur « en », jamais d'exception.
+  // HA profile language, normalised ("en_US" → "en-US") and validated: a value rejected by the Intl APIs falls back to "en", never an exception.
   get loc() {
     const h = this._hass, raw = (h && ((h.locale && h.locale.language) || h.language)) || "en";
     if (this._locRaw !== raw) { this._locRaw = raw; try { this._locVal = Intl.getCanonicalLocales(String(raw).replace(/_/g, "-"))[0] || "en"; } catch (e) { this._locVal = "en"; } }
@@ -422,7 +422,7 @@ class SfBase extends HTMLElement {
       const d = new Date(), m = d.getMonth() + 1, j = d.getDate();
       if ((m === 10 && j >= 20) || (m === 11 && j <= 1)) return "halloween";
       if (m === 12 && j <= 26) return "noel";
-    } catch (e) { /* pas de thème */ }
+    } catch (e) { /* no theme */ }
     return null;
   }
   _evDecor(ev) {
@@ -434,8 +434,8 @@ class SfBase extends HTMLElement {
     return `<div class="hud ${ev ? "ev-" + ev + " " : ""}${this.esc(extraClass)}"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>${ev ? this._evDecor(ev) : ""}
       <div class="head"><span class="dot"></span>${title}<span class="sub">${sub || ""}</span></div>${body}</div>`;
   }
-  // Minuteur d'un bouton (ex. sèche-serviette) : { actif, reste (min) }. Un rafraîchissement
-  // toutes les 20 s tant qu'un minuteur tourne, sinon le décompte resterait figé entre deux changements d'état.
+  // Timer of a button (e.g. towel dryer): { active, remaining (min) }. A refresh
+  // every 20 s while a timer is running, otherwise the countdown would stay frozen between two state changes.
   timerInfo(id) {
     const t = id && this.st(id);
     if (!t || t.state !== "active") return { actif: false, reste: 0 };
@@ -452,11 +452,11 @@ class SfBase extends HTMLElement {
  * type: custom:sf-alert-card
  * alarm: alarm_control_panel.x
  * ring: binary_sensor.x            # sonnette
- * snapshot: camera.x               # photo affichée en cas de sonnette
+ * snapshot: camera.x               # photo shown when the doorbell rings
  * leaks: [binary_sensor.x, ...]    # fuites
  * doors: [binary_sensor.x, ...]    # ouvertures (informatif)
- * power: sensor.x                 # tension d'entrée onduleur ; alerte si < power_below (200 V)
- * hide_sim: true                  # masque le bouton de simulation
+ * power: sensor.x                 # UPS input voltage; alert if < power_below (200 V)
+ * hide_sim: true                  # hides the simulation button
  */
 class SfAlertCard extends SfBase {
   defaults() { return { leaks: [], doors: [] }; }
@@ -544,9 +544,9 @@ class SfAlertCard extends SfBase {
   }
 }
 
-/* États d'une borne / d'une voiture : toutes les intégrations ne publient pas un simple on/off. Beaucoup donnent un statut texte
- * (« Charging », « Plugged in », « Awaiting start », « SuspendedEV »…). Comparaison insensible à la casse, aux espaces et aux tirets.
- * `charging_states` / `connected_states` (listes) remplacent les valeurs par défaut si une marque a un statut inhabituel. */
+/* States of a charger / a car: not every integration publishes a plain on/off. Many give a text status
+ * ("Charging", "Plugged in", "Awaiting start", "SuspendedEV"…). Comparison is insensitive to case, spaces and hyphens.
+ * `charging_states` / `connected_states` (lists) replace the defaults if a brand has an unusual status. */
 const SF_EV_CHARGING = ["on", "true", "yes", "1", "charging", "charge", "in_charge", "charging_started", "started", "in_progress", "active",
   "fast_charging", "slow_charging", "ac_charging", "dc_charging", "supercharging", "rapid_charging"];
 const SF_EV_CONNECTED = [...SF_EV_CHARGING, "connected", "plugged", "plugged_in", "pluggedin", "cable_connected", "cable_plugged_in", "vehicle_connected",
@@ -565,25 +565,25 @@ function sfEvOn(el, id, kind, custom) {
  * cars:                       # 3 voitures maximum
  *   - name: Car A
  *     soc: sensor.x            # %
- *     range: sensor.x          # km ou mi (voir distance_unit)
+ *     range: sensor.x          # km or mi (see distance_unit)
  *     target: sensor.x         # charge cible (%), facultatif
- *     charging: binary_sensor.x | sensor.x   # facultatif ; mêmes statuts que la borne (charging_states : liste facultative)
+ *     charging: binary_sensor.x | sensor.x   # optional; same statuses as the charger (charging_states: optional list)
  *     color: "#00e5ff"
- * distance_unit: auto          # auto (unité du capteur) | km | mi (convertit si besoin)
+ * distance_unit: auto          # auto (sensor unit) | km | mi (converts if needed)
  * charger:
  *   name: Garage               # facultatif
- *   connected: binary_sensor.x | sensor.x   # on, Connected, Plugged in… (connected_states : liste facultative qui remplace celle par défaut)
- *   charging: binary_sensor.x | sensor.x | switch.x   # on, charging, Charging… (charging_states) ; absent : puissance > 50 W
- *   power: sensor.x            # W (kW et MW acceptés)
+ *   connected: binary_sensor.x | sensor.x   # on, Connected, Plugged in… (connected_states: optional list that replaces the default)
+ *   charging: binary_sensor.x | sensor.x | switch.x   # on, charging, Charging… (charging_states); absent: power > 50 W
+ *   power: sensor.x            # W (kW and MW accepted)
  *   current: number.x          # A
- *   decision: sensor.x         # décision du pilote de charge (facultatif)
- *   mode: select.x | input_select.x   # sélecteur de mode propre à cette borne (facultatif)
- *   controls: true             # commandes facultatives ; rien ne s'affiche ni ne peut se déclencher sans cette option :
- *   switch: switch.x           #   démarrer / arrêter (arrêt en 2 appuis) ; switch_invert: true si ON = charge en PAUSE
- *   current_step: 1            #   intensité − / + (entité number) ; current_min / current_max si l'entité n'expose pas ses bornes
- * chargers:                    # OU plusieurs bornes (4 max) : [{ name, connected, charging, power, current, decision, mode, controls… }, …]
- * mode: select.x | input_select.x      # sélecteur de mode global (facultatif) ; warn_mode / warn_text : avertissement le soir
- * flows: { solar, home, surplus }       # facultatif : seuls les flux configurés s'affichent
+ *   decision: sensor.x         # charge controller decision (optional)
+ *   mode: select.x | input_select.x   # mode selector of this charger (optional)
+ *   controls: true             # optional controls; nothing is shown or can be triggered without this option:
+ *   switch: switch.x           #   start / stop (stop needs 2 presses); switch_invert: true if ON = charge PAUSED
+ *   current_step: 1            #   current − / + (number entity); current_min / current_max if the entity does not expose its bounds
+ * chargers:                    # OR several chargers (4 max): [{ name, connected, charging, power, current, decision, mode, controls… }, …]
+ * mode: select.x | input_select.x      # global mode selector (optional); warn_mode / warn_text: evening warning
+ * flows: { solar, home, surplus }       # optional: only the configured flows are shown
  */
 class SfHangarCard extends SfBase {
   defaults() { return { cars: [], charger: {}, distance_unit: "auto" }; }
@@ -641,13 +641,13 @@ class SfHangarCard extends SfBase {
       ${this._target(car)}
       <text class="soc" x="55" y="62" text-anchor="middle">${soc === null ? "—" : Math.round(soc) + "%"}</text></svg>`;
   }
-  // Repère blanc à la charge cible (ex. 80 %), si la voiture la publie.
+  // White marker at the target charge (e.g. 80 %), if the car publishes it.
   _target(car) {
     const t = this.num(car.target); if (t === null) return "";
     const a = (t / 100) * 2 * Math.PI - Math.PI / 2;
     return `<line class="tgt" x1="${this.esc(55 + 36 * Math.cos(a))}" y1="${this.esc(55 + 36 * Math.sin(a))}" x2="${this.esc(55 + 48 * Math.cos(a))}" y2="${this.esc(55 + 48 * Math.sin(a))}"><title>${this.esc(this.t("CIBLE"))} ${Math.round(t)} %</title></line>`;
   }
-  // Autonomie : `distance_unit: auto` (défaut) affiche la valeur et l'unité du capteur (km ou mi) ; `km` / `mi` convertit si besoin.
+  // Range: `distance_unit: auto` (default) shows the sensor's value and unit (km or mi); `km` / `mi` converts if needed.
   _range(car) {
     const want = String(this._config.distance_unit || "auto").toLowerCase(), raw = this.num(car.range);
     const su = String(this.unit(car.range) || "").toLowerCase(), src = su.startsWith("mi") ? "mi" : "km";
@@ -663,13 +663,13 @@ class SfHangarCard extends SfBase {
       <div class="km click" data-e="${this.esc(car.range)}">${this._range(car)}</div>
       ${charging ? `<span class="badge">${this.t("EN CHARGE")}</span>` : ""}</div>`;
   }
-  // Une ou plusieurs bornes : `chargers: [{ name, connected, charging, power, current, decision, mode }]` ; `charger: {…}` reste valable (une seule).
+  // One or more chargers: `chargers: [{ name, connected, charging, power, current, decision, mode }]`; `charger: {…}` remains valid (a single one).
   _chargers() {
     const c = this._config;
     const list = c.chargers && c.chargers.length ? c.chargers : [c.charger || {}];
     return list.slice(0, 4);
   }
-  // État d'une borne : « en charge » = statut configuré, sinon puissance > 50 W ; « branché » = statut, ou le simple fait de charger.
+  // State of a charger: "charging" = configured status, otherwise power > 50 W; "plugged in" = status, or the mere fact of charging.
   _chState(ch) {
     const p = this.watts(ch.power);
     const charging = ch.charging ? sfEvOn(this, ch.charging, "charging", ch.charging_states) : (p !== null && p > 50);
@@ -684,13 +684,13 @@ class SfHangarCard extends SfBase {
         <div class="val click" data-e="${this.esc(ch.power)}">${st.p === null ? "—" : Math.round(st.p) + " W"}</div>
         <div class="lbl click" data-e="${this.esc(ch.current)}">${this.fmt(ch.current)} A</div>${this._controls(ch, st)}</div>`;
   }
-  // Commandes facultatives (`controls: true` sur la borne) : démarrer / arrêter la charge (`switch`) et régler l'intensité (`current`
-  // = entité `number`, pas `step`). Rien ne s'affiche sans `controls: true` : une configuration existante ne change pas.
+  // Optional controls (`controls: true` on the charger): start / stop charging (`switch`) and set the current (`current`
+  // = `number` entity, `step`). Nothing is shown without `controls: true`: an existing configuration does not change.
   _controls(ch, st) {
     if (!ch.controls) return "";
     const out = [];
     if (ch.switch && this.st(ch.switch)) {
-      // `switch_invert: true` : l'interrupteur est actif quand la charge est EN PAUSE (ex. « mettre la session en pause »).
+      // `switch_invert: true`: the switch is active when charging is PAUSED (e.g. "pause the session").
       const raw = this.isOn(ch.switch), on = ch.switch_invert ? !raw : raw, dead = !this.ok(ch.switch);
       out.push(`<span class="btn ${this.esc(on ? "on" : "")}" title="${this.esc(this.t(on ? "Arrêter la charge" : "Démarrer la charge"))}" ${dead ? "" : this.call(`${ch.switch.split(".")[0]}.turn_${raw ? "off" : "on"}`, { entity_id: ch.switch }, on ? this.t("Arrêter ?") : "")}>${this.icon(on ? "mdi:stop" : "mdi:play", 16)} ${this.t(on ? "Arrêter" : "Démarrer")}</span>`);
     }
@@ -708,23 +708,23 @@ class SfHangarCard extends SfBase {
     const cars = c.cars.slice(0, 3);
     const label = (ch, k) => ch.name || (multi ? `${this.t("Borne")} ${k + 1}` : this.t("Borne"));
     const bornes = chs.map((ch, k) => this._borne(ch, sts[k], label(ch, k)));
-    // Disposition : une borne et ≤ 2 voitures = voiture | borne | voiture ; sinon les voitures en rangée, les bornes dessous.
+    // Layout: one charger and ≤ 2 cars = car | charger | car; otherwise the cars in a row, the chargers below.
     const carsHtml = cars.map((k) => this._car(k)).join("");
     const bay = !multi && cars.length <= 2
       ? `<div class="bay">${cars[0] ? this._car(cars[0]) : "<div></div>"}${bornes[0]}${cars[1] ? this._car(cars[1]) : "<div></div>"}</div>`
       : `<div class="bay stack">${cars.length ? `<div class="cars" style="grid-template-columns:repeat(${this.esc(cars.length)},minmax(0,1fr))">${carsHtml}</div>` : ""}<div class="bornes">${bornes.join("")}</div></div>`;
-    // Ligne d'information : une borne = message habituel ; plusieurs = une ligne par borne.
+    // Information line: one charger = usual message; several = one line per charger.
     const decOf = (ch) => ch.decision ? `<span class="click" data-e="${this.esc(ch.decision)}">${this.t("Pilote")}${this.lang === "fr" ? " " : ""}: <b style="color:${SF_C.cyan}">${this.fmt(ch.decision)}</b></span>` : "";
     const note = !multi
       ? `<span>${sts[0].connected ? `${this.t("Câble branché")} · <span style="color:${SF_C.amber}">${this.t("voiture non identifiée par HA")}</span>` : `<span class="muted">${this.t("Aucun véhicule branché")}</span>`}</span>${decOf(chs[0])}`
       : chs.map((ch, k) => `<span style="flex:1 1 100%"><b style="color:${this.esc(sts[k].charging ? SF_C.green : sts[k].connected ? SF_C.amber : SF_C.dim)}">${this.esc(label(ch, k))}</b> · ${sts[k].charging ? this.t("charge en cours") : sts[k].connected ? this.t("en attente") : this.t("au repos")}${ch.decision ? ` · ${decOf(ch)}` : ""}</span>`).join("");
-    // Sélecteurs de mode : le mode global, puis celui de chaque borne qui en a un.
+    // Mode selectors: the global mode, then that of each charger that has one.
     const modes = [this._modes(c.mode, connected, multi ? "" : null), ...chs.map((ch, k) => ch.mode ? this._modes(ch.mode, sts[k].connected, label(ch, k)) : "")].join("");
     return this.frame(this.t("Véhicules"), charging ? this.t("charge en cours") : connected ? this.t("en attente") : this.t("au repos"),
       `${bay}<div class="note">${note}</div>${modes}${this._flows()}`);
   }
-  // Sélecteur du mode de charge (input_select ou select) + garde-fou : voiture branchée le soir
-  // en « Surplus » seul = pas de charge de nuit. `who` : nom de la borne quand il y en a plusieurs.
+  // Charge-mode selector (input_select or select) + safeguard: car plugged in in the evening
+  // in "Surplus" only = no night charging. `who`: name of the charger when there are several.
   _modes(entity, connected, who) {
     const c = this._config, m = this.st(entity);
     if (!entity || !m) return "";
@@ -747,11 +747,11 @@ class SfHangarCard extends SfBase {
 /* ------------------------------------------------------------------- RADAR */
 /*
  * Trois anneaux, trois sources, AUCUNE fusion (principe de conception) :
- *   anneau extérieur  : person.*            -> à la maison ou non (réseau/GPS), sans pièce
- *   anneau du milieu  : Frigate (visage)    -> dernière caméra où la personne a été reconnue
- *   anneau intérieur  : capteurs de pièce   -> occupation, SANS identité
- * Une même personne apparaît sur deux anneaux distincts : la carte ne déduit jamais
- * « Alice est au salon » en croisant deux sources.
+ *   outer ring   : person.*            -> at home or not (network/GPS), without room
+ *   middle ring  : Frigate (face)      -> last camera where the person was recognised
+ *   inner ring   : room sensors        -> occupancy, WITHOUT identity
+ * The same person appears on two distinct rings: the card never deduces
+ * "Alice is in the living room" by crossing two sources.
  *
  * type: custom:sf-radar-card
  * people: [{ name, person, face, color }]   # face = sensor.<x>_last_camera
@@ -802,7 +802,7 @@ class SfRadarCard extends SfBase {
     const peopleRows = [], faceRows = [], roomRows = [];
     c.people.forEach((p, i) => {
       const col = p.color || SF_C.cyan;
-      if (p.person) {  // pas d'entité person (ex. personne sans téléphone) : absent de cet anneau
+      if (p.person) {  // no person entity (e.g. a person without a phone): absent from this ring
         const home = this.st(p.person) && this.st(p.person).state === "home";
         const [x1, y1] = pos(R.outer, i, np, -60);
         svg += blip(x1, y1, col, home, p.name);
@@ -839,11 +839,11 @@ class SfRadarCard extends SfBase {
  *   - label: CPU host
  *     entity: sensor.x
  *     kind: percent | value | binary | duration | timestamp | text
- *     warn: 70          # seuils (percent/value) ; invert: true si « bas = mauvais »
+ *     warn: 70          # thresholds (percent/value); invert: true if "low = bad"
  *     crit: 90
  *     invert: false
- *     ok_state: "on"    # binary : état considéré OK
- *     unit: "°C"        # forcer l'unité
+ *     ok_state: "on"    # binary: state considered OK
+ *     unit: "°C"        # force the unit
  */
 class SfMachinesCard extends SfBase {
   defaults() { return { tiles: [] }; }
@@ -870,7 +870,7 @@ class SfMachinesCard extends SfBase {
   _tile(t) {
     const id = t.entity, kind = t.kind || "value";
     if (kind === "toggle") {
-      // `timer` + `stop` : tant que le minuteur tourne, la tuile affiche le temps restant et un appui l'arrête (2 appuis).
+      // `timer` + `stop`: while the timer runs, the tile shows the remaining time and a press stops it (2 presses).
       const tm = this.timerInfo(t.timer), dead = !this.ok(id);
       const on = tm.actif || this.isOn(id), col = dead ? SF_C.grey : on ? (t.color || SF_C.cyan) : SF_C.grey;
       const act = tm.actif && t.stop ? this.call("homeassistant.turn_off", { entity_id: t.stop }, this.t("Arrêter ?")) : this.toggleCall(id);
@@ -903,7 +903,7 @@ class SfMachinesCard extends SfBase {
         const bad = (lim) => (t.invert ? n <= lim : n >= lim);
         if (t.crit !== undefined && bad(t.crit)) col = SF_C.red;
         else if (t.warn !== undefined && bad(t.warn)) col = SF_C.amber;
-        else if (t.low !== undefined && n < t.low) col = SF_C.amber;   // seuil bas (ex. eau d'un bac trop froide)
+        else if (t.low !== undefined && n < t.low) col = SF_C.amber;   // low threshold (e.g. water of a tank that is too cold)
       }
     }
     const lvl = col === SF_C.red ? this.t("critique") : col === SF_C.amber ? this.t("attention") : "";
@@ -924,15 +924,15 @@ class SfMachinesCard extends SfBase {
 
 /* ================================================================== PONT */
 /*
- * Bandeau de commandement plein cadre : heure, météo, tarif, mode maison, équipage,
- * et la liste des anomalies du moment (ou « tous systèmes nominaux »).
+ * Full-width command banner: time, weather, tariff, house mode, crew,
+ * and the list of current anomalies (or "all systems nominal").
  *
  * type: custom:sf-bridge-card
- * weather: weather.x            outdoor: sensor.x (température extérieure)
- * price: sensor.x (€/kWh)        hc_price: input_number.x (prix HC : sert à savoir HP/HC quand aucune plage n'est saisie)
- * hc_windows: [{ start: "00:56", end: "06:56" }, { start: "14:26", end: "16:26" }]   # heures creuses (autant de plages que nécessaire) : font foi pour HP/HC et le compte à rebours
+ * weather: weather.x            outdoor: sensor.x (outdoor temperature)
+ * price: sensor.x (€/kWh)        hc_price: input_number.x (off-peak price: used to tell peak/off-peak when no window is entered)
+ * hc_windows: [{ start: "00:56", end: "06:56" }, { start: "14:26", end: "16:26" }]   # off-peak hours (as many windows as needed): authoritative for peak/off-peak and the countdown
  * mode: input_select.x           solar_left: sensor.x (kWh solaires restants aujourd'hui)
- * people: [{ name, entity, color }]    home_states: [home]   # états comptés « à la maison » (ex. [home, "Ma zone"])
+ * people: [{ name, entity, color }]    home_states: [home]   # states counted as "at home" (e.g. [home, "My zone"])
  * power_in: sensor.x (tension secteur, < 200 V = coupure)  internet: binary_sensor.x
  * leaks: [..]  doors: [..]
  */
@@ -993,8 +993,8 @@ class SfBridgeCard extends SfBase {
       .member.away { opacity:.45; }
       .crew .right { margin-left:auto; font-size:11px; color:${SF_C.dim}; }`;
   }
-  // HP/HC : les plages `hc_windows` saisies par l'utilisateur font foi (autant que nécessaire : 2, 3 périodes par jour…).
-  // Sans plages, on compare le prix en cours au prix HC (`hc_price`). Sans l'un ni l'autre, HP/HC est inconnu : rien n'est affiché.
+  // Peak/off-peak: the `hc_windows` entered by the user are authoritative (as many as needed: 2, 3 periods a day…).
+  // Without windows, the current price is compared with the off-peak price (`hc_price`). With neither, peak/off-peak is unknown: nothing is shown.
   _isHC(now) {
     const c = this._config, toMin = (x) => { const [h, m] = String(x).split(":").map(Number); return h * 60 + m; };
     const raw = c.hc_windows && c.hc_windows.length ? c.hc_windows : (c.hc_start && c.hc_end ? [{ start: c.hc_start, end: c.hc_end }] : []);
@@ -1041,7 +1041,7 @@ class SfBridgeCard extends SfBase {
     const sol = this.num(c.solar_left);
 
     const crew = c.people.map((p) => {
-      // « à la maison » = état `home`, ou l'un des états de `home_states` (zone maison personnalisée, plus petite que « home »).
+      // "at home" = state `home`, or one of the `home_states` (custom home zone, smaller than "home").
       const hs = (c.home_states || ["home"]).map((x) => String(x).trim().toLowerCase());
       const home = this.st(p.entity) && hs.includes(String(this.st(p.entity).state).trim().toLowerCase());
       return `<span class="member click ${this.esc(home ? "" : "away")}" data-e="${this.esc(p.entity)}"><span class="av" style="background:${this.esc(p.color || SF_C.cyan)};box-shadow:0 0 8px ${this.esc(p.color || SF_C.cyan)}">${this.esc(String(p.name || "?")[0])}</span>${this.esc(p.name)} · ${home ? this.t("à la maison") : this.t("absent·e")}</span>`;
@@ -1070,23 +1070,23 @@ class SfBridgeCard extends SfBase {
   getCardSize() { return 4; }
 }
 
-/* =============================================================== RÉACTEUR */
+/* =============================================================== REACTOR */
 /*
- * Flux d'énergie autour d'un cœur 3D. Les puissances sont converties en W quelle
- * que soit l'unité (certains compteurs publient en kW).
+ * Energy flows around a 3D core. Powers are converted to W whatever
+ * the unit (some meters publish in kW).
  *
  * type: custom:sf-reactor-card
- * solar: sensor.x (facultatif)    grid: sensor.x (positif = soutirage du réseau)
- * battery_power: sensor.x (W, positif = décharge)   battery_soc: sensor.x (%)   battery_invert: false   # batterie facultative
- * batteries: [{ soc, power, capacity_kwh }]   # ou plusieurs batteries (un seul nœud : niveau pondéré, puissance cumulée)
+ * solar: sensor.x (optional)    grid: sensor.x (positive = drawing from the grid)
+ * battery_power: sensor.x (W, positive = discharging)   battery_soc: sensor.x (%)   battery_invert: false   # optional battery
+ * batteries: [{ soc, power, capacity_kwh }]   # or several batteries (a single node: weighted level, summed power)
  * devices: [{ name, entity, icon, color }]
- * hide_idle: true   idle_w: 20   # masque les appareils sous 20 W (la disposition ne porte que sur les visibles)
- * max_devices: 8                 # au-delà, seuls les plus gourmands sont affichés (« +N autres »)
- * fossil: sensor.x (% fossile du réseau)   price: sensor.x
+ * hide_idle: true   idle_w: 20   # hides devices below 20 W (the layout only counts the visible ones)
+ * max_devices: 8                 # beyond that, only the most power-hungry are shown ("+N others")
+ * fossil: sensor.x (% fossil share of the grid)   price: sensor.x
  */
 class SfReactorCard extends SfBase {
   defaults() { return { devices: [], hide_idle: true, idle_w: 20, max_devices: 8 }; }
-  // La disposition dépend de la largeur disponible : on re-rend quand elle change (rotation, redimensionnement).
+  // The layout depends on the available width: we re-render when it changes (rotation, resizing).
   connectedCallback() {
     super.connectedCallback();
     if (typeof ResizeObserver === "undefined") return;
@@ -1133,7 +1133,7 @@ class SfReactorCard extends SfBase {
       .foot > div { padding:8px 10px; border-radius:8px; background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.12); text-align:center; }
       .foot .v { font-family:Orbitron,sans-serif; font-size:16px; color:#fff; margin-top:3px; }`;
   }
-  _dur(w) { // plus c'est puissant, plus le flux est rapide
+  _dur(w) { // the more powerful, the faster the flow
     const a = Math.abs(w || 0);
     return Math.max(0.35, 2.6 - Math.log10(Math.max(a, 10)) * 0.6).toFixed(2) + "s";
   }
@@ -1142,8 +1142,8 @@ class SfReactorCard extends SfBase {
     const hasSolar = !!c.solar;
     const solar = Math.max(0, this.watts(c.solar) ?? 0);
     const grid = this.watts(c.grid);
-    // Batterie facultative : `battery_power` (W, positif = décharge, `battery_invert: true` pour l'inverse), `battery_soc` (%).
-    // Plusieurs batteries : `batteries: [{ soc, power, capacity_kwh }]` → un seul nœud (niveau pondéré, puissance cumulée).
+    // Optional battery: `battery_power` (W, positive = discharging, `battery_invert: true` for the opposite), `battery_soc` (%).
+    // Several batteries: `batteries: [{ soc, power, capacity_kwh }]` → a single node (weighted level, summed power).
     const bat = sfBatAgg(this, { batteries: c.batteries, soc: c.battery_soc, power: c.battery_power, invert: c.battery_invert });
     const hasBat = bat.n > 0, bsoc = bat.soc, bw = bat.power;
     const home = grid === null ? null : solar + grid + (bw || 0);
@@ -1151,35 +1151,35 @@ class SfReactorCard extends SfBase {
     const autonomy = (hasSolar || hasBat) && home && home > 0 ? Math.min(100, ((hasSolar ? Math.min(solar, home) : 0) + Math.max(bw || 0, 0)) / home * 100) : null;
     const cc = exporting || (autonomy !== null && autonomy > 90) ? SF_C.green : grid !== null && grid > 3000 ? SF_C.amber : SF_C.cyan;
 
-    // Disposition dynamique, selon le nombre d'appareils ET la largeur disponible (le cadre grandit pour garder
-    // ~90 px par rang : aucun chevauchement, quel que soit le nombre d'entités).
-    //  - écran large  : appareils en 1 à 3 colonnes à droite du cœur ;
-    //  - écran étroit (téléphone) : solaire au-dessus du cœur, réseau à côté, appareils en grille de 3 colonnes dessous.
-    // Un appareil à l'arrêt (sous `idle_w`, 20 W par défaut) est masqué (`hide_idle: false` pour tout garder) ;
-    // une mesure indisponible reste visible (« — »), c'est une information. La disposition ne porte que sur les visibles.
+    // Dynamic layout, according to the number of devices AND the available width (the frame grows to keep
+    // ~90 px per row: no overlap, whatever the number of entities).
+    //  - wide screen  : devices in 1 to 3 columns to the right of the core;
+    //  - narrow screen (phone): solar above the core, grid beside it, devices in a 3-column grid below.
+    // A stopped device (below `idle_w`, 20 W by default) is hidden (`hide_idle: false` to keep them all);
+    // an unavailable measurement stays visible ("—"), it is information. The layout only counts the visible ones.
     const visibles = c.hide_idle === false ? c.devices : c.devices.filter((d) => { const w = this.watts(d.entity); return w === null || Math.abs(w) >= (c.idle_w ?? 20); });
     const hidden = c.devices.length - visibles.length;
-    // Plafond d'affichage : au-delà de `max_devices` (8), on garde les plus gourmands, dans l'ordre de la config.
+    // Display cap: beyond `max_devices` (8), the most power-hungry are kept, in config order.
     let devs = visibles, extra = 0;
     const max = Math.max(1, c.max_devices ?? 8);
     if (visibles.length > max) {
       const top = new Set([...visibles].sort((a, b) => Math.abs(this.watts(b.entity) ?? 0) - Math.abs(this.watts(a.entity) ?? 0)).slice(0, max));
       devs = visibles.filter((d) => top.has(d)); extra = visibles.length - max;
     }
-    // La batterie est un « appareil » toujours visible, placé en premier, dont le flux va du cœur vers elle (charge) ou inversement.
+    // The battery is an always-visible "device", placed first, whose flow goes from the core to it (charging) or the other way round.
     if (hasBat) {
       const lvl = bsoc === null ? "mdi:battery" : bsoc >= 95 ? "mdi:battery" : `mdi:battery-${Math.max(10, Math.round(bsoc / 10) * 10)}`;
       devs = [{ __bat: true, name: bsoc === null ? this.t("Batterie") : `${this.t("Batterie")} ${Math.round(bsoc)} %`, icon: lvl, entity: bat.firstId,
         color: SF_C.green, w: bw === null ? null : Math.abs(bw), rev: bw !== null && bw > 0 }, ...devs];
     }
-    // Au tout premier rendu l'élément n'a pas encore sa largeur (ses styles ne sont pas appliqués) : on dessine avec 600 px puis
-    // on redessine une fois, sinon un téléphone verrait d'abord la disposition « grand écran ».
+    // On the very first render the element does not have its width yet (its styles are not applied): we draw with 600 px then
+    // redraw once, otherwise a phone would first see the "wide screen" layout.
     const W = this.getBoundingClientRect().width || 600, NODE = 92;
     if (!this.getBoundingClientRect().width && !this._retry) { this._retry = true; requestAnimationFrame(() => { this._lastHtml = null; this._schedule(); }); }
     const narrow = W < 520;
     let H, pts;
     if (narrow) {
-      // Le solaire reste au-dessus du cœur (comme sur grand écran) ; le réseau est à côté. Sans solaire, le cœur remonte.
+      // Solar stays above the core (as on wide screens); the grid is beside it. Without solar, the core moves up.
       const cols = devs.length <= 2 ? devs.length || 1 : 3, rows = Math.ceil(devs.length / cols), cy = hasSolar ? 165 : 100, top = cy + 105;
       H = top + (devs.length ? rows * 92 + 10 : 0) + 10;
       const py = (px) => (px / H) * 100;
@@ -1194,8 +1194,8 @@ class SfReactorCard extends SfBase {
       const perCol = Array.from({ length: cols }, (_, k) => devs.filter((_, i) => i % cols === k).length);
       H = Math.max(260, Math.max(1, ...perCol) * NODE + PAD_PX * 2 - 20);
       const pad = (PAD_PX / H) * 100, XS = { 1: [88], 2: [72, 91], 3: [63, 78, 93] }[cols];
-      // Plus il y a de colonnes d'appareils, plus le noyau (avec solaire et réseau) se décale à gauche et se rapproche
-      // de l'injection : [x du noyau, x du réseau] — la place libérée va aux appareils.
+      // The more device columns, the more the core (with solar and grid) shifts left and gets closer
+      // to the injection: [x of the core, x of the grid] — the freed space goes to the devices.
       const [cx, gx] = { 1: [50, 16], 2: [42, 14], 3: [35, 12] }[cols];
       pts = { solar: [cx, Math.max(pad, 11)], grid: [gx, 50], core: [cx, 50] };
       devs.forEach((d, i) => {
@@ -1204,7 +1204,7 @@ class SfReactorCard extends SfBase {
       });
     }
 
-    // Les coordonnées sont en % du cadre ; le SVG utilise un viewBox 100x56.25 (16/9).
+    // Coordinates are in % of the frame; the SVG uses a 100x56.25 viewBox (16/9).
     const Y = (y) => (y * 56.25) / 100;
     const line = (a, b, w, color, rev) => {
       const [x1, y1] = pts[a], [x2, y2] = pts[b];
@@ -1226,7 +1226,7 @@ class SfReactorCard extends SfBase {
     nodes.push(this._node(pts.grid, exporting ? this.t("Injection") : this.t("Réseau"), "mdi:transmission-tower", grid === null ? null : Math.abs(grid), exporting ? SF_C.green : "#ff7a45", c.grid));
 
     const fossil = this.num(c.fossil), price = this.num(c.price);
-    // Pied de page : seulement les indicateurs dont les entités sont configurées.
+    // Footer: only the indicators whose entities are configured.
     const foot = [
       (hasSolar || hasBat) && `<div><div class="lbl">${this.t(hasSolar ? "Autonomie solaire" : "Autonomie")}</div><div class="v" style="color:${this.esc(cc)}">${autonomy === null ? "—" : Math.round(autonomy) + " %"}</div></div>`,
       c.fossil && `<div class="click" data-e="${this.esc(c.fossil)}"><div class="lbl">${this.t("Réseau fossile")}</div><div class="v">${fossil === null ? "—" : this.nf(fossil, 0) + " %"}</div></div>`,
@@ -1251,15 +1251,15 @@ class SfReactorCard extends SfBase {
 
 /* ================================================================== CLIMAT */
 /*
- * Pièces pilotées : la cible est un input_number,
- * l'interrupteur de pièce appelle `switch_script` s'il est défini (régulation + clim), sinon climate.turn_on / turn_off.
+ * Controlled rooms: the target is an input_number,
+ * the room switch calls `switch_script` if defined (regulation + A/C), otherwise climate.turn_on / turn_off.
  *
  * type: custom:sf-climate-card
  * mode: input_select.house_mode
- * min: 15   max: 30                      # plage du cadran (°C)
- * switch_script: script.my_room_toggle   # facultatif ; sans lui, le bouton marche/arrêt appelle climate.turn_on / turn_off
+ * min: 15   max: 30                      # dial range (°C)
+ * switch_script: script.my_room_toggle   # optional; without it, the on/off button calls climate.turn_on / turn_off
  * rooms: [{ name, icon, climate, temp, hum, target, regul, window }]
- * extras: [{ label, entity, icon, timer?, stop? }]   # interrupteurs/scripts sous les pièces ; timer = minuteur affiché, stop = entités coupées par un appui
+ * extras: [{ label, entity, icon, timer?, stop? }]   # switches/scripts under the rooms; timer = displayed timer, stop = entities turned off by a press
  */
 const SF_HVAC = Object.assign(Object.create(null), {
   heat: ["Chauffe", "#ff7043", "mdi:fire"], cool: ["Refroidit", "#4fc3f7", "mdi:snowflake"],
@@ -1364,19 +1364,19 @@ class SfClimateCard extends SfBase {
 
 /* ================================================================= CONSOLE */
 /*
- * Console de commande générique, par groupes.
+ * Generic command console, by groups.
  *
  * type: custom:sf-console-card
  * title: "Console"
  * groups:
- *   - title: Lumières
+ *   - title: Lights
  *     items:
  *       - { kind: toggle, entity: light.x, label: Salon, icon: mdi:lightbulb }
- *       - { kind: action, label: Tamisé, icon: mdi:..., service: scene.turn_on, data: {...}, confirm: "Sûr ?" }
+ *       - { kind: action, label: Dimmed, icon: mdi:..., service: scene.turn_on, data: {...}, confirm: "Sure?" }
  *       - { kind: cover, entity: cover.x, label: Volets }
  *       - { kind: vacuum, entity: vacuum.x, battery: sensor.x, label: Robot }
  *       - { kind: select, entity: input_select.x, label: ... }
- *       - { kind: dimmer, entity: light.x, label: Salon }     # bascule + intensité ±10 %
+ *       - { kind: dimmer, entity: light.x, label: Living room }     # toggle + brightness ±10 %
  *       - { kind: sensor, entity: sensor.x, label: ..., icon: ..., digits: 0 }
  */
 class SfConsoleCard extends SfBase {
@@ -1441,7 +1441,7 @@ class SfConsoleCard extends SfBase {
             `<span class="btn" ${this.call("button.press", { entity_id: b.entity })}>${this.icon(b.icon || "mdi:map-marker-path", 14)}${this.esc(b.label)}</span>`).join("")}</div>` : ""}</div>`;
       }
       case "dimmer": {
-        // Ampoule : bascule + variation d'intensité par pas de 10 % (couleur / température : fiche de l'entité).
+        // Bulb: toggle + brightness change in 10 % steps (colour / temperature: the entity's page).
         const on = this.isOn(x.entity), b = s && s.attributes.brightness;
         const pct = on && typeof b === "number" ? Math.round(b / 2.55) : null;
         const step = (d) => this.call("light.turn_on", { entity_id: x.entity, brightness_step_pct: d });
@@ -1451,7 +1451,7 @@ class SfConsoleCard extends SfBase {
           <span class="btn" ${dead ? "" : step(-10)}>−</span><span class="btn" ${dead ? "" : step(10)}>+</span></div></div>`;
       }
       case "stepper": {
-        // input_number : increment/decrement ; number : set_value borné au pas déclaré.
+        // input_number: increment/decrement; number: set_value bounded to the declared step.
         const v = this.num(x.entity), a = (s && s.attributes) || {}, step = a.step || 1;
         const dom = (x.entity || "").split(".")[0];
         const go = (dir) => dom === "input_number"
@@ -1480,10 +1480,10 @@ class SfConsoleCard extends SfBase {
   getCardSize() { return 6; }
 }
 
-/* ================================================================= CAMÉRAS */
+/* ================================================================= CAMERAS */
 /*
- * Mosaïque de caméras avec réticule. Image fixe rafraîchie toutes les `refresh`
- * secondes (léger) ; un appui ouvre la fiche HA de la caméra, avec le flux en direct.
+ * Camera mosaic with a reticle. Still image refreshed every `refresh`
+ * seconds (light); a press opens the camera's HA page, with the live stream.
  *
  * type: custom:sf-camera-card
  * refresh: 5
@@ -1555,12 +1555,12 @@ class SfCameraCard extends SfBase {
 
 /* =============================================================== CONSIGNES */
 /*
- * Matrice de consignes : une ligne par pièce, une colonne par programme.
+ * Setpoint matrix: one row per room, one column per program.
  *
  * type: custom:sf-setpoints-card
  * columns: [{ label, color }]
- * rows: [{ name, icon, entities: [input_number.x, ...] }]   # dans l'ordre des colonnes
- * Toucher une valeur ouvre un éditeur (curseur, − / +, bornes et pas de l'input_number) avec portée : cette valeur, tout le programme (colonne) ou toute la pièce (ligne).
+ * rows: [{ name, icon, entities: [input_number.x, ...] }]   # in column order
+ * Touching a value opens an editor (slider, − / +, bounds and step of the input_number) with a scope: this value, the whole program (column) or the whole room (row).
  */
 class SfSetpointsCard extends SfBase {
   defaults() { return { columns: [], rows: [] }; }
@@ -1594,7 +1594,7 @@ class SfSetpointsCard extends SfBase {
     const a = (this.st(id) || {}).attributes || {}, mn = parseFloat(a.min), mx = parseFloat(a.max), sp = parseFloat(a.step);
     return { min: isFinite(mn) ? mn : 5, max: isFinite(mx) && mx > (isFinite(mn) ? mn : 5) ? mx : 30, step: isFinite(sp) && sp > 0 ? sp : 0.5 };
   }
-  _fit(id, v) {   // valeur ramenée dans les bornes et sur le pas de l'entité
+  _fit(id, v) {   // value brought back within the bounds and onto the entity's step
     const l = this._lim(id), dec = (String(l.step).split(".")[1] || "").length;
     return Math.min(l.max, Math.max(l.min, parseFloat((Math.round((v - l.min) / l.step) * l.step + l.min).toFixed(dec))));
   }
@@ -1671,7 +1671,7 @@ class SfSetpointsCard extends SfBase {
 
 /* ================================================================== BILAN */
 /*
- * Bilan de consommation par appareil sur une période choisie (input_select).
+ * Consumption summary per device over a chosen period (input_select).
  *
  * type: custom:sf-ledger-card
  * period: input_select.x    total_cost: sensor.x   solar_fraction: sensor.x   avg_price: sensor.x
@@ -1718,12 +1718,12 @@ class SfLedgerCard extends SfBase {
 
 /* ================================================================ CELLULES */
 /*
- * Batteries de tous les capteurs (device_class battery), découvertes automatiquement,
- * les plus faibles d'abord.
+ * Batteries of all sensors (device_class battery), discovered automatically,
+ * weakest first.
  *
  * type: custom:sf-cells-card
  * warn: 30   crit: 15   limit: 16   exclude: [sensor.x, ...]
- * include_pattern: "" / exclude_pattern: ""   (regex facultatives sur l'identifiant ; ignorées si trop longues, invalides ou à quantificateurs imbriqués)
+ * include_pattern: "" / exclude_pattern: ""   (optional regexes on the id; ignored if too long, invalid or with nested quantifiers)
  */
 class SfCellsCard extends SfBase {
   defaults() { return { warn: 30, crit: 15, limit: 16, exclude: [] }; }
@@ -1758,12 +1758,12 @@ class SfCellsCard extends SfBase {
 
 /* ================================================================== POPUPS */
 /*
- * Lanceur de popups (pensé pour le téléphone) : une grille de tuiles résumées ; un
- * appui ouvre la carte complète dans un panneau qui monte du bas de l'écran.
- * Le panneau est attaché à <body> (hors de la grille HA, dont le confinement CSS
- * casserait un position:fixed) et reçoit `hass` à chaque mise à jour.
- * Le bouton retour du téléphone ferme le panneau (une entrée d'historique #hash
- * est ajoutée à l'ouverture) ; un lien vers #hash ouvre directement le panneau.
+ * Popup launcher (designed for the phone): a grid of summary tiles; a
+ * press opens the full card in a panel that rises from the bottom of the screen.
+ * The panel is attached to <body> (outside the HA grid, whose CSS containment
+ * would break a position:fixed) and receives `hass` on every update.
+ * The phone's back button closes the panel (a #hash history entry
+ * is added on opening); a link to #hash opens the panel directly.
  *
  * type: custom:sf-launcher-card
  * columns: 2
@@ -1772,10 +1772,10 @@ class SfCellsCard extends SfBase {
  *     icon: mdi:thermostat
  *     color: "#ff7043"
  *     hash: climat
- *     summary: climate | room | vehicles | commands | cameras | energy | battery | machines | text   (calculé depuis `card` ; text = `sub`)
- *     sub: "texte libre"         # affiché sous le titre quand summary: text
- *     users: [id, ...]          # facultatif : tuile visible seulement pour ces utilisateurs
- *     card: { type: custom:sf-climate-card, ... }   # n'importe quelle carte : SF, standard de HA (vertical-stack, history-graph…) ou autre carte personnalisée
+ *     summary: climate | room | vehicles | commands | cameras | energy | battery | machines | text   (computed from `card`; text = `sub`)
+ *     sub: "free text"         # shown under the title when summary: text
+ *     users: [id, ...]          # optional: tile visible only to these users
+ *     card: { type: custom:sf-climate-card, ... }   # any card: SF, standard HA (vertical-stack, history-graph…) or another custom card
  */
 const SF_POP_CSS = `
   @media (prefers-reduced-motion: reduce) { .back, .sheet { transition:none !important; } }
@@ -1806,8 +1806,8 @@ class SfLauncherCard extends SfBase {
   connectedCallback() {
     super.connectedCallback();
     this._onPop = () => {
-      if (!this.isConnected) return;   // carte retirée entre-temps : ne jamais rouvrir un popup
-      if (Date.now() < (this._ignoreUntil || 0)) return;   // écho de notre propre « retour » après une fermeture
+      if (!this.isConnected) return;   // card removed in the meantime: never reopen a popup
+      if (Date.now() < (this._ignoreUntil || 0)) return;   // echo of our own "back" after a closing
       const h = sfHash();
       if (this._pop && h !== this._pop.hash) this._close(false);
       else if (!this._pop && h && this._hass) { const t = this._tiles().find((x) => x.hash === h); if (t) this._open(t, false); }
@@ -1833,7 +1833,7 @@ class SfLauncherCard extends SfBase {
     const tiles = this._config.tiles.filter((t) => !t.users || !uid || t.users.includes(uid));
     const prio = this._prio(); return prio ? [...tiles.filter(prio), ...tiles.filter((t) => !prio(t))] : tiles;
   }
-  // Mode adaptatif : avec `mode_entity` (ex. Matin / Jour / Soir / Nuit) les tuiles dont `modes` contient le mode actuel passent en tête et sont mises en avant.
+  // Adaptive mode: with `mode_entity` (e.g. Morning / Day / Evening / Night) the tiles whose `modes` contain the current mode move first and are highlighted.
   _prio() {
     const me = this._config.mode_entity && this.st(this._config.mode_entity), m = me && !["unavailable", "unknown", ""].includes(me.state) ? String(me.state).trim().toLowerCase() : "";
     if (!m) return null;
@@ -1857,7 +1857,7 @@ class SfLauncherCard extends SfBase {
       .tile.prio { border-color:var(--tc); box-shadow:0 0 16px -6px var(--tc), inset 0 0 14px -8px var(--tc); }
       @keyframes tglow { 50% { box-shadow:0 0 18px -4px var(--tc); } }`;
   }
-  // Résumé d'une tuile, calculé depuis la config de la carte qu'elle ouvre.
+  // Summary of a tile, computed from the config of the card it opens.
   _sum(t) {
     const tag = String((t.card && t.card.type) || "").replace(/^custom:/, "");
     const c = sfNormConfig(tag, { ...(t.card || {}) }), n = (id) => this.num(id);
@@ -1938,10 +1938,10 @@ class SfLauncherCard extends SfBase {
     const root = host.attachShadow({ mode: "open" });
     root.innerHTML = `<style>${SF_POP_CSS}</style><div class="wrap"><div class="back"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${this.esc(t.name || "")}">
       <div class="grab"></div><div class="bar"><button aria-label="${this.esc(this.t("Fermer"))}">✕</button></div><div class="body"></div></div></div>`;
-    // Carte déjà connue du navigateur (SF ou autre carte personnalisée chargée) : création directe. Sinon (carte standard de HA :
-    // vertical-stack, weather-forecast, history-graph…) : on passe par les « card helpers » de HA, qui créent n'importe quelle carte.
-    // Thème clair : le panneau prend un habillage clair ; chaque carte SF se met en thème clair elle-même (aucune double inversion,
-    // images et caméras comprises) ; les cartes non SF gardent leur propre rendu.
+    // Card already known to the browser (SF or another loaded custom card): direct creation. Otherwise (standard HA card:
+    // vertical-stack, weather-forecast, history-graph…): we go through HA's "card helpers", which create any card.
+    // Light theme: the panel takes a light look; each SF card switches to the light theme by itself (no double inversion,
+    // images and cameras included); non-SF cards keep their own rendering.
     const th = this._theme(); host.setAttribute("theme", th);
     const type = String(t.card && t.card.type || ""), isSf = /^custom:sf-/.test(type);
     const cfg = isSf ? { ...t.card, theme: t.card.theme || th } : t.card;
@@ -1970,7 +1970,7 @@ class SfLauncherCard extends SfBase {
     document.addEventListener("keydown", this._esc);
     document.body.appendChild(host);
     this._pop = { host, card, hash: t.hash || "" };
-    this._opener = this.shadowRoot && this.shadowRoot.activeElement;   // pour rendre le focus à la fermeture
+    this._opener = this.shadowRoot && this.shadowRoot.activeElement;   // to give focus back on closing
     requestAnimationFrame(() => requestAnimationFrame(() => { root.querySelector(".wrap").classList.add("open"); const b = root.querySelector(".bar button"); if (b) b.focus(); }));
     if (push && t.hash && sfHash() !== t.hash) history.pushState({ sfPopup: t.hash }, "", `${location.pathname}${location.search}#${encodeURIComponent(t.hash)}`);
   }
@@ -1981,20 +1981,20 @@ class SfLauncherCard extends SfBase {
     p.host.shadowRoot.querySelector(".wrap").classList.remove("open");
     setTimeout(() => p.host.remove(), 330);
     if (this._opener && this._opener.isConnected && this._opener.focus) this._opener.focus();
-    // Fermé à la main : on retire l'entrée #hash ajoutée à l'ouverture.
+    // Closed by hand: we remove the #hash entry added on opening.
     if (viaUi && p.hash && sfHash() === p.hash) {
-      if (history.state && history.state.sfPopup === p.hash) { this._ignoreUntil = Date.now() + 500; history.back(); }   // entrée poussée à l'ouverture
-      else history.replaceState(history.state, "", `${location.pathname}${location.search}`);   // lien direct : on retire seulement le #hash, on ne quitte pas la page
+      if (history.state && history.state.sfPopup === p.hash) { this._ignoreUntil = Date.now() + 500; history.back(); }   // entry pushed on opening
+      else history.replaceState(history.state, "", `${location.pathname}${location.search}`);   // direct link: we only remove the #hash, we do not leave the page
     }
   }
   getCardSize() { return 4; }
 }
 
-/* Batteries : une seule (soc / power / capacity_kwh à la racine) ou plusieurs (`batteries: [{ name, soc, power, capacity_kwh, invert }]`).
- * Niveau global = moyenne pondérée par la capacité (moyenne simple si une capacité manque) ; puissance = somme (positif = décharge) ;
- * capacité = somme (seulement si elle est connue pour toutes). Une batterie indisponible n'entre pas dans la moyenne. */
+/* Batteries: a single one (soc / power / capacity_kwh at the root) or several (`batteries: [{ name, soc, power, capacity_kwh, invert }]`).
+ * Overall level = capacity-weighted average (simple average if a capacity is missing); power = sum (positive = discharging);
+ * capacity = sum (only if known for all). An unavailable battery does not enter the average. */
 function sfBatAgg(el, c) {
-  const own = (c.batteries || []).filter((b) => b && (b.soc || b.power || b.entity));   // entrées vides (« + Ajouter une batterie » non rempli) ignorées
+  const own = (c.batteries || []).filter((b) => b && (b.soc || b.power || b.entity));   // empty entries ("+ Add a battery" not filled in) ignored
   const raw = own.length ? own : ((c.soc || c.power || c.entity) ? [{ soc: c.soc, power: c.power, entity: c.entity, capacity_kwh: c.capacity_kwh }] : []);
   const items = raw.map((b) => {
     const inv = b.invert ?? c.invert, w = b.power ? el.watts(b.power) : null;
@@ -2009,12 +2009,12 @@ function sfBatAgg(el, c) {
 
 /* ============================================================== BATTERIE */
 /*
- * Batterie domestique : niveau, sens et puissance du flux, autonomie estimée, énergie du jour, mode.
- * Tout est facultatif : seul ce qui est configuré s'affiche, et sans `soc` ni `power` la carte disparaît.
+ * Home battery: level, flow direction and power, estimated autonomy, daily energy, mode.
+ * Everything is optional: only what is configured is shown, and without `soc` or `power` the card disappears.
  *
  * type: custom:sf-battery-card
- * soc: sensor.x (%)     power: sensor.x (W, positif = décharge ; `invert: true` si c'est l'inverse)
- * batteries: [{ name, soc, power, capacity_kwh }]   # plusieurs batteries : niveau pondéré, puissance cumulée, détail par batterie
+ * soc: sensor.x (%)     power: sensor.x (W, positive = discharging; `invert: true` if it is the opposite)
+ * batteries: [{ name, soc, power, capacity_kwh }]   # several batteries: weighted level, summed power, per-battery detail
  * capacity_kwh: 10      charged_today: sensor.x (kWh)   discharged_today: sensor.x (kWh)
  * mode: select.x | input_select.x     temperature: sensor.x     health: sensor.x (%)     cycles: sensor.x
  */
@@ -2047,12 +2047,12 @@ class SfBatteryCard extends SfBase {
   }
   render() {
     if (!this._has()) return "";
-    const c = this._config, agg = sfBatAgg(this, c), soc = agg.soc, bw = agg.power;   // bw > 0 = décharge
+    const c = this._config, agg = sfBatAgg(this, c), soc = agg.soc, bw = agg.power;   // bw > 0 = discharging
     const idle = bw === null || Math.abs(bw) < 20;
     const col = soc === null ? SF_C.grey : soc <= 15 ? SF_C.red : soc <= 30 ? SF_C.amber : SF_C.green;
     const state = idle ? this.t("En veille") : bw > 0 ? this.t("Décharge") : this.t("Charge");
     const R = 56, C = 2 * Math.PI * R, pct = soc === null ? 0 : Math.max(0, Math.min(100, soc));
-    // Autonomie estimée : seulement si la capacité est connue et que ça circule.
+    // Estimated autonomy: only if the capacity is known and something is flowing.
     let eta = "";
     const cap = agg.cap;
     if (cap > 0 && soc !== null && !idle) {
@@ -2062,7 +2062,7 @@ class SfBatteryCard extends SfBase {
     const stat = (id, label, unit, digits) => { if (!id) return ""; const n = this.num(id); return `<div class="click" data-e="${this.esc(id)}"><div class="lbl">${this.t(label)}</div><div class="v">${n === null ? "—" : this.nf(n, digits) + unit}</div></div>`; };
     const stats = [stat(c.charged_today, "Chargé aujourd'hui", " kWh", 1), stat(c.discharged_today, "Déchargé aujourd'hui", " kWh", 1),
       stat(c.temperature, "Température", " °C", 0), stat(c.health, "Santé", " %", 0), stat(c.cycles, "Cycles", "", 0)].filter(Boolean).join("");
-    // Détail par batterie quand il y en a plusieurs.
+    // Per-battery detail when there are several.
     const bats = agg.items.length > 1 ? `<div class="bats">${agg.items.map((b, i) => {
       const lv = b.soc === null ? null : Math.max(0, Math.min(100, b.soc)), bc = lv === null ? SF_C.grey : lv <= 15 ? SF_C.red : lv <= 30 ? SF_C.amber : SF_C.green;
       const pw = b.power === null ? "—" : Math.abs(b.power) < 20 ? this.t("En veille") : `${this.icon(b.power > 0 ? "mdi:arrow-down-bold" : "mdi:arrow-up-bold", 12)} ${this.kw(Math.abs(b.power))}`;
@@ -2085,17 +2085,17 @@ class SfBatteryCard extends SfBase {
 
 /* ============================================================ RADIATEURS */
 /*
- * Radiateurs pilotés par préréglage (Voltalis, Tado, Netatmo…) qui n'ont pas toujours de sonde de
- * température : état de chauffe, préréglage (une pastille par mode proposé par l'appareil),
- * consigne ± et consommation du jour. Pensé pour le téléphone (une colonne, grandes cibles).
+ * Radiators controlled by preset (Voltalis, Tado, Netatmo…) that do not always have a
+ * temperature probe: heating state, preset (one pill per mode offered by the device),
+ * setpoint ± and daily consumption. Designed for the phone (one column, large targets).
  *
  * type: custom:sf-radiators-card
  * title: Radiateurs        accent: "#e07a4f"     step: 0.5     max_kwh: 5
- * setpoint: false          # fil pilote : pas de consigne chiffrée, on masque le réglage ±
- * preset_labels: { away: "Hors-gel" }   # renomme un préréglage
+ * setpoint: false          # pilot wire: no numeric setpoint, the ± setting is hidden
+ * preset_labels: { away: "Frost protection" }   # renames a preset
  * radiators:
- *   - { name, icon, climate: climate.x, kwh: sensor.x (consommation du jour), connection: sensor.x (facultatif),
- *       preset: select.x (facultatif : liste de préréglages d'un select, ex. avec « auto »), presets: [auto, comfort, eco, away] (ordre / filtre) }
+ *   - { name, icon, climate: climate.x, kwh: sensor.x (daily consumption), connection: sensor.x (optional),
+ *       preset: select.x (optional: preset list of a select, e.g. with "auto"), presets: [auto, comfort, eco, away] (order / filter) }
  */
 const SF_PRESETS = Object.assign(Object.create(null), { auto: "Programme", comfort: "Confort", eco: "Éco", away: "Absent", none: "Aucun", boost: "Boost", sleep: "Nuit", home: "Présent", activity: "Activité", frost_protection: "Hors-gel" });
 class SfRadiatorsCard extends SfBase {
@@ -2139,7 +2139,7 @@ class SfRadiatorsCard extends SfBase {
     const a = (cl && cl.attributes) || {};
     const mode = cl ? cl.state : "unavailable", off = mode === "off";
     const heat = !dead && !off && a.hvac_action === "heating";
-    // Préréglages : ceux d'un `select` si fourni (il propose souvent « auto » en plus), sinon ceux du climate.
+    // Presets: those of a `select` if provided (it often offers "auto" in addition), otherwise those of the climate.
     const sel = r.preset && this.st(r.preset), viaSel = !!(sel && sel.state !== "unavailable");
     let presets = viaSel ? (sel.attributes.options || []) : (a.preset_modes || []);
     if (r.presets) presets = r.presets.filter((p) => presets.includes(p));
@@ -2178,12 +2178,12 @@ class SfRadiatorsCard extends SfBase {
   getCardSize() { return 2 + (this._config.radiators || []).length * 2; }
 }
 
-/* ------------------------------------------------------------------ ÉCRAN PLEIN FORMAT (NSPanel, tablette murale) */
+/* ------------------------------------------------------------------ FULL-SCREEN PANEL (NSPanel, wall tablet) */
 /*
  * type: custom:sf-ns-card
- * Un écran qui change de visage selon le moment (Matin / Jour / Soir / Nuit), conçu pour un petit écran carré (NSPanel Pro 480 x 480)
- * mais proportionnel : tout est en « vmin ». À placer seule dans une vue de type « panel ». Toute la configuration vient du tableau :
- * aucune entité par défaut.
+ * A screen that changes face depending on the moment (Morning / Day / Evening / Night), designed for a small square screen (NSPanel Pro 480 x 480)
+ * but proportional: everything is in "vmin". To be placed alone in a "panel" view. All the configuration comes from the dashboard:
+ * no default entity.
  */
 const SF_NS_EVENTS = {
   halloween: { a: "#ff8a1f", bg: "radial-gradient(ellipse at 50% -10%, #3d1a06 0%, #1b0b2e 50%, #06020b 100%)" },
@@ -2213,8 +2213,8 @@ const SF_NS_CSS = `
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; } }
   :host([theme="light"]) { filter: invert(1) hue-rotate(180deg); }
   [role="button"]:focus-visible { outline:2px solid #00e5ff; outline-offset:2px; }
-  /* Tout est dimensionné en « u » = 1 vmin (4,8 px sur le NSPanel Pro 480 x 480) : la mise en page reste proportionnelle. */
-  /* hauteur disponible : celle de --sf-ns-height si elle est définie ; sinon tout l'écran en mode kiosque, ou l'écran moins la barre HA (56 px) */
+  /* Everything is sized in "u" = 1 vmin (4.8 px on the NSPanel Pro 480 x 480): the layout stays proportional. */
+  /* available height: that of --sf-ns-height if defined; otherwise the whole screen in kiosk mode, or the screen minus the HA bar (56 px) */
   .ns { --H:var(--sf-ns-height, calc(100vh - 56px)); --u:min(1vw, calc(var(--H) / 100)); --a:#00e5ff; position:relative; display:flex; flex-direction:column; gap:calc(var(--u)*1.7);
     height:var(--H); padding:calc(var(--u)*2) calc(var(--u)*2.2); overflow:hidden; color:#cfefff;
     font-family:'B612 Mono', ui-monospace, monospace; font-size:calc(var(--u)*2.6); background:var(--bg); transition:background .8s; }
@@ -2236,7 +2236,7 @@ const SF_NS_CSS = `
   .hm, .big, .num, .nm { font-family:Orbitron, sans-serif; }
   ha-icon { display:inline-block; line-height:0; }
 
-  /* en-tête */
+  /* header */
   .hero { flex:0 0 auto; }
   .hrow { display:flex; align-items:flex-start; justify-content:space-between; gap:calc(var(--u)*2); }
   .hm { font-size:calc(var(--u)*12); font-weight:700; line-height:1; letter-spacing:.02em; color:#fff; text-shadow:0 0 calc(var(--u)*3) var(--a); }
@@ -2254,7 +2254,7 @@ const SF_NS_CSS = `
   .modeTxt { position:absolute; right:0; top:calc(var(--u)*-3.4); font-size:calc(var(--u)*2.3); letter-spacing:.12em; text-transform:uppercase; color:#7fa3bd; }
   .modeTxt b { color:var(--a); font-weight:400; }
 
-  /* alertes (2 lignes au plus) */
+  /* alerts (2 lines at most) */
   .alerts { flex:0 0 auto; display:flex; flex-direction:column; gap:calc(var(--u)*1); }
   .alert { display:flex; align-items:center; gap:calc(var(--u)*1.6); height:calc(var(--u)*7.2); padding:0 calc(var(--u)*2); border-radius:calc(var(--u)*1.8);
     border:1px solid #ff3355; background:rgba(255,51,85,.18); color:#ffd9df; font-size:calc(var(--u)*2.8); font-weight:700; letter-spacing:.05em; animation:pulse 1.4s infinite; overflow:hidden; }
@@ -2264,11 +2264,11 @@ const SF_NS_CSS = `
   .alert.warn { border-color:#ffb300; background:rgba(255,179,0,.13); color:#ffe9b0; animation:none; } .alert.warn ha-icon { color:#ffb300; }
   @keyframes pulse { 50% { box-shadow:0 0 calc(var(--u)*4) rgba(255,51,85,.85); } }
 
-  /* une alerte est affichée : en-tête et chiffres compactés pour garder la zone principale lisible */
+  /* an alert is displayed: header and figures compacted to keep the main area readable */
   .ns.tight .hm { font-size:calc(var(--u)*9); } .ns.tight .date { margin-top:calc(var(--u)*.4); } .ns.tight .wx .t { font-size:calc(var(--u)*5.6); } .ns.tight .wx ha-icon { --mdc-icon-size:calc(var(--u)*7); }
   .ns.tight .orbC .big { font-size:calc(var(--u)*6.4); } .ns.tight .orbC .lbl + .big + .lbl { display:none; } .ns.tight .stat .v { font-size:calc(var(--u)*3.8); } .ns.tight .stat { gap:calc(var(--u)*.4); }
   .ns.tight .car svg { width:calc(var(--u)*13); height:calc(var(--u)*13); }
-  /* zone principale : grille qui remplit exactement l'espace restant */
+  /* main area: grid that fills exactly the remaining space */
   .main { flex:1 1 0; min-height:0; display:grid; gap:calc(var(--u)*1.7); }
   .panel { position:relative; min-width:0; min-height:0; overflow:hidden; border-radius:calc(var(--u)*2.2); padding:calc(var(--u)*1.7) calc(var(--u)*2);
     border:1px solid rgba(0,229,255,.2); background:rgba(6,16,29,.62); box-shadow:inset 0 0 calc(var(--u)*6) rgba(0,229,255,.05); }
@@ -2281,7 +2281,7 @@ const SF_NS_CSS = `
   .armed { border-color:#ffb300 !important; background:rgba(255,179,0,.22) !important; color:#fff !important; animation:blink .5s infinite; }
   @keyframes blink { 50% { opacity:.35; } }
 
-  /* météo */
+  /* weather */
   .wxP { display:flex; flex-direction:column; justify-content:space-between; }
   .wxTop { display:flex; align-items:center; gap:calc(var(--u)*2); }
   .wxTop ha-icon { --mdc-icon-size:calc(var(--u)*10); color:var(--a); filter:drop-shadow(0 0 calc(var(--u)*2) var(--a)); flex:0 0 auto; }
@@ -2309,7 +2309,7 @@ const SF_NS_CSS = `
   .car .rg ha-icon { --mdc-icon-size:calc(var(--u)*3); vertical-align:-3px; margin-left:calc(var(--u)*.8); }
   .okc { color:#2bff88; } .badc { color:#ff3355; } .ambc { color:#ffb300; }
 
-  /* pastilles de température */
+  /* temperature pills */
   .pills { display:flex; gap:calc(var(--u)*1.2); height:100%; }
   .pill { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:calc(var(--u)*2);
     border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); padding:calc(var(--u)*.8) 0; }
@@ -2330,7 +2330,7 @@ const SF_NS_CSS = `
   .btn ha-icon { --mdc-icon-size:calc(var(--u)*5.6); color:var(--a); }
   .dock { flex:0 0 calc(var(--u)*11.5); }
 
-  /* énergie */
+  /* energy */
   .orbP { display:flex; align-items:center; justify-content:center; padding:calc(var(--u)*1); }
   .orbWrap { position:relative; width:100%; height:100%; }
   .orbWrap svg { position:absolute; inset:0; width:100%; height:100%; }
@@ -2353,7 +2353,7 @@ const SF_NS_CSS = `
   .dec ha-icon { --mdc-icon-size:calc(var(--u)*5); color:#2bff88; flex:0 0 auto; }
   .dec span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .dec .r { margin-left:auto; color:#7fa3bd; font-size:calc(var(--u)*2.2); flex:0 0 auto; }
 
-  /* tuiles du soir */
+  /* evening tiles */
   .tiles { display:grid; grid-template-columns:repeat(3, 1fr); grid-auto-rows:1fr; gap:calc(var(--u)*1.7); min-height:0; }
   .tile { position:relative; min-width:0; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:calc(var(--u)*.6);
     border-radius:calc(var(--u)*2.6); border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); color:#9fc3d9; text-align:center; padding:calc(var(--u)*1); }
@@ -2396,10 +2396,10 @@ class SfNsCard extends SfBase {
   disconnectedCallback() {
     super.disconnectedCallback();
     clearInterval(this._tk); this._tk = null;
-    if (this._kiosk) { try { this._kiosk.remove(); } catch (e) { /* déjà retiré */ } this._kiosk = null; }
-    if (this._fcUnsub) { try { this._fcUnsub(); } catch (e) { /* déjà fermé */ } this._fcUnsub = null; }
+    if (this._kiosk) { try { this._kiosk.remove(); } catch (e) { /* already removed */ } this._kiosk = null; }
+    if (this._fcUnsub) { try { this._fcUnsub(); } catch (e) { /* already closed */ } this._fcUnsub = null; }
   }
-  // Réécriture du DOM seulement si le rendu a changé (la minute de l'horloge est exclue de la comparaison : appuis longs et animations ne sont pas coupés).
+  // Rewrite the DOM only if the render changed (the clock minute is excluded from the comparison: long presses and animations are not cut).
   _schedule() {
     if (this._raf || !this._config || !this._hass) return;
     this._raf = requestAnimationFrame(() => { this._raf = null; this._render(); });
@@ -2421,7 +2421,7 @@ class SfNsCard extends SfBase {
     const norm = (v) => this.own(SF_NS_ALIAS, String(v || "").trim().toLowerCase());
     const q = norm(new URLSearchParams(location.search).get("mode"));
     if (q) return q;
-    const s = this.st(this._config.mode_entity);   // st() accepte un identifiant absent
+    const s = this.st(this._config.mode_entity);   // st() accepts a missing identifier
     if (s && norm(s.state)) return norm(s.state);
     const h = this.now().getHours();
     return h < 6 || h >= 22 ? "Nuit" : h < 9 ? "Matin" : h < 18 ? "Jour" : "Soir";
@@ -2434,7 +2434,7 @@ class SfNsCard extends SfBase {
   }
   async _subFc() {
     if (this._fcUnsub || this._fcBusy || !this._hass || !this._hass.connection || !this._config || !this._config.weather) return;
-    // Échec (entité météo sans prévision horaire, indisponible…) : HA rappelle `hass` plusieurs fois par seconde, on ne retente donc qu'une fois par minute.
+    // Failure (weather entity without hourly forecast, unavailable…): HA calls `hass` several times per second, so we only retry once a minute.
     if (this._fcFail && Date.now() - this._fcFail < 60000) return;
     this._fcBusy = true;
     try {
@@ -2444,7 +2444,7 @@ class SfNsCard extends SfBase {
     this._fcBusy = false;
   }
 
-  // Bilan du jour : statistiques horaires (recorder) des compteurs cumulés import / export / production.
+  // Day summary: hourly statistics (recorder) of the cumulative import / export / production meters.
   async _loadDay() {
     const D = this._config && this._config.energy && this._config.energy.day;
     if (!D || typeof D !== "object" || typeof D.import !== "string" || !D.import || this._dayBusy || !this._hass || !this._hass.callWS) return;
@@ -2469,7 +2469,7 @@ class SfNsCard extends SfBase {
     let c = 0, i = 0, cost = 0, y = 0;
     Object.keys(hrs).forEach((k) => { const t = +k, q = hrs[k], cons = Math.max(0, q.i + q.s - q.e);
       if (t >= m0) { c += cons; i += q.i; if (hasP) cost += q.i * price(new Date(t).getHours()); }
-      else if (t >= m0 - 86400000 && t < m0 - 86400000 + el) y += cons; });   // hier, jusqu'à la même heure qu'à présent
+      else if (t >= m0 - 86400000 && t < m0 - 86400000 + el) y += cons; });   // yesterday, up to the same hour as now
     if (c <= 0 && i <= 0) return null;
     return { c, i, cost: hasP ? cost : null, share: c > 0 ? Math.max(0, Math.min(1, (c - i) / c)) : null, y, delta: y > 0.5 ? (c - y) / y : null };
   }
@@ -2623,18 +2623,18 @@ class SfNsCard extends SfBase {
     const imp = grid !== null && grid > 20, dec = this.st(e.decision), evc = this.isOn(e.ev_connected);
     const orb = this.panel(`<div class="orbWrap" data-info="${this.esc(e.solar)}"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="8"/>${arcs}</svg>
       <div class="orbC"><div class="lbl">${this.esc(this.t(sol > 30 ? "solaire" : "nuit"))}</div><div class="big">${this.pw(sol)}</div>${ratio !== null ? `<div class="lbl" style="margin-top:4px">${this.esc(this.t("autoconso {n} %", { n: ratio }))}</div>` : ""}</div></div>`, "orbP");
-    // --- trois tuiles d'information : chacune a une icône, une valeur, une barre proportionnelle et une ligne de contexte
+    // --- three information tiles: each has an icon, a value, a proportional bar and a context line
     const E = e, scale = Math.max(sol, home + ev, Math.abs(grid || 0), 500);
     const ico = (n, col) => this.ic(n).replace("<ha-icon", `<ha-icon style="color:${col}"`);
-    // maison : les appareils qui tirent le plus (2 au plus, > 30 W)
+    // house: the devices that draw the most (2 at most, > 30 W)
     const devs = (Array.isArray(E.devices) ? E.devices : []).filter((d) => d && typeof d === "object").map((d) => ({ ...d, w: this.watts(d.entity) })).filter((d) => d.w !== null && d.w > 30).sort((x, y) => y.w - x.w).slice(0, 2);
     const chipsHome = devs.length ? devs.map((d) => `<span class="chip" data-info="${this.esc(d.entity)}">${this.ic(d.icon || "mdi:flash")}${this.pw(d.w)}</span>`).join("") : `<span class="sub1">${this.esc(this.t("consommation de fond"))}</span>`;
-    // borne : intensité + part de solaire dans la charge
+    // charger: current + solar share of the charge
     const evS = this.watts(E.ev_solar), evG = this.watts(E.ev_grid), evPct = evS !== null && evG !== null && evS + evG > 20 ? Math.round(evS / (evS + evG) * 100) : null;
     const amps = this.num(E.ev_current);
     const subEv = ev > 20 ? `${amps !== null ? `<span class="chip">${this.ic("mdi:current-ac")}${Math.round(amps)} A</span>` : ""}${evPct !== null ? `<span class="chip">${this.ic("mdi:white-balance-sunny")}${evPct} %</span>` : ""}`
       : `<span class="sub1">${this.esc(this.t(evc ? "branchée, en attente" : "libre"))}</span>`;
-    // réseau : sens, tarif en cours (HP/HC), coût horaire du soutirage
+    // grid: direction, current tariff (peak/off-peak), hourly cost of the draw
     const price = this.num(E.price), hc = price !== null && E.hc_below !== undefined && price < E.hc_below;
     const costH = imp && price !== null ? (grid / 1000 * price) : null;
     const subGrid = `${price !== null ? `<span class="chip ${hc ? "hc" : ""}">${this.esc(this.t(hc ? "HC" : "HP"))} ${this.nf(price, 3)} ${this.esc(this.cur())}</span>` : ""}${costH !== null ? `<span class="chip">≈ ${this.nf(costH, 2)} ${this.esc(this.cur())}/h</span>` : ""}${!imp && grid !== null ? `<span class="chip">${this.ic("mdi:transmission-tower-export")}${this.esc(this.t("injecte"))}</span>` : ""}`;
@@ -2682,7 +2682,7 @@ class SfNsCard extends SfBase {
     if (c.mode_entity) b.push(`<div class="btn tap" data-act="info" data-e="${this.esc(c.mode_entity)}">${this.ic("mdi:home-clock")}<span>${this.esc(this.t("Mode"))}</span></div>`);
     return b.length ? `<div class="dock"><div class="btns">${b.join("")}</div></div>` : "";
   }
-  // Popup aspirateur : mêmes raccourcis que l'écran du matin, disponibles à toute heure + état et batterie de l'aspirateur.
+  // Vacuum popup: same shortcuts as the morning screen, available at any hour + vacuum state and battery.
   popup() {
     if (this._pop !== "vac") return "";
     const c = this._config, V = this.vac, v = V && this.st(V.entity), bat = V && this.num(V.battery);
@@ -2702,20 +2702,20 @@ class SfNsCard extends SfBase {
       const st = document.createElement("style"); st.id = "sf-ns-kiosk";
       st.textContent = ".header, .toolbar { display:none !important } #view { min-height:100vh !important; height:100vh !important; padding-top:0 !important; margin-top:0 !important } hui-view-container { padding-top:0 !important }";
       r.appendChild(st); this._kiosk = st;
-    } catch (e) { /* structure de HA différente : on laisse la barre visible */ }
+    } catch (e) { /* different HA structure: we leave the bar visible */ }
   }
   _render() {
     const c = this._config, miss = SF_REQ["sf-ns-card"](c);
     this.dir = this.lang === "ar" ? "rtl" : "ltr";
     const th = this._theme(); if (this.getAttribute("theme") !== th) this.setAttribute("theme", th);
-    if (miss.length) {   // rien d'utile à afficher : même message « Carte à compléter » que les autres cartes
+    if (miss.length) {   // nothing useful to display: same "Card to be completed" message as the other cards
       const h0 = `<style>${SF_CSS}</style>` + this.frame(this.esc(this.t("Carte à compléter")), "", `<div style="color:${SF_C.amber};line-height:1.6">${miss.map((m) => `• ${this.esc(this.t(m))}`).join("<br>")}</div>`);
       if (h0 !== this._key) { this._key = h0; this.shadowRoot.innerHTML = h0; }
       return;
     }
     const mode = this.mode(), M = SF_NS_MODES[mode];
     this._mode = mode; this._hideHeader();
-    // une seule ligne d'alerte (la plus grave d'abord) pour ne jamais écraser l'écran ; « +N » s'il y en a d'autres
+    // a single alert line (the most serious first) so the screen is never crowded; "+N" if there are others
     const al = this.alerts().sort((x, y) => (x.warn ? 1 : 0) - (y.warn ? 1 : 0)), a0 = al[0], more = al.length - 1;
     const alerts = a0 ? `<div class="alerts"><div class="alert tap ${a0.warn ? "warn" : ""}" data-info="${this.esc(a0.e)}">${this.ic(a0.i)}<span>${this.esc(a0.t)}</span>${more > 0 ? `<em>+${more}</em>` : ""}</div></div>` : "";
     const EVT = mode === "Nuit" ? null : this._ev();
@@ -2732,7 +2732,7 @@ class SfNsCard extends SfBase {
       .shead .x{width:calc(var(--u)*8);height:calc(var(--u)*8);display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgba(255,255,255,.2);color:#fff}
       .btn.big ha-icon{--mdc-icon-size:calc(var(--u)*11)} .btn.big{font-size:calc(var(--u)*2.8)} .nrow{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:calc(var(--u)*1.7);min-height:0} .nrow>.panel{min-height:0}</style>
       <div class="ns ${mode.toLowerCase()}${this._kiosk ? " full" : ""}${a0 ? " tight" : ""}" style="--a:${EVT ? SF_NS_EVENTS[EVT].a : M.a};--bg:${EVT ? SF_NS_EVENTS[EVT].bg : M.bg}">${EVT ? this._nsDecor(EVT) : ""}${this.hero(mode)}${alerts}<div class="main" style="${grid}">${main}</div>${mode === "Nuit" ? "" : this.dock()}${this.popup()}</div>`;
-    // pas de réécriture si rien n'a changé (sinon animations et appuis longs seraient coupés) ; l'heure est exclue de la comparaison
+    // no rewrite if nothing changed (otherwise animations and long presses would be cut); the time is excluded from the comparison
     const key = html.replace(/<div class="hm">[^<]*<\/div>/, "").replace(/left:[\d.]+%/, "");
     if (key === this._key) { this._tick(); return; }
     this._key = key;
@@ -2740,10 +2740,10 @@ class SfNsCard extends SfBase {
     this._bind();
     this._a11yNs(this.shadowRoot);
   }
-  // Éléments cliquables : vrais boutons pour le clavier et les lecteurs d'écran (rôle, focus, nom, Entrée / Espace).
+  // Clickable elements: real buttons for the keyboard and screen readers (role, focus, name, Enter / Space).
   _a11yNs(root) {
     root.querySelectorAll("[data-act], [data-info]").forEach((el) => {
-      if (el.dataset.act === "close" && el.classList.contains("pop")) return;   // le fond du popup n'est pas un bouton
+      if (el.dataset.act === "close" && el.classList.contains("pop")) return;   // the popup background is not a button
       el.setAttribute("role", "button"); el.setAttribute("tabindex", "0");
       if (!el.getAttribute("aria-label")) {
         const lab = (el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 90) || (el.dataset.e || el.dataset.info || "").slice(0, 90);
@@ -2756,21 +2756,21 @@ class SfNsCard extends SfBase {
 
 /* ================================================================ TENDANCE */
 /*
- * Courbes d'historique en lecture seule (aucun calcul : on trace ce que Home Assistant a enregistré). Plusieurs séries sur un même graphe
- * (même unité) ou une courbe par ligne ; boutons de plage ; survol / toucher = valeur à l'instant visé. Jusqu'à 48 h : historique complet ;
- * au-delà : statistiques à long terme (moyenne horaire), avec repli sur l'historique pour une entité qui n'en a pas.
+ * Read-only history curves (no computation: we draw what Home Assistant recorded). Several series on one chart
+ * (same unit) or one curve per row; range buttons; hover / touch = value at the targeted instant. Up to 48 h: full history;
+ * beyond: long-term statistics (hourly mean), falling back to the history for an entity that has none.
  *
  * type: custom:sf-trend-card
- * title: Températures
- * hours: 24                 # plage affichée au départ
+ * title: Temperatures
+ * hours: 24                 # range shown initially
  * ranges: [6, 24, 168]      # boutons de plage, en heures ([] = aucun bouton)
- * layout: auto              # auto (superposées si même unité) | combined | separate
+ * layout: auto              # auto (overlaid if same unit) | combined | separate
  * height: 150
  * series: [{ entity: sensor.x, name: Salon, color: "#00e5ff", unit: "°C", digits: 1 }]
  */
 const SF_TREND_COLORS = [SF_C.cyan, SF_C.amber, SF_C.green, "#b388ff", "#ff7043", "#4fc3f7", "#ff4fd8", "#ffd54f"];
 const SF_TREND_MAX_SERIES = 8, SF_TREND_POINTS = 240;
-// Réduit une série [[t, v], …] à au plus n points (moyenne par tranche de temps) ; les tranches vides sont simplement absentes de la courbe.
+// Reduces a series [[t, v], …] to at most n points (mean per time slice); empty slices are simply absent from the curve.
 function sfTrendReduce(pts, t0, t1, n = SF_TREND_POINTS) {
   const span = t1 - t0; if (!(span > 0) || !pts.length) return [];
   const sum = new Float64Array(n), cnt = new Uint32Array(n);
@@ -2789,8 +2789,8 @@ class SfTrendCard extends SfBase {
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); }
-  // Chargement : jamais deux à la fois, rafraîchi seulement après une durée de validité, et après un échec on ne réessaie qu'une fois par minute
-  // (HA rappelle `hass` plusieurs fois par seconde : sans ces gardes, une erreur déclencherait une requête à chaque appel).
+  // Loading: never two at a time, refreshed only after a validity period, and after a failure we only retry once a minute
+  // (HA calls `hass` several times per second: without these guards, an error would trigger a request on every call).
   async _load(force) {
     const ser = this._series();
     if (!this._config || !ser.length || !this._hass || !this._hass.callWS || this._busy) return;
@@ -2805,7 +2805,7 @@ class SfTrendCard extends SfBase {
         try {
           const r = await this._hass.callWS({ type: "recorder/statistics_during_period", start_time: ISO(t0), end_time: ISO(t1), statistic_ids: ids, period: hrs > 336 ? "day" : "hour", types: ["mean"] });
           for (const id of ids) { out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((q) => [typeof q.start === "number" ? q.start : Date.parse(q.start), Number(q.mean)]).filter((p) => isFinite(p[0]) && isFinite(p[1])); stat[id] = out[id].length > 0; }
-        } catch (e) { /* repli sur l'historique ci-dessous */ }
+        } catch (e) { /* fall back to the history below */ }
       }
       const missing = ids.filter((id) => !out[id] || !out[id].length);
       if (missing.length) {
@@ -2816,8 +2816,8 @@ class SfTrendCard extends SfBase {
           return [t, parseFloat(x.s ?? x.state)];
         }).filter((p) => isFinite(p[0]) && isFinite(p[1]));
       }
-      // Une série stable n'a qu'un point (son état au début de la fenêtre) : on prolonge sa dernière valeur jusqu'à maintenant pour tracer une ligne
-      // (valable pour l'historique, où l'état persiste ; pas pour les statistiques horaires). Un point antérieur au début est ramené au début.
+      // A stable series has only one point (its state at the start of the window): its last value is extended up to now to draw a line
+      // (valid for the history, where the state persists; not for hourly statistics). A point before the start is brought back to the start.
       const pts = {}; for (const id of ids) {
         const raw = (out[id] || []).sort((a, b) => a[0] - b[0]).map(([t, v]) => [Math.max(t, t0), v]);
         if (raw.length && !stat[id] && raw[raw.length - 1][0] < t1) raw.push([t1, raw[raw.length - 1][1]]);
@@ -2826,9 +2826,9 @@ class SfTrendCard extends SfBase {
       this._data = { key, t0, t1, pts }; this._at = Date.now(); this._failAt = 0;
     } catch (e) { this._failAt = Date.now(); this._failKey = key; this._data = { key, t0: now - hrs * 3600000, t1: now, pts: {}, error: true }; this._at = Date.now(); }
     this._busy = false; this._lastHtml = null; this._schedule();
-    if (this._keyNow() !== key) this._load();   // la plage a changé pendant le chargement
+    if (this._keyNow() !== key) this._load();   // the range changed while loading
   }
-  // Couleur de chaque série : celle de la config, sinon la première teinte de la palette qui n'est pas déjà prise par une série (pas de doublon).
+  // Colour of each series: the one from the config, otherwise the first palette hue not already taken by a series (no duplicates).
   _cols(ser) {
     const used = new Set(ser.filter((x) => x.color).map((x) => String(x.color).toLowerCase())), free = SF_TREND_COLORS.filter((x) => !used.has(x.toLowerCase())); let k = 0;
     return ser.map((x) => x.color || free[k++ % free.length] || SF_C.cyan);
@@ -2877,7 +2877,7 @@ class SfTrendCard extends SfBase {
       const html = groups.map((idx) => {
         const all = idx.flatMap((i) => (d.pts[ser[i].entity] || []).map((p) => p[1]));
         if (!all.length) return "";
-        // Deux échelles seulement si des séries sont marquées `axis: right` ET d'autres non (sinon une seule, à gauche).
+        // Two scales only if some series are marked `axis: right` AND others are not (otherwise a single one, on the left).
         const R = idx.filter((i) => ser[i].axis === "right"), L = idx.filter((i) => ser[i].axis !== "right"), two = R.length > 0 && L.length > 0;
         const scale = (ids) => { const v = ids.flatMap((i) => (d.pts[ser[i].entity] || []).map((p) => p[1])); if (!v.length) return null;
           let lo = Math.min(...v), hi = Math.max(...v); if (hi - lo < 1e-9) { lo -= 1; hi += 1; } const pad = (hi - lo) * 0.08; return { lo: lo - pad, hi: hi + pad, pad }; };
@@ -2940,20 +2940,20 @@ class SfTrendCard extends SfBase {
 
 /* ============================================================ LIGNE DE TEMPS */
 /*
- * Fil chronologique en lecture seule : les derniers changements d'état des entités choisies (journal de Home Assistant), regroupés par jour,
- * avec une phrase lisible selon le type d'entité (porte ouverte, mouvement détecté, alarme armée…). Aucun calcul ni décision : on affiche le
- * journal. Chargé une fois, rafraîchi au plus toutes les 60 s ; après une erreur, au plus une nouvelle tentative par minute.
+ * Read-only chronological feed: the latest state changes of the chosen entities (Home Assistant logbook), grouped by day,
+ * with a readable sentence according to the entity type (door open, motion detected, alarm armed…). No computation or decision: we show the
+ * log. Loaded once, refreshed at most every 60 s; after an error, at most one new attempt per minute.
  *
  * type: custom:sf-timeline-card
  * title: Journal
- * hours: 24            # fenêtre affichée
- * limit: 30            # nombre maximal d'événements
- * group: true          # fusionne les répétitions consécutives identiques (« × 3 »)
+ * hours: 24            # window shown
+ * limit: 30            # maximum number of events
+ * group: true          # merges identical consecutive repeats ("× 3")
  * hide_unavailable: true
  * entities: [binary_sensor.door, { entity: alarm_control_panel.home, name: Alarme, icon: "mdi:shield-home", color: "#ffb300" }]
  */
 const SF_TL_MAX_ENTITIES = 40, SF_TL_RAW_MAX = 2000;
-const SF_TL_BIN = {   // binary_sensor selon device_class : [phrase « on », phrase « off », icône « on », icône « off », ton « on » (warn / bad / ok)]
+const SF_TL_BIN = {   // binary_sensor by device_class: ["on" sentence, "off" sentence, "on" icon, "off" icon, "on" tone (warn / bad / ok)]
   door: ["ouvert", "fermé", "mdi:door-open", "mdi:door-closed", "warn"], window: ["ouvert", "fermé", "mdi:window-open", "mdi:window-closed", "warn"],
   opening: ["ouvert", "fermé", "mdi:square-outline", "mdi:square", "warn"], garage_door: ["ouvert", "fermé", "mdi:garage-open", "mdi:garage", "warn"],
   motion: ["mouvement détecté", "plus de mouvement", "mdi:motion-sensor", "mdi:motion-sensor-off", "ok"], occupancy: ["présence détectée", "plus de présence", "mdi:account", "mdi:account-off", "ok"],
@@ -2967,7 +2967,7 @@ const SF_TL_ALARM = { disarmed: ["désarmée", "mdi:shield-off", "ok"], armed_ho
   arming: ["armement…", "mdi:shield-sync", "ok"], pending: ["en attente", "mdi:shield-sync", "warn"] };
 class SfTimelineCard extends SfBase {
   defaults() { return { hours: 24, limit: 30, group: true, hide_unavailable: true, entities: [] }; }
-  // Entrées : « sensor.x » ou { entity, name, icon, color } ; identifiant valide, 40 au plus.
+  // Entries: "sensor.x" or { entity, name, icon, color }; valid identifier, 40 at most.
   _ents() {
     const out = [];
     for (const e of Array.isArray(this._config.entities) ? this._config.entities : []) {
@@ -2999,7 +2999,7 @@ class SfTimelineCard extends SfBase {
     } catch (e) { this._failAt = Date.now(); this._failKey = key; this._data = { key, ev: [], error: true }; this._at = Date.now(); }
     this._busy = false; this._lastHtml = null; this._schedule();
   }
-  // Phrase, icône et ton d'un événement selon l'entité (domaine, device_class) ; le ton colore la ligne : bad (rouge), warn (ambre), ok (cyan), dim.
+  // Sentence, icon and tone of an event according to the entity (domain, device_class); the tone colours the row: bad (red), warn (amber), ok (cyan), dim.
   _what(ev, cfg) {
     const id = ev.id, dom = id.split(".")[0], st = this.st(id), a = (st && st.attributes) || {}, dc = a.device_class, s = ev.state, sl = s.toLowerCase();
     let txt = "", ico = cfg.icon || a.icon || "mdi:circle-medium", tone = "ok";
@@ -3030,11 +3030,11 @@ class SfTimelineCard extends SfBase {
     const c = this._config, ents = this._ents(), cfgOf = Object.fromEntries(ents.map((e) => [e.entity, e]));
     const d = this._data && this._data.key === this._keyNow() ? this._data : null, limit = Math.max(1, Math.min(200, Math.round(Number(c.limit)) || 30));
     let rows = d ? d.ev.filter((e) => cfgOf[e.id] && !(c.hide_unavailable !== false && ["unavailable", "unknown"].includes(e.state.toLowerCase()))) : [];
-    // même entité, même état que l'événement précédent : pas un changement ; répétitions consécutives fusionnées si group
+    // same entity, same state as the previous event: not a change; identical consecutive repeats merged if group
     const last = {}, kept = [];
     for (const e of rows.slice().reverse()) { if (last[e.id] === e.state) continue; last[e.id] = e.state; kept.push(e); }
     rows = kept.reverse();
-    // filtres par entité : `states` (seuls ces états sont affichés) et `min_gap` (minutes minimales entre deux événements affichés : coupe le clignotement d'un détecteur)
+    // per-entity filters: `states` (only these states are shown) and `min_gap` (minimum minutes between two displayed events: cuts a detector's flicker)
     const gapKept = {}, flt = [], lstOf = (v) => (Array.isArray(v) ? v : v === undefined || v === null || v === "" ? [] : [v]).map((x) => String(x).trim().toLowerCase());
     for (const e of rows.slice().reverse()) {
       const cf = cfgOf[e.id] || {}, sts = lstOf(cf.states), gap = Number(cf.min_gap) > 0 ? Number(cf.min_gap) * 60000 : 0;
@@ -3065,22 +3065,22 @@ class SfTimelineCard extends SfBase {
   getCardSize() { return 6; }
 }
 
-/* ================================================================== SANTÉ */
+/* ================================================================== HEALTH */
 /*
- * Vue d'ensemble de l'installation : une liste de CONTRÔLES que tu définis (entité + ce qui est normal), un verdict global (tout va bien /
- * attention / critique) et les anomalies classées par gravité, regroupées pour ne pas répéter dix alertes d'un même sous-système.
- * La carte ne décide rien : elle applique tes règles aux états déjà présents dans Home Assistant (aucune requête, aucun calcul caché).
+ * Overview of the installation: a list of CHECKS that you define (entity + what is normal), an overall verdict (all good /
+ * warning / critical) and the anomalies ranked by severity, grouped so as not to repeat ten alerts of one subsystem.
+ * The card decides nothing: it applies your rules to the states already present in Home Assistant (no request, no hidden computation).
  *
  * type: custom:sf-health-card
- * title: Santé
- * show_ok: false          # liste aussi les contrôles normaux
+ * title: Health
+ * show_ok: false          # also lists the normal checks
  * checks:
- *   - { name: Internet, entity: binary_sensor.internet, ok: ["on"], severity: critical, group: Réseau }
+ *   - { name: Internet, entity: binary_sensor.internet, ok: ["on"], severity: critical, group: Network }
  *   - { name: Onduleur, entity: sensor.ups_battery, min: 30 }
- *   - { name: Capteur cuisine, entity: sensor.kitchen_temp, stale: 60 }     # minutes sans mise à jour
- *   - { name: Fuite, entity: binary_sensor.leak, bad: ["on"], severity: critical }
- * Règles d'un contrôle : indisponible / inconnu = anomalie ; ok: états normaux (tout autre = anomalie) ; bad: états anormaux ;
- * min / max : seuils numériques ; stale : anomalie sans mise à jour depuis N minutes ; severity: warning (défaut) | critical.
+ *   - { name: Kitchen sensor, entity: sensor.kitchen_temp, stale: 60 }     # minutes without update
+ *   - { name: Leak, entity: binary_sensor.leak, bad: ["on"], severity: critical }
+ * Rules of a check: unavailable / unknown = anomaly; ok: normal states (any other = anomaly); bad: abnormal states;
+ * min / max: numeric thresholds; stale: anomaly without update for N minutes; severity: warning (default) | critical.
  */
 const SF_HEALTH_MAX = 60;
 class SfHealthCard extends SfBase {
@@ -3088,11 +3088,11 @@ class SfHealthCard extends SfBase {
   _checks() { return (Array.isArray(this._config.checks) ? this._config.checks : []).filter((c) => c && typeof c.entity === "string" && /^[a-z0-9_]+\.[a-z0-9_]+$/i.test(c.entity)).slice(0, SF_HEALTH_MAX); }
   connectedCallback() {
     super.connectedCallback();
-    clearInterval(this._tk); this._tk = setInterval(() => this._schedule(), 60000);   // l'âge d'un capteur change même sans mise à jour de hass
+    clearInterval(this._tk); this._tk = setInterval(() => this._schedule(), 60000);   // the age of a sensor changes even without a hass update
   }
   disconnectedCallback() { super.disconnectedCallback(); clearInterval(this._tk); this._tk = null; }
   _lst(v) { return (Array.isArray(v) ? v : v === undefined || v === null || v === "" ? [] : [v]).map((x) => String(x).toLowerCase()); }
-  // Verdict d'un contrôle : { lvl: "ok" | "warning" | "critical", why: [clé de traduction, variables] | null }
+  // Verdict of a check: { lvl: "ok" | "warning" | "critical", why: [translation key, variables] | null }
   _eval(c) {
     const st = this.st(c.entity), crit = String(c.severity).toLowerCase() === "critical", bad = crit ? "critical" : "warning";
     if (!st || ["unavailable", "unknown"].includes(st.state)) return { lvl: bad, why: ["indisponible", {}] };
@@ -3128,8 +3128,8 @@ class SfHealthCard extends SfBase {
     const name = (x) => x.k.name || (this.st(x.k.entity) && this.st(x.k.entity).attributes.friendly_name) || x.k.entity;
     const row = (x) => { const col = x.lvl === "critical" ? SF_C.red : SF_C.amber, why = x.why ? this.t(x.why[0], x.why[1]) : "";
       return `<div class="hr" data-e="${this.esc(x.k.entity)}" style="color:${col}">${this.icon(x.lvl === "critical" ? "mdi:alert-octagon" : "mdi:alert", 16, col)}<span class="nm" title="${this.esc(name(x))}">${this.esc(name(x))}</span><span class="why">${this.esc(why)}</span></div>`; };
-    // regroupement : un sous-système qui a plusieurs anomalies n'affiche qu'un en-tête (« Réseau · 3 anomalies ») puis ses lignes
-    // Unités d'affichage : un groupe = une unité (placée à sa première anomalie), une anomalie sans groupe = une unité ; `probs` met déjà les critiques en tête, donc elles restent en tête.
+    // grouping: a subsystem with several anomalies shows a single header ("Network · 3 anomalies") then its rows
+    // Display units: a group = one unit (placed at its first anomaly), an ungrouped anomaly = one unit; `probs` already puts the critical ones first, so they stay first.
     const units = [], byG = new Map();
     for (const x of probs) { const g = x.k.group ? String(x.k.group) : ""; if (!g) units.push({ g: "", xs: [x] }); else if (byG.has(g)) byG.get(g).xs.push(x); else { const u = { g, xs: [x] }; byG.set(g, u); units.push(u); } }
     let list = "";
@@ -3145,20 +3145,20 @@ class SfHealthCard extends SfBase {
 
 /* =============================================================== ASSISTANT */
 /*
- * État d'un assistant (vocal ou conversationnel) en lecture seule : sa phase du moment (au repos / à l'écoute / réfléchit / exécute / répond /
- * erreur), la dernière demande, l'action en cours, son résultat et la dernière réponse, + boutons d'action facultatifs. Marche tout de suite avec
- * les satellites Assist de Home Assistant (`assist_satellite.*` : idle / listening / processing / responding) et avec toute entité dont tu
- * indiques la correspondance des états (`phases`). La carte n'interprète rien : elle affiche ce que les entités contiennent.
+ * Read-only state of an assistant (voice or chat): its current phase (idle / listening / thinking / running / replying /
+ * error), the last request, the current action, its result and the last reply, + optional action buttons. Works right away with
+ * Home Assistant Assist satellites (`assist_satellite.*`: idle / listening / processing / responding) and with any entity whose
+ * states you map (`phases`). The card interprets nothing: it shows what the entities contain.
  *
  * type: custom:sf-assistant-card
  * name: Assistant
- * state: assist_satellite.kitchen          # phase (entité dont l'état décrit l'activité)
- * phases: { idle: idle, busy: thinking }   # état de l'entité -> phase (idle | listening | thinking | acting | speaking | error), facultatif
- * request: sensor.assistant_last_request   # entités texte facultatives (leur état est affiché)
+ * state: assist_satellite.kitchen          # phase (entity whose state describes the activity)
+ * phases: { idle: idle, busy: thinking }   # entity state -> phase (idle | listening | thinking | acting | speaking | error), optional
+ * request: sensor.assistant_last_request   # optional text entities (their state is displayed)
  * action: sensor.assistant_current_action
  * result: sensor.assistant_last_result
  * reply: sensor.assistant_last_reply
- * actions: [{ name: Stop, icon: "mdi:stop", service: script.assistant_stop, confirm: "Arrêter ?" }]
+ * actions: [{ name: Stop, icon: "mdi:stop", service: script.assistant_stop, confirm: "Stop?" }]
  */
 const SF_AS_PH = { idle: ["Au repos", "mdi:sleep", "grey"], listening: ["À l'écoute", "mdi:ear-hearing", "cyan"], thinking: ["Réfléchit", "mdi:brain", "amber"],
   acting: ["Exécute", "mdi:cog-play", "amber"], speaking: ["Répond", "mdi:message-text", "green"], error: ["Erreur", "mdi:alert-circle", "red"] };
@@ -3179,7 +3179,7 @@ class SfAssistantCard extends SfBase {
     const m = Math.max(0, Math.round((Date.now() - lc) / 60000));
     return m < 1 ? this.t("à l'instant") : m < 60 ? this.t("il y a {n} min", { n: m }) : m < 2880 ? this.t("il y a {n} h", { n: Math.round(m / 60) }) : "";
   }
-  connectedCallback() { super.connectedCallback(); clearInterval(this._tk); this._tk = setInterval(() => this._schedule(), 60000); }   // l'âge affiché avance même sans mise à jour de hass
+  connectedCallback() { super.connectedCallback(); clearInterval(this._tk); this._tk = setInterval(() => this._schedule(), 60000); }   // the displayed age advances even without a hass update
   disconnectedCallback() { super.disconnectedCallback(); clearInterval(this._tk); this._tk = null; }
   css() {
     return `
@@ -3241,14 +3241,14 @@ for (const [tag, cls, name, description] of SF_DEFS) {
   if (!window.customCards.some((c) => c.type === tag)) window.customCards.push({ type: tag, name, description });
 }
 
-/* ============================================================ ÉDITEURS VISUELS */
+/* ============================================================ VISUAL EDITORS */
 /*
- * Chaque carte SF s'édite dans l'interface (« Modifier la carte ») sans écrire de YAML :
- * un formulaire HA (ha-form : sélecteurs d'entités, icônes, interrupteurs…) pour les réglages
- * simples, et des listes « + Ajouter / ↑ ↓ / Supprimer » pour les pièces, groupes, éléments, tuiles.
- * Les champs rares ou imbriqués (données d'un service, carte d'un panneau…) restent éditables
- * via un champ YAML intégré au formulaire. Un champ inconnu du formulaire n'est jamais perdu :
- * l'éditeur modifie la config en place et ne supprime que les valeurs vidées par l'utilisateur.
+ * Every SF card is edited in the interface ("Edit card") without writing YAML:
+ * an HA form (ha-form: entity selectors, icons, switches…) for the simple
+ * settings, and "+ Add / ↑ ↓ / Delete" lists for rooms, groups, items, tiles.
+ * Rare or nested fields (service data, a panel's card…) remain editable
+ * through a YAML field embedded in the form. A field unknown to the form is never lost:
+ * the editor modifies the config in place and only removes the values emptied by the user.
  */
 const SF_ED_CSS = `
   .req { margin:0 0 12px; padding:8px 12px; border-radius:8px; border:1px solid #ffb300; background:rgba(255,179,0,.12); color:#ffb300; font-size:12px; line-height:1.5; }
@@ -3272,7 +3272,7 @@ const SF_ED_CSS = `
   button.add { width:100%; padding:8px; border-style:dashed; color:var(--primary-color); }
 `;
 
-// Charge les composants de formulaire de HA (chargés à la demande par le frontend).
+// Loads HA's form components (loaded on demand by the frontend).
 let _sfFormReady;
 function sfLoadHaForm() {
   if (!_sfFormReady) _sfFormReady = (async () => {
@@ -3281,7 +3281,7 @@ function sfLoadHaForm() {
       const h = await window.loadCardHelpers();
       const c = await h.createCardElement({ type: "entities", entities: [] });
       await c.constructor.getConfigElement();
-    } catch (e) { /* le formulaire s'affichera dès que HA aura chargé ses composants */ }
+    } catch (e) { /* the form will show as soon as HA has loaded its components */ }
   })();
   return _sfFormReady;
 }
@@ -3336,7 +3336,7 @@ function sfMachineTile(t) {
   return s;
 }
 
-const SF_CARD_NAMES = {};   // rempli plus bas : tag -> titre
+const SF_CARD_NAMES = {};   // filled in below: tag -> title
 const sfCardTag = (c) => { const t = c && typeof c.type === "string" ? c.type.replace(/^custom:/, "") : ""; return SF_CARD_NAMES[t] ? t : ""; };
 
 const SF_SPECS = {
@@ -3565,7 +3565,7 @@ const SF_SPECS = {
   },
 };
 
-// Retire les valeurs vidées (chaîne vide, null, undefined) pour garder un YAML propre.
+// Removes emptied values (empty string, null, undefined) to keep the YAML clean.
 function sfClean(v) {
   if (Array.isArray(v)) return v.map(sfClean);
   if (v && typeof v === "object") {
@@ -3573,7 +3573,7 @@ function sfClean(v) {
     for (const [k, x] of Object.entries(v)) {
       if (x === "" || x === null || x === undefined) continue;
       const c = sfClean(x);
-      if (x && typeof x === "object" && (Array.isArray(c) ? c.length === 0 : Object.keys(c).length === 0)) continue;   // pas de « charger: {} » ni de listes vides dans le YAML émis
+      if (x && typeof x === "object" && (Array.isArray(c) ? c.length === 0 : Object.keys(c).length === 0)) continue;   // no "charger: {}" nor empty lists in the emitted YAML
       o[k] = c;
     }
     return o;
@@ -3581,16 +3581,16 @@ function sfClean(v) {
   return v;
 }
 
-/* ===================================================== REMPLISSAGE AUTOMATIQUE (éditeur) */
-/* On choisit un appareil (voiture, borne, batterie) : l'éditeur retrouve ses entités d'après leur type (device_class, unité, nom) et
- * remplit les champs encore vides. Meilleur effort : on relit et on corrige si besoin, rien n'est jamais écrasé. Requiert l'inventaire
- * des entités de HA (`hass.entities`). */
+/* ===================================================== AUTO-FILL (editor) */
+/* You pick a device (car, charger, battery): the editor finds its entities from their type (device_class, unit, name) and
+ * fills the fields that are still empty. Best effort: re-read and correct if needed, nothing is ever overwritten. Requires the entity
+ * inventory of HA (`hass.entities`). */
 function sfGuess(hass, deviceId, kind) {
   const ents = hass && hass.entities ? Object.values(hass.entities) : [];
   const L = ents.filter((e) => e.device_id === deviceId && !e.hidden && hass.states[e.entity_id]).map((e) => ({ id: e.entity_id, st: hass.states[e.entity_id] }));
   const dom = (x) => x.id.split(".")[0], dc = (x) => x.st.attributes.device_class, unit = (x) => String(x.st.attributes.unit_of_measurement || "").toLowerCase();
-  // Un champ n'est rempli que si le choix est sûr : une entité qui correspond à une préférence, ou la seule candidate. Plusieurs candidates sans
-  // préférence = ambigu = on laisse vide (mieux vaut un champ à remplir à la main qu'un mauvais capteur).
+  // A field is only filled when the choice is safe: an entity that matches a preference, or the only candidate. Several candidates without a
+  // preference = ambiguous = left empty (better a field to fill by hand than a wrong sensor).
   const pick = (pred, ...prefs) => { const c = L.filter(pred); for (const re of prefs) { const m = c.find((x) => re.test(x.id)); if (m) return m.id; } return c.length === 1 ? c[0].id : undefined; };
   const dev = hass && hass.devices && hass.devices[deviceId], out = { name: dev && (dev.name_by_user || dev.name) };
   const net = /wifi|network|signal|rssi|ssid|online|connectivity|ping|uptime/;
@@ -3604,11 +3604,11 @@ function sfGuess(hass, deviceId, kind) {
     out.charging = pick((x) => !net.test(x.id) && ((dom(x) === "binary_sensor" && dc(x) === "battery_charging") || (["sensor", "binary_sensor"].includes(dom(x)) && /charging$/.test(x.id)) || (dom(x) === "sensor" && /(status|state)$/.test(x.id))), /charging/, /status|state/);
     out.power = pick((x) => dom(x) === "sensor" && dc(x) === "power" && !/solar|pv|grid|house|home/.test(x.id), /charg|session|evse|wallbox/);
     out.current = pick((x) => dom(x) === "number" && unit(x) === "a", /charg|limit|current/) || pick((x) => dom(x) === "sensor" && dc(x) === "current", /charg/);
-    // Interrupteur : seulement « charge / charging » ; jamais pause, verrou, planning… (sens inversé ou action différente).
+    // Switch: only "charge / charging"; never pause, lock, schedule… (inverted meaning or a different action).
     out.switch = pick((x) => dom(x) === "switch" && /(^|_)(charging|charge)(_|$)/.test(x.id) && !/pause|paus|hold|lock|schedule|limit|smart/.test(x.id), /charging/);
   } else if (kind === "battery") {
     out.soc = pick((x) => dom(x) === "sensor" && dc(x) === "battery" && unit(x) === "%", /soc|state_of_charge|level/);
-    // La puissance d'une batterie est celle de la batterie, pas du solaire ni du réseau ; son signe n'est pas deviné (à vérifier : `invert`).
+    // A battery's power is the battery's, not the solar's or the grid's; its sign is not guessed (to check: `invert`).
     out.power = pick((x) => dom(x) === "sensor" && dc(x) === "power" && !/solar|pv|grid|house|home|load/.test(x.id), /batt|storage|bat_/);
     out.charged_today = pick((x) => dom(x) === "sensor" && dc(x) === "energy" && /charg/.test(x.id) && !/discharg/.test(x.id) && /today|daily|day/.test(x.id));
     out.discharged_today = pick((x) => dom(x) === "sensor" && dc(x) === "energy" && /discharg/.test(x.id) && /today|daily|day/.test(x.id));
@@ -3629,24 +3629,24 @@ const sfDev = (kind) => ({ name: "_device", sfFill: kind, selector: { device: {}
 class SfEditorBase extends HTMLElement {
   setConfig(config) {
     const j = JSON.stringify(config);
-    // Écho de notre propre modification : on garde la config en cours (les formulaires y sont liés)
-    // et on ne reconstruit pas, pour conserver le focus.
+    // Echo of our own modification: we keep the current config (the forms are bound to it)
+    // and we do not rebuild, to keep the focus.
     if (j === this._emitted) return;
     this._config = JSON.parse(j);
-    if (this.spec && this.spec.norm) this.spec.norm(this._config);   // ex. entités données en texte -> objets (la liste de l'éditeur attend des objets)
-    this._emitted = null;   // une config acceptée remet l'écho à zéro (sinon revenir à une valeur déjà émise serait ignoré)
+    if (this.spec && this.spec.norm) this.spec.norm(this._config);   // e.g. entities given as text -> objects (the editor list expects objects)
+    this._emitted = null;   // an accepted config resets the echo (otherwise going back to an already emitted value would be ignored)
     this._build();
   }
   set hass(h) {
     this._hass = h;
     if (this.shadowRoot) {
       this.shadowRoot.querySelectorAll("ha-form").forEach((f) => { f.hass = h; });
-      // éditeurs de cartes imbriquées (contenu d'un panneau) : eux aussi doivent suivre `hass`, sinon leurs sélecteurs gardent l'état d'origine
+      // editors of nested cards (a panel's content): they must also follow `hass`, otherwise their selectors keep the original state
       this.shadowRoot.querySelectorAll("*").forEach((e) => { if (e !== this && e.localName.endsWith("-editor")) e.hass = h; });
     }
   }
   _t(key) { return sfTr(sfLang(this._hass), key); }
-  // Traduit les libellés des listes déroulantes d'un schéma ha-form.
+  // Translates the labels of the drop-down lists of an ha-form schema.
   _trSchema(schema) {
     return (schema || []).map((f) => {
       const o = f.selector && f.selector.select && f.selector.select.options;
@@ -3655,7 +3655,7 @@ class SfEditorBase extends HTMLElement {
     });
   }
   connectedCallback() { sfLoadHaForm(); this._build(); }
-  // Bandeau « Champs obligatoires manquants » : se met à jour à chaque modification.
+  // "Missing required fields" banner: updated on every change.
   _banner() {
     const root = this.shadowRoot; if (!root) return;
     const rq = SF_REQ[this.localName.replace(/-editor$/, "")], miss = rq ? rq(this._config || {}) : [];
@@ -3702,7 +3702,7 @@ class SfEditorBase extends HTMLElement {
       const v = ev.detail.value || {};
       for (const k of Object.keys(data)) if (!(k in v)) delete data[k];
       Object.assign(data, v);
-      if (data._device) {   // champ « Remplir depuis un appareil » : on remplit les champs vides, puis on oublie le choix
+      if (data._device) {   // "Fill from a device" field: we fill the empty fields, then forget the choice
         const dv = data._device, fld = (schemaFn(data) || []).find((x) => x && x.sfFill);
         delete data._device;
         if (fld) {
@@ -3715,18 +3715,18 @@ class SfEditorBase extends HTMLElement {
         }
       }
       const ns = this._trSchema(schemaFn(data));
-      if (JSON.stringify(ns) !== JSON.stringify(f.schema)) f.schema = ns;   // ex. le type d'élément change les champs
+      if (JSON.stringify(ns) !== JSON.stringify(f.schema)) f.schema = ns;   // e.g. the item type changes the fields
       onChange();
     });
     return f;
   }
-  // Carte imbriquée (ex. contenu d'un panneau) : choix du type puis éditeur de cette carte.
+  // Nested card (e.g. a panel's content): choice of the type then the editor of that card.
   _embed(item, key, onChange) {
     const box = document.createElement("div");
     const h = document.createElement("h3"); h.textContent = this._t("Contenu du panneau"); box.appendChild(h);
     const tag = sfCardTag(item[key]);
     const sel = document.createElement("ha-form");
-    // « Autre carte » n'est proposé que si le panneau n'est pas déjà une carte SF : le choisir effacerait son contenu.
+    // "Other card" is only offered if the panel is not already an SF card: choosing it would erase its content.
     const opts = [...(tag ? [] : [["", this._t("Autre carte (YAML ci-dessus)")]]), ...Object.entries(SF_CARD_NAMES).map(([k, v]) => [k, this._t(v)])];
     const schema = [{ name: "type", selector: { select: { mode: "dropdown", options: opts.map(([value, label]) => ({ value, label })) } } }];
     sel.hass = this._hass; sel.schema = schema; sel.data = { type: tag };
@@ -3743,7 +3743,7 @@ class SfEditorBase extends HTMLElement {
       const sub = document.createElement(`${tag}-editor`);
       sub.hass = this._hass;
       sub.setConfig(item[key]);
-      sub.addEventListener("config-changed", (ev) => {   // ne pas laisser remonter : HA y verrait la config de toute la carte
+      sub.addEventListener("config-changed", (ev) => {   // do not let it bubble up: HA would see the config of the whole card
         ev.stopPropagation();
         item[key] = ev.detail.config;
         onChange();
@@ -3773,7 +3773,7 @@ class SfEditorBase extends HTMLElement {
       if (i > 0) btn("↑", "", move(i - 1), this._t("Monter"));
       if (i < arr.length - 1) btn("↓", "", move(i + 1), this._t("Descendre"));
       btn(this._t("Supprimer"), "del", (b) => {
-        if (!b.classList.contains("armed")) {   // deux appuis : évite la suppression par erreur
+        if (!b.classList.contains("armed")) {   // two presses: avoids deleting by mistake
           b.classList.add("armed"); b.textContent = this._t("Confirmer ?");
           setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = this._t("Supprimer"); } }, 3000);
           return;
@@ -3801,15 +3801,15 @@ class SfEditorBase extends HTMLElement {
   }
 }
 
-// Rouge garanti sur les champs obligatoires : l'astérisque natif de ha-form n'a pas la couleur voulue (texte du libellé, dans des shadow DOM
-// imbriqués). On repère les éléments `required` du formulaire (récursivement) et on leur pose une barre + une étoile rouges.
+// Guaranteed red on required fields: ha-form's native asterisk does not have the wanted colour (label text, inside nested shadow DOMs).
+// We find the form's `required` elements (recursively) and give them a red bar + a red star.
 const SF_RED = "#ff3b30";
 function sfRedReq(form) {
   const css = `[sf-req]{position:relative;display:block;box-shadow:inset 3px 0 0 ${SF_RED};padding-left:6px}[sf-req]::after{content:"*";position:absolute;top:2px;right:8px;color:${SF_RED};font:700 20px/1 sans-serif;pointer-events:none}`;
   const scan = (root) => {
     if (!root) return;
-    // NB : `:scope > style` ne trouve JAMAIS rien dans un ShadowRoot (Chrome/WebKit) -> un <style> de plus à chaque passage, l'observateur se
-    // relançait sur sa propre mutation et figeait l'onglet dès qu'on choisissait une entité. On teste donc les enfants directement.
+    // NB: `:scope > style` NEVER matches anything in a ShadowRoot (Chrome/WebKit) -> one more <style> on every pass, the observer
+    // re-triggered itself on its own mutation and froze the tab as soon as an entity was picked. So we test the children directly.
     if (![...root.children].some((c) => c.localName === "style" && c.hasAttribute("sf-red"))) { const st = document.createElement("style"); st.setAttribute("sf-red", ""); st.textContent = css; root.prepend(st); }
     for (const el of root.querySelectorAll("*")) {
       if (el.required === true || el.hasAttribute("required")) el.setAttribute("sf-req", "");
@@ -3825,7 +3825,7 @@ function sfRedReq(form) {
   (form.updateComplete || Promise.resolve()).then(() => setTimeout(start, 50));
   form.addEventListener("value-changed", () => setTimeout(run, 100));
 }
-// Champs clés des éléments de liste marqués `required` (astérisque natif de ha-form).
+// Key fields of the list items marked `required` (ha-form's native asterisk).
 const SF_REQ_FIELDS = { "sf-climate-card": { rooms: ["climate"] }, "sf-radiators-card": { radiators: ["climate"] }, "sf-camera-card": { cameras: ["entity"] }, "sf-hangar-card": { cars: ["soc"] },
   "sf-launcher-card": { tiles: ["name"] }, "sf-machines-card": { tiles: ["entity"] }, "sf-ledger-card": { devices: ["total"] }, "sf-reactor-card": { devices: ["entity"] }, "sf-setpoints-card": { rows: ["name"] },
   "sf-trend-card": { series: ["entity"] }, "sf-timeline-card": { entities: ["entity"] }, "sf-health-card": { checks: ["entity"] }, "sf-assistant-card": { actions: ["service"] }, "sf-ns-card": { rooms: ["entity"], fridge: ["entity"], cars: ["soc"], leaks: ["entity"], tiles: ["entity"], shortcuts: ["entity"] } };
@@ -3836,7 +3836,7 @@ for (const [tag, lists] of Object.entries(SF_REQ_FIELDS)) for (const [key, names
 }
 for (const [tag, spec] of Object.entries(SF_SPECS)) if (tag !== "sf-launcher-card") SF_CARD_NAMES[tag] = spec.title;
 
-// Un élément « <carte>-editor » par carte, branché sur la classe de la carte.
+// One "<card>-editor" element per card, wired to the card's class.
 for (const [tag, spec] of Object.entries(SF_SPECS)) {
   const edTag = `${tag}-editor`;
   if (!customElements.get(edTag)) customElements.define(edTag, class extends SfEditorBase { get spec() { return spec; } });
@@ -3849,6 +3849,6 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
 
 console.info("%c SF-CARDS %c v1.11.1 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
 
-// Accès réservé aux tests automatiques (le fichier est encapsulé : ses fonctions ne sont plus globales).
+// Reserved access for automated tests (the file is encapsulated: its functions are no longer global).
 if (window.__SF_TEST) window.__SF = { SF_T, SF_HOOK, sfGuess, sfAutofill, sfSafeUrl, sfNormConfig, SF_REQ, sfRedReq };
 })();
