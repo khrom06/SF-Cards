@@ -69,7 +69,7 @@ const base = {
 const withIds = (states) => Object.fromEntries(Object.entries(states).map(([id, st]) => [id, { entity_id: id, last_changed: new Date().toISOString(), ...st }]));
 // Historique fictif (sinusoïdes) pour la carte de tendance de la démo.
 const demoHistory = (m) => Object.fromEntries((m.entity_ids || m.statistic_ids || []).map((id, k) => [id, Array.from({ length: 120 }, (_, i) => {
-  const t = Date.now() - 86400000 + (i * 86400000) / 120, v = 21 + 2 * Math.sin(i / 120 * 12.5 + k * 1.3) + Math.sin(i * 1.7) * 0.25;
+  const t = Date.now() - 86400000 + (i * 86400000) / 120, v = (id === "sensor.out" ? 9 : 21) + 2 * Math.sin(i / 120 * 12.5 + k * 1.3) + Math.sin(i * 1.7) * 0.25;
   return { s: String(v.toFixed(2)), lu: t / 1000 }; })]));
 const demoLogbook = () => { const n = Date.now(); return [["binary_sensor.door", "on", 8], ["binary_sensor.door", "off", 7], ["alarm_control_panel.home", "armed_away", 45], ["alarm_control_panel.home", "disarmed", 400]].map(([e, s, m]) => ({ entity_id: e, state: s, when: (n - m * 60000) / 1000 })); };
 const HASS = (states, language) => ({ states: withIds(states), locale: { language }, language, callService: () => Promise.resolve(), callWS: async (m) => m.type === "logbook/get_events" ? demoLogbook() : demoHistory(m) });
@@ -97,7 +97,7 @@ const FULL = {
   "sf-assistant-card": { name: "Assistant", state: "select.room_preset", phases: { eco: "thinking", auto: "listening" }, request: "weather.home", result: "sensor.price", actions: [{ name: "Stop", icon: "mdi:stop", service: "script.stop", confirm: "Stop?" }] },
   "sf-health-card": { title: "Health", show_ok: true, checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Network" }, { name: "Wi-Fi", entity: "binary_sensor.window", ok: ["on"], group: "Network" }, { name: "Heat pump", entity: "sensor.pac", max: 500 }, { name: "Climate", entity: "climate.room", ok: ["auto", "heat"] }] },
   "sf-timeline-card": { title: "Timeline", entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarm" }] },
-  "sf-trend-card": { title: "Temperatures", series: [{ entity: "sensor.temp", name: "Living room" }, { entity: "sensor.temp2", name: "Bedroom" }] },
+  "sf-trend-card": { title: "Temperatures", series: [{ entity: "sensor.temp", name: "Living room" }, { entity: "sensor.temp2", name: "Bedroom" }, { entity: "sensor.out", name: "Outdoor", axis: "right" }] },
   "sf-radiators-card": { radiators: [{ name: "Room", climate: "climate.room", preset: "select.room_preset", kwh: "sensor.kwh" }], setpoint: false },
   "sf-battery-card": { soc: "sensor.bat_soc", power: "sensor.bat_p", capacity_kwh: 10, charged_today: "sensor.kwh", discharged_today: "sensor.kwh", temperature: "sensor.temp", health: "sensor.hum", cycles: "sensor.kwh", mode: "input_select.mode" },
   "sf-launcher-card": { tiles: [{ name: "Climate", summary: "room", card: { type: "custom:sf-climate-card", rooms: [{ name: "L", climate: "climate.room", temp: "sensor.temp", target: "input_number.target" }] } },

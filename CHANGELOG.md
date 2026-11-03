@@ -2,6 +2,13 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.11.1]
+### Fixed
+- `sf-trend-card`: a series that did not change during the window (only its start state is returned) is now drawn as a flat line up to now instead of nothing ("No data").
+### Added
+- `sf-trend-card`: per-series `axis: right` — a second scale on the right so that, e.g., the outdoor temperature no longer flattens the indoor curves.
+- `sf-timeline-card`: per-entity `states` (only show these states) and `min_gap` (minutes between two events of the entity) to tame flickering detectors.
+
 ## [1.11.0]
 ### Added
 - `sf-assistant-card`: **state of an assistant**, read-only — phase (idle / listening / thinking / running / replying / error), last request, current action, result, last reply, optional action buttons. Works out of the box with Assist satellites; `phases` maps any other entity. Text capped, ages refreshed every minute, visual editor and 11 languages included.

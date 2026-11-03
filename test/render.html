@@ -42,8 +42,8 @@ const HASS = (states, language) => ({ states: withIds(states), locale: { languag
 const FULL = {
   "sf-assistant-card": { name: "Assistant", state: "assist_satellite.kitchen", request: "sensor.as_req", action: "sensor.as_act", result: "sensor.as_res", reply: "sensor.as_rep", actions: [{ name: "Stop", icon: "mdi:stop", service: "script.stop", confirm: "Stop?" }] },
   "sf-health-card": { title: "Health", checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Network" }, { name: "UPS", entity: "sensor.ups", min: 30 }] },
-  "sf-timeline-card": { title: "Log", hours: 24, entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarm" }] },
-  "sf-trend-card": { title: "Trend", hours: 24, series: [{ entity: "sensor.temp_a", name: "A" }, { entity: "sensor.temp_b", name: "B", color: "#ffb300" }] },
+  "sf-timeline-card": { title: "Log", hours: 24, entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarm", states: ["triggered"], min_gap: 5 }] },
+  "sf-trend-card": { title: "Trend", hours: 24, series: [{ entity: "sensor.temp_a", name: "A" }, { entity: "sensor.temp_b", name: "B", color: "#ffb300", axis: "right" }] },
   "sf-alert-card": { leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], alarm: "alarm_control_panel.home", hide_sim: true },
   "sf-hangar-card": { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range", target: "sensor.car_target", charging: "binary_sensor.charging" }],
     charger: { connected: "binary_sensor.connected", charging: "binary_sensor.charging", power: "sensor.ev", current: "number.current" }, mode: "input_select.mode",
@@ -856,6 +856,19 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (f1.shadowRoot.querySelector("img") || window.__pwn) fail("tendance : un nom d'entité hostile a été injecté dans le HTML");
     if (calls.length && calls[0].entity_ids && calls[0].entity_ids.some((x) => /[<>"]/.test(x))) fail("tendance : un identifiant mal formé a été envoyé au serveur");
     f1.remove();
+    // h. série stable (un seul point, son état au début de la fenêtre) : la ligne est prolongée jusqu'à maintenant ; point antérieur au début ramené dans la fenêtre.
+    const sp = await draw({ hours: 24, series: [{ entity: "sensor.temp_a" }] }, mk(() => ({ "sensor.temp_a": [{ s: "21.5", lu: (Date.now() - 90000000) / 1000 }] })));
+    const dd = sp.shadowRoot.querySelector(".ln2"); const nn = dd ? (dd.getAttribute("d").match(/[ML]/g) || []).length : 0;
+    if (nn < 2) fail(`tendance : une série stable (1 seul point) doit tracer une ligne (points tracés : ${nn})`);
+    sp.remove();
+    // i. second axe : deux échelles, étiquettes à droite, même graphe ; sans axis right : aucune étiquette à droite.
+    const hv = (f) => hist(40, f);
+    const ax = await draw({ series: [{ entity: "sensor.temp_a", name: "A" }, { entity: "sensor.temp_b", name: "B", axis: "right" }] }, mk(() => ({ "sensor.temp_a": hv((i) => 20 + (i % 3)), "sensor.temp_b": hv((i) => 1000 + (i % 50)) })));
+    if (ax.shadowRoot.querySelectorAll(".plot").length !== 1 || ax.shadowRoot.querySelectorAll(".yl.r").length !== 2 || ax.shadowRoot.querySelectorAll(".yl.l").length !== 2) fail(`tendance : second axe = 1 graphe, 2 étiquettes à droite et 2 à gauche (reçu ${ax.shadowRoot.querySelectorAll(".plot").length} graphe(s), ${ax.shadowRoot.querySelectorAll(".yl.r").length} à droite)`);
+    const dpaths = [...ax.shadowRoot.querySelectorAll(".ln2")].map((e) => e.getAttribute("d")); if (dpaths.length !== 2 || dpaths[0] === dpaths[1]) fail("tendance : deux courbes distinctes attendues avec le second axe");
+    ax.remove();
+    const nax = await draw({ series: [{ entity: "sensor.temp_a" }, { entity: "sensor.temp_a", axis: "right" }] }, mk(() => ({ "sensor.temp_a": hv((i) => 20 + (i % 3)) })));
+    nax.remove();
     // g. couleurs : jamais deux séries de la même teinte quand l'une est choisie explicitement.
     const g1 = await draw({ series: [{ entity: "sensor.temp_a", color: "#ffb300" }, { entity: "sensor.temp_b" }, { entity: "sensor.temp_a" }] }, mk(() => ({})), 40);
     const bg = [...g1.shadowRoot.querySelectorAll(".lg .it .dt")].map((e) => e.style.background);
@@ -884,6 +897,14 @@ __SF.SF_HOOK.tr = (lang, key) => {
     const g = await draw({ entities: ["binary_sensor.door"] }, mk(() => [{ entity_id: "binary_sensor.door", state: "on", when: sec(30) }, { entity_id: "binary_sensor.door", state: "off", when: sec(20) }, { entity_id: "binary_sensor.door", state: "on", when: sec(10) }]));
     if (g.shadowRoot.querySelectorAll(".row").length !== 3) fail("ligne de temps : des changements d'état distincts ne doivent pas être fusionnés");
     g.remove();
+    // filtres par entité : seuls les états choisis, et un intervalle minimal entre deux événements (détecteur qui clignote)
+    const fl = [20, 19, 18, 10, 9, 5, 4].map((m, i) => ({ entity_id: "binary_sensor.door", state: i % 2 ? "off" : "on", when: sec(m) }));   // on 20, off 19, on 18, off 10, on 9, off 5, on 4 (minutes)
+    const f1 = await draw({ group: false, entities: [{ entity: "binary_sensor.door", states: ["on"], min_gap: 5 }] }, mk(() => fl));
+    const nf1 = f1.shadowRoot.querySelectorAll(".row").length; if (nf1 !== 3) fail(`ligne de temps : états [on] + intervalle 5 min = 3 lignes (on à -20, -9, -4), reçu ${nf1}`);
+    f1.remove();
+    const f2 = await draw({ group: false, entities: [{ entity: "binary_sensor.door", states: "off" }] }, mk(() => fl));
+    if (f2.shadowRoot.querySelectorAll(".row").length !== 3 || /ouvert/.test(f2.shadowRoot.textContent)) fail("ligne de temps : « states: off » = seulement les 3 événements fermé");
+    f2.remove();
     // sans fusion : deux relevés identiques d'affilée ne sont pas un changement d'état
     const g2 = await draw({ group: false, entities: ["binary_sensor.door"] }, mk(() => [{ entity_id: "binary_sensor.door", state: "on", when: sec(30) }, { entity_id: "binary_sensor.door", state: "on", when: sec(20) }]));
     if (g2.shadowRoot.querySelectorAll(".row").length !== 1) fail("ligne de temps : deux états identiques consécutifs affichés comme deux changements");

@@ -404,6 +404,9 @@ entities:                  # up to 40: an entity id, or an object
     name: Alarm            # optional
     icon: mdi:shield-home  # optional
     color: "#ffb300"       # optional
+  - entity: binary_sensor.hall_motion
+    states: ["on"]         # optional: only show these states (here: motion detected, not "cleared")
+    min_gap: 15            # optional: at least 15 minutes between two events of this entity (tames a flickering detector)
 ```
 
 ### sf-trend-card
@@ -423,7 +426,10 @@ series:                    # up to 8
     color: "#00e5ff"       # optional, otherwise the first free colour of the palette
     unit: "°C"             # optional, otherwise the entity's unit
     digits: 1
+    axis: left             # optional: right = second scale on the right (e.g. outdoor temperature next to indoor ones)
 ```
+
+A series that did not change during the window (a parked car, a stable setpoint) is drawn as a flat line up to now. With `axis: right` on some series (and not on others) both scales are shown, left and right, on one chart.
 
 ### sf-battery-card
 
