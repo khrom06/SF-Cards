@@ -42,7 +42,7 @@
 
 ## Features
 
-- **19 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
+- **20 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone or on a wall tablet; idle devices can be hidden automatically and the number of displayed devices is capped.
@@ -96,6 +96,7 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-hangar-card`](#sf-hangar-card) | EV(s) + shared charger, charge‑mode selector, energy flows |
 | [`sf-machines-card`](#sf-machines-card) | Status tiles: values with thresholds, on/off, toggles with timers |
 | [`sf-cells-card`](#sf-cells-card) | Weakest sensor batteries first, discovered automatically |
+| [`sf-assistant-card`](#sf-assistant-card) | State of an assistant: phase, last request, action, result, reply — works out of the box with Assist satellites (read-only) |
 | [`sf-health-card`](#sf-health-card) | Overview of your own checks: overall verdict and anomalies by severity, grouped by subsystem |
 | [`sf-timeline-card`](#sf-timeline-card) | Latest state changes of the chosen entities, grouped by day, in plain words (read-only) |
 | [`sf-trend-card`](#sf-trend-card) | History curves (read-only): range buttons, several series on one chart or one line each, hover / touch readout |
@@ -220,10 +221,12 @@ Each tile shows a live summary and opens a card in a popup — an SF card, a sta
 ```yaml
 type: custom:sf-launcher-card
 columns: 2
+mode_entity: input_select.day_mode   # optional: adaptive mode (see below)
 tiles:
   - name: Climate
     icon: mdi:thermostat
     color: "#ff7043"
+    modes: [Morning, Evening]   # optional: highlighted (and moved first) while the mode entity is in one of these states
     hash: climate            # deep link: …/dashboard/home#climate
     summary: climate         # climate | room | vehicles | commands | cameras | energy | battery | machines | text
     # sub: "free text"      # shown under the title when summary: text
@@ -232,6 +235,8 @@ tiles:
       type: custom:sf-climate-card
       rooms: [ … ]
 ```
+
+With `mode_entity` (any `input_select` / `select` / `sensor`, e.g. Morning / Day / Evening / Night) the tiles whose `modes` list the current state move to the front and get a brighter outline; the order changes back when the mode changes. Without `mode_entity`, or when the entity is unavailable or matches no tile, nothing changes.
 
 ### sf-alert-card
 
@@ -332,6 +337,26 @@ limit: 12                # default 16
 exclude: [sensor.some_battery]
 include_pattern: ""      # optional regex on the entity id (a group with alternatives repeated with + or * is refused, see the console)
 exclude_pattern: ""      # optional regex: ignore matching entity ids
+```
+
+### sf-assistant-card
+
+State of an assistant (voice or chat), read-only: its current phase (idle / listening / thinking / running / replying / error), the last request, the current action, its result and the last reply, plus optional action buttons. It works out of the box with Home Assistant **Assist satellites** (`assist_satellite.*`: idle / listening / processing / responding); for anything else, map the entity's states to phases with `phases`. The card interprets nothing — it shows what the entities contain (text capped at 300 characters, ages refreshed every minute).
+
+```yaml
+type: custom:sf-assistant-card
+name: Assistant                              # optional
+state: assist_satellite.kitchen              # entity whose state describes the activity
+phases: { busy: acting, done: idle }         # optional: entity state -> idle | listening | thinking | acting | speaking | error
+request: sensor.assistant_last_request       # optional text entities (their state is displayed)
+action: sensor.assistant_current_action
+result: sensor.assistant_last_result
+reply: sensor.assistant_last_reply
+actions:                                     # optional buttons (up to 6)
+  - name: Stop
+    icon: mdi:stop
+    service: script.assistant_stop           # domain.service
+    confirm: "Stop?"                         # optional: asks to press twice
 ```
 
 ### sf-health-card

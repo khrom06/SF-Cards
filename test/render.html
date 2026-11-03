@@ -40,6 +40,7 @@ const HASS = (states, language) => ({ states: withIds(states), locale: { languag
 
 // Une configuration complète par carte (les identifiants ci-dessus sont fictifs).
 const FULL = {
+  "sf-assistant-card": { name: "Assistant", state: "assist_satellite.kitchen", request: "sensor.as_req", action: "sensor.as_act", result: "sensor.as_res", reply: "sensor.as_rep", actions: [{ name: "Stop", icon: "mdi:stop", service: "script.stop", confirm: "Stop?" }] },
   "sf-health-card": { title: "Health", checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Network" }, { name: "UPS", entity: "sensor.ups", min: 30 }] },
   "sf-timeline-card": { title: "Log", hours: 24, entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarm" }] },
   "sf-trend-card": { title: "Trend", hours: 24, series: [{ entity: "sensor.temp_a", name: "A" }, { entity: "sensor.temp_b", name: "B", color: "#ffb300" }] },
@@ -936,6 +937,38 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (h.shadowRoot.querySelector("img") || window.__pwn) fail("santé : nom hostile injecté dans le HTML");
     if (performance.now() - t0 > 1500) fail("santé : rendu de 500 contrôles trop lent");
     h.remove(); }
+  // 5j. Carte assistant : phases (Assist + correspondance personnalisée), lignes, boutons, texte hostile, minuterie ; lanceur : mode adaptatif.
+  { const ago = (m) => new Date(Date.now() - m * 60000).toISOString(), S = (state, a, lc) => ({ state, attributes: a || {}, last_changed: lc || ago(3), last_updated: lc || ago(3) });
+    const mk = (extra, over) => HASS({ ...base, "assist_satellite.kitchen": S("listening"), "sensor.as_req": S("allume le salon"), "sensor.as_res": S("<img src=x onerror=window.__pwn=1>"), "sensor.as_act": S("unavailable"), "sensor.as_rep": S("Voilà"), ...extra }, "fr");
+    const draw = async (cfg, hass) => { const el = document.createElement("sf-assistant-card"); el.setConfig(cfg); document.body.appendChild(el); el.hass = hass; await wait(60); return el; };
+    const cfg = { state: "assist_satellite.kitchen", request: "sensor.as_req", action: "sensor.as_act", result: "sensor.as_res", reply: "sensor.as_rep", actions: [{ name: "Stop", service: "script.stop", confirm: "Arrêter ?" }, { name: "Mauvais", service: "pas un service" }] };
+    const a = await draw(cfg, mk()), ra = a.shadowRoot;
+    if (!/À l'écoute/.test(ra.textContent)) fail("assistant : phase « À l'écoute » absente pour l'état Assist listening");
+    if (ra.querySelectorAll(".ln").length !== 4 || !/allume le salon/.test(ra.textContent) || !/il y a 3 min/.test(ra.textContent)) fail("assistant : lignes demande / action / résultat / réponse ou âge absents");
+    if (ra.querySelector("img") || window.__pwn) fail("assistant : texte d'entité hostile injecté dans le HTML");
+    if (ra.querySelectorAll(".acts .btn").length !== 1 || !ra.querySelector(".acts .btn").getAttribute("data-call") || !ra.querySelector(".acts .btn").getAttribute("data-confirm")) fail("assistant : bouton d'action (service valide + confirmation) absent, ou service invalide accepté");
+    for (const [st, want] of [["idle", "Au repos"], ["processing", "Réfléchit"], ["responding", "Répond"], ["error", "Erreur"], ["unavailable", "Au repos"]]) {
+      a.hass = mk({ "assist_satellite.kitchen": S(st) }); await wait(40); if (!ra.textContent.includes(want)) fail(`assistant : l'état « ${st} » devrait afficher « ${want} »`); }
+    a.setConfig({ ...cfg, phases: { busy: "acting", constructor: "error", "__proto__": "speaking" } }); a.hass = mk({ "assist_satellite.kitchen": S("busy") }); await wait(40);
+    if (!/Exécute/.test(ra.textContent)) fail("assistant : correspondance personnalisée busy -> acting ignorée");
+    a.hass = mk({ "assist_satellite.kitchen": S("constructor") }); await wait(40); if (!/Erreur/.test(ra.textContent)) fail("assistant : correspondance explicite constructor -> error ignorée");
+    a.hass = mk({ "assist_satellite.kitchen": S("toString") }); await wait(40); if (!/Au repos/.test(ra.textContent)) fail("assistant : un état comme « toString » ne doit pas casser la correspondance (retour au repos)");
+    a.hass = mk({ "sensor.as_req": S("x".repeat(5000)) }); await wait(40);
+    if ((ra.querySelector(".ln .v").textContent || "").length > 400) fail("assistant : un texte d'entité de 5 000 caractères n'est pas borné");
+    a.remove();
+    // lanceur : mode adaptatif (tuiles du mode courant en tête et mises en avant ; sans mode_entity ou mode inconnu : ordre inchangé)
+    const tiles = [{ name: "A", modes: ["Jour"] }, { name: "B", modes: "Soir" }, { name: "C" }];
+    const L = async (cfg, st) => { const el = document.createElement("sf-launcher-card"); el.setConfig({ tiles, ...cfg }); document.body.appendChild(el); el.hass = HASS({ ...base, ...st }, "fr"); await wait(60); return el; };
+    const names = (el) => [...el.shadowRoot.querySelectorAll(".tile .top")].map((e) => e.textContent.replace(/\W/g, "").trim());
+    const l0 = await L({}, {}); if (names(l0).join() !== "A,B,C" || l0.shadowRoot.querySelector(".prio")) fail("lanceur : sans mode_entity l'ordre ou l'aspect a changé"); l0.remove();
+    const l1 = await L({ mode_entity: "input_select.m" }, { "input_select.m": S("soir") });
+    if (names(l1).join() !== "B,A,C" || l1.shadowRoot.querySelectorAll(".prio").length !== 1) fail(`lanceur : mode « soir » = B en tête et mise en avant (reçu ${names(l1).join()})`);
+    l1.hass = HASS({ ...base, "input_select.m": S("Jour") }, "fr"); await wait(60);
+    if (names(l1).join() !== "A,B,C") fail(`lanceur : le changement de mode doit réordonner (reçu ${names(l1).join()})`);
+    l1.hass = HASS({ ...base, "input_select.m": S("unavailable") }, "fr"); await wait(60);
+    if (names(l1).join() !== "A,B,C" || l1.shadowRoot.querySelector(".prio")) fail("lanceur : mode indisponible = ordre d'origine, aucune mise en avant");
+    l1.remove();
+    const l2 = await L({ mode_entity: "input_select.m" }, { "input_select.m": S("nuit") }); if (names(l2).join() !== "A,B,C" || l2.shadowRoot.querySelector(".prio")) fail("lanceur : mode sans tuile associée = rien ne change"); l2.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);

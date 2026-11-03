@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SF Cards — live demo</title>
-<meta name="description" content="Sci-fi HUD cards for Home Assistant. Try all 19 cards live, in 11 languages, with fake data.">
+<meta name="description" content="Sci-fi HUD cards for Home Assistant. Try all 20 cards live, in 11 languages, with fake data.">
 <meta property="og:title" content="SF Cards — sci-fi HUD cards for Home Assistant">
 <meta property="og:description" content="16 Lovelace cards, visual editors, 11 languages, a 480×480 wall-panel dashboard. Try them live.">
 <meta property="og:image" content="https://khrom06.github.io/SF-Cards/social.png">
@@ -94,6 +94,7 @@ const FULL = {
   "sf-setpoints-card": { columns: [{ label: "Day" }], rows: [{ name: "Living", entities: ["input_number.target"] }] },
   "sf-ledger-card": { total_cost: "sensor.eur", solar_fraction: "sensor.fossil", avg_price: "sensor.price", devices: [{ name: "EV", total: "sensor.kwh", edf: "sensor.kwh", solar: "sensor.kwh", cost: "sensor.eur" }] },
   "sf-cells-card": {},
+  "sf-assistant-card": { name: "Assistant", state: "select.room_preset", phases: { eco: "thinking", auto: "listening" }, request: "weather.home", result: "sensor.price", actions: [{ name: "Stop", icon: "mdi:stop", service: "script.stop", confirm: "Stop?" }] },
   "sf-health-card": { title: "Health", show_ok: true, checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Network" }, { name: "Wi-Fi", entity: "binary_sensor.window", ok: ["on"], group: "Network" }, { name: "Heat pump", entity: "sensor.pac", max: 500 }, { name: "Climate", entity: "climate.room", ok: ["auto", "heat"] }] },
   "sf-timeline-card": { title: "Timeline", entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarm" }] },
   "sf-trend-card": { title: "Temperatures", series: [{ entity: "sensor.temp", name: "Living room" }, { entity: "sensor.temp2", name: "Bedroom" }] },
