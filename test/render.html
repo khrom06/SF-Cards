@@ -40,6 +40,7 @@ const HASS = (states, language) => ({ states: withIds(states), locale: { languag
 
 // Une configuration complète par carte (les identifiants ci-dessus sont fictifs).
 const FULL = {
+  "sf-health-card": { title: "Health", checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Network" }, { name: "UPS", entity: "sensor.ups", min: 30 }] },
   "sf-timeline-card": { title: "Log", hours: 24, entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarm" }] },
   "sf-trend-card": { title: "Trend", hours: 24, series: [{ entity: "sensor.temp_a", name: "A" }, { entity: "sensor.temp_b", name: "B", color: "#ffb300" }] },
   "sf-alert-card": { leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], alarm: "alarm_control_panel.home", hide_sim: true },
@@ -904,6 +905,37 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (h1.shadowRoot.querySelector("img") || window.__pwn) fail("ligne de temps : nom hostile injecté dans le HTML");
     if (calls[0].entity_ids.length !== 1) fail(`ligne de temps : identifiants invalides envoyés au serveur (${JSON.stringify(calls[0].entity_ids)})`);
     h1.remove(); }
+  // 5i. Carte santé : règles (états, seuils, ancienneté, indisponible), gravité, regroupement, verdict, données hostiles, plafond de contrôles.
+  { const ago = (m) => new Date(Date.now() - m * 60000).toISOString(), S = (state, a, lu) => ({ state, attributes: a || {}, last_updated: lu || ago(1) });
+    const st = { ...base, "binary_sensor.net": S("off"), "binary_sensor.wifi": S("off"), "sensor.ups": S("20", { unit_of_measurement: "%" }), "sensor.hot": S("85", { unit_of_measurement: "°C" }),
+      "binary_sensor.leak": S("on"), "sensor.old": S("1", {}, ago(300)), "sensor.fresh": S("1", {}, ago(5)), "binary_sensor.fine": S("on") };
+    const draw = async (cfg, states) => { const el = document.createElement("sf-health-card"); el.setConfig(cfg); document.body.appendChild(el); el.hass = HASS(states || st, "fr"); await wait(60); return el; };
+    const ck = [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Réseau" }, { name: "Wifi", entity: "binary_sensor.wifi", ok: ["on"], group: "Réseau" },
+      { name: "Onduleur", entity: "sensor.ups", min: 30 }, { name: "Four", entity: "sensor.hot", max: 80 }, { name: "Fuite", entity: "binary_sensor.leak", bad: ["on"], severity: "critical" },
+      { name: "Vieux", entity: "sensor.old", stale: 60 }, { name: "Récent", entity: "sensor.fresh", stale: 60 }, { name: "Absent", entity: "sensor.nexiste.pas" }, { name: "Bon", entity: "binary_sensor.fine", ok: ["on"] },
+      { name: "Fantôme", entity: "sensor.ghost" }];
+    const a = await draw({ checks: ck, show_ok: true }), r = a.shadowRoot, txt = r.textContent;
+    const rows = [...r.querySelectorAll(".hr")].map((x) => x.querySelector(".nm").textContent);
+    // anomalies attendues : Internet, Wifi (états), Onduleur (min), Four (max), Fuite (bad), Vieux (ancienneté), Fantôme (indisponible : entité absente) = 7 ; Récent et Bon = normaux ; « sensor.nexiste.pas » invalide ignoré
+    if (rows.length !== 7) fail(`santé : 7 anomalies attendues, reçu ${rows.length} (${rows.join(", ")})`);
+    if (!/7 anomalies/.test(txt)) fail("santé : verdict « 7 anomalies » absent");
+    const at = (n) => rows.indexOf(n);
+    if (!(at("Internet") < at("Onduleur") && at("Fuite") < at("Onduleur") && at("Fuite") < at("Four") && at("Fuite") < at("Vieux"))) fail(`santé : les critiques (réseau, fuite) doivent précéder les simples avertissements (${rows.join(", ")})`);
+    if (at("Wifi") !== at("Internet") + 1) fail(`santé : le Wifi doit suivre Internet dans le groupe Réseau (${rows.join(", ")})`);
+    if (!/Réseau · 2 anomalies/.test(txt)) fail("santé : en-tête de groupe « Réseau · 2 anomalies » absent");
+    if (!/sous le minimum/.test(txt) || !/au-dessus du maximum/.test(txt) || !/pas de mise à jour depuis 5 h/.test(txt) || !/indisponible/.test(txt)) fail("santé : motifs (minimum / maximum / ancienneté / indisponible) absents");
+    const oks = [...r.querySelectorAll(".okc")].map((x) => x.textContent); if (oks.length !== 2 || !oks.includes("Bon") || !oks.includes("Récent")) fail(`santé : contrôles normaux attendus (Bon, Récent), reçu ${oks.join(",")}`);
+    a.remove();
+    // tout va bien
+    const b = await draw({ checks: [{ entity: "binary_sensor.fine", ok: ["on"] }, { entity: "sensor.fresh", stale: 60 }] });
+    if (!/Tout va bien/.test(b.shadowRoot.textContent) || b.shadowRoot.querySelector(".hr")) fail("santé : « Tout va bien » attendu sans anomalie"); b.remove();
+    // hostile : noms piégés, ok / seuils absurdes, 500 contrôles (plafond 60), entités mal formées
+    const many = Array.from({ length: 500 }, (_, i) => ({ name: `<img src=x onerror=window.__pwn=1>${i}`, entity: "sensor.ghost", ok: "on", min: "abc", max: {}, stale: "x" })).concat([{ entity: "x\"><b>" }, null, 5, { entity: "nul" }]);
+    const t0 = performance.now(), h = await draw({ checks: many });
+    if (h.shadowRoot.querySelectorAll(".hr").length !== 60) fail(`santé : plafond de 60 contrôles non respecté (${h.shadowRoot.querySelectorAll(".hr").length})`);
+    if (h.shadowRoot.querySelector("img") || window.__pwn) fail("santé : nom hostile injecté dans le HTML");
+    if (performance.now() - t0 > 1500) fail("santé : rendu de 500 contrôles trop lent");
+    h.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
