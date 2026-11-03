@@ -941,13 +941,14 @@ class SfBridgeCard extends SfBase {
   defaults() { return { people: [], leaks: [], doors: [], home_states: ["home"] }; }
   connectedCallback() {
     super.connectedCallback();
+    clearInterval(this._tick);
     this._tick = setInterval(() => {
       const el = this.shadowRoot && this.shadowRoot.querySelector(".clock .s");
       if (el) el.textContent = String(new Date().getSeconds()).padStart(2, "0");
       if (new Date().getSeconds() === 0) this._schedule();
     }, 1000);
   }
-  disconnectedCallback() { clearInterval(this._tick); }
+  disconnectedCallback() { super.disconnectedCallback(); clearInterval(this._tick); this._tick = null; }
   css() {
     return `
       .hud.bridge { padding:22px 26px 20px; min-height:170px; }
@@ -1080,10 +1081,11 @@ class SfReactorCard extends SfBase {
   connectedCallback() {
     super.connectedCallback();
     if (typeof ResizeObserver === "undefined") return;
+    if (this._ro) this._ro.disconnect();
     this._ro = new ResizeObserver(() => this._schedule());
     this._ro.observe(this);
   }
-  disconnectedCallback() { if (this._ro) { this._ro.disconnect(); this._ro = null; } }
+  disconnectedCallback() { super.disconnectedCallback(); if (this._ro) { this._ro.disconnect(); this._ro = null; } }
   css() {
     return `
       .stage { position:relative; width:100%; aspect-ratio: 16 / 9; min-height:260px; }
@@ -1484,7 +1486,7 @@ class SfCameraCard extends SfBase {
   _restart() { clearInterval(this._timer); this._timer = setInterval(() => this._refresh(), this._every() * 1000); }
   setConfig(config) { super.setConfig(config); if (this.isConnected) this._restart(); }
   connectedCallback() { super.connectedCallback(); this._restart(); }
-  disconnectedCallback() { clearInterval(this._timer); }
+  disconnectedCallback() { super.disconnectedCallback(); clearInterval(this._timer); this._timer = null; }
   afterRender() { this._refresh(); }
   _refresh() {
     if (!this.shadowRoot || document.hidden) return;
@@ -1806,6 +1808,7 @@ class SfLauncherCard extends SfBase {
     this._deep = setTimeout(this._onPop, 400);  // lien direct …/accueil#climat
   }
   disconnectedCallback() {
+    super.disconnectedCallback();
     window.removeEventListener("popstate", this._onPop);
     window.removeEventListener("hashchange", this._onPop);
     clearTimeout(this._deep);
@@ -3116,7 +3119,11 @@ class SfEditorBase extends HTMLElement {
   }
   set hass(h) {
     this._hass = h;
-    if (this.shadowRoot) this.shadowRoot.querySelectorAll("ha-form").forEach((f) => { f.hass = h; });
+    if (this.shadowRoot) {
+      this.shadowRoot.querySelectorAll("ha-form").forEach((f) => { f.hass = h; });
+      // éditeurs de cartes imbriquées (contenu d'un panneau) : eux aussi doivent suivre `hass`, sinon leurs sélecteurs gardent l'état d'origine
+      this.shadowRoot.querySelectorAll("*").forEach((e) => { if (e !== this && e.localName.endsWith("-editor")) e.hass = h; });
+    }
   }
   _t(key) { return sfTr(sfLang(this._hass), key); }
   // Traduit les libellés des listes déroulantes d'un schéma ha-form.

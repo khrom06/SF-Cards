@@ -2,6 +2,11 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+### Fixed
+- Card editor: cards nested in a panel (launcher) now get `hass` updates in their own editor.
+- Every card now calls the base `disconnectedCallback`, so timers never stack or outlive a card when HA moves it in edit mode.
+
 ## [1.10.1]
 ### Fixed
 - Card editor: choosing an entity could freeze the page (browser tab or iOS app). The red "required field" marking re-triggered its own observer in an endless loop because `:scope > style` never matches inside a shadow root. Regression test added.

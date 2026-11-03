@@ -780,6 +780,27 @@ __SF.SF_HOOK.tr = (lang, key) => {
     for (let i = 0; i < 40; i++) { el.hass = { ...h }; await wait(5); }
     if (calls > 2) fail(`NSPanel : ${calls} abonnements météo tentés en 40 mises à jour de hass (retente à chaque fois)`);
     el.remove(); }
+  // 5f. Cycles connexion / déconnexion (HA déplace les cartes en mode édition) : les minuteries ne s'empilent pas, tout est nettoyé à la fin ;
+  // et un éditeur imbriqué reçoit les mises à jour de `hass`.
+  { const live = new Set(), si = window.setInterval, ci = window.clearInterval;
+    window.setInterval = (f, ms, ...a) => { const id = si(f, ms, ...a); live.add(id); return id; };
+    window.clearInterval = (id) => { live.delete(id); ci(id); };
+    try {
+      for (const tag of Object.keys(FULL)) {
+        const el = mount(tag, FULL[tag], "fr");
+        for (let i = 0; i < 6; i++) { el.remove(); document.body.appendChild(el); }
+        if (live.size > 2) fail(`cycles connexion : ${tag} laisse ${live.size} minuteries actives après 6 déplacements (empilement)`);
+        el.remove(); await wait(20);
+        if (live.size) { fail(`cycles connexion : ${tag} garde ${live.size} minuterie(s) après retrait`); live.forEach((id) => ci(id)); live.clear(); }
+      }
+      const ed = document.createElement("sf-launcher-card-editor"); ed.hass = { states: {}, locale: { language: "fr" } };
+      ed.setConfig({ tiles: [{ name: "A", card: { type: "custom:sf-machines-card", tiles: [{ entity: "sensor.x" }] } }] }); document.body.appendChild(ed); await wait(30);
+      const sub = [...ed.shadowRoot.querySelectorAll("*")].find((e) => e.localName === "sf-machines-card-editor");
+      const H2 = { states: { "sensor.y": { state: "1", attributes: {} } }, locale: { language: "fr" } };
+      if (!sub) fail("éditeur imbriqué : sf-machines-card-editor introuvable dans l'éditeur du lanceur");
+      else { ed.hass = H2; if (sub._hass !== H2) fail("éditeur imbriqué : hass n'est pas propagé aux éditeurs de cartes imbriquées"); }
+      ed.remove();
+    } finally { window.setInterval = si; window.clearInterval = ci; live.forEach((id) => ci(id)); } }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
