@@ -2412,11 +2412,13 @@ class SfNsCard extends SfBase {
   }
   async _subFc() {
     if (this._fcUnsub || this._fcBusy || !this._hass || !this._hass.connection || !this._config || !this._config.weather) return;
+    // Échec (entité météo sans prévision horaire, indisponible…) : HA rappelle `hass` plusieurs fois par seconde, on ne retente donc qu'une fois par minute.
+    if (this._fcFail && Date.now() - this._fcFail < 60000) return;
     this._fcBusy = true;
     try {
       this._fcUnsub = await this._hass.connection.subscribeMessage((ev) => { this._fc = (ev && ev.forecast) || []; this._schedule(); },
         { type: "weather/subscribe_forecast", forecast_type: "hourly", entity_id: this._config.weather });
-    } catch (e) { this._fc = null; }
+    } catch (e) { this._fc = null; this._fcFail = Date.now(); }
     this._fcBusy = false;
   }
 

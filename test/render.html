@@ -756,6 +756,30 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (n !== 1) fail(`marquage rouge : ${n} balises <style> après redessin (1 attendue) — boucle de l'observateur`);
     if (!req.hasAttribute("sf-req")) fail("marquage rouge : le champ obligatoire n'est pas marqué");
     form.remove(); }
+  // 5d. Robustesse : aucune minuterie ne survit au retrait d'une carte, et des mises à jour de `hass` en rafale restent bon marché
+  // (HA rappelle `hass` à chaque changement d'état de la maison : une carte qui boucle ou fuit se verrait tout de suite).
+  { const live = new Set(), si = window.setInterval, ci = window.clearInterval;
+    window.setInterval = (f, ms, ...a) => { const id = si(f, ms, ...a); live.add(id); return id; };
+    window.clearInterval = (id) => { live.delete(id); ci(id); };
+    try {
+      const t0 = performance.now(), els = [];
+      for (const tag of Object.keys(FULL)) {
+        const el = mount(tag, FULL[tag], "fr"); els.push(el);
+        for (let i = 0; i < 100; i++) el.hass = HASS({ ...base, "sensor.tick": { state: String(i), attributes: {} } }, "fr");
+      }
+      await wait(60);
+      const ms = performance.now() - t0;
+      if (ms > 6000) fail(`robustesse : 100 mises à jour de hass sur ${els.length} cartes ont pris ${Math.round(ms)} ms (boucle ou rendu trop lourd ?)`);
+      els.forEach((el) => el.remove()); await wait(60);
+      if (live.size) fail(`robustesse : ${live.size} minuterie(s) setInterval encore actives après le retrait des cartes (fuite)`);
+    } finally { window.setInterval = si; window.clearInterval = ci; live.forEach((id) => ci(id)); } }
+  // 5e. Carte NSPanel : un abonnement aux prévisions qui échoue n'est pas retenté à chaque mise à jour de `hass` (plusieurs par seconde).
+  { let calls = 0;
+    const h = { ...HASS(base, "fr"), connection: { subscribeMessage: () => { calls++; return Promise.reject(new Error("pas de prévision horaire")); } } };
+    const el = document.createElement("sf-ns-card"); el.setConfig({ ...FULL["sf-ns-card"], weather: "weather.test" }); document.body.appendChild(el);
+    for (let i = 0; i < 40; i++) { el.hass = { ...h }; await wait(5); }
+    if (calls > 2) fail(`NSPanel : ${calls} abonnements météo tentés en 40 mises à jour de hass (retente à chaque fois)`);
+    el.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
