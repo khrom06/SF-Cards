@@ -2,6 +2,12 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.12.0]
+### Added
+- `sf-trend-card`: **forecast against reality**. `window: today` (local midnight to midnight, with a "now" marker and a "Today" range button), per-series `attribute` (draws, dashed, a time-indexed attribute of the entity's current state, e.g. the `watts` forecast of a solar-forecast sensor) and per-series `factor` (e.g. 1000 to compare a kW sensor with a forecast in W). The attribute read is bounded (5,000 entries).
+- `sf-machines-card`: **mini-curves** in `value` / `percent` tiles (`spark: true` = 24 h, or a number of hours, 1 to 168). Grouped requests (one per distinct duration), refreshed every 5 minutes, at most one retry per minute after an error.
+- `sf-launcher-card`: **health tile** (`summary: health`): verdict of a health card's checks on the tile, red and pulsing when a critical check fails.
+
 ## [1.11.1]
 ### Fixed
 - `sf-trend-card`: a series that did not change during the window (only its start state is returned) is now drawn as a flat line up to now instead of nothing ("No data").

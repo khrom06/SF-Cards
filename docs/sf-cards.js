@@ -28,10 +28,10 @@
 
 (function () {
 if (window.SF_CARDS_VERSION) {   // resource declared twice (HACS + manual file): the first loaded version stays active, and we say so clearly
-  console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.11.1) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
+  console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.12.0) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
   return;
 }
-window.SF_CARDS_VERSION = "1.11.1";
+window.SF_CARDS_VERSION = "1.12.0";
 
 // Embedded fonts (OFL 1.1, see THIRD_PARTY_NOTICES.md). Orbitron is a variable font.
 if (!document.getElementById("sf-hud-fonts")) {
@@ -54,6 +54,9 @@ Object.assign(SF_T, {"ouvert": ["open", "abierto", "offen", "open", "aperto", "a
 Object.assign(SF_T, {"Tout va bien": ["All good", "Todo bien", "Alles in Ordnung", "Alles goed", "Tutto ok", "Tudo bem", "Wszystko w porządku", "Всё хорошо", "一切正常", "كل شيء على ما يرام"], "{n} anomalie": ["{n} issue", "{n} anomalía", "{n} Auffälligkeit", "{n} afwijking", "{n} anomalia", "{n} anomalia", "{n} anomalia", "{n} проблема", "{n} 个异常", "{n} خلل"], "{n} anomalies": ["{n} issues", "{n} anomalías", "{n} Auffälligkeiten", "{n} afwijkingen", "{n} anomalie", "{n} anomalias", "{n} anomalie", "{n} проблем(ы)", "{n} 个异常", "{n} اختلالات"], "normal": ["normal", "normal", "normal", "normaal", "normale", "normal", "normalne", "в норме", "正常", "طبيعي"], "état : {s}": ["state: {s}", "estado: {s}", "Zustand: {s}", "status: {s}", "stato: {s}", "estado: {s}", "stan: {s}", "состояние: {s}", "状态：{s}", "الحالة: {s}"], "{v} sous le minimum ({m})": ["{v} below minimum ({m})", "{v} por debajo del mínimo ({m})", "{v} unter dem Minimum ({m})", "{v} onder het minimum ({m})", "{v} sotto il minimo ({m})", "{v} abaixo do mínimo ({m})", "{v} poniżej minimum ({m})", "{v} ниже минимума ({m})", "{v} 低于最小值（{m}）", "{v} أقل من الحد الأدنى ({m})"], "{v} au-dessus du maximum ({m})": ["{v} above maximum ({m})", "{v} por encima del máximo ({m})", "{v} über dem Maximum ({m})", "{v} boven het maximum ({m})", "{v} sopra il massimo ({m})", "{v} acima do máximo ({m})", "{v} powyżej maksimum ({m})", "{v} выше максимума ({m})", "{v} 高于最大值（{m}）", "{v} أعلى من الحد الأقصى ({m})"], "pas de mise à jour depuis {n} min": ["no update for {n} min", "sin actualizar desde hace {n} min", "seit {n} Min. keine Aktualisierung", "{n} min niet bijgewerkt", "nessun aggiornamento da {n} min", "sem atualização há {n} min", "brak aktualizacji od {n} min", "нет обновлений {n} мин", "{n} 分钟未更新", "لا تحديث منذ {n} د"], "pas de mise à jour depuis {n} h": ["no update for {n} h", "sin actualizar desde hace {n} h", "seit {n} Std. keine Aktualisierung", "{n} u niet bijgewerkt", "nessun aggiornamento da {n} h", "sem atualização há {n} h", "brak aktualizacji od {n} godz.", "нет обновлений {n} ч", "{n} 小时未更新", "لا تحديث منذ {n} س"], "Aucun contrôle": ["No checks", "Sin controles", "Keine Prüfungen", "Geen controles", "Nessun controllo", "Sem verificações", "Brak kontroli", "Нет проверок", "无检查项", "لا توجد فحوصات"], "Au moins un contrôle": ["At least one check", "Al menos un control", "Mindestens eine Prüfung", "Minstens één controle", "Almeno un controllo", "Pelo menos uma verificação", "Co najmniej jedna kontrola", "Хотя бы одна проверка", "至少一个检查项", "فحص واحد على الأقل"], "Contrôles": ["Checks", "Controles", "Prüfungen", "Controles", "Controlli", "Verificações", "Kontrole", "Проверки", "检查项", "الفحوصات"], "Ajouter un contrôle": ["Add a check", "Añadir un control", "Prüfung hinzufügen", "Controle toevoegen", "Aggiungi un controllo", "Adicionar uma verificação", "Dodaj kontrolę", "Добавить проверку", "添加检查项", "إضافة فحص"], "Contrôle": ["Check", "Control", "Prüfung", "Controle", "Controllo", "Verificação", "Kontrola", "Проверка", "检查项", "فحص"], "États normaux (tout autre état = anomalie)": ["Normal states (any other state = issue)", "Estados normales (cualquier otro = anomalía)", "Normale Zustände (jeder andere = Auffälligkeit)", "Normale statussen (elke andere = afwijking)", "Stati normali (ogni altro = anomalia)", "Estados normais (qualquer outro = anomalia)", "Stany normalne (każdy inny = anomalia)", "Нормальные состояния (любое другое = проблема)", "正常状态（其他状态均为异常）", "الحالات الطبيعية (أي حالة أخرى = خلل)"], "États anormaux": ["Abnormal states", "Estados anómalos", "Anormale Zustände", "Abnormale statussen", "Stati anomali", "Estados anómalos", "Stany nieprawidłowe", "Аномальные состояния", "异常状态", "الحالات غير الطبيعية"], "Anomalie sans mise à jour depuis (minutes)": ["Issue if not updated for (minutes)", "Anomalía sin actualizar durante (minutos)", "Auffällig ohne Aktualisierung seit (Minuten)", "Afwijking zonder update gedurende (minuten)", "Anomalia senza aggiornamento da (minuti)", "Anomalia sem atualização há (minutos)", "Anomalia bez aktualizacji od (minuty)", "Проблема, если нет обновлений (минуты)", "超过此时间未更新视为异常（分钟）", "خلل إذا لم يُحدَّث لمدة (دقائق)"], "Gravité": ["Severity", "Gravedad", "Schweregrad", "Ernst", "Gravità", "Gravidade", "Waga", "Серьёзность", "严重程度", "الخطورة"], "Attention (orange)": ["Warning (amber)", "Atención (ámbar)", "Warnung (Orange)", "Let op (oranje)", "Attenzione (arancione)", "Atenção (laranja)", "Uwaga (pomarańczowy)", "Внимание (оранжевый)", "注意（橙色）", "تنبيه (برتقالي)"], "Critique (rouge)": ["Critical (red)", "Crítico (rojo)", "Kritisch (Rot)", "Kritiek (rood)", "Critico (rosso)", "Crítico (vermelho)", "Krytyczne (czerwony)", "Критично (красный)", "严重（红色）", "حرج (أحمر)"], "Groupe (réunit les anomalies d'un même sous-système)": ["Group (merges issues of one subsystem)", "Grupo (reúne anomalías de un subsistema)", "Gruppe (fasst Auffälligkeiten eines Teilsystems zusammen)", "Groep (bundelt afwijkingen van één subsysteem)", "Gruppo (riunisce le anomalie di un sottosistema)", "Grupo (reúne anomalias de um subsistema)", "Grupa (łączy anomalie jednego podsystemu)", "Группа (объединяет проблемы одной подсистемы)", "分组（合并同一子系统的异常）", "مجموعة (تجمع أعطال نظام فرعي واحد)"], "Lister aussi les contrôles normaux": ["Also list normal checks", "Listar también los controles normales", "Auch normale Prüfungen auflisten", "Ook normale controles tonen", "Elenca anche i controlli normali", "Listar também as verificações normais", "Pokaż także kontrole prawidłowe", "Показывать и нормальные проверки", "同时列出正常项", "عرض الفحوصات الطبيعية أيضاً"], "Valeur minimale (en dessous = anomalie)": ["Minimum value (below = issue)", "Valor mínimo (por debajo = anomalía)", "Mindestwert (darunter = Auffälligkeit)", "Minimumwaarde (eronder = afwijking)", "Valore minimo (sotto = anomalia)", "Valor mínimo (abaixo = anomalia)", "Wartość minimalna (poniżej = anomalia)", "Минимум (ниже = проблема)", "最小值（低于则异常）", "القيمة الدنيا (أقل = خلل)"], "Valeur maximale (au-dessus = anomalie)": ["Maximum value (above = issue)", "Valor máximo (por encima = anomalía)", "Höchstwert (darüber = Auffälligkeit)", "Maximumwaarde (erboven = afwijking)", "Valore massimo (sopra = anomalia)", "Valor máximo (acima = anomalia)", "Wartość maksymalna (powyżej = anomalia)", "Максимум (выше = проблема)", "最大值（高于则异常）", "القيمة القصوى (أعلى = خلل)"]});
 Object.assign(SF_T, {"Assistant": ["Assistant", "Asistente", "Assistent", "Assistent", "Assistente", "Assistente", "Asystent", "Ассистент", "助手", "المساعد"], "Au repos": ["Idle", "En reposo", "Bereit", "Inactief", "A riposo", "Em repouso", "Bezczynny", "Ожидает", "空闲", "في وضع الراحة"], "À l'écoute": ["Listening", "Escuchando", "Hört zu", "Luistert", "In ascolto", "A ouvir", "Słucha", "Слушает", "正在聆听", "يستمع"], "Réfléchit": ["Thinking", "Pensando", "Denkt nach", "Denkt na", "Sta pensando", "A pensar", "Myśli", "Думает", "思考中", "يفكر"], "Exécute": ["Running", "Ejecutando", "Führt aus", "Voert uit", "In esecuzione", "A executar", "Wykonuje", "Выполняет", "执行中", "ينفّذ"], "Répond": ["Replying", "Respondiendo", "Antwortet", "Antwoordt", "Sta rispondendo", "A responder", "Odpowiada", "Отвечает", "回复中", "يردّ"], "Erreur": ["Error", "Error", "Fehler", "Fout", "Errore", "Erro", "Błąd", "Ошибка", "错误", "خطأ"], "Demande": ["Request", "Solicitud", "Anfrage", "Verzoek", "Richiesta", "Pedido", "Prośba", "Запрос", "请求", "الطلب"], "Action": ["Action", "Acción", "Aktion", "Actie", "Azione", "Ação", "Akcja", "Действие", "动作", "الإجراء"], "Résultat": ["Result", "Resultado", "Ergebnis", "Resultaat", "Risultato", "Resultado", "Wynik", "Результат", "结果", "النتيجة"], "Réponse": ["Reply", "Respuesta", "Antwort", "Antwoord", "Risposta", "Resposta", "Odpowiedź", "Ответ", "回复", "الرد"], "Au moins une entité : état, demande, action, résultat ou réponse": ["At least one entity: state, request, action, result or reply", "Al menos una entidad: estado, solicitud, acción, resultado o respuesta", "Mindestens eine Entität: Zustand, Anfrage, Aktion, Ergebnis oder Antwort", "Minstens één entiteit: status, verzoek, actie, resultaat of antwoord", "Almeno un'entità: stato, richiesta, azione, risultato o risposta", "Pelo menos uma entidade: estado, pedido, ação, resultado ou resposta", "Co najmniej jedna encja: stan, prośba, akcja, wynik lub odpowiedź", "Хотя бы одна сущность: состояние, запрос, действие, результат или ответ", "至少一个实体：状态、请求、动作、结果或回复", "كيان واحد على الأقل: الحالة أو الطلب أو الإجراء أو النتيجة أو الرد"], "Phase (entité dont l'état décrit l'activité)": ["Phase (entity whose state describes the activity)", "Fase (entidad cuyo estado describe la actividad)", "Phase (Entität, deren Zustand die Aktivität beschreibt)", "Fase (entiteit waarvan de status de activiteit beschrijft)", "Fase (entità il cui stato descrive l'attività)", "Fase (entidade cujo estado descreve a atividade)", "Faza (encja, której stan opisuje aktywność)", "Фаза (сущность, чьё состояние описывает активность)", "阶段（其状态描述活动的实体）", "المرحلة (كيان تصف حالته النشاط)"], "Correspondance état → phase (YAML : idle, listening, thinking, acting, speaking, error)": ["State → phase mapping (YAML: idle, listening, thinking, acting, speaking, error)", "Correspondencia estado → fase (YAML: idle, listening, thinking, acting, speaking, error)", "Zuordnung Zustand → Phase (YAML: idle, listening, thinking, acting, speaking, error)", "Koppeling status → fase (YAML: idle, listening, thinking, acting, speaking, error)", "Corrispondenza stato → fase (YAML: idle, listening, thinking, acting, speaking, error)", "Correspondência estado → fase (YAML: idle, listening, thinking, acting, speaking, error)", "Mapowanie stan → faza (YAML: idle, listening, thinking, acting, speaking, error)", "Соответствие состояние → фаза (YAML: idle, listening, thinking, acting, speaking, error)", "状态 → 阶段映射（YAML：idle、listening、thinking、acting、speaking、error）", "ربط الحالة بالمرحلة (YAML: idle, listening, thinking, acting, speaking, error)"], "Dernière demande": ["Last request", "Última solicitud", "Letzte Anfrage", "Laatste verzoek", "Ultima richiesta", "Último pedido", "Ostatnia prośba", "Последний запрос", "最近的请求", "آخر طلب"], "Action en cours": ["Current action", "Acción en curso", "Laufende Aktion", "Huidige actie", "Azione in corso", "Ação em curso", "Bieżąca akcja", "Текущее действие", "当前动作", "الإجراء الحالي"], "Dernier résultat": ["Last result", "Último resultado", "Letztes Ergebnis", "Laatste resultaat", "Ultimo risultato", "Último resultado", "Ostatni wynik", "Последний результат", "最近的结果", "آخر نتيجة"], "Dernière réponse": ["Last reply", "Última respuesta", "Letzte Antwort", "Laatste antwoord", "Ultima risposta", "Última resposta", "Ostatnia odpowiedź", "Последний ответ", "最近的回复", "آخر رد"], "Boutons d'action": ["Action buttons", "Botones de acción", "Aktionsschaltflächen", "Actieknoppen", "Pulsanti di azione", "Botões de ação", "Przyciski akcji", "Кнопки действий", "操作按钮", "أزرار الإجراءات"], "Service (domaine.service)": ["Service (domain.service)", "Servicio (dominio.servicio)", "Dienst (domäne.dienst)", "Service (domein.service)", "Servizio (dominio.servizio)", "Serviço (domínio.serviço)", "Usługa (domena.usługa)", "Служба (домен.служба)", "服务（域.服务）", "الخدمة (النطاق.الخدمة)"], "Entité de mode (met en avant les tuiles du moment)": ["Mode entity (highlights the tiles of the moment)", "Entidad de modo (destaca los mosaicos del momento)", "Modus-Entität (hebt die passenden Kacheln hervor)", "Modus-entiteit (licht de tegels van het moment uit)", "Entità di modalità (evidenzia i riquadri del momento)", "Entidade de modo (destaca os mosaicos do momento)", "Encja trybu (wyróżnia kafelki na dany moment)", "Сущность режима (выделяет плитки момента)", "模式实体（突出当前时段的磁贴）", "كيان الوضع (يبرز بلاطات اللحظة)"], "Modes où la tuile est mise en avant": ["Modes in which the tile is highlighted", "Modos en los que se destaca el mosaico", "Modi, in denen die Kachel hervorgehoben wird", "Modi waarin de tegel wordt uitgelicht", "Modalità in cui il riquadro è evidenziato", "Modos em que o mosaico é destacado", "Tryby, w których kafelek jest wyróżniony", "Режимы, в которых плитка выделяется", "磁贴被突出显示的模式", "الأوضاع التي تُبرز فيها البلاطة"]});
 Object.assign(SF_T, {"États affichés (tous si vide)": ["States shown (all if empty)", "Estados mostrados (todos si vacío)", "Angezeigte Zustände (alle, wenn leer)", "Getoonde statussen (alle als leeg)", "Stati mostrati (tutti se vuoto)", "Estados mostrados (todos se vazio)", "Wyświetlane stany (wszystkie, gdy puste)", "Показываемые состояния (все, если пусто)", "显示的状态（为空则全部）", "الحالات المعروضة (الكل إذا كانت فارغة)"], "Intervalle minimal entre deux événements (minutes)": ["Minimum interval between two events (minutes)", "Intervalo mínimo entre dos eventos (minutos)", "Mindestabstand zwischen zwei Ereignissen (Minuten)", "Minimale tijd tussen twee gebeurtenissen (minuten)", "Intervallo minimo tra due eventi (minuti)", "Intervalo mínimo entre dois eventos (minutos)", "Minimalny odstęp między zdarzeniami (minuty)", "Минимальный интервал между событиями (минуты)", "两次事件的最小间隔（分钟）", "أدنى فاصل بين حدثين (دقائق)"], "Axe": ["Axis", "Eje", "Achse", "As", "Asse", "Eixo", "Oś", "Ось", "坐标轴", "المحور"], "Axe de gauche": ["Left axis", "Eje izquierdo", "Linke Achse", "Linkeras", "Asse sinistro", "Eixo esquerdo", "Oś lewa", "Левая ось", "左轴", "المحور الأيسر"], "Axe de droite (échelle propre)": ["Right axis (own scale)", "Eje derecho (escala propia)", "Rechte Achse (eigene Skala)", "Rechteras (eigen schaal)", "Asse destro (scala propria)", "Eixo direito (escala própria)", "Oś prawa (własna skala)", "Правая ось (своя шкала)", "右轴（独立刻度）", "المحور الأيمن (مقياس خاص)"]});
+Object.assign(SF_T, {"Fenêtre": ["Window", "Ventana", "Zeitfenster", "Venster", "Finestra", "Janela", "Okno", "Окно", "窗口", "النافذة"], "Glissante (nombre d'heures ci-dessus)": ["Rolling (number of hours above)", "Deslizante (número de horas arriba)", "Gleitend (Stundenzahl oben)", "Voortschrijdend (aantal uren hierboven)", "Scorrevole (numero di ore sopra)", "Deslizante (número de horas acima)", "Przesuwane (liczba godzin powyżej)", "Скользящее (число часов выше)", "滚动（上方的小时数）", "متحرك (عدد الساعات أعلاه)"], "Aujourd'hui (de minuit à minuit, pour afficher une prévision)": ["Today (midnight to midnight, to show a forecast)", "Hoy (de medianoche a medianoche, para mostrar una previsión)", "Heute (Mitternacht bis Mitternacht, für eine Prognose)", "Vandaag (middernacht tot middernacht, om een voorspelling te tonen)", "Oggi (da mezzanotte a mezzanotte, per mostrare una previsione)", "Hoje (da meia-noite à meia-noite, para mostrar uma previsão)", "Dzisiaj (od północy do północy, aby pokazać prognozę)", "Сегодня (с полуночи до полуночи, для показа прогноза)", "今天（午夜到午夜，用于显示预测）", "اليوم (من منتصف الليل إلى منتصفه، لعرض توقع)"], "Attribut daté à tracer en pointillés (ex. watts d'une prévision solaire)": ["Time-indexed attribute to draw dashed (e.g. watts of a solar forecast)", "Atributo con fecha para trazar en discontinuo (p. ej. watts de una previsión solar)", "Zeitindiziertes Attribut gestrichelt zeichnen (z. B. Watt einer Solarprognose)", "Tijdgebonden attribuut gestippeld tekenen (bijv. watt van een zonneprognose)", "Attributo con data da tracciare tratteggiato (es. watt di una previsione solare)", "Atributo datado a traçar a tracejado (ex. watts de uma previsão solar)", "Atrybut z datami rysowany linią przerywaną (np. waty prognozy słonecznej)", "Датированный атрибут пунктиром (напр. ватты прогноза солнца)", "按时间索引的属性（虚线绘制，如太阳能预测的瓦特）", "خاصية مؤرخة ترسم بخط متقطع (مثل واط توقع الطاقة الشمسية)"]});
+Object.assign(SF_T, {"{n} contrôles normaux": ["{n} checks normal", "{n} controles normales", "{n} Prüfungen normal", "{n} controles normaal", "{n} controlli normali", "{n} verificações normais", "{n} kontroli prawidłowych", "{n} проверок в норме", "{n} 项检查正常", "{n} فحوصات طبيعية"], "Mini-courbe sur N heures (0 = aucune)": ["Mini-curve over N hours (0 = none)", "Minicurva de N horas (0 = ninguna)", "Minikurve über N Stunden (0 = keine)", "Minigrafiek over N uur (0 = geen)", "Mini-curva su N ore (0 = nessuna)", "Mini-curva de N horas (0 = nenhuma)", "Mini-wykres z N godzin (0 = brak)", "Мини-график за N часов (0 = нет)", "N 小时迷你曲线（0 = 无）", "منحنى صغير لمدة N ساعة (0 = بدون)"]});
+Object.assign(SF_T, {"Multiplicateur des valeurs (ex. 1000 pour passer des kW aux W)": ["Value multiplier (e.g. 1000 to go from kW to W)", "Multiplicador de valores (p. ej. 1000 para pasar de kW a W)", "Wertfaktor (z. B. 1000 von kW zu W)", "Waardefactor (bijv. 1000 van kW naar W)", "Moltiplicatore dei valori (es. 1000 da kW a W)", "Multiplicador de valores (ex. 1000 para passar de kW a W)", "Mnożnik wartości (np. 1000 z kW na W)", "Множитель значений (напр. 1000 для перевода кВт в Вт)", "数值倍率（如 1000，将 kW 转为 W）", "معامل ضرب القيم (مثل 1000 للتحويل من kW إلى W)"]});
 const SF_LANGS = { en: 0, es: 1, de: 2, nl: 3, it: 4, pt: 5, pl: 6, ru: 7, zh: 8, ar: 9 };
 // HA language (user profile); unsupported language -> English.
 /* Required fields: per card, a function that returns the texts (translation keys) of what is missing. Deliberately lenient rules:
@@ -847,6 +850,53 @@ class SfRadarCard extends SfBase {
  */
 class SfMachinesCard extends SfBase {
   defaults() { return { tiles: [] }; }
+  set hass(h) { this._hass = h; this._loadSpark(); this._schedule(); }
+  get hass() { return this._hass; }
+  setConfig(config) { super.setConfig(config); this._sp = null; this._spAt = 0; this._spFail = 0; this._loadSpark(); }
+  // Mini-curve of a tile (`spark: true` = 24 h, or a number of hours, 1 to 168): history of the entities loaded together (one request per distinct duration,
+  // 3 at most), refreshed at most every 5 minutes; after a failure, at most one retry per minute (hass is called several times per second).
+  _sparkTiles() {
+    const out = [];
+    for (const t of Array.isArray(this._config.tiles) ? this._config.tiles : []) {
+      if (!t || typeof t.entity !== "string" || !/^[a-z0-9_]+\.[a-z0-9_]+$/i.test(t.entity) || !["value", "percent", undefined].includes(t.kind)) continue;
+      const h = t.spark === true ? 24 : Number(t.spark); if (!(isFinite(h) && h >= 1)) continue;
+      out.push({ id: t.entity, h: Math.min(168, Math.round(h)) });
+    }
+    return out.slice(0, 40);
+  }
+  async _loadSpark() {
+    if (!this._config) return;   // attached / given `hass` before setConfig: nothing to load yet
+    const st = this._sparkTiles();
+    if (!st.length || !this._hass || !this._hass.callWS || this._spBusy) return;
+    const key = st.map((x) => `${x.id}@${x.h}`).join(","), now = Date.now();
+    if (this._sp && !this._sp.error && this._sp.key === key && now - this._spAt < 300000) return;
+    if (this._spFail && this._spKey === key && now - this._spFail < 60000) return;
+    this._spBusy = true;
+    try {
+      const groups = new Map(); for (const x of st) { if (!groups.has(x.h)) groups.set(x.h, new Set()); groups.get(x.h).add(x.id); }
+      const pts = {};
+      for (const [h, ids] of [...groups].slice(0, 3)) {
+        const t0 = now - h * 3600000, r = await this._hass.callWS({ type: "history/history_during_period", start_time: new Date(t0).toISOString(), end_time: new Date(now).toISOString(),
+          entity_ids: [...ids], include_start_time_state: true, significant_changes_only: false, minimal_response: true, no_attributes: true });
+        for (const id of ids) {
+          const raw = (r && Array.isArray(r[id]) ? r[id] : []).map((x) => [typeof x.lu === "number" ? x.lu * 1000 : typeof x.lc === "number" ? x.lc * 1000 : Date.parse(x.last_updated || x.last_changed || ""), parseFloat(x.s ?? x.state)])
+            .filter((q) => isFinite(q[0]) && isFinite(q[1])).sort((a, b) => a[0] - b[0]).map(([t, v]) => [Math.max(t, t0), v]);
+          if (raw.length && raw[raw.length - 1][0] < now) raw.push([now, raw[raw.length - 1][1]]);   // a stable entity gets a flat line up to now
+          pts[`${id}@${h}`] = { t0, t1: now, p: sfTrendReduce(raw, t0, now, 48) };
+        }
+      }
+      this._sp = { key, pts }; this._spAt = Date.now(); this._spFail = 0;
+    } catch (e) { this._spFail = Date.now(); this._spKey = key; this._sp = { key, pts: {}, error: true }; this._spAt = Date.now(); }
+    this._spBusy = false; this._lastHtml = null; this._schedule();
+  }
+  _spark(t, col) {
+    const h = t.spark === true ? 24 : Math.min(168, Math.round(Number(t.spark))), d = this._sp && this._sp.pts[`${t.entity}@${h}`];
+    if (!d || !d.p.length) return `<div class="spk"></div>`;
+    const v = d.p.map((q) => q[1]); let lo = Math.min(...v), hi = Math.max(...v); if (hi - lo < 1e-9) { lo -= 1; hi += 1; }
+    const X = (tm) => (((tm - d.t0) / (d.t1 - d.t0)) * 100).toFixed(1), Y = (val) => (21 - ((val - lo) / (hi - lo)) * 20).toFixed(1);
+    const path = d.p.map(([tm, val], k) => `${k ? "L" : "M"}${X(tm)} ${Y(val)}`).join("");
+    return `<svg class="spk" viewBox="0 0 100 22" preserveAspectRatio="none" aria-hidden="true"><path class="sa" d="${path}L${X(d.p[d.p.length - 1][0])} 22L${X(d.p[0][0])} 22Z" fill="${this.esc(col)}"/><path d="${path}" stroke="${this.esc(col)}"/></svg>`;
+  }
   css() {
     return `
       .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap:10px; }
@@ -858,6 +908,9 @@ class SfMachinesCard extends SfBase {
       .bar { height:3px; margin-top:8px; border-radius:2px; background:rgba(255,255,255,.07); overflow:hidden; }
       .bar i { display:block; height:100%; border-radius:2px; transition: width 1s; }
       .led { position:absolute; top:10px; right:10px; width:7px; height:7px; border-radius:50%; }
+      .spk { display:block; width:100%; height:22px; margin-top:8px; }
+      .spk path { fill:none; stroke-width:1.6; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
+      .spk .sa { stroke:none; opacity:.14; }
       .pulse { height:26px; margin-top:12px; opacity:.75; }
       .pulse path { fill:none; stroke:${SF_C.cyan}; stroke-width:1.4; stroke-dasharray:40 220;
         animation: beat 2.4s linear infinite; filter:drop-shadow(0 0 3px ${SF_C.cyan}); }
@@ -910,7 +963,7 @@ class SfMachinesCard extends SfBase {
     return `<div class="tile click" data-e="${this.esc(id)}" aria-label="${this.esc(`${t.label}: ${v}${u}${lvl ? ` (${lvl})` : ""}`)}">
       <span class="led" style="background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></span>
       <div class="lbl">${this.esc(t.label)}</div><div class="v" style="color:${this.esc(col === SF_C.grey ? SF_C.grey : "#fff")}">${this.esc(v)}<span class="u">${this.esc(u)}</span></div>
-      ${pct !== null ? `<div class="bar"><i style="width:${pct}%;background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></i></div>` : ""}</div>`;
+      ${pct !== null ? `<div class="bar"><i style="width:${pct}%;background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></i></div>` : ""}${t.spark && col !== SF_C.grey && this._sparkTiles().some((x) => x.id === id) ? this._spark(t, col) : ""}</div>`;
   }
   render() {
     const tiles = this._config.tiles;
@@ -1913,6 +1966,14 @@ class SfLauncherCard extends SfBase {
         return { main: v === null ? "—" : `${this.nf(v, first.digits ?? 1)}${this.esc(first.unit ?? this.unit(first.entity))}`,
           sub: `${first ? this.esc(first.label) : ""}${bad ? ` · ${this.t("{n} sans réponse", { n: bad })}` : ""}`, hot: false };
       }
+      case "health": {
+        // Same verdict as the health card, from the checks of the card the tile opens (counted here, nothing is decided).
+        const h = this._hc || (this._hc = document.createElement("sf-health-card")); h._hass = this._hass;
+        const checks = (Array.isArray(c.checks) ? c.checks : []).filter((x) => x && typeof x.entity === "string" && /^[a-z0-9_]+\.[a-z0-9_]+$/i.test(x.entity)).slice(0, SF_HEALTH_MAX);
+        const ev = checks.map((x) => h._eval(x)), bad = checks.filter((x, i) => ev[i].lvl !== "ok"), crit = ev.some((x) => x.lvl === "critical");
+        return { main: bad.length ? this.t(bad.length > 1 ? "{n} anomalies" : "{n} anomalie", { n: bad.length }) : this.t("Tout va bien"),
+          sub: bad.length ? this.esc(bad.slice(0, 2).map((x) => x.name || x.entity).join(" · ")) : this.t("{n} contrôles normaux", { n: checks.length }), hot: bad.length > 0, crit };
+      }
       default: return { main: "", sub: this.esc(t.sub || ""), hot: false };
     }
   }
@@ -1920,7 +1981,7 @@ class SfLauncherCard extends SfBase {
     const prio = this._prio();
     const tiles = this._tiles().map((t, i) => {
       const s = this._sum(t);
-      return `<div class="tile ${this.esc(s.hot ? "hot" : "")}${prio && prio(t) ? " prio" : ""}" data-i="${this.esc(i)}" style="--tc:${this.esc(t.color || SF_C.cyan)}">
+      return `<div class="tile ${this.esc(s.hot ? "hot" : "")}${prio && prio(t) ? " prio" : ""}" data-i="${this.esc(i)}" style="--tc:${this.esc(s.crit ? SF_C.red : t.color || SF_C.cyan)}">
         <div class="top">${this.icon(t.icon || "mdi:open-in-new", 16)}${this.esc(t.name)}<span class="go">${this.icon("mdi:chevron-up", 16)}</span></div>
         <div class="main">${s.main}</div><div class="sub">${s.sub}</div></div>`;
     }).join("");
@@ -2782,9 +2843,33 @@ function sfTrendReduce(pts, t0, t1, n = SF_TREND_POINTS) {
 class SfTrendCard extends SfBase {
   defaults() { return { hours: 24, ranges: [6, 24, 168], layout: "auto", height: 150, series: [] }; }
   _series() { return (Array.isArray(this._config.series) ? this._config.series : []).filter((s) => s && typeof s.entity === "string" && /^[a-z0-9_]+\.[a-z0-9_]+$/i.test(s.entity)).slice(0, SF_TREND_MAX_SERIES); }
-  _hours() { const h = Number(this._h ?? this._config.hours); return isFinite(h) && h >= 1 ? Math.min(720, Math.round(h)) : 24; }
-  _ranges() { return (Array.isArray(this._config.ranges) ? this._config.ranges : []).map(Number).filter((n) => isFinite(n) && n >= 1 && n <= 720).map(Math.round).slice(0, 5); }
-  _keyNow() { return `${this._hours()}|${this._series().map((s) => s.entity).join(",")}`; }
+  // A series with `attribute` is not read from the history but from a time-indexed attribute of the entity's CURRENT state (e.g. the `watts`
+  // forecast of a solar-forecast sensor: { "2026-11-03T10:00:00+01:00": 1200, … }); it is drawn dashed.
+  _attr(s) { return typeof s.attribute === "string" && /^[a-z0-9_]{1,40}$/i.test(s.attribute) ? s.attribute : ""; }
+  // Range: a number of hours (rolling window) or "today" (local midnight to midnight, so that a forecast can extend into the future).
+  _range() { const v = this._h ?? (this._config.window === "today" ? "today" : this._config.hours); if (v === "today") return "today"; const h = Number(v); return isFinite(h) && h >= 1 ? Math.min(720, Math.round(h)) : 24; }
+  _hours() { const r = this._range(); return r === "today" ? 24 : r; }
+  _ranges() { return (Array.isArray(this._config.ranges) ? this._config.ranges : []).map((v) => (v === "today" ? "today" : Math.round(Number(v)))).filter((n) => n === "today" || (isFinite(n) && n >= 1 && n <= 720)).slice(0, 5); }
+  _keyNow() { return `${this._range()}|${this._series().map((s) => s.entity + (this._attr(s) ? "@" + this._attr(s) : "")).join(",")}`; }
+  _win(now) {
+    if (this._range() === "today") { const d0 = new Date(now); d0.setHours(0, 0, 0, 0); const d1 = new Date(d0); d1.setDate(d1.getDate() + 1); return { t0: d0.getTime(), t1: d1.getTime(), tEnd: Math.min(now, d1.getTime()), today: true }; }
+    const h = this._hours(); return { t0: now - h * 3600000, t1: now, tEnd: now, today: false };
+  }
+  // Points of series i: history data, or the entity's current time-indexed attribute (bounded read: 5,000 entries at most).
+  _pts(i, d) {
+    const s = this._series()[i]; if (!s) return [];
+    const f = this._factor(s), raw = this._pts0(s, d);
+    return f === 1 ? raw : raw.map(([t, v]) => [t, v * f]);
+  }
+  // `factor` multiplies the values (e.g. 1000 to compare a kW sensor with a forecast in W); ignored if not a finite non-zero number.
+  _factor(s) { const f = Number(s.factor); return isFinite(f) && f !== 0 ? f : 1; }
+  _pts0(s, d) {
+    const a = this._attr(s); if (!a) return d.pts[s.entity] || [];
+    const st = this.st(s.entity), m = st && st.attributes && st.attributes[a]; if (!m || typeof m !== "object") return [];
+    const out = []; let n = 0;
+    for (const k in m) { if (!Object.prototype.hasOwnProperty.call(m, k)) continue; if (++n > 5000) break; const t = Date.parse(k), v = Number(m[k]); if (isFinite(t) && isFinite(v) && t >= d.t0 && t <= d.t1) out.push([t, v]); }
+    return sfTrendReduce(out.sort((x, y) => x[0] - y[0]), d.t0, d.t1);
+  }
   setConfig(config) { super.setConfig(config); this._h = null; this._data = null; this._at = 0; this._failAt = 0; this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
@@ -2792,24 +2877,25 @@ class SfTrendCard extends SfBase {
   // Loading: never two at a time, refreshed only after a validity period, and after a failure we only retry once a minute
   // (HA calls `hass` several times per second: without these guards, an error would trigger a request on every call).
   async _load(force) {
+    if (!this._config) return;   // attached / given `hass` before setConfig: nothing to load yet
     const ser = this._series();
-    if (!this._config || !ser.length || !this._hass || !this._hass.callWS || this._busy) return;
-    const key = this._keyNow(), hrs = this._hours(), now = Date.now();
+    if (!ser.length || !this._hass || !this._hass.callWS || this._busy) return;
+    const key = this._keyNow(), hrs = this._hours(), now = Date.now(), W = this._win(now);
     if (!force && this._data && !this._data.error && this._data.key === key && now - this._at < (hrs > 48 ? 600000 : 120000)) return;
     if (this._failAt && this._failKey === key && now - this._failAt < 60000) return;
     this._busy = true;
     try {
-      const t1 = now, t0 = now - hrs * 3600000, ids = [...new Set(ser.map((s) => s.entity))], out = {}, stat = {};
+      const { t0, t1, tEnd } = W, ids = [...new Set(ser.filter((s) => !this._attr(s)).map((s) => s.entity))], out = {}, stat = {};
       const ISO = (t) => new Date(t).toISOString();
-      if (hrs > 48) {
+      if (hrs > 48 && !W.today && ids.length) {
         try {
-          const r = await this._hass.callWS({ type: "recorder/statistics_during_period", start_time: ISO(t0), end_time: ISO(t1), statistic_ids: ids, period: hrs > 336 ? "day" : "hour", types: ["mean"] });
+          const r = await this._hass.callWS({ type: "recorder/statistics_during_period", start_time: ISO(t0), end_time: ISO(tEnd), statistic_ids: ids, period: hrs > 336 ? "day" : "hour", types: ["mean"] });
           for (const id of ids) { out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((q) => [typeof q.start === "number" ? q.start : Date.parse(q.start), Number(q.mean)]).filter((p) => isFinite(p[0]) && isFinite(p[1])); stat[id] = out[id].length > 0; }
         } catch (e) { /* fall back to the history below */ }
       }
       const missing = ids.filter((id) => !out[id] || !out[id].length);
       if (missing.length) {
-        const r = await this._hass.callWS({ type: "history/history_during_period", start_time: ISO(t0), end_time: ISO(t1), entity_ids: missing,
+        const r = await this._hass.callWS({ type: "history/history_during_period", start_time: ISO(t0), end_time: ISO(tEnd), entity_ids: missing,
           include_start_time_state: true, significant_changes_only: false, minimal_response: true, no_attributes: true });
         for (const id of missing) out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((x) => {
           const t = typeof x.lu === "number" ? x.lu * 1000 : typeof x.lc === "number" ? x.lc * 1000 : Date.parse(x.last_updated || x.last_changed || "");
@@ -2820,11 +2906,11 @@ class SfTrendCard extends SfBase {
       // (valid for the history, where the state persists; not for hourly statistics). A point before the start is brought back to the start.
       const pts = {}; for (const id of ids) {
         const raw = (out[id] || []).sort((a, b) => a[0] - b[0]).map(([t, v]) => [Math.max(t, t0), v]);
-        if (raw.length && !stat[id] && raw[raw.length - 1][0] < t1) raw.push([t1, raw[raw.length - 1][1]]);
+        if (raw.length && !stat[id] && raw[raw.length - 1][0] < tEnd) raw.push([tEnd, raw[raw.length - 1][1]]);
         pts[id] = sfTrendReduce(raw, t0, t1);
       }
       this._data = { key, t0, t1, pts }; this._at = Date.now(); this._failAt = 0;
-    } catch (e) { this._failAt = Date.now(); this._failKey = key; this._data = { key, t0: now - hrs * 3600000, t1: now, pts: {}, error: true }; this._at = Date.now(); }
+    } catch (e) { this._failAt = Date.now(); this._failKey = key; this._data = { key, t0: W.t0, t1: W.t1, pts: {}, error: true }; this._at = Date.now(); }
     this._busy = false; this._lastHtml = null; this._schedule();
     if (this._keyNow() !== key) this._load();   // the range changed while loading
   }
@@ -2833,7 +2919,7 @@ class SfTrendCard extends SfBase {
     const used = new Set(ser.filter((x) => x.color).map((x) => String(x.color).toLowerCase())), free = SF_TREND_COLORS.filter((x) => !used.has(x.toLowerCase())); let k = 0;
     return ser.map((x) => x.color || free[k++ % free.length] || SF_C.cyan);
   }
-  _rangeLabel(h) { return h >= 48 && h % 24 === 0 ? this.t("{n} j", { n: h / 24 }) : this.t("{n} h", { n: h }); }
+  _rangeLabel(h) { return h === "today" ? this.t("Aujourd'hui") : h >= 48 && h % 24 === 0 ? this.t("{n} j", { n: h / 24 }) : this.t("{n} h", { n: h }); }
   _fmtT(t, long) {
     try { return new Intl.DateTimeFormat(this.locLatn, long ? { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" } : { hour: "2-digit", minute: "2-digit" }).format(new Date(t)); } catch (e) { return ""; }
   }
@@ -2845,6 +2931,7 @@ class SfTrendCard extends SfBase {
       .plot { position:relative; margin-bottom:6px; touch-action:pan-y; }
       .plot svg { width:100%; display:block; border-radius:6px; background:rgba(0,229,255,.025); }
       .gl { stroke:rgba(0,229,255,.12); stroke-width:1; vector-effect:non-scaling-stroke; }
+      .gl.nowl { stroke:rgba(255,179,0,.55); stroke-dasharray:3 4; }
       .ln2 { fill:none; stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
       .ar { stroke:none; opacity:.14; }
       .yl { position:absolute; left:6px; font-size:9.5px; color:${SF_C.dim}; pointer-events:none; text-shadow:0 0 4px #000; }
@@ -2864,10 +2951,10 @@ class SfTrendCard extends SfBase {
   render() {
     const c = this._config, ser = this._series(), d = this._data && this._data.key === this._keyNow() ? this._data : null;
     const H = Math.max(80, Math.min(400, Number(c.height) || 150)), hrs = this._hours();
-    const cols = this._cols(ser), units = ser.map((s) => s.unit || this.unit(s.entity)), same = units.every((u) => u === units[0]);
+    const cols = this._cols(ser), units = ser.map((s) => s.unit || (this._attr(s) ? "" : this.unit(s.entity))), same = units.every((u) => u === units[0]);
     const comb = c.layout === "combined" || (c.layout !== "separate" && (same || ser.some((s) => s.axis === "right")));
-    const btn = this._ranges().map((r) => `<button class="rg ${r === hrs ? "on" : ""}" data-rg="${this.esc(r)}">${this.esc(this._rangeLabel(r))}</button>`).join("");
-    const any = d && ser.some((s) => (d.pts[s.entity] || []).length);
+    const btn = this._ranges().map((r) => `<button class="rg ${r === this._range() ? "on" : ""}" data-rg="${this.esc(r)}">${this.esc(this._rangeLabel(r))}</button>`).join("");
+    const any = d && ser.some((s, i) => this._pts(i, d).length);
     let body;
     if (!d || !any) body = `<div class="empty">${this.esc(this.t(d && !this._busy ? "Aucune donnée" : "Chargement…"))}</div>`;
     else {
@@ -2875,24 +2962,26 @@ class SfTrendCard extends SfBase {
       const groups = comb ? [ser.map((s, i) => i)] : ser.map((s, i) => [i]);
       const W = 600, X = (t) => ((t - d.t0) / (d.t1 - d.t0)) * W;
       const html = groups.map((idx) => {
-        const all = idx.flatMap((i) => (d.pts[ser[i].entity] || []).map((p) => p[1]));
+        const all = idx.flatMap((i) => this._pts(i, d).map((p) => p[1]));
         if (!all.length) return "";
         // Two scales only if some series are marked `axis: right` AND others are not (otherwise a single one, on the left).
         const R = idx.filter((i) => ser[i].axis === "right"), L = idx.filter((i) => ser[i].axis !== "right"), two = R.length > 0 && L.length > 0;
-        const scale = (ids) => { const v = ids.flatMap((i) => (d.pts[ser[i].entity] || []).map((p) => p[1])); if (!v.length) return null;
+        const scale = (ids) => { const v = ids.flatMap((i) => this._pts(i, d).map((p) => p[1])); if (!v.length) return null;
           let lo = Math.min(...v), hi = Math.max(...v); if (hi - lo < 1e-9) { lo -= 1; hi += 1; } const pad = (hi - lo) * 0.08; return { lo: lo - pad, hi: hi + pad, pad }; };
         const sc = two ? { L: scale(L), R: scale(R) } : { L: scale(idx), R: null };
         const dgOf = (ids) => (ids.length === 1 && Number.isFinite(Number(ser[ids[0]].digits)) ? Number(ser[ids[0]].digits) : 1);
         const lines = idx.map((i) => {
-          const col = cols[i], pts = d.pts[ser[i].entity] || [], S = two && ser[i].axis === "right" ? sc.R : sc.L;
+          const col = cols[i], pts = this._pts(i, d), S = two && ser[i].axis === "right" ? sc.R : sc.L;
           if (!pts.length || !S) return "";
           const Y = (v) => H - ((v - S.lo) / (S.hi - S.lo)) * H;
           const path = pts.map(([t, v], k) => `${k ? "L" : "M"}${X(t).toFixed(1)} ${Y(v).toFixed(1)}`).join("");
-          const area = idx.length === 1 && pts.length > 1 ? `<path class="ar" d="${path}L${X(pts[pts.length - 1][0]).toFixed(1)} ${H}L${X(pts[0][0]).toFixed(1)} ${H}Z" fill="${this.esc(col)}"/>` : "";
-          return `${area}<path class="ln2" d="${path}" stroke="${this.esc(col)}"/>`;
+          const area = idx.length === 1 && pts.length > 1 && !this._attr(ser[i]) ? `<path class="ar" d="${path}L${X(pts[pts.length - 1][0]).toFixed(1)} ${H}L${X(pts[0][0]).toFixed(1)} ${H}Z" fill="${this.esc(col)}"/>` : "";
+          return `${area}<path class="ln2" d="${path}" stroke="${this.esc(col)}"${this._attr(ser[i]) ? ' stroke-dasharray="7 5" opacity=".85"' : ""}/>`;
         }).join("");
         this._plots.push({ idx, d });
-        const grid = [0.25, 0.5, 0.75].map((f) => `<line class="gl" x1="0" x2="${W}" y1="${(H * f).toFixed(1)}" y2="${(H * f).toFixed(1)}"/>`).join("");
+        let grid = [0.25, 0.5, 0.75].map((f) => `<line class="gl" x1="0" x2="${W}" y1="${(H * f).toFixed(1)}" y2="${(H * f).toFixed(1)}"/>`).join("");
+        // "today" window: a marker at the current time separates what happened from what is forecast
+        if (this._range() === "today" && Date.now() > d.t0 && Date.now() < d.t1) grid += `<line class="gl nowl" x1="${X(Date.now()).toFixed(1)}" x2="${X(Date.now()).toFixed(1)}" y1="0" y2="${H}"/>`;
         const uOf = (ids) => (ids.length === 1 ? units[ids[0]] : (ids.every((i) => units[i] === units[ids[0]]) ? units[ids[0]] : ""));
         const lab = (S, ids, cls, colr) => S ? `<span class="yl ${cls} hi" ${colr ? `style="color:${this.esc(colr)}"` : ""}>${this.esc(this.nf(S.hi - S.pad, dgOf(ids)))}${uOf(ids) ? " " + this.esc(uOf(ids)) : ""}</span><span class="yl ${cls} lo" ${colr ? `style="color:${this.esc(colr)}"` : ""}>${this.esc(this.nf(S.lo + S.pad, dgOf(ids)))}${uOf(ids) ? " " + this.esc(uOf(ids)) : ""}</span>` : "";
         return `<div class="plot" data-p="${this._plots.length - 1}"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${this.esc(idx.map((i) => ser[i].name || (this.st(ser[i].entity) || { attributes: {} }).attributes.friendly_name || ser[i].entity).join(", "))}">${grid}${lines}</svg>
@@ -2904,8 +2993,11 @@ class SfTrendCard extends SfBase {
     }
     const lg = ser.map((s, i) => {
       const col = cols[i], st = this.st(s.entity), nm = s.name || (st && st.attributes.friendly_name) || s.entity;
-      const pts = d ? d.pts[s.entity] || [] : [], vs = pts.map((p) => p[1]), dg = Number.isFinite(Number(s.digits)) ? Number(s.digits) : 1, u = units[i];
-      const cur = this.num(s.entity), mm = vs.length ? `${this.t("min")} ${this.nf(Math.min(...vs), dg)} · ${this.t("max")} ${this.nf(Math.max(...vs), dg)}` : "";
+      const pts = d ? this._pts(i, d) : [], vs = pts.map((p) => p[1]), dg = Number.isFinite(Number(s.digits)) ? Number(s.digits) : 1, u = units[i];
+      // value now: the entity's state, or for an attribute series the point nearest to now
+      let cur = this._attr(s) ? null : this.num(s.entity); if (cur !== null) cur *= this._factor(s);
+      if (this._attr(s) && pts.length) { const nw = Date.now(); let b = pts[0]; for (const p of pts) if (Math.abs(p[0] - nw) < Math.abs(b[0] - nw)) b = p; cur = Math.abs(b[0] - nw) <= 3600000 ? b[1] : null; }
+      const mm = vs.length ? `${this.t("min")} ${this.nf(Math.min(...vs), dg)} · ${this.t("max")} ${this.nf(Math.max(...vs), dg)}` : "";
       return `<div class="it" data-e="${this.esc(s.entity)}" style="color:${this.esc(col)}"><span class="dt" style="background:${this.esc(col)}"></span><span class="nm" style="color:${SF_C.text}" title="${this.esc(nm)}">${this.esc(nm)}</span>
         <span class="vl">${cur === null ? "—" : this.esc(this.nf(cur, dg)) + (u ? " " + this.esc(u) : "")}</span><span class="mm">${this.esc(mm)}</span></div>`;
     }).join("");
@@ -2914,7 +3006,7 @@ class SfTrendCard extends SfBase {
   afterRender() {
     const root = this.shadowRoot;
     root.querySelectorAll("[data-rg]").forEach((b) => b.addEventListener("click", () => {
-      const h = Number(b.dataset.rg); if (!(h >= 1) || h === this._hours()) return;
+      const h = b.dataset.rg === "today" ? "today" : Number(b.dataset.rg); if (h !== "today" && !(h >= 1)) return; if (h === this._range()) return;
       this._h = h; this._data = null; this._failAt = 0; this._lastHtml = null; this._schedule(); this._load(true);
     }));
     root.querySelectorAll(".plot").forEach((el) => {
@@ -2924,7 +3016,7 @@ class SfTrendCard extends SfBase {
         const r = el.getBoundingClientRect(); if (!r.width) return;
         const f = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)), t = P.d.t0 + f * (P.d.t1 - P.d.t0), lines = [this._fmtT(t, this._hours() > 48)];
         for (const i of P.idx) {
-          const pts = P.d.pts[ser[i].entity] || []; if (!pts.length) continue;
+          const pts = this._pts(i, P.d); if (!pts.length) continue;
           let best = pts[0]; for (const p of pts) if (Math.abs(p[0] - t) < Math.abs(best[0] - t)) best = p;
           const dg = Number.isFinite(Number(ser[i].digits)) ? Number(ser[i].digits) : 1;
           lines.push(`${P.idx.length > 1 ? (ser[i].name || ser[i].entity) + " : " : ""}${this.nf(best[1], dg)}`);
@@ -2983,8 +3075,9 @@ class SfTimelineCard extends SfBase {
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); }
   async _load() {
+    if (!this._config) return;   // attached / given `hass` before setConfig: nothing to load yet
     const ents = this._ents();
-    if (!this._config || !ents.length || !this._hass || !this._hass.callWS || this._busy) return;
+    if (!ents.length || !this._hass || !this._hass.callWS || this._busy) return;
     const key = this._keyNow(), now = Date.now();
     if (this._data && !this._data.error && this._data.key === key && now - this._at < 60000) return;
     if (this._failAt && this._failKey === key && now - this._failAt < 60000) return;
@@ -3327,8 +3420,8 @@ const SF_TILE_KINDS = [["value", "Valeur (avec seuils)"], ["percent", "Pourcenta
 function sfMachineTile(t) {
   const k = t.kind || "value";
   const s = [sfT("label"), sfE("entity"), sfS("kind", SF_TILE_KINDS)];
-  if (k === "value") s.push(sfG(sfT("unit"), sfN("digits", 0, 4)), sfG(sfN("warn"), sfN("crit")), sfG(sfN("low"), sfN("max")), sfB("invert"));
-  if (k === "percent") s.push(sfG(sfN("warn", 0, 100), sfN("crit", 0, 100)));
+  if (k === "value") s.push(sfG(sfT("unit"), sfN("digits", 0, 4)), sfG(sfN("warn"), sfN("crit")), sfG(sfN("low"), sfN("max")), sfB("invert"), sfN("spark", 0, 168));
+  if (k === "percent") s.push(sfG(sfN("warn", 0, 100), sfN("crit", 0, 100)), sfN("spark", 0, 168));
   if (k === "binary") s.push(sfT("ok_state"), sfT("bad_text"));
   if (k === "text") s.push(sfO("map"), sfO("ok_values"));
   if (k === "duration") s.push(sfG(sfN("warn"), sfN("max")));
@@ -3378,18 +3471,18 @@ const SF_SPECS = {
   "sf-machines-card": {
     title: "Équipements",
     stub: { tiles: [] },
-    labels: { ok_state: "État considéré normal", bad_text: "Texte si anormal", low: "Seuil bas (orange)", invert: "Alerte quand la valeur est BASSE", map: "Traduction des états (YAML)", ok_values: "États normaux (YAML)", stop: "Entités coupées pour arrêter" },
+    labels: { spark: "Mini-courbe sur N heures (0 = aucune)", ok_state: "État considéré normal", bad_text: "Texte si anormal", low: "Seuil bas (orange)", invert: "Alerte quand la valeur est BASSE", map: "Traduction des états (YAML)", ok_values: "États normaux (YAML)", stop: "Entités coupées pour arrêter" },
     fields: () => [sfT("title")],
     lists: [{ key: "tiles", title: "Tuiles", add: "Ajouter une tuile", item: "Tuile", itemTitle: (t) => t.label, new: () => ({ kind: "value" }), schema: sfMachineTile }],
   },
   "sf-trend-card": {
     title: "Tendance",
     stub: { series: [] },
-    labels: { hours: "Plage affichée au départ (heures)", layout: "Disposition", height: "Hauteur du graphique (px)", axis: "Axe" },
-    fields: () => [sfT("title"), sfG(sfN("hours", 1, 720), sfN("height", 80, 400, 10)),
+    labels: { factor: "Multiplicateur des valeurs (ex. 1000 pour passer des kW aux W)", hours: "Plage affichée au départ (heures)", window: "Fenêtre", attribute: "Attribut daté à tracer en pointillés (ex. watts d'une prévision solaire)", layout: "Disposition", height: "Hauteur du graphique (px)", axis: "Axe" },
+    fields: () => [sfT("title"), sfG(sfN("hours", 1, 720), sfN("height", 80, 400, 10)), sfS("window", [["rolling", "Glissante (nombre d'heures ci-dessus)"], ["today", "Aujourd'hui (de minuit à minuit, pour afficher une prévision)"]]),
       sfS("layout", [["auto", "Automatique (superposées si même unité)"], ["combined", "Courbes superposées"], ["separate", "Une courbe par ligne"]])],
     lists: [{ key: "series", title: "Séries", add: "Ajouter une série", item: "Série", itemTitle: (x) => x.name || x.entity, new: () => ({}),
-      schema: () => [sfE("entity", ["sensor", "input_number", "number", "counter"]), sfG(sfT("name"), sfT("color")), sfG(sfT("unit"), sfN("digits", 0, 4)), sfS("axis", [["left", "Axe de gauche"], ["right", "Axe de droite (échelle propre)"]])] }],
+      schema: () => [sfE("entity", ["sensor", "input_number", "number", "counter"]), sfG(sfT("name"), sfT("color")), sfG(sfT("unit"), sfN("digits", 0, 4)), sfN("factor", -1000000, 1000000, 0.001), sfT("attribute"), sfS("axis", [["left", "Axe de gauche"], ["right", "Axe de droite (échelle propre)"]])] }],
   },
   "sf-timeline-card": {
     title: "Journal",
@@ -3455,7 +3548,7 @@ const SF_SPECS = {
     lists: [{ key: "tiles", title: "Tuiles", add: "Ajouter une tuile", item: "Tuile", itemTitle: (t) => t.name, new: () => ({ icon: "mdi:open-in-new", summary: "texte" }),
       embed: "card",
       schema: (t) => [sfG(sfT("name"), sfI("icon")), sfG(sfT("color"), sfT("hash")), { name: "modes", selector: { text: { multiple: true } } },
-        sfS("summary", [["texte", "Texte libre"], ["climate", "Climat (températures)"], ["room", "Une pièce"], ["vehicles", "Véhicules"], ["commands", "Commandes"], ["cameras", "Caméras"], ["energy", "Énergie"], ["battery", "Batterie"], ["machines", "Équipements"]]),
+        sfS("summary", [["texte", "Texte libre"], ["climate", "Climat (températures)"], ["room", "Une pièce"], ["vehicles", "Véhicules"], ["commands", "Commandes"], ["cameras", "Caméras"], ["energy", "Énergie"], ["battery", "Batterie", ["health", "Santé"]], ["machines", "Équipements"]]),
         sfT("sub"), sfO("users"), ...(sfCardTag(t.card) ? [] : [sfO("card")])] }],
   },
   "sf-hangar-card": {
@@ -3847,7 +3940,7 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
   }
 }
 
-console.info("%c SF-CARDS %c v1.11.1 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
+console.info("%c SF-CARDS %c v1.12.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
 
 // Reserved access for automated tests (the file is encapsulated: its functions are no longer global).
 if (window.__SF_TEST) window.__SF = { SF_T, SF_HOOK, sfGuess, sfAutofill, sfSafeUrl, sfNormConfig, SF_REQ, sfRedReq };

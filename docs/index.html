@@ -49,9 +49,13 @@ customElements.define("ha-icon",FakeIcon);
 <script>
 const S = (state, attrs = {}) => ({ state: String(state), attributes: attrs });
 const U = (v, unit) => S(v, { unit_of_measurement: unit });
+const bell = (t) => { const d = new Date(t), h = d.getHours() + d.getMinutes() / 60; return Math.max(0, Math.sin(((h - 7) / 10) * Math.PI)); };   // 0 at night, 1 around noon
+// Solar forecast of the day (15-minute steps), like the `watts` attribute of a solar-forecast sensor.
+const demoWatts = (() => { const m0 = new Date(); m0.setHours(0, 0, 0, 0); return Object.fromEntries(Array.from({ length: 96 }, (_, i) => { const t = m0.getTime() + i * 900000; return [new Date(t).toISOString(), Math.round(2500 * bell(t))]; })); })();
 const base = {
   "sensor.grid": U(850, "W"), "sensor.solar": U(2400, "W"), "sensor.ev": U(1800, "W"), "sensor.pac": U(600, "W"),
   "sensor.bat_soc": U(62, "%"), "sensor.bat_p": U(-1200, "W"), "sensor.kwh": U(2.1, "kWh"), "sensor.eur": U(1.2, "€"),
+  "sensor.fc": S(9.1, { unit_of_measurement: "kWh", watts: demoWatts }),
   "sensor.price": U(0.18, "€"), "sensor.temp": U(20.5, "°C"), "sensor.temp2": U(19.5, "°C"), "sensor.hum": U(55, "%"), "sensor.out": U(11, "°C"),
   "sensor.solar_left": U(4.2, "kWh"), "sensor.fossil": U(12, "%"),
   "weather.home": S("sunny", { temperature: 12 }),
@@ -69,7 +73,8 @@ const base = {
 const withIds = (states) => Object.fromEntries(Object.entries(states).map(([id, st]) => [id, { entity_id: id, last_changed: new Date().toISOString(), ...st }]));
 // Fake history (sine waves) for the demo's trend card.
 const demoHistory = (m) => Object.fromEntries((m.entity_ids || m.statistic_ids || []).map((id, k) => [id, Array.from({ length: 120 }, (_, i) => {
-  const t = Date.now() - 86400000 + (i * 86400000) / 120, v = (id === "sensor.out" ? 9 : 21) + 2 * Math.sin(i / 120 * 12.5 + k * 1.3) + Math.sin(i * 1.7) * 0.25;
+  const t1 = m.end_time ? Date.parse(m.end_time) : Date.now(), t0 = m.start_time ? Date.parse(m.start_time) : t1 - 86400000, t = t0 + (i * (t1 - t0)) / 119;
+  const v = id === "sensor.solar" ? 2200 * bell(t) * (0.65 + 0.2 * Math.sin(i * 0.9)) : (id === "sensor.out" ? 9 : 21) + 2 * Math.sin(i / 120 * 12.5 + k * 1.3) + Math.sin(i * 1.7) * 0.25;
   return { s: String(v.toFixed(2)), lu: t / 1000 }; })]));
 const demoLogbook = () => { const n = Date.now(); return [["binary_sensor.door", "on", 8], ["binary_sensor.door", "off", 7], ["alarm_control_panel.home", "armed_away", 45], ["alarm_control_panel.home", "disarmed", 400]].map(([e, s, m]) => ({ entity_id: e, state: s, when: (n - m * 60000) / 1000 })); };
 const HASS = (states, language) => ({ states: withIds(states), locale: { language }, language, callService: () => Promise.resolve(), callWS: async (m) => m.type === "logbook/get_events" ? demoLogbook() : demoHistory(m) });
@@ -81,7 +86,7 @@ const FULL = {
     charger: { connected: "binary_sensor.connected", charging: "binary_sensor.charging", power: "sensor.ev", current: "number.current" }, mode: "input_select.mode",
     flows: { solar: "sensor.solar", home: "sensor.pac", surplus: "sensor.grid" } },
   "sf-radar-card": { people: [{ name: "Alice", person: "person.alice", color: "#00e5ff" }], rooms: [{ label: "Living", entity: "binary_sensor.door" }] },
-  "sf-machines-card": { title: "Equipment", tiles: [{ label: "A", entity: "sensor.temp", kind: "value", warn: 30 }, { label: "B", entity: "switch.plug", kind: "toggle" }, { label: "C", entity: "binary_sensor.net", kind: "binary" }, { label: "D", entity: "weather.home", kind: "text" }] },
+  "sf-machines-card": { title: "Equipment", tiles: [{ label: "A", entity: "sensor.temp", kind: "value", warn: 30, spark: true }, { label: "B", entity: "switch.plug", kind: "toggle" }, { label: "C", entity: "binary_sensor.net", kind: "binary" }, { label: "D", entity: "weather.home", kind: "text" }] },
   "sf-bridge-card": { weather: "weather.home", outdoor: "sensor.out", price: "sensor.price", hc_price: "sensor.price", mode: "input_select.mode", solar_left: "sensor.solar_left",
     internet: "binary_sensor.net", leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], people: [{ name: "Alice", entity: "person.alice" }] },
   "sf-reactor-card": { solar: "sensor.solar", grid: "sensor.grid", fossil: "sensor.fossil", price: "sensor.price", battery_soc: "sensor.bat_soc", battery_power: "sensor.bat_p",
@@ -97,11 +102,13 @@ const FULL = {
   "sf-assistant-card": { name: "Assistant", state: "select.room_preset", phases: { eco: "thinking", auto: "listening" }, request: "weather.home", result: "sensor.price", actions: [{ name: "Stop", icon: "mdi:stop", service: "script.stop", confirm: "Stop?" }] },
   "sf-health-card": { title: "Health", show_ok: true, checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Network" }, { name: "Wi-Fi", entity: "binary_sensor.window", ok: ["on"], group: "Network" }, { name: "Heat pump", entity: "sensor.pac", max: 500 }, { name: "Climate", entity: "climate.room", ok: ["auto", "heat"] }] },
   "sf-timeline-card": { title: "Timeline", entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarm" }] },
-  "sf-trend-card": { title: "Temperatures", series: [{ entity: "sensor.temp", name: "Living room" }, { entity: "sensor.temp2", name: "Bedroom" }, { entity: "sensor.out", name: "Outdoor", axis: "right" }] },
+  "sf-trend-card": { title: "Solar: forecast and real", window: "today", ranges: ["today", 24, 168], series: [{ entity: "sensor.solar", name: "Real", unit: "W", color: "#ffb300" }, { entity: "sensor.fc", attribute: "watts", name: "Forecast", unit: "W", color: "#00e5ff" }] },
+  "sf-trend-card@2": { title: "Temperatures", series: [{ entity: "sensor.temp", name: "Living room" }, { entity: "sensor.temp2", name: "Bedroom" }, { entity: "sensor.out", name: "Outdoor", axis: "right" }] },
   "sf-radiators-card": { radiators: [{ name: "Room", climate: "climate.room", preset: "select.room_preset", kwh: "sensor.kwh" }], setpoint: false },
   "sf-battery-card": { soc: "sensor.bat_soc", power: "sensor.bat_p", capacity_kwh: 10, charged_today: "sensor.kwh", discharged_today: "sensor.kwh", temperature: "sensor.temp", health: "sensor.hum", cycles: "sensor.kwh", mode: "input_select.mode" },
   "sf-launcher-card": { tiles: [{ name: "Climate", summary: "room", card: { type: "custom:sf-climate-card", rooms: [{ name: "L", climate: "climate.room", temp: "sensor.temp", target: "input_number.target" }] } },
-    { name: "Battery", summary: "battery", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc", power: "sensor.bat_p" } }] },
+    { name: "Battery", summary: "battery", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc", power: "sensor.bat_p" } },
+    { name: "Health", icon: "mdi:heart-pulse", color: "#2bff88", summary: "health", card: { type: "custom:sf-health-card", checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical" }, { name: "Heat pump", entity: "sensor.pac", max: 500 }] } }] },
 };
 
 const live = {};   // animated values so that the demo feels alive
@@ -114,7 +121,8 @@ Object.entries(LANGS).forEach(([k, v]) => sel.add(new Option(v, k)));
 sel.value = (navigator.language || "en").slice(0, 2) in LANGS ? (navigator.language || "en").slice(0, 2) : "en";
 let theme = "dark"; const els = [];
 const gal = document.getElementById("gallery");
-Object.entries(FULL).forEach(([tag, cfg]) => {
+Object.entries(FULL).forEach(([key, cfg]) => {
+  const tag = key.split("@")[0];   // "sf-trend-card@2": a second example of the same card
   if (!customElements.get(tag)) return;
   const sec = document.createElement("section"); sec.innerHTML = `<h2>${tag.replace("sf-", "").replace("-card", "")}</h2>`;
   const el = document.createElement(tag); sec.appendChild(el); gal.appendChild(sec);

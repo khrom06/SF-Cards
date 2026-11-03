@@ -236,6 +236,8 @@ tiles:
       rooms: [ … ]
 ```
 
+`summary: health` shows the verdict of a health card's checks on the tile ("All good" / "2 anomalies" + the first names; red and pulsing when a critical check fails): put the `sf-health-card` config in the tile's `card`.
+
 With `mode_entity` (any `input_select` / `select` / `sensor`, e.g. Morning / Day / Evening / Night) the tiles whose `modes` list the current state move to the front and get a brighter outline; the order changes back when the mode changes. Without `mode_entity`, or when the entity is unavailable or matches no tile, nothing changes.
 
 ### sf-alert-card
@@ -322,6 +324,8 @@ tiles:
 ```
 
 Tile kinds: `value`, `percent`, `binary`, `text`, `duration`, `timestamp`, `toggle`.
+
+Mini-curve: `spark: true` (24 h) or `spark: <hours>` (1 to 168) on a `value` / `percent` tile draws its recent history under the figure (one request per distinct duration, refreshed every 5 minutes; nothing is drawn if the entity is unavailable).
 
 Other tile options: `unit` (force the unit), `invert: true` (alert when the value is LOW), `ok_state` / `bad_text` (kind `binary`), `map` / `ok_values` (kind `text`: translate states / list the normal ones), `timer` / `stop` (kind `toggle`: remaining-time timer, and the entities switched off by a tap while it runs).
 
@@ -427,6 +431,20 @@ series:                    # up to 8
     unit: "°C"             # optional, otherwise the entity's unit
     digits: 1
     axis: left             # optional: right = second scale on the right (e.g. outdoor temperature next to indoor ones)
+    factor: 1              # optional: multiplies the values (e.g. 1000 to compare a kW sensor with a forecast in W)
+    attribute: watts       # optional: draw (dashed) a time-indexed attribute of the entity's CURRENT state instead of its history
+```
+
+**Forecast against reality.** `window: today` shows local midnight to midnight, so a forecast can extend into the future (a dashed marker shows "now"); `ranges: [today, 24, 168]` adds a "Today" button. With `attribute`, a series reads a time-indexed attribute such as the `watts` of a solar-forecast sensor (`{ "2026-11-03T10:00:00+01:00": 1200, … }`), drawn dashed, next to the real production read from the history:
+
+```yaml
+type: custom:sf-trend-card
+title: Solar: forecast and real
+window: today
+ranges: [today, 24, 168]
+series:
+  - { entity: sensor.solar_power, name: Real, unit: W, factor: 1000 }   # a kW sensor, brought to W
+  - { entity: sensor.energy_production_today, attribute: watts, name: Forecast, unit: W }
 ```
 
 A series that did not change during the window (a parked car, a stable setpoint) is drawn as a flat line up to now. With `axis: right` on some series (and not on others) both scales are shown, left and right, on one chart.

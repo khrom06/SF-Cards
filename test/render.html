@@ -8,6 +8,7 @@ class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon)
 window.requestAnimationFrame = (f) => setTimeout(f, 0);   // headless: no real frames, render immediately
 window.__errors = [];
 window.addEventListener("error", (e) => window.__errors.push(`${e.message} @${(e.filename || "").split("/").pop()}:${e.lineno}`));
+window.addEventListener("unhandledrejection", (e) => window.__errors.push(`unhandled rejection: ${e.reason && e.reason.message || e.reason}`));
 window.__missing = new Set();
 window.__SF_TEST = true;   // exposes internal functions to this test only
 window.SF_EVENTS = false;   // event themes depend on the date: disabled for reproducible tests
@@ -43,13 +44,13 @@ const FULL = {
   "sf-assistant-card": { name: "Assistant", state: "assist_satellite.kitchen", request: "sensor.as_req", action: "sensor.as_act", result: "sensor.as_res", reply: "sensor.as_rep", actions: [{ name: "Stop", icon: "mdi:stop", service: "script.stop", confirm: "Stop?" }] },
   "sf-health-card": { title: "Health", checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Network" }, { name: "UPS", entity: "sensor.ups", min: 30 }] },
   "sf-timeline-card": { title: "Log", hours: 24, entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarm", states: ["triggered"], min_gap: 5 }] },
-  "sf-trend-card": { title: "Trend", hours: 24, series: [{ entity: "sensor.temp_a", name: "A" }, { entity: "sensor.temp_b", name: "B", color: "#ffb300", axis: "right" }] },
+  "sf-trend-card": { title: "Trend", window: "today", ranges: ["today", 24], series: [{ entity: "sensor.temp_a", name: "A", factor: 1 }, { entity: "sensor.temp_b", name: "B", color: "#ffb300", axis: "right", attribute: "watts" }] },
   "sf-alert-card": { leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], alarm: "alarm_control_panel.home", hide_sim: true },
   "sf-hangar-card": { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range", target: "sensor.car_target", charging: "binary_sensor.charging" }],
     charger: { connected: "binary_sensor.connected", charging: "binary_sensor.charging", power: "sensor.ev", current: "number.current" }, mode: "input_select.mode",
     flows: { solar: "sensor.solar", home: "sensor.pac", surplus: "sensor.grid" } },
   "sf-radar-card": { people: [{ name: "Alice", person: "person.alice", color: "#00e5ff" }], rooms: [{ label: "Living", entity: "binary_sensor.door" }] },
-  "sf-machines-card": { title: "Equipment", tiles: [{ label: "A", entity: "sensor.temp", kind: "value", warn: 30 }, { label: "B", entity: "switch.plug", kind: "toggle" }, { label: "C", entity: "binary_sensor.net", kind: "binary" }, { label: "D", entity: "weather.home", kind: "text" }] },
+  "sf-machines-card": { title: "Equipment", tiles: [{ label: "A", entity: "sensor.temp", kind: "value", warn: 30, spark: 24 }, { label: "B", entity: "switch.plug", kind: "toggle" }, { label: "C", entity: "binary_sensor.net", kind: "binary" }, { label: "D", entity: "weather.home", kind: "text" }] },
   "sf-bridge-card": { weather: "weather.home", outdoor: "sensor.out", price: "sensor.price", hc_price: "sensor.price", mode: "input_select.mode", solar_left: "sensor.solar_left",
     internet: "binary_sensor.net", leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], people: [{ name: "Alice", entity: "person.alice" }] },
   "sf-reactor-card": { solar: "sensor.solar", grid: "sensor.grid", fossil: "sensor.fossil", price: "sensor.price", battery_soc: "sensor.bat_soc", battery_power: "sensor.bat_p",
@@ -869,6 +870,42 @@ __SF.SF_HOOK.tr = (lang, key) => {
     ax.remove();
     const nax = await draw({ series: [{ entity: "sensor.temp_a" }, { entity: "sensor.temp_a", axis: "right" }] }, mk(() => ({ "sensor.temp_a": hv((i) => 20 + (i % 3)) })));
     nax.remove();
+    // j. "today" window + forecast read from an entity attribute (dashed), now marker, bounded attribute read, range buttons incl. "today".
+    const mid = new Date(); mid.setHours(0, 0, 0, 0); const q = (i) => new Date(mid.getTime() + i * 900000).toISOString();
+    const watts = Object.fromEntries(Array.from({ length: 96 }, (_, i) => [q(i), Math.round(2000 * Math.max(0, Math.sin(((i - 28) / 40) * Math.PI)))]));
+    const hugeW = Object.fromEntries(Array.from({ length: 20000 }, (_, i) => [q(i % 96) + "#" + i, i]));
+    const stT = { ...HASS(base, "fr").states, "sensor.temp_a": { state: "800", attributes: { unit_of_measurement: "W", friendly_name: "Real" } }, "sensor.fc": { state: "9.1", attributes: { unit_of_measurement: "kWh", watts, friendly_name: "Forecast" } }, "sensor.hugefc": { state: "1", attributes: { watts: hugeW } } };
+    const hT = { ...HASS(base, "fr"), states: stT, callWS: async (m) => { calls.push(m); return { "sensor.temp_a": hist(30, (i) => 100 + 20 * i) }; } };
+    calls.length = 0;
+    const tdy = document.createElement("sf-trend-card"); tdy.setConfig({ window: "today", ranges: ["today", 24], series: [{ entity: "sensor.temp_a", name: "Real", unit: "W" }, { entity: "sensor.fc", attribute: "watts", name: "Forecast", unit: "W" }] });
+    document.body.appendChild(tdy); tdy.hass = hT; await wait(100);
+    const rt = tdy.shadowRoot, lns = [...rt.querySelectorAll(".ln2")];
+    if (lns.length !== 2 || lns.filter((e) => e.getAttribute("stroke-dasharray")).length !== 1) fail(`trend: 2 curves expected with exactly one dashed (the forecast), got ${lns.length} / ${lns.filter((e) => e.getAttribute("stroke-dasharray")).length}`);
+    if (rt.querySelectorAll(".plot").length !== 1) fail("trend: the forecast (W) and the real series (W) must share one chart");
+    if (!rt.querySelector(".nowl")) fail("trend: the 'now' marker is missing in the today window");
+    if (!rt.querySelector(".rg.on") || !/Aujourd/.test(rt.querySelector(".rg.on").textContent)) fail("trend: the 'today' range button must be selected");
+    const hc = calls.find((c) => c.type === "history/history_during_period");
+    if (!hc || Date.parse(hc.start_time) > mid.getTime() + 1000 || Math.abs(Date.parse(hc.end_time) - Date.now()) > 120000 || hc.entity_ids.length !== 1 || hc.entity_ids[0] !== "sensor.temp_a") fail(`trend: today window = history from midnight to now for the real series only (${JSON.stringify(hc && { s: hc.start_time, e: hc.end_time, ids: hc.entity_ids })})`);
+    const legend = [...rt.querySelectorAll(".lg .it")].map((e) => e.textContent); if (!legend[1] || !/ W/.test(legend[1])) fail(`trend: the forecast legend should show a value in W (${legend[1]})`);
+    // the attribute series must not be read from the entity state (9.1 kWh)
+    if (/9[.,]1/.test(legend[1] || "")) fail("trend: the forecast legend shows the entity state instead of the attribute value");
+    // factor: a kW series is brought onto the forecast's W scale (value x 1000), legend and curve alike; invalid factors are ignored.
+    const fk = document.createElement("sf-trend-card"); fk.setConfig({ window: "today", series: [{ entity: "sensor.temp_a", unit: "W", factor: 1000, digits: 0 }] });
+    document.body.appendChild(fk); fk.hass = { ...hT, states: { ...stT, "sensor.temp_a": { state: "0.8", attributes: { unit_of_measurement: "kW" } } }, callWS: async () => ({ "sensor.temp_a": hist(30, (i) => 0.5 + i / 100) }) }; await wait(100);
+    const fl = fk.shadowRoot.querySelector(".lg .it .vl"); if (!fl || !/800/.test(fl.textContent)) fail(`trend: factor 1000 must show 0.8 kW as 800 W in the legend (${fl && fl.textContent})`);
+    const fmax = (fk.shadowRoot.querySelector(".lg .mm") || {}).textContent || ""; if (!/max (7\d\d|8\d\d)/.test(fmax)) fail(`trend: factor 1000 must scale the curve values too (${fmax})`);
+    fk.remove();
+    const fi = document.createElement("sf-trend-card"); fi.setConfig({ series: [{ entity: "sensor.temp_a", factor: "abc" }, { entity: "sensor.temp_a", factor: 0 }] });
+    document.body.appendChild(fi); fi.hass = hT; await wait(80); if (!fi.shadowRoot.querySelector(".ln2")) fail("trend: an invalid factor must be ignored (curve still drawn)"); fi.remove();
+    // switching to a rolling range: still works, no forecast outside the window needed
+    tdy.shadowRoot.querySelector('[data-rg="24"]').click(); await wait(100);
+    if (!tdy.shadowRoot.querySelector('.rg.on[data-rg="24"]')) fail("trend: switching from 'today' to 24 h failed");
+    tdy.remove();
+    // bounded / hostile attribute read: 20,000 entries and a non-object attribute must neither freeze nor crash
+    const tb = document.createElement("sf-trend-card"); tb.setConfig({ window: "today", series: [{ entity: "sensor.hugefc", attribute: "watts" }, { entity: "sensor.fc", attribute: "not valid!" }, { entity: "sensor.fc", attribute: "state_class" }] });
+    document.body.appendChild(tb); const tb0 = performance.now(); tb.hass = hT; await wait(120);
+    if (performance.now() - tb0 > 1500) fail("trend: a 20,000-entry attribute is read too slowly (cap expected)");
+    tb.remove();
     // g. colours: never two series of the same hue when one is chosen explicitly.
     const g1 = await draw({ series: [{ entity: "sensor.temp_a", color: "#ffb300" }, { entity: "sensor.temp_b" }, { entity: "sensor.temp_a" }] }, mk(() => ({})), 40);
     const bg = [...g1.shadowRoot.querySelectorAll(".lg .it .dt")].map((e) => e.style.background);
@@ -990,9 +1027,63 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (names(l1).join() !== "A,B,C" || l1.shadowRoot.querySelector(".prio")) fail("lanceur : mode indisponible = ordre d'origine, aucune mise en avant");
     l1.remove();
     const l2 = await L({ mode_entity: "input_select.m" }, { "input_select.m": S("nuit") }); if (names(l2).join() !== "A,B,C" || l2.shadowRoot.querySelector(".prio")) fail("launcher: a mode without associated tile = nothing changes"); l2.remove(); }
+  // 5k. Launcher "health" tile (verdict of a health card's checks) and machines-tile mini-curves (spark).
+  { const ago = (m) => new Date(Date.now() - m * 60000).toISOString(), S = (state, a) => ({ state, attributes: a || {}, last_updated: ago(1), last_changed: ago(1) });
+    const stH = { ...base, "binary_sensor.net": S("off"), "binary_sensor.wifi": S("off"), "sensor.ups": S("20"), "binary_sensor.fine": S("on") };
+    const mkL = async (checks, states) => { const el = document.createElement("sf-launcher-card"); el.setConfig({ tiles: [{ name: "Health", summary: "health", card: { type: "custom:sf-health-card", checks } }] });
+      document.body.appendChild(el); el.hass = HASS(states || stH, "fr"); await wait(60); return el; };
+    const l1 = await mkL([{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical" }, { name: "Wifi", entity: "binary_sensor.wifi", ok: ["on"] }, { name: "UPS", entity: "sensor.ups", min: 30 }, { name: "Ok", entity: "binary_sensor.fine", ok: ["on"] }]);
+    const t1 = l1.shadowRoot.querySelector(".tile");
+    if (!/3 anomalies/.test(t1.querySelector(".main").textContent) || !/Internet · Wifi/.test(t1.querySelector(".sub").textContent)) fail(`launcher health: '3 anomalies' and the first two names expected (${t1.textContent.trim().slice(0, 80)})`);
+    if (!t1.classList.contains("hot") || !/ff3355|255, ?51, ?85/i.test(t1.getAttribute("style") || "")) fail("launcher health: a critical anomaly must make the tile hot and red");
+    l1.remove();
+    const l2 = await mkL([{ name: "Ok", entity: "binary_sensor.fine", ok: ["on"] }, { entity: "x\"><b>" }, null]);
+    const t2 = l2.shadowRoot.querySelector(".tile");
+    if (!/Tout va bien/.test(t2.textContent) || !/1 contrôles normaux/.test(t2.textContent) || t2.classList.contains("hot")) fail(`launcher health: 'Tout va bien' + '1 contrôles normaux' expected, invalid checks ignored (${t2.textContent.trim().slice(0, 80)})`);
+    l2.remove();
+    const l3 = await mkL([{ name: "<img src=x onerror=window.__pwn=1>", entity: "sensor.absent" }]);
+    if (l3.shadowRoot.querySelector("img") || window.__pwn || !/1 anomalie/.test(l3.shadowRoot.textContent)) fail("launcher health: hostile name injected, or a missing entity not counted as an anomaly");
+    l3.remove();
+    // machines: mini-curves
+    const calls = [], hist = (n, f) => Array.from({ length: n }, (_, i) => ({ s: String(f(i)), lu: (Date.now() - 86400000 + (i * 86400000) / n) / 1000 }));
+    const stM = { ...base, "sensor.t1": { state: "21", attributes: { unit_of_measurement: "°C" } }, "sensor.t2": { state: "50", attributes: { unit_of_measurement: "%" } }, "sensor.t3": { state: "7", attributes: {} }, "binary_sensor.b1": S("on") };
+    const mkM = (over) => ({ ...HASS(stM, "fr"), callWS: async (m) => { calls.push(m); return over(m); } });
+    const drawM = async (tiles, hass, ms = 90) => { const el = document.createElement("sf-machines-card"); el.setConfig({ tiles }); document.body.appendChild(el); el.hass = hass; await wait(ms); return el; };
+    const m1 = await drawM([{ label: "A", entity: "sensor.t1", spark: true }, { label: "B", entity: "sensor.t2", kind: "percent", spark: 24 }, { label: "C", entity: "sensor.t3" }, { label: "D", entity: "binary_sensor.b1", kind: "binary", spark: 24 }],
+      mkM((m) => Object.fromEntries(m.entity_ids.map((id) => [id, hist(40, (i) => 10 + (i % 9))]))));
+    const sp1 = m1.shadowRoot.querySelectorAll("svg.spk");
+    if (calls.length !== 1 || calls[0].entity_ids.length !== 2) fail(`machines spark: one grouped call for 2 entities expected (calls: ${JSON.stringify(calls.map((c) => c.entity_ids))})`);
+    if (sp1.length !== 2 || m1.shadowRoot.querySelectorAll(".tile").length !== 4) fail(`machines spark: 2 mini-curves expected (tiles A, B), not on C (no spark) nor D (binary); got ${sp1.length}`);
+    m1.remove();
+    calls.length = 0;
+    const m2 = await drawM([{ label: "A", entity: "sensor.t1", spark: 6 }, { label: "B", entity: "sensor.t2", spark: 48 }], mkM((m) => Object.fromEntries(m.entity_ids.map((id) => [id, hist(10, (i) => i)]))));
+    if (calls.length !== 2) fail(`machines spark: 2 durations = 2 calls, got ${calls.length}`);
+    m2.remove();
+    // stable entity (one point): flat line ; hostile: 60,000 points bounded ; failure: no request burst
+    const m3 = await drawM([{ label: "A", entity: "sensor.t1", spark: 24 }], mkM(() => ({ "sensor.t1": [{ s: "21", lu: (Date.now() - 80000000) / 1000 }] })));
+    const d3 = m3.shadowRoot.querySelector("svg.spk path:not(.sa)"); if (!d3 || (d3.getAttribute("d").match(/[ML]/g) || []).length < 2) fail("machines spark: a stable entity (one point) must draw a flat line");
+    m3.remove();
+    const bigS = Array.from({ length: 60000 }, (_, i) => ({ s: i % 5 ? String(i % 40) : "unavailable", lu: (Date.now() - 86400000 + i * 1440) / 1000 }));
+    const m4 = await drawM([{ label: "A", entity: "sensor.t1", spark: 24 }], mkM(() => ({ "sensor.t1": bigS })), 150);
+    const d4 = m4.shadowRoot.querySelector("svg.spk path:not(.sa)"); if (!d4 || (d4.getAttribute("d").match(/[ML]/g) || []).length > 49) fail("machines spark: 60,000 points must be reduced to 48 at most");
+    m4.remove();
+    calls.length = 0;
+    const badM = mkM(() => { throw new Error("boom"); });
+    const m5 = await drawM([{ label: "A", entity: "sensor.t1", spark: 24 }, { label: "X", entity: "x\"><b>", spark: 24 }], badM);
+    for (let i = 0; i < 40; i++) { m5.hass = { ...badM }; await wait(4); }
+    if (calls.length > 1) fail(`machines spark: ${calls.length} requests after a failure (retries on every hass update)`);
+    if (m5.shadowRoot.querySelectorAll("svg.spk").length || !m5.shadowRoot.querySelector("div.spk")) fail("machines spark: after a failure the tile must keep an empty placeholder, no curve");
+    if (calls[0] && calls[0].entity_ids.some((x) => /[<>"]/.test(x))) fail("machines spark: a malformed entity id was sent to the server");
+    m5.remove(); }
+  // 5l. Elements that are attached, or given `hass`, BEFORE setConfig (the demo page and some editors do) must not throw or reject.
+  { const before = window.__errors.length;
+    for (const tag of ["sf-trend-card", "sf-timeline-card", "sf-machines-card", "sf-health-card", "sf-assistant-card", "sf-launcher-card"]) {
+      const el = document.createElement(tag); document.body.appendChild(el); el.hass = { ...HASS(base, "fr"), callWS: async () => ({}) };
+      await wait(30); try { el.setConfig(FULL[tag]); } catch (e) { fail(`${tag}: setConfig after hass threw (${e.message})`); } await wait(60); el.remove(); }
+    if (window.__errors.length > before) fail(`config-less start: ${window.__errors.slice(before).join(" | ")}`); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
-  for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);
+  for (const e of window.__errors) fail(`JavaScript error: ${e}`);
   } catch (e) { fail(`the test crashed: ${e && e.stack || e}`); }
   finally {
   const out = document.createElement("pre"); out.id = "result";
