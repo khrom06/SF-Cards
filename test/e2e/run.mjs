@@ -61,6 +61,8 @@ async function main() {
 
   // 1. Rendu des 16 cartes sur un vrai HA, puis rafale d'états pendant 5 s.
   await page.goto(HA + "/e2e-test/e2e", { waitUntil: "domcontentloaded" }); await sleep(6000); await alive("chargement du dashboard");
+  // Le fichier des cartes peut arriver tard sur un serveur CI lent : on attend (40 s au plus) que la dernière carte soit définie avant de compter.
+  await page.waitForFunction((t) => t.every((x) => customElements.get(x)), tags, { timeout: 40000 }).catch(() => {});
   const defined = await page.evaluate((t) => t.filter((x) => customElements.get(x)), tags);
   if (defined.length !== tags.length) fails.push(`cartes non enregistrées : ${tags.filter((x) => !defined.includes(x)).join(", ")}`);
   log("cartes enregistrées :", defined.length + "/" + tags.length);
