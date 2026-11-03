@@ -1,7 +1,13 @@
 name: E2E on a real Home Assistant
-# Manuel pour l'instant (workflow_dispatch) : démarre un vrai Home Assistant en conteneur et pilote son frontend avec Playwright.
-# Détecte les gels et erreurs que les tests simulés (test/run.sh) ne peuvent pas voir. À passer en automatique une fois éprouvé.
+# Démarre un vrai Home Assistant en conteneur et pilote son frontend avec Playwright (éprouvé le 2026-11-03 : vert sur la version corrigée,
+# rouge « GEL » sur v1.10.0). Détecte les gels et erreurs que les tests simulés (test/run.sh) ne peuvent pas voir.
+# Automatique à chaque push / pull request qui touche les cartes ou les tests ; lançable à la main (version de HA, version de SF-Cards au choix).
 on:
+  push:
+    branches: [main]
+    paths: ["dist/**", "test/**", ".github/workflows/ha-e2e.yml"]
+  pull_request:
+    paths: ["dist/**", "test/**", ".github/workflows/ha-e2e.yml"]
   workflow_dispatch:
     inputs:
       ha_version:
@@ -10,6 +16,9 @@ on:
       sf_ref:
         description: "Version de SF-Cards à tester (tag ou commit, ex. v1.10.0). Vide = dist/sf-cards.js du commit courant. Sert à vérifier que le test détecte un ancien bug."
         default: ""
+concurrency:
+  group: ha-e2e-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   e2e:
     runs-on: ubuntu-latest
@@ -46,7 +55,7 @@ jobs:
                   state: "19.0"
           YAML
       - name: Démarrer Home Assistant
-        run: docker run -d --name ha -p 8123:8123 -v "$PWD/ha-config:/config" "ghcr.io/home-assistant/home-assistant:${{ inputs.ha_version }}"
+        run: docker run -d --name ha -p 8123:8123 -v "$PWD/ha-config:/config" "ghcr.io/home-assistant/home-assistant:${{ inputs.ha_version || 'stable' }}"
       - name: Installer Playwright
         run: |
           npm init -y >/dev/null
