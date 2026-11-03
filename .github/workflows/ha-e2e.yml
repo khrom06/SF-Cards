@@ -7,18 +7,29 @@ on:
       ha_version:
         description: "Image Home Assistant (ex. 2026.10, stable, beta)"
         default: "stable"
+      sf_ref:
+        description: "Version de SF-Cards à tester (tag ou commit, ex. v1.10.0). Vide = dist/sf-cards.js du commit courant. Sert à vérifier que le test détecte un ancien bug."
+        default: ""
 jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - name: Configuration Home Assistant de test
+        env:
+          SF_REF: ${{ inputs.sf_ref }}
         run: |
           mkdir -p ha-config/www
-          cp dist/sf-cards.js ha-config/www/sf-cards.js
+          if [ -n "$SF_REF" ]; then
+            git show "$SF_REF:dist/sf-cards.js" > ha-config/www/sf-cards.js
+            echo "SF-Cards testé : $SF_REF ($(git rev-parse --short "$SF_REF"))"
+          else
+            cp dist/sf-cards.js ha-config/www/sf-cards.js
+          fi
           cat > ha-config/configuration.yaml <<'YAML'
           default_config:
           template:
