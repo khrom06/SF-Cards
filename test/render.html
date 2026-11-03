@@ -11,7 +11,6 @@ window.addEventListener("error", (e) => window.__errors.push(`${e.message} @${(e
 window.addEventListener("unhandledrejection", (e) => window.__errors.push(`unhandled rejection: ${e.reason && e.reason.message || e.reason}`));
 window.__missing = new Set();
 window.__SF_TEST = true;   // exposes internal functions to this test only
-window.SF_EVENTS = false;   // event themes depend on the date: disabled for reproducible tests
 </script>
 <script src="../dist/sf-cards.js"></script>
 <script src="fixtures.js"></script>
@@ -656,22 +655,6 @@ __SF.SF_HOOK.tr = (lang, key) => {
       el.shadowRoot.querySelector('[data-act="lights_off"]').click(); await wait(10); if (!calls.includes("light.turn_off")) fail("sf-ns-card: the second press on 'Éteindre' must send light.turn_off");
       const ar = el.shadowRoot.querySelectorAll('[role="button"]'); if (ar.length < 4) fail("sf-ns-card: clickable elements without a button role"); el.remove(); }
     box.remove(); }
-  // 5b. Event themes: decoration present on the right day, absent if disabled, never in Night mode, never on the red alert.
-  { window.SF_EVENTS = true;
-    const evBox = document.createElement("div"); document.body.appendChild(evBox);
-    const mkEv = async (tag, cfg, ev) => { const el = document.createElement(tag); el.setConfig(cfg); evBox.appendChild(el); if (ev !== undefined) el._ev = () => ev; el.hass = HASS(base, "en"); await wait(60); return el; };
-    for (const ev of ["halloween", "noel"]) {
-      const el = await mkEv("sf-machines-card", FULL["sf-machines-card"], ev), r = el.shadowRoot;
-      if (!r.querySelector(".hud.ev-" + ev) || !r.querySelector(".evx")) fail(`theme ${ev}: decoration missing on sf-machines-card`);
-      const ns = await mkEv("sf-ns-card", { ...FULL["sf-ns-card"], mode_entity: undefined }, ev);
-      ns._mode = null; ns.mode = () => "Jour"; ns._render();
-      if (!ns.shadowRoot.querySelector(".evd")) fail(`theme ${ev}: decoration missing on sf-ns-card`);
-      ns.mode = () => "Nuit"; ns._key = null; ns._render();
-      if (ns.shadowRoot.querySelector(".evd")) fail(`theme ${ev}: decoration present in Night mode`);
-    }
-   const off = await mkEv("sf-machines-card", { ...FULL["sf-machines-card"], events: false }, undefined);
-    if (off.shadowRoot.querySelector(".evx") || off._ev() !== null) fail("events: false did not disable the theme");
-    window.SF_EVENTS = false; evBox.remove(); }
   // 5c. Regression 2026-11-03: the red marking of required fields must NEVER loop. `:scope > style` matched nothing inside a
   // ShadowRoot: every pass added a <style>, the observer re-triggered itself on its own mutation and the tab froze as soon as an
   // entity was picked (iPhone app and Chrome). After a form mutation, exactly ONE <style sf-red> must remain.

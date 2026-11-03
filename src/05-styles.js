@@ -23,18 +23,6 @@ const SF_CSS = `
   .c { position:absolute; width:14px; height:14px; border-color:${SF_C.cyan}; border-style:solid; opacity:.8; }
   .c.tl { top:6px; left:6px; border-width:2px 0 0 2px; } .c.tr { top:6px; right:6px; border-width:2px 2px 0 0; }
   .c.bl { bottom:6px; left:6px; border-width:0 0 2px 2px; } .c.br { bottom:6px; right:6px; border-width:0 2px 2px 0; }
-  .hud.ev-halloween:not(.alert) .c { border-color:#ff8a1f; }
-  .hud.ev-halloween:not(.alert) .head { color:#ff8a1f; text-shadow:0 0 8px rgba(255,138,31,.6); }
-  .hud.ev-noel:not(.alert) .c { border-color:#ff5a5f; }
-  .hud.ev-noel:not(.alert) .head { color:#ff5a5f; text-shadow:0 0 8px rgba(255,90,95,.55); }
-  .evx { position:absolute; pointer-events:none; z-index:2; }
-  .evx.web { top:0; left:0; width:44px; height:44px; opacity:.3; }
-  .evx.fig { right:10px; bottom:8px; width:26px; height:26px; opacity:.9; filter:drop-shadow(0 0 6px rgba(255,138,31,.6)); }
-  .evx.fig.noel { filter:drop-shadow(0 0 6px rgba(43,255,136,.5)); }
-  .evx svg { width:100%; height:100%; display:block; }
-  .evx.snow { top:-6px; width:4px; height:4px; border-radius:50%; background:#fff; opacity:.6; animation:evxfall linear infinite; }
-  @keyframes evxfall { from { transform:translateY(0) } to { transform:translateY(420px) } }
-  @media (prefers-reduced-motion: reduce) { .evx.snow { display:none } }
   .head { display:flex; align-items:center; gap:10px; margin-bottom:14px;
     font-family:Orbitron, sans-serif; font-weight:700; font-size:12px; letter-spacing:.22em;
     text-transform:uppercase; color:${SF_C.cyan}; text-shadow:0 0 8px rgba(0,229,255,.6); }

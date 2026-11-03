@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+### Removed
+- **Seasonal themes** (Halloween / Christmas decorations, `events: false`, `window.SF_EVENTS`, `?event=`): removed to keep the library focused. An `events:` option left in an existing configuration is ignored without any warning.
+
 ## [1.13.0]
 ### Changed
 - The library is now written as modules in `src/` and built into the single `dist/sf-cards.js` (byte-for-byte concatenation); `./test/run.sh` also checks 440 render snapshots (every card, language and theme) so that behaviour-preserving refactorings can be proven.

@@ -1,9 +1,3 @@
-// Event themes (Halloween 20/10→01/11, Christmas 01→26/12): discreet decoration on every frame. Disable: `events: false` on the card, or window.SF_EVENTS = false. Preview: ?event=halloween | noel
-const SF_EVSVG = {
-  pumpkin: `<svg viewBox="0 0 64 64"><ellipse cx="32" cy="38" rx="26" ry="22" fill="#ff8a1f"/><ellipse cx="19" cy="38" rx="11" ry="21" fill="#ffa84d" opacity=".55"/><ellipse cx="45" cy="38" rx="11" ry="21" fill="#e56f00" opacity=".55"/><rect x="29" y="10" width="6" height="11" rx="2" fill="#4caf50"/><path d="M17 33L26 33L21.5 41ZM38 33L47 33L42.5 41Z M19 47Q32 59 45 47L41 47L38 51L32 48L26 51L23 47Z" fill="#2a0e00"/></svg>`,
-  web: `<svg viewBox="0 0 40 40"><g stroke="#d9cdf2" stroke-width=".7" fill="none"><path d="M0 0L40 0M0 0L0 40M0 0L34 34M0 0L40 16M0 0L16 40"/><path d="M10 0Q9 9 0 10M20 0Q18 18 0 20M30 0Q27 27 0 30"/></g></svg>`,
-  tree: `<svg viewBox="0 0 64 64"><path d="M32 6L40 20L35 20L45 34L38 34L50 50L14 50L26 34L19 34L29 20L24 20Z" fill="#2bff88" opacity=".9"/><rect x="29" y="50" width="6" height="8" fill="#8d5a2b"/><path d="M32 1L33.6 5.4L38 5.6L34.6 8.4L35.8 12.6L32 10.2L28.2 12.6L29.4 8.4L26 5.6L30.4 5.4Z" fill="#ffd54f"/><circle cx="28" cy="30" r="2" fill="#ff5a5f"/><circle cx="37" cy="42" r="2" fill="#ffd54f"/><circle cx="26" cy="44" r="2" fill="#00e5ff"/></svg>`,
-};
 class SfBase extends HTMLElement {
   setConfig(config) {
     if (!config) throw new Error(`${this.localName} : config required`);
@@ -200,24 +194,8 @@ class SfBase extends HTMLElement {
     if (m < 1) return this.t("common.just_now"); if (m < 60) return this.t("common.n_min_ago", { n: m });
     const h = Math.round(m / 60); return h < 48 ? this.t("common.n_h_ago", { n: h }) : this.t("common.n_d_ago", { n: Math.round(h / 24) });
   }
-  _ev() {
-    try {
-      if (window.SF_EVENTS === false || (this._config && this._config.events === false)) return null;
-      const q = new URLSearchParams(location.search).get("event");
-      if (q) return q === "halloween" || q === "noel" ? q : null;
-      const d = new Date(), m = d.getMonth() + 1, j = d.getDate();
-      if ((m === 10 && j >= 20) || (m === 11 && j <= 1)) return "halloween";
-      if (m === 12 && j <= 26) return "noel";
-    } catch (e) { /* no theme */ }
-    return null;
-  }
-  _evDecor(ev) {
-    if (ev === "halloween") return `<div class="evx web">${SF_EVSVG.web}</div><div class="evx fig">${SF_EVSVG.pumpkin}</div>`;
-    return `<div class="evx fig noel">${SF_EVSVG.tree}</div>` + [14, 33, 52, 71, 88].map((x, i) => `<i class="evx snow" style="left:${x}%;animation-duration:${8 + (i * 5) % 7}s;animation-delay:-${(i * 3) % 8}s"></i>`).join("");
-  }
   frame(title, sub, body, extraClass = "") {
-    const ev = /\balert\b/.test(extraClass) ? null : this._ev();
-    return `<div class="hud ${ev ? "ev-" + ev + " " : ""}${this.esc(extraClass)}"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>${ev ? this._evDecor(ev) : ""}
+    return `<div class="hud ${this.esc(extraClass)}"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
       <div class="head"><span class="dot"></span>${title}<span class="sub">${sub || ""}</span></div>${body}</div>`;
   }
   // Timer of a button (e.g. towel dryer): { active, remaining (min) }. A refresh

@@ -12,7 +12,6 @@
   let seed = 12345; Math.random = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
 class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon);
 window.requestAnimationFrame = (f) => setTimeout(f, 0);
-window.SF_EVENTS = false;
 window.__errors = [];
 window.addEventListener("error", (e) => window.__errors.push(e.message));
 </script>

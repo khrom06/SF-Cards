@@ -123,9 +123,8 @@ class SfBridgeCard extends SfBase {
       return `<span class="member click ${this.esc(home ? "" : "away")}" data-e="${this.esc(p.entity)}"><span class="av" style="background:${this.esc(p.color || SF_C.cyan)};box-shadow:0 0 8px ${this.esc(p.color || SF_C.cyan)}">${this.esc(String(p.name || "?")[0])}</span>${this.esc(p.name)} · ${home ? this.t("common.home") : this.t("common.away")}</span>`;
     }).join("");
 
-    const ev = this._ev();
-    return `<div class="hud bridge${ev ? " ev-" + ev : ""}"><div class="floor"></div><div class="horizon"></div>
-      <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>${ev ? this._evDecor(ev) : ""}
+    return `<div class="hud bridge"><div class="floor"></div><div class="horizon"></div>
+      <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
       <div class="top">
         <div><div class="clock">${hh}:${mm}<span class="s">${String(now.getSeconds()).padStart(2, "0")}</span></div>
           <div class="date">${this.esc(date)}</div></div>

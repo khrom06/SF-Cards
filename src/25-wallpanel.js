@@ -5,11 +5,6 @@
  * but proportional: everything is in "vmin". To be placed alone in a "panel" view. All the configuration comes from the dashboard:
  * no default entity.
  */
-const SF_NS_EVENTS = {
-  halloween: { a: "#ff8a1f", bg: "radial-gradient(ellipse at 50% -10%, #3d1a06 0%, #1b0b2e 50%, #06020b 100%)" },
-  noel:      { a: "#ff5a5f", bg: "radial-gradient(ellipse at 50% -10%, #3a0f16 0%, #0b2218 52%, #030a07 100%)" },
-};
-SF_EVSVG.bat = `<svg viewBox="0 0 40 20"><path d="M2 8Q8 2 15 8Q18 4 20 9Q22 4 25 8Q32 2 38 8Q32 8 29 13Q26 9 23 13L20 17L17 13Q14 9 11 13Q8 8 2 8Z" fill="#b388ff"/></svg>`;
 const SF_NS_MODES = {
   Matin: { label: "Matin", greet: "Bonjour", a: "#ffb347", bg: "radial-gradient(ellipse at 50% -10%, #3a2347 0%, #14203a 48%, #050b16 100%)" },
   Jour:  { label: "Jour",  greet: "Énergie", a: "#00e5ff", bg: "radial-gradient(ellipse at 50% -10%, #0e2f52 0%, #07182c 52%, #03080f 100%)" },
@@ -40,17 +35,6 @@ const SF_NS_CSS = `
     font-family:'B612 Mono', ui-monospace, monospace; font-size:calc(var(--u)*2.6); background:var(--bg); transition:background .8s; }
   .ns.full { --H:var(--sf-ns-height, 100vh); }
   .ns::after { content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px); }
-  .evd { position:absolute; pointer-events:none; z-index:3; }
-  .evd.mid { left:50%; top:calc(var(--u)*1.2); width:calc(var(--u)*9); height:calc(var(--u)*9); transform:translateX(-50%); filter:drop-shadow(0 0 calc(var(--u)*1.6) rgba(255,138,31,.7)); animation:evflick 3.2s ease-in-out infinite; }
-  .evd.noel { filter:drop-shadow(0 0 calc(var(--u)*1.4) rgba(43,255,136,.5)); }
-  .evd svg { width:100%; height:100%; display:block; }
-  .evd.web { left:0; top:0; width:calc(var(--u)*13); height:calc(var(--u)*13); opacity:.32; }
-  .evd.bat { top:calc(var(--u)*3); left:-12%; width:calc(var(--u)*7); height:calc(var(--u)*3.5); animation:evfly 24s linear infinite; opacity:.85; }
-  .evd.snow { top:calc(var(--u)*-3); width:calc(var(--u)*1.5); height:calc(var(--u)*1.5); border-radius:50%; background:#fff; opacity:.7; animation:evfall linear infinite; }
-  @keyframes evflick { 0%,100% { opacity:1 } 45% { opacity:.8 } 60% { opacity:.95 } }
-  @keyframes evfly { 0% { left:-12%; top:calc(var(--u)*7) } 25% { top:calc(var(--u)*2) } 50% { top:calc(var(--u)*8) } 75% { top:calc(var(--u)*3) } 100% { left:112%; top:calc(var(--u)*6) } }
-  @keyframes evfall { from { transform:translateY(0) } to { transform:translateY(calc(var(--u)*108)) } }
-  @media (prefers-reduced-motion: reduce) { .evd { animation:none !important } .evd.snow, .evd.bat { display:none } }
   .ns.nuit { color:#b9a39e; }
   .ns.nuit .panel { background:rgba(255,255,255,.02); border-color:rgba(217,87,63,.22); box-shadow:none; }
   .hm, .big, .num, .nm { font-family:Orbitron, sans-serif; }
@@ -247,11 +231,6 @@ class SfNsCard extends SfBase {
     return h < 6 || h >= 22 ? "Nuit" : h < 9 ? "Matin" : h < 18 ? "Jour" : "Soir";
   }
 
-  _nsDecor(ev) {
-    if (ev === "halloween") return `<div class="evd web">${SF_EVSVG.web}</div><div class="evd mid">${SF_EVSVG.pumpkin}</div><div class="evd bat">${SF_EVSVG.bat}</div>`;
-    const flakes = [8, 19, 31, 44, 57, 69, 81, 92].map((x, i) => `<i class="evd snow" style="left:${x}%;animation-duration:${9 + (i * 7) % 8}s;animation-delay:-${(i * 3) % 9}s"></i>`).join("");
-    return `<div class="evd mid noel">${SF_EVSVG.tree}</div>${flakes}`;
-  }
   async _subFc() {
     if (this._fcUnsub || this._fcBusy || !this._hass || !this._hass.connection || !this._config || !this._config.weather) return;
     // Failure (weather entity without hourly forecast, unavailable…): HA calls `hass` several times per second, so we only retry once a minute.
@@ -538,7 +517,6 @@ class SfNsCard extends SfBase {
     // a single alert line (the most serious first) so the screen is never crowded; "+N" if there are others
     const al = this.alerts().sort((x, y) => (x.warn ? 1 : 0) - (y.warn ? 1 : 0)), a0 = al[0], more = al.length - 1;
     const alerts = a0 ? `<div class="alerts"><div class="alert tap ${a0.warn ? "warn" : ""}" data-info="${this.esc(a0.e)}">${this.ic(a0.i)}<span>${this.esc(a0.t)}</span>${more > 0 ? `<em>+${more}</em>` : ""}</div></div>` : "";
-    const EVT = mode === "Nuit" ? null : this._ev();
     const H = (n) => `calc(var(--u)*${n})`; let main = "", grid = "";
     if (mode === "Matin") { main = this.weatherBlock() + this.carsBlock() + this.pills(c.rooms) + this.shortcuts(); grid = "grid-template-columns:1fr 1fr;grid-template-rows:1.15fr 1fr"; }
     else if (mode === "Jour") { const e = this.energyBlocks(); main = (e ? e.join("") : "") + this.pills(c.fridge, true); grid = `grid-template-columns:1.2fr 1fr;grid-template-rows:1fr ${H(12.5)}`;
@@ -551,7 +529,7 @@ class SfNsCard extends SfBase {
       .shead ha-icon{--mdc-icon-size:calc(var(--u)*5)} .shead .r{margin-left:auto;font-family:'B612 Mono',monospace;font-weight:400;font-size:calc(var(--u)*2.6);letter-spacing:.04em;text-transform:none;color:#9fc3d9}
       .shead .x{width:calc(var(--u)*8);height:calc(var(--u)*8);display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgba(255,255,255,.2);color:#fff}
       .btn.big ha-icon{--mdc-icon-size:calc(var(--u)*11)} .btn.big{font-size:calc(var(--u)*2.8)} .nrow{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:calc(var(--u)*1.7);min-height:0} .nrow>.panel{min-height:0}</style>
-      <div class="ns ${mode.toLowerCase()}${this._kiosk ? " full" : ""}${a0 ? " tight" : ""}" style="--a:${EVT ? SF_NS_EVENTS[EVT].a : M.a};--bg:${EVT ? SF_NS_EVENTS[EVT].bg : M.bg}">${EVT ? this._nsDecor(EVT) : ""}${this.hero(mode)}${alerts}<div class="main" style="${grid}">${main}</div>${mode === "Nuit" ? "" : this.dock()}${this.popup()}</div>`;
+      <div class="ns ${mode.toLowerCase()}${this._kiosk ? " full" : ""}${a0 ? " tight" : ""}" style="--a:${M.a};--bg:${M.bg}">${this.hero(mode)}${alerts}<div class="main" style="${grid}">${main}</div>${mode === "Nuit" ? "" : this.dock()}${this.popup()}</div>`;
     // no rewrite if nothing changed (otherwise animations and long presses would be cut); the time is excluded from the comparison
     const key = html.replace(/<div class="hm">[^<]*<\/div>/, "").replace(/left:[\d.]+%/, "");
     if (key === this._key) { this._tick(); return; }

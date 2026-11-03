@@ -42,7 +42,6 @@ customElements.define("ha-icon",FakeIcon);
 <a href="https://github.com/khrom06/SF-Cards" target="_blank" rel="noopener">GitHub</a>
 <label>Language <select id="lang"></select></label>
 <button id="theme">Light / dark</button>
-<button id="evb">Seasonal theme: auto</button>
 </div></header>
 <main id="gallery"></main>
 <footer>MIT licence · fonts under SIL OFL · icons: Material Design Icons (Apache 2.0, demo only). Designed and written by Claude (Anthropic).</footer>
@@ -133,15 +132,12 @@ nsSec.innerHTML = `<h2>sf-ns-card · wall panel 480×480 (NSPanel Pro and simila
 <div><div class="modes" id="modes"></div><p class="note">The card follows the time of day: <b>morning</b> (weather, 12 h rain chart, vehicles), <b>day</b> (solar orb, consumption, charger, grid price), <b>evening</b> (ambience tiles, today's energy and cost) and <b>night</b> (all-clear sentinel). Real panels switch automatically, or from an <code>input_select</code>.</p></div></div>`;
 gal.prepend(nsSec);
 let nsMode = "Jour"; const nsif = document.getElementById("nsif");
-const nsLoad = () => { nsif.src = "ns.html?mode=" + nsMode + "&lang=" + sel.value + (new URLSearchParams(location.search).get("event") ? "&event=" + new URLSearchParams(location.search).get("event") : ""); };
+const nsLoad = () => { nsif.src = "ns.html?mode=" + nsMode + "&lang=" + sel.value; };
 ["Matin", "Jour", "Soir", "Nuit"].forEach((m) => { const b = document.createElement("button"); b.textContent = { Matin: "Morning", Jour: "Day", Soir: "Evening", Nuit: "Night" }[m];
   b.onclick = () => { nsMode = m; [...document.querySelectorAll("#modes button")].forEach((x) => x.classList.toggle("on", x === b)); nsLoad(); }; if (m === nsMode) b.classList.add("on"); document.getElementById("modes").appendChild(b); });
 sel.addEventListener("change", nsLoad); nsLoad();
 const apply = () => { document.documentElement.dir = sel.value === "ar" ? "rtl" : "ltr"; tick();
   els.forEach(([el, cfg]) => { try { el.setConfig({ ...cfg, theme: theme === "light" ? "light" : undefined }); } catch (e) {} el.hass = HASS(base, sel.value); }); };
-const EVS = [["", "auto"], ["halloween", "Halloween"], ["noel", "Christmas"], ["none", "off"]]; let evi = 0;
-document.getElementById("evb").onclick = () => { evi = (evi + 1) % EVS.length; const u = new URL(location.href); if (EVS[evi][0]) u.searchParams.set("event", EVS[evi][0]); else u.searchParams.delete("event"); location.href = u.toString(); };
-{ const cur = new URLSearchParams(location.search).get("event") || ""; evi = Math.max(0, EVS.findIndex((x) => x[0] === cur)); document.getElementById("evb").textContent = "Seasonal theme: " + EVS[evi][1]; }
 sel.onchange = apply; document.getElementById("theme").onclick = () => { theme = theme === "dark" ? "light" : "dark"; document.body.style.background = theme === "light" ? "#e9f0f6" : ""; apply(); };
 apply(); setInterval(() => { tick(); els.forEach(([el]) => { el.hass = HASS(base, sel.value); }); }, 2500);
 </script>
