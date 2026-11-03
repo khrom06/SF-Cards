@@ -38,27 +38,25 @@ class SfTimelineCard extends SfBase {
   }
   _hours() { const h = Number(this._config.hours); return isFinite(h) && h >= 1 ? Math.min(720, Math.round(h)) : 24; }
   _keyNow() { return `${this._hours()}|${this._ents().map((e) => e.entity).join(",")}`; }
-  setConfig(config) { super.setConfig(config); this._data = null; this._at = 0; this._failAt = 0; this._lastHtml = null; this._load(); }
+  get _ld() { return this.__ld || (this.__ld = new SfLoader(this)); }
+  get _data() { const d = this._ld.data; return d ? { key: d.key, error: d.error, ev: d.value || [] } : null; }
+  setConfig(config) { super.setConfig(config); this._ld.reset(); this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); }
   async _load() {
     if (!this._config) return;   // attached / given `hass` before setConfig: nothing to load yet
     const ents = this._ents();
-    if (!ents.length || !this._hass || !this._hass.callWS || this._busy) return;
-    const key = this._keyNow(), now = Date.now();
-    if (this._data && !this._data.error && this._data.key === key && now - this._at < 60000) return;
-    if (this._failAt && this._failKey === key && now - this._failAt < 60000) return;
-    this._busy = true;
-    try {
+    if (!ents.length || !this._hass || !this._hass.callWS) return;
+    await this._ld.run(this._keyNow(), async () => {
+      const now = Date.now();
       const r = await this._hass.callWS({ type: "logbook/get_events", start_time: new Date(now - this._hours() * 3600000).toISOString(), end_time: new Date(now).toISOString(), entity_ids: ents.map((e) => e.entity) });
       const ev = (Array.isArray(r) ? r : []).slice(-SF_TL_RAW_MAX).map((x) => {
         const w = x && x.when, t = typeof w === "number" ? (w > 1e12 ? w : w * 1000) : Date.parse(w || "");
         return x && typeof x.entity_id === "string" && isFinite(t) ? { t, id: x.entity_id, state: x.state === undefined || x.state === null ? "" : String(x.state), msg: typeof x.message === "string" ? x.message : "" } : null;
       }).filter(Boolean).sort((a, b) => b.t - a.t);
-      this._data = { key, ev }; this._at = Date.now(); this._failAt = 0;
-    } catch (e) { this._failAt = Date.now(); this._failKey = key; this._data = { key, ev: [], error: true }; this._at = Date.now(); }
-    this._busy = false; this._lastHtml = null; this._schedule();
+      return ev;
+    }, { ttl: 60000, fallback: () => [] });
   }
   // Sentence, icon and tone of an event according to the entity (domain, device_class); the tone colours the row: bad (red), warn (amber), ok (cyan), dim.
   _what(ev, cfg) {
@@ -107,7 +105,7 @@ class SfTimelineCard extends SfBase {
     if (c.group !== false) { const g = []; for (const e of rows) { const p = g[g.length - 1]; if (p && p.id === e.id && p.state === e.state) p.n++; else g.push({ ...e, n: 1 }); } rows = g; }
     rows = rows.slice(0, limit);
     let body;
-    if (!d || !rows.length) body = `<div class="empty">${this.esc(this.t(d && !this._busy ? "Aucun événement" : "Chargement…"))}</div>`;
+    if (!d || !rows.length) body = `<div class="empty">${this.esc(this.t(d && !this._ld.busy ? "Aucun événement" : "Chargement…"))}</div>`;
     else {
       const today = new Date().toDateString(), yest = new Date(Date.now() - 86400000).toDateString(); let curDay = "", html = "";
       for (const e of rows) {

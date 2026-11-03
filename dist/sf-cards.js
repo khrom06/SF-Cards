@@ -1081,6 +1081,34 @@ class SfBase extends HTMLElement {
   getCardSize() { return 4; }
 }
 
+/* ================================================================== LOADER */
+/*
+ * Guarded asynchronous loader shared by the cards that fetch data from Home Assistant (trend, timeline, mini-curves). One per data source:
+ *  - never two runs at a time (`busy`);
+ *  - a result stays valid for `ttl` ms for the same `key` (a different key loads at once, `force` always loads);
+ *  - after a failure the same key is not retried before `retry` ms (HA calls `hass` several times per second: without this, an error
+ *    would trigger a request on every call);
+ *  - when a run ends, the owner card is re-rendered.
+ * `data` is { key, value } after a success and { key, error: true, value: fallback() } after a failure.
+ */
+class SfLoader {
+  constructor(owner, { ttl = 120000, retry = 60000 } = {}) { this.owner = owner; this.ttl = ttl; this.retry = retry; this.busy = false; this.reset(); }
+  reset() { this.data = null; this.at = 0; this.failAt = 0; this.failKey = null; }
+  // Returns true when a run completed (so that the owner can react, e.g. reload if its key changed meanwhile), false when it was skipped.
+  async run(key, fn, { ttl, force, fallback } = {}) {
+    if (this.busy) return false;
+    const now = Date.now();
+    if (!force && this.data && !this.data.error && this.data.key === key && now - this.at < (ttl ?? this.ttl)) return false;
+    if (this.failAt && this.failKey === key && now - this.failAt < this.retry) return false;
+    this.busy = true;
+    try { this.data = { key, value: await fn() }; this.failAt = 0; }
+    catch (e) { this.failAt = Date.now(); this.failKey = key; this.data = { key, error: true, value: fallback ? fallback() : undefined }; }
+    this.at = Date.now(); this.busy = false;
+    this.owner._lastHtml = null; this.owner._schedule();
+    return true;
+  }
+}
+
 /* ------------------------------------------------------------------ ALERTE */
 /*
  * type: custom:sf-alert-card
@@ -1483,7 +1511,9 @@ class SfMachinesCard extends SfBase {
   defaults() { return { tiles: [] }; }
   set hass(h) { this._hass = h; this._loadSpark(); this._schedule(); }
   get hass() { return this._hass; }
-  setConfig(config) { super.setConfig(config); this._sp = null; this._spAt = 0; this._spFail = 0; this._loadSpark(); }
+  get _ld() { return this.__ld || (this.__ld = new SfLoader(this)); }
+  get _sp() { const d = this._ld.data; return d ? { key: d.key, error: d.error, pts: d.value || {} } : null; }
+  setConfig(config) { super.setConfig(config); this._ld.reset(); this._loadSpark(); }
   // Mini-curve of a tile (`spark: true` = 24 h, or a number of hours, 1 to 168): history of the entities loaded together (one request per distinct duration,
   // 3 at most), refreshed at most every 5 minutes; after a failure, at most one retry per minute (hass is called several times per second).
   _sparkTiles() {
@@ -1498,12 +1528,9 @@ class SfMachinesCard extends SfBase {
   async _loadSpark() {
     if (!this._config) return;   // attached / given `hass` before setConfig: nothing to load yet
     const st = this._sparkTiles();
-    if (!st.length || !this._hass || !this._hass.callWS || this._spBusy) return;
-    const key = st.map((x) => `${x.id}@${x.h}`).join(","), now = Date.now();
-    if (this._sp && !this._sp.error && this._sp.key === key && now - this._spAt < 300000) return;
-    if (this._spFail && this._spKey === key && now - this._spFail < 60000) return;
-    this._spBusy = true;
-    try {
+    if (!st.length || !this._hass || !this._hass.callWS) return;
+    await this._ld.run(st.map((x) => `${x.id}@${x.h}`).join(","), async () => {
+      const now = Date.now();
       const groups = new Map(); for (const x of st) { if (!groups.has(x.h)) groups.set(x.h, new Set()); groups.get(x.h).add(x.id); }
       const pts = {};
       for (const [h, ids] of [...groups].slice(0, 3)) {
@@ -1516,9 +1543,8 @@ class SfMachinesCard extends SfBase {
           pts[`${id}@${h}`] = { t0, t1: now, p: sfTrendReduce(raw, t0, now, 48) };
         }
       }
-      this._sp = { key, pts }; this._spAt = Date.now(); this._spFail = 0;
-    } catch (e) { this._spFail = Date.now(); this._spKey = key; this._sp = { key, pts: {}, error: true }; this._spAt = Date.now(); }
-    this._spBusy = false; this._lastHtml = null; this._schedule();
+      return pts;
+    }, { ttl: 300000, fallback: () => ({}) });
   }
   _spark(t, col) {
     const h = t.spark === true ? 24 : Math.min(168, Math.round(Number(t.spark))), d = this._sp && this._sp.pts[`${t.entity}@${h}`];
@@ -3501,7 +3527,10 @@ class SfTrendCard extends SfBase {
     for (const k in m) { if (!Object.prototype.hasOwnProperty.call(m, k)) continue; if (++n > 5000) break; const t = Date.parse(k), v = Number(m[k]); if (isFinite(t) && isFinite(v) && t >= d.t0 && t <= d.t1) out.push([t, v]); }
     return sfTrendReduce(out.sort((x, y) => x[0] - y[0]), d.t0, d.t1);
   }
-  setConfig(config) { super.setConfig(config); this._h = null; this._data = null; this._at = 0; this._failAt = 0; this._lastHtml = null; this._load(); }
+  get _ld() { return this.__ld || (this.__ld = new SfLoader(this)); }
+  // the loaded data in the shape the renderer uses: { key, error, t0, t1, pts }
+  get _data() { const d = this._ld.data; return d ? { key: d.key, error: d.error, ...d.value } : null; }
+  setConfig(config) { super.setConfig(config); this._h = null; this._ld.reset(); this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); }
@@ -3510,40 +3539,37 @@ class SfTrendCard extends SfBase {
   async _load(force) {
     if (!this._config) return;   // attached / given `hass` before setConfig: nothing to load yet
     const ser = this._series();
-    if (!ser.length || !this._hass || !this._hass.callWS || this._busy) return;
-    const key = this._keyNow(), hrs = this._hours(), now = Date.now(), W = this._win(now);
-    if (!force && this._data && !this._data.error && this._data.key === key && now - this._at < (hrs > 48 ? 600000 : 120000)) return;
-    if (this._failAt && this._failKey === key && now - this._failAt < 60000) return;
-    this._busy = true;
-    try {
-      const { t0, t1, tEnd } = W, ids = [...new Set(ser.filter((s) => !this._attr(s)).map((s) => s.entity))], out = {}, stat = {};
-      const ISO = (t) => new Date(t).toISOString();
-      if (hrs > 48 && !W.today && ids.length) {
-        try {
-          const r = await this._hass.callWS({ type: "recorder/statistics_during_period", start_time: ISO(t0), end_time: ISO(tEnd), statistic_ids: ids, period: hrs > 336 ? "day" : "hour", types: ["mean"] });
-          for (const id of ids) { out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((q) => [typeof q.start === "number" ? q.start : Date.parse(q.start), Number(q.mean)]).filter((p) => isFinite(p[0]) && isFinite(p[1])); stat[id] = out[id].length > 0; }
-        } catch (e) { /* fall back to the history below */ }
-      }
-      const missing = ids.filter((id) => !out[id] || !out[id].length);
-      if (missing.length) {
-        const r = await this._hass.callWS({ type: "history/history_during_period", start_time: ISO(t0), end_time: ISO(tEnd), entity_ids: missing,
-          include_start_time_state: true, significant_changes_only: false, minimal_response: true, no_attributes: true });
-        for (const id of missing) out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((x) => {
-          const t = typeof x.lu === "number" ? x.lu * 1000 : typeof x.lc === "number" ? x.lc * 1000 : Date.parse(x.last_updated || x.last_changed || "");
-          return [t, parseFloat(x.s ?? x.state)];
-        }).filter((p) => isFinite(p[0]) && isFinite(p[1]));
-      }
-      // A stable series has only one point (its state at the start of the window): its last value is extended up to now to draw a line
-      // (valid for the history, where the state persists; not for hourly statistics). A point before the start is brought back to the start.
-      const pts = {}; for (const id of ids) {
-        const raw = (out[id] || []).sort((a, b) => a[0] - b[0]).map(([t, v]) => [Math.max(t, t0), v]);
-        if (raw.length && !stat[id] && raw[raw.length - 1][0] < tEnd) raw.push([tEnd, raw[raw.length - 1][1]]);
-        pts[id] = sfTrendReduce(raw, t0, t1);
-      }
-      this._data = { key, t0, t1, pts }; this._at = Date.now(); this._failAt = 0;
-    } catch (e) { this._failAt = Date.now(); this._failKey = key; this._data = { key, t0: W.t0, t1: W.t1, pts: {}, error: true }; this._at = Date.now(); }
-    this._busy = false; this._lastHtml = null; this._schedule();
-    if (this._keyNow() !== key) this._load();   // the range changed while loading
+    if (!ser.length || !this._hass || !this._hass.callWS) return;
+    const key = this._keyNow(), hrs = this._hours(), W = this._win(Date.now());
+    const ran = await this._ld.run(key, () => this._fetch(ser, hrs, W), { ttl: hrs > 48 ? 600000 : 120000, force, fallback: () => ({ t0: W.t0, t1: W.t1, pts: {} }) });
+    if (ran && this._keyNow() !== key) this._load();   // the range changed while loading
+  }
+  async _fetch(ser, hrs, W) {
+    const { t0, t1, tEnd } = W, ids = [...new Set(ser.filter((s) => !this._attr(s)).map((s) => s.entity))], out = {}, stat = {};
+    const ISO = (t) => new Date(t).toISOString();
+    if (hrs > 48 && !W.today && ids.length) {
+      try {
+        const r = await this._hass.callWS({ type: "recorder/statistics_during_period", start_time: ISO(t0), end_time: ISO(tEnd), statistic_ids: ids, period: hrs > 336 ? "day" : "hour", types: ["mean"] });
+        for (const id of ids) { out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((q) => [typeof q.start === "number" ? q.start : Date.parse(q.start), Number(q.mean)]).filter((p) => isFinite(p[0]) && isFinite(p[1])); stat[id] = out[id].length > 0; }
+      } catch (e) { /* fall back to the history below */ }
+    }
+    const missing = ids.filter((id) => !out[id] || !out[id].length);
+    if (missing.length) {
+      const r = await this._hass.callWS({ type: "history/history_during_period", start_time: ISO(t0), end_time: ISO(tEnd), entity_ids: missing,
+        include_start_time_state: true, significant_changes_only: false, minimal_response: true, no_attributes: true });
+      for (const id of missing) out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((x) => {
+        const t = typeof x.lu === "number" ? x.lu * 1000 : typeof x.lc === "number" ? x.lc * 1000 : Date.parse(x.last_updated || x.last_changed || "");
+        return [t, parseFloat(x.s ?? x.state)];
+      }).filter((p) => isFinite(p[0]) && isFinite(p[1]));
+    }
+    // A stable series has only one point (its state at the start of the window): its last value is extended up to now to draw a line
+    // (valid for the history, where the state persists; not for hourly statistics). A point before the start is brought back to the start.
+    const pts = {}; for (const id of ids) {
+      const raw = (out[id] || []).sort((a, b) => a[0] - b[0]).map(([t, v]) => [Math.max(t, t0), v]);
+      if (raw.length && !stat[id] && raw[raw.length - 1][0] < tEnd) raw.push([tEnd, raw[raw.length - 1][1]]);
+      pts[id] = sfTrendReduce(raw, t0, t1);
+    }
+    return { t0, t1, pts };
   }
   // Colour of each series: the one from the config, otherwise the first palette hue not already taken by a series (no duplicates).
   _cols(ser) {
@@ -3587,7 +3613,7 @@ class SfTrendCard extends SfBase {
     const btn = this._ranges().map((r) => `<button class="rg ${r === this._range() ? "on" : ""}" data-rg="${this.esc(r)}">${this.esc(this._rangeLabel(r))}</button>`).join("");
     const any = d && ser.some((s, i) => this._pts(i, d).length);
     let body;
-    if (!d || !any) body = `<div class="empty">${this.esc(this.t(d && !this._busy ? "Aucune donnée" : "Chargement…"))}</div>`;
+    if (!d || !any) body = `<div class="empty">${this.esc(this.t(d && !this._ld.busy ? "Aucune donnée" : "Chargement…"))}</div>`;
     else {
       this._plots = [];
       const groups = comb ? [ser.map((s, i) => i)] : ser.map((s, i) => [i]);
@@ -3638,7 +3664,7 @@ class SfTrendCard extends SfBase {
     const root = this.shadowRoot;
     root.querySelectorAll("[data-rg]").forEach((b) => b.addEventListener("click", () => {
       const h = b.dataset.rg === "today" ? "today" : Number(b.dataset.rg); if (h !== "today" && !(h >= 1)) return; if (h === this._range()) return;
-      this._h = h; this._data = null; this._failAt = 0; this._lastHtml = null; this._schedule(); this._load(true);
+      this._h = h; this._ld.reset(); this._lastHtml = null; this._schedule(); this._load(true);
     }));
     root.querySelectorAll(".plot").forEach((el) => {
       const P = this._plots && this._plots[Number(el.dataset.p)]; if (!P) return;
@@ -3701,27 +3727,25 @@ class SfTimelineCard extends SfBase {
   }
   _hours() { const h = Number(this._config.hours); return isFinite(h) && h >= 1 ? Math.min(720, Math.round(h)) : 24; }
   _keyNow() { return `${this._hours()}|${this._ents().map((e) => e.entity).join(",")}`; }
-  setConfig(config) { super.setConfig(config); this._data = null; this._at = 0; this._failAt = 0; this._lastHtml = null; this._load(); }
+  get _ld() { return this.__ld || (this.__ld = new SfLoader(this)); }
+  get _data() { const d = this._ld.data; return d ? { key: d.key, error: d.error, ev: d.value || [] } : null; }
+  setConfig(config) { super.setConfig(config); this._ld.reset(); this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); }
   async _load() {
     if (!this._config) return;   // attached / given `hass` before setConfig: nothing to load yet
     const ents = this._ents();
-    if (!ents.length || !this._hass || !this._hass.callWS || this._busy) return;
-    const key = this._keyNow(), now = Date.now();
-    if (this._data && !this._data.error && this._data.key === key && now - this._at < 60000) return;
-    if (this._failAt && this._failKey === key && now - this._failAt < 60000) return;
-    this._busy = true;
-    try {
+    if (!ents.length || !this._hass || !this._hass.callWS) return;
+    await this._ld.run(this._keyNow(), async () => {
+      const now = Date.now();
       const r = await this._hass.callWS({ type: "logbook/get_events", start_time: new Date(now - this._hours() * 3600000).toISOString(), end_time: new Date(now).toISOString(), entity_ids: ents.map((e) => e.entity) });
       const ev = (Array.isArray(r) ? r : []).slice(-SF_TL_RAW_MAX).map((x) => {
         const w = x && x.when, t = typeof w === "number" ? (w > 1e12 ? w : w * 1000) : Date.parse(w || "");
         return x && typeof x.entity_id === "string" && isFinite(t) ? { t, id: x.entity_id, state: x.state === undefined || x.state === null ? "" : String(x.state), msg: typeof x.message === "string" ? x.message : "" } : null;
       }).filter(Boolean).sort((a, b) => b.t - a.t);
-      this._data = { key, ev }; this._at = Date.now(); this._failAt = 0;
-    } catch (e) { this._failAt = Date.now(); this._failKey = key; this._data = { key, ev: [], error: true }; this._at = Date.now(); }
-    this._busy = false; this._lastHtml = null; this._schedule();
+      return ev;
+    }, { ttl: 60000, fallback: () => [] });
   }
   // Sentence, icon and tone of an event according to the entity (domain, device_class); the tone colours the row: bad (red), warn (amber), ok (cyan), dim.
   _what(ev, cfg) {
@@ -3770,7 +3794,7 @@ class SfTimelineCard extends SfBase {
     if (c.group !== false) { const g = []; for (const e of rows) { const p = g[g.length - 1]; if (p && p.id === e.id && p.state === e.state) p.n++; else g.push({ ...e, n: 1 }); } rows = g; }
     rows = rows.slice(0, limit);
     let body;
-    if (!d || !rows.length) body = `<div class="empty">${this.esc(this.t(d && !this._busy ? "Aucun événement" : "Chargement…"))}</div>`;
+    if (!d || !rows.length) body = `<div class="empty">${this.esc(this.t(d && !this._ld.busy ? "Aucun événement" : "Chargement…"))}</div>`;
     else {
       const today = new Date().toDateString(), yest = new Date(Date.now() - 86400000).toDateString(); let curDay = "", html = "";
       for (const e of rows) {
@@ -4581,5 +4605,5 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
 console.info("%c SF-CARDS %c v1.12.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
 
 // Reserved access for automated tests (the file is encapsulated: its functions are no longer global).
-if (window.__SF_TEST) window.__SF = { SF_T, SF_FR2ID, SF_HOOK, sfGuess, sfAutofill, sfSafeUrl, sfNormConfig, SF_REQ, sfRedReq };
+if (window.__SF_TEST) window.__SF = { SF_T, SF_FR2ID, SF_HOOK, SfLoader, sfGuess, sfAutofill, sfSafeUrl, sfNormConfig, SF_REQ, sfRedReq };
 })();

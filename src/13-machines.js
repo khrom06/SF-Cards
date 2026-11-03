@@ -15,7 +15,9 @@ class SfMachinesCard extends SfBase {
   defaults() { return { tiles: [] }; }
   set hass(h) { this._hass = h; this._loadSpark(); this._schedule(); }
   get hass() { return this._hass; }
-  setConfig(config) { super.setConfig(config); this._sp = null; this._spAt = 0; this._spFail = 0; this._loadSpark(); }
+  get _ld() { return this.__ld || (this.__ld = new SfLoader(this)); }
+  get _sp() { const d = this._ld.data; return d ? { key: d.key, error: d.error, pts: d.value || {} } : null; }
+  setConfig(config) { super.setConfig(config); this._ld.reset(); this._loadSpark(); }
   // Mini-curve of a tile (`spark: true` = 24 h, or a number of hours, 1 to 168): history of the entities loaded together (one request per distinct duration,
   // 3 at most), refreshed at most every 5 minutes; after a failure, at most one retry per minute (hass is called several times per second).
   _sparkTiles() {
@@ -30,12 +32,9 @@ class SfMachinesCard extends SfBase {
   async _loadSpark() {
     if (!this._config) return;   // attached / given `hass` before setConfig: nothing to load yet
     const st = this._sparkTiles();
-    if (!st.length || !this._hass || !this._hass.callWS || this._spBusy) return;
-    const key = st.map((x) => `${x.id}@${x.h}`).join(","), now = Date.now();
-    if (this._sp && !this._sp.error && this._sp.key === key && now - this._spAt < 300000) return;
-    if (this._spFail && this._spKey === key && now - this._spFail < 60000) return;
-    this._spBusy = true;
-    try {
+    if (!st.length || !this._hass || !this._hass.callWS) return;
+    await this._ld.run(st.map((x) => `${x.id}@${x.h}`).join(","), async () => {
+      const now = Date.now();
       const groups = new Map(); for (const x of st) { if (!groups.has(x.h)) groups.set(x.h, new Set()); groups.get(x.h).add(x.id); }
       const pts = {};
       for (const [h, ids] of [...groups].slice(0, 3)) {
@@ -48,9 +47,8 @@ class SfMachinesCard extends SfBase {
           pts[`${id}@${h}`] = { t0, t1: now, p: sfTrendReduce(raw, t0, now, 48) };
         }
       }
-      this._sp = { key, pts }; this._spAt = Date.now(); this._spFail = 0;
-    } catch (e) { this._spFail = Date.now(); this._spKey = key; this._sp = { key, pts: {}, error: true }; this._spAt = Date.now(); }
-    this._spBusy = false; this._lastHtml = null; this._schedule();
+      return pts;
+    }, { ttl: 300000, fallback: () => ({}) });
   }
   _spark(t, col) {
     const h = t.spark === true ? 24 : Math.min(168, Math.round(Number(t.spark))), d = this._sp && this._sp.pts[`${t.entity}@${h}`];

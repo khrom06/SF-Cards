@@ -53,7 +53,10 @@ class SfTrendCard extends SfBase {
     for (const k in m) { if (!Object.prototype.hasOwnProperty.call(m, k)) continue; if (++n > 5000) break; const t = Date.parse(k), v = Number(m[k]); if (isFinite(t) && isFinite(v) && t >= d.t0 && t <= d.t1) out.push([t, v]); }
     return sfTrendReduce(out.sort((x, y) => x[0] - y[0]), d.t0, d.t1);
   }
-  setConfig(config) { super.setConfig(config); this._h = null; this._data = null; this._at = 0; this._failAt = 0; this._lastHtml = null; this._load(); }
+  get _ld() { return this.__ld || (this.__ld = new SfLoader(this)); }
+  // the loaded data in the shape the renderer uses: { key, error, t0, t1, pts }
+  get _data() { const d = this._ld.data; return d ? { key: d.key, error: d.error, ...d.value } : null; }
+  setConfig(config) { super.setConfig(config); this._h = null; this._ld.reset(); this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); }
@@ -62,40 +65,37 @@ class SfTrendCard extends SfBase {
   async _load(force) {
     if (!this._config) return;   // attached / given `hass` before setConfig: nothing to load yet
     const ser = this._series();
-    if (!ser.length || !this._hass || !this._hass.callWS || this._busy) return;
-    const key = this._keyNow(), hrs = this._hours(), now = Date.now(), W = this._win(now);
-    if (!force && this._data && !this._data.error && this._data.key === key && now - this._at < (hrs > 48 ? 600000 : 120000)) return;
-    if (this._failAt && this._failKey === key && now - this._failAt < 60000) return;
-    this._busy = true;
-    try {
-      const { t0, t1, tEnd } = W, ids = [...new Set(ser.filter((s) => !this._attr(s)).map((s) => s.entity))], out = {}, stat = {};
-      const ISO = (t) => new Date(t).toISOString();
-      if (hrs > 48 && !W.today && ids.length) {
-        try {
-          const r = await this._hass.callWS({ type: "recorder/statistics_during_period", start_time: ISO(t0), end_time: ISO(tEnd), statistic_ids: ids, period: hrs > 336 ? "day" : "hour", types: ["mean"] });
-          for (const id of ids) { out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((q) => [typeof q.start === "number" ? q.start : Date.parse(q.start), Number(q.mean)]).filter((p) => isFinite(p[0]) && isFinite(p[1])); stat[id] = out[id].length > 0; }
-        } catch (e) { /* fall back to the history below */ }
-      }
-      const missing = ids.filter((id) => !out[id] || !out[id].length);
-      if (missing.length) {
-        const r = await this._hass.callWS({ type: "history/history_during_period", start_time: ISO(t0), end_time: ISO(tEnd), entity_ids: missing,
-          include_start_time_state: true, significant_changes_only: false, minimal_response: true, no_attributes: true });
-        for (const id of missing) out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((x) => {
-          const t = typeof x.lu === "number" ? x.lu * 1000 : typeof x.lc === "number" ? x.lc * 1000 : Date.parse(x.last_updated || x.last_changed || "");
-          return [t, parseFloat(x.s ?? x.state)];
-        }).filter((p) => isFinite(p[0]) && isFinite(p[1]));
-      }
-      // A stable series has only one point (its state at the start of the window): its last value is extended up to now to draw a line
-      // (valid for the history, where the state persists; not for hourly statistics). A point before the start is brought back to the start.
-      const pts = {}; for (const id of ids) {
-        const raw = (out[id] || []).sort((a, b) => a[0] - b[0]).map(([t, v]) => [Math.max(t, t0), v]);
-        if (raw.length && !stat[id] && raw[raw.length - 1][0] < tEnd) raw.push([tEnd, raw[raw.length - 1][1]]);
-        pts[id] = sfTrendReduce(raw, t0, t1);
-      }
-      this._data = { key, t0, t1, pts }; this._at = Date.now(); this._failAt = 0;
-    } catch (e) { this._failAt = Date.now(); this._failKey = key; this._data = { key, t0: W.t0, t1: W.t1, pts: {}, error: true }; this._at = Date.now(); }
-    this._busy = false; this._lastHtml = null; this._schedule();
-    if (this._keyNow() !== key) this._load();   // the range changed while loading
+    if (!ser.length || !this._hass || !this._hass.callWS) return;
+    const key = this._keyNow(), hrs = this._hours(), W = this._win(Date.now());
+    const ran = await this._ld.run(key, () => this._fetch(ser, hrs, W), { ttl: hrs > 48 ? 600000 : 120000, force, fallback: () => ({ t0: W.t0, t1: W.t1, pts: {} }) });
+    if (ran && this._keyNow() !== key) this._load();   // the range changed while loading
+  }
+  async _fetch(ser, hrs, W) {
+    const { t0, t1, tEnd } = W, ids = [...new Set(ser.filter((s) => !this._attr(s)).map((s) => s.entity))], out = {}, stat = {};
+    const ISO = (t) => new Date(t).toISOString();
+    if (hrs > 48 && !W.today && ids.length) {
+      try {
+        const r = await this._hass.callWS({ type: "recorder/statistics_during_period", start_time: ISO(t0), end_time: ISO(tEnd), statistic_ids: ids, period: hrs > 336 ? "day" : "hour", types: ["mean"] });
+        for (const id of ids) { out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((q) => [typeof q.start === "number" ? q.start : Date.parse(q.start), Number(q.mean)]).filter((p) => isFinite(p[0]) && isFinite(p[1])); stat[id] = out[id].length > 0; }
+      } catch (e) { /* fall back to the history below */ }
+    }
+    const missing = ids.filter((id) => !out[id] || !out[id].length);
+    if (missing.length) {
+      const r = await this._hass.callWS({ type: "history/history_during_period", start_time: ISO(t0), end_time: ISO(tEnd), entity_ids: missing,
+        include_start_time_state: true, significant_changes_only: false, minimal_response: true, no_attributes: true });
+      for (const id of missing) out[id] = (r && Array.isArray(r[id]) ? r[id] : []).map((x) => {
+        const t = typeof x.lu === "number" ? x.lu * 1000 : typeof x.lc === "number" ? x.lc * 1000 : Date.parse(x.last_updated || x.last_changed || "");
+        return [t, parseFloat(x.s ?? x.state)];
+      }).filter((p) => isFinite(p[0]) && isFinite(p[1]));
+    }
+    // A stable series has only one point (its state at the start of the window): its last value is extended up to now to draw a line
+    // (valid for the history, where the state persists; not for hourly statistics). A point before the start is brought back to the start.
+    const pts = {}; for (const id of ids) {
+      const raw = (out[id] || []).sort((a, b) => a[0] - b[0]).map(([t, v]) => [Math.max(t, t0), v]);
+      if (raw.length && !stat[id] && raw[raw.length - 1][0] < tEnd) raw.push([tEnd, raw[raw.length - 1][1]]);
+      pts[id] = sfTrendReduce(raw, t0, t1);
+    }
+    return { t0, t1, pts };
   }
   // Colour of each series: the one from the config, otherwise the first palette hue not already taken by a series (no duplicates).
   _cols(ser) {
@@ -139,7 +139,7 @@ class SfTrendCard extends SfBase {
     const btn = this._ranges().map((r) => `<button class="rg ${r === this._range() ? "on" : ""}" data-rg="${this.esc(r)}">${this.esc(this._rangeLabel(r))}</button>`).join("");
     const any = d && ser.some((s, i) => this._pts(i, d).length);
     let body;
-    if (!d || !any) body = `<div class="empty">${this.esc(this.t(d && !this._busy ? "Aucune donnée" : "Chargement…"))}</div>`;
+    if (!d || !any) body = `<div class="empty">${this.esc(this.t(d && !this._ld.busy ? "Aucune donnée" : "Chargement…"))}</div>`;
     else {
       this._plots = [];
       const groups = comb ? [ser.map((s, i) => i)] : ser.map((s, i) => [i]);
@@ -190,7 +190,7 @@ class SfTrendCard extends SfBase {
     const root = this.shadowRoot;
     root.querySelectorAll("[data-rg]").forEach((b) => b.addEventListener("click", () => {
       const h = b.dataset.rg === "today" ? "today" : Number(b.dataset.rg); if (h !== "today" && !(h >= 1)) return; if (h === this._range()) return;
-      this._h = h; this._data = null; this._failAt = 0; this._lastHtml = null; this._schedule(); this._load(true);
+      this._h = h; this._ld.reset(); this._lastHtml = null; this._schedule(); this._load(true);
     }));
     root.querySelectorAll(".plot").forEach((el) => {
       const P = this._plots && this._plots[Number(el.dataset.p)]; if (!P) return;

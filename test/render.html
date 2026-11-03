@@ -1027,6 +1027,27 @@ __SF.SF_HOOK.tr = (lang, key) => {
     }
     const el = document.createElement("sf-launcher-card"); el.setConfig({ tiles: [{ name: "E", summary: "energy", card: { type: "custom:sf-energy-flow-card", ...FULL["sf-reactor-card"] } }] }); document.body.appendChild(el); el.hass = HASS(base, "fr"); await wait(40);
     if (!el.shadowRoot.querySelector(".tile")) fail("launcher: a tile whose card uses a friendly name must render"); el.remove(); }
+  // 5n. SfLoader (shared by the trend, timeline and mini-curve loads): validity period, one run at a time, failure back-off, force, owner refresh.
+  { const { SfLoader } = window.__SF; const owner = { renders: 0, _lastHtml: "x", _schedule() { this.renders++; } };
+    let calls = 0; const ok = async () => { calls++; return "v" + calls; }, slow = async () => { calls++; await wait(60); return "slow"; }, bad = async () => { calls++; throw new Error("boom"); };
+    const L = new SfLoader(owner, { ttl: 80, retry: 80 });
+    if ((await L.run("k", ok)) !== true || calls !== 1 || L.data.value !== "v1" || owner._lastHtml !== null || owner.renders !== 1) fail("loader: first run must call, store the value and refresh the owner");
+    if ((await L.run("k", ok)) !== false || calls !== 1) fail("loader: a second run within the validity period must be skipped");
+    if ((await L.run("other", ok)) !== true || calls !== 2) fail("loader: a different key must load at once");
+    if ((await L.run("other", ok, { force: true })) !== true || calls !== 3) fail("loader: force must bypass the validity period");
+    await wait(100); if ((await L.run("other", ok)) !== true || calls !== 4) fail("loader: a result older than its ttl must be reloaded");
+    // one run at a time
+    calls = 0; const L2 = new SfLoader(owner, { ttl: 0 }); const r = await Promise.all([L2.run("a", slow), L2.run("a", slow), L2.run("b", slow)]);
+    if (calls !== 1 || r.filter(Boolean).length !== 1 || !L2.busy === false && false) fail(`loader: concurrent runs must collapse into one (calls ${calls})`);
+    if (L2.busy) fail("loader: busy must be false once the run is over");
+    // failure back-off: same key not retried before `retry`, another key is, then the same key again after the delay; fallback value kept
+    calls = 0; const L3 = new SfLoader(owner, { ttl: 1000, retry: 80 });
+    await L3.run("k", bad, { fallback: () => ({ empty: true }) });
+    if (!L3.data.error || !L3.data.value || !L3.data.value.empty) fail("loader: a failure must store error: true and the fallback value");
+    for (let i = 0; i < 30; i++) await L3.run("k", bad); if (calls !== 1) fail(`loader: ${calls} calls after a failure (retries on every update)`);
+    await L3.run("k2", bad); if (calls !== 2) fail("loader: a different key must not be blocked by another key's failure");
+    await wait(100); await L3.run("k", ok); if (calls !== 3 || L3.data.error) fail("loader: the same key must be retried after the retry delay");
+    L3.reset(); if (L3.data !== null) fail("loader: reset must clear the data"); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`translation problem: ${m}`);
   for (const e of window.__errors) fail(`JavaScript error: ${e}`);
