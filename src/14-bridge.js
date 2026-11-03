@@ -48,8 +48,8 @@ class SfBridgeCard extends SfBase {
         background: linear-gradient(90deg, transparent, rgb(var(--sf-cyan-rgb) / .8), transparent); filter: blur(1px); }
       .top { position:relative; display:grid; grid-template-columns: auto 1fr auto; gap:28px; align-items:center; }
       @media (max-width: 900px) { .top { grid-template-columns: 1fr; gap:14px; } }
-      .clock { font-family:Orbitron,sans-serif; font-weight:700; font-size:54px; line-height:1; color:#fff;
-        text-shadow: 0 0 18px rgb(var(--sf-cyan-rgb) / .75), 0 0 2px #fff; letter-spacing:.04em; }
+      .clock { font-family:Orbitron,sans-serif; font-weight:700; font-size:54px; line-height:1; color:var(--sf-strong);
+        text-shadow: 0 0 18px rgb(var(--sf-cyan-rgb) / .75), 0 0 2px var(--sf-strong); letter-spacing:.04em; }
       .clock .s { font-size:22px; color:${SF_C.cyan}; margin-left:4px; }
       .date { margin-top:6px; letter-spacing:.24em; text-transform:uppercase; font-size:11px; color:${SF_C.dim}; }
       .status { text-align:center; }
@@ -59,7 +59,7 @@ class SfBridgeCard extends SfBase {
       .an.red { color:${SF_C.red}; border-color:rgb(var(--sf-red-rgb) / .6); background:rgb(var(--sf-red-rgb) / .1); animation: blink 1.2s infinite; }
       .an.amber { color:${SF_C.amber}; border-color:rgb(var(--sf-amber-rgb) / .5); background:rgb(var(--sf-amber-rgb) / .08); }
       .meta { display:grid; grid-template-columns: repeat(2, minmax(120px, auto)); gap:10px 22px; }
-      .meta .v { font-family:Orbitron,sans-serif; font-size:15px; color:#fff; margin-top:2px; display:flex; align-items:center; gap:6px; }
+      .meta .v { font-family:Orbitron,sans-serif; font-size:15px; color:var(--sf-strong); margin-top:2px; display:flex; align-items:center; gap:6px; }
       .crew { position:relative; display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; padding-top:12px;
         border-top:1px solid rgb(var(--sf-cyan-rgb) / .14); align-items:center; }
       .member { display:flex; align-items:center; gap:7px; padding:4px 12px 4px 4px; border-radius:20px;

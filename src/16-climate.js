@@ -33,11 +33,11 @@ class SfClimateCard extends SfBase {
       .dial { position:relative; width:100%; max-width:190px; margin:4px auto 0; }
       .dial svg { width:100%; display:block; }
       .dial .t { position:absolute; left:0; right:0; top:38%; text-align:center; }
-      .dial .t b { font-family:Orbitron,sans-serif; font-size:30px; color:#fff; text-shadow:0 0 10px var(--hc); }
+      .dial .t b { font-family:Orbitron,sans-serif; font-size:30px; color:var(--sf-strong); text-shadow:0 0 10px var(--hc); }
       .dial .t small { display:block; font-size:10px; color:${SF_C.dim}; margin-top:2px; letter-spacing:.08em; }
       .ctl { display:grid; grid-template-columns: 36px 1fr 36px; gap:6px; margin-top:4px; align-items:center; }
       .ctl .btn { padding:6px 0; }
-      .ctl .tg { text-align:center; font-family:Orbitron,sans-serif; font-size:15px; color:#fff; }
+      .ctl .tg { text-align:center; font-family:Orbitron,sans-serif; font-size:15px; color:var(--sf-strong); }
       .ctl .tg small { display:block; font-family:'B612 Mono',monospace; font-size:8px; letter-spacing:.2em; color:${SF_C.dim}; }
       .pw.on { color:var(--hc); border-color:var(--hc); box-shadow:0 0 10px -2px var(--hc); }
       .extras { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px dashed rgb(var(--sf-cyan-rgb) / .18); }`;

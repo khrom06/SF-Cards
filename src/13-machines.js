@@ -91,7 +91,7 @@ class SfMachinesCard extends SfBase {
       const txt = dead ? "—" : tm.actif ? (tm.reste === null ? "ON" : `${tm.reste} min`) : on ? "ON" : "OFF";
       return `<div class="tile" ${act} style="cursor:pointer">
         <span class="led" style="background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></span>
-        <div class="lbl">${this.esc(t.label)}</div><div class="v" style="color:${this.esc(dead ? SF_C.grey : "#fff")}">${txt}</div></div>`;
+        <div class="lbl">${this.esc(t.label)}</div><div class="v" style="color:${this.esc(dead ? SF_C.grey : "var(--sf-strong)")}">${txt}</div></div>`;
     }
     let v = "—", u = "", col = SF_C.grey, pct = null;
     if (this.ok(id)) {
@@ -123,7 +123,7 @@ class SfMachinesCard extends SfBase {
     const lvl = col === SF_C.red ? this.t("machines.critical") : col === SF_C.amber ? this.t("machines.warning") : "";
     return `<div class="tile click" data-e="${this.esc(id)}" aria-label="${this.esc(`${t.label}: ${v}${u}${lvl ? ` (${lvl})` : ""}`)}">
       <span class="led" style="background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></span>
-      <div class="lbl">${this.esc(t.label)}</div><div class="v" style="color:${this.esc(col === SF_C.grey ? SF_C.grey : "#fff")}">${this.esc(v)}<span class="u">${this.esc(u)}</span></div>
+      <div class="lbl">${this.esc(t.label)}</div><div class="v" style="color:${this.esc(col === SF_C.grey ? SF_C.grey : "var(--sf-strong)")}">${this.esc(v)}<span class="u">${this.esc(u)}</span></div>
       ${pct !== null ? `<div class="bar"><i style="width:${pct}%;background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></i></div>` : ""}${t.spark && col !== SF_C.grey && this._sparkTiles().some((x) => x.id === id) ? this._spark(t, col) : ""}</div>`;
   }
   render() {

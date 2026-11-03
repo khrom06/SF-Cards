@@ -6,7 +6,7 @@ const SF_C = {
   grey: "var(--sf-grey)", text: "var(--sf-text)", dim: "var(--sf-dim)",
 };
 const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; --sf-green:#2bff88; --sf-grey:#5b6b7d; --sf-text:#cfefff; --sf-dim:#7fa3bd;
-    --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff;`;
+    --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff; --sf-white:#fff;`;
 
 const SF_CSS = `
   :host { display:block; ${SF_VARS_DARK} }
@@ -51,8 +51,8 @@ const SF_CSS = `
   .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:7px 11px;
     border-radius:8px; border:1px solid rgb(var(--sf-cyan-rgb) / .25); background:rgb(var(--sf-cyan-rgb) / .05);
     color:${SF_C.text}; font-family:'B612 Mono',monospace; font-size:11px; letter-spacing:.06em; }
-  .btn:hover { border-color:${SF_C.cyan}; color:#fff; }
-  .btn.on { border-color:${SF_C.cyan}; background:rgb(var(--sf-cyan-rgb) / .18); color:#fff;
+  .btn:hover { border-color:${SF_C.cyan}; color:var(--sf-strong); }
+  .btn.on { border-color:${SF_C.cyan}; background:rgb(var(--sf-cyan-rgb) / .18); color:var(--sf-strong);
     box-shadow: inset 0 0 12px rgb(var(--sf-cyan-rgb) / .25), 0 0 10px rgb(var(--sf-cyan-rgb) / .25); }
   .seg { display:flex; flex-wrap:wrap; gap:6px; }
 `;

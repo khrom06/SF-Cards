@@ -37,7 +37,7 @@ class SfReactorCard extends SfBase {
         background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .12), rgba(0,0,0,.4));
         border:1px solid currentColor; box-shadow: 0 0 12px -2px currentColor, inset 0 0 10px -4px currentColor; }
       .node .n { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:${SF_C.dim}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-      .node .w { font-family:Orbitron,sans-serif; font-size:13px; color:#fff; }
+      .node .w { font-family:Orbitron,sans-serif; font-size:13px; color:var(--sf-strong); }
       .node.idle { opacity:.4; }
       .core { position:absolute; left:50%; top:50%; width:min(30%, 190px); aspect-ratio:1; transform:translate(-50%,-50%);
         perspective: 600px; }
@@ -50,16 +50,16 @@ class SfReactorCard extends SfBase {
       @keyframes o2 { from { transform: rotateY(65deg) rotateZ(0); } to { transform: rotateY(65deg) rotateZ(-360deg); } }
       @keyframes o3 { from { transform: rotateX(-40deg) rotateY(30deg) rotateZ(0); } to { transform: rotateX(-40deg) rotateY(30deg) rotateZ(360deg); } }
       .core .orb { position:absolute; inset:28%; border-radius:50%;
-        background: radial-gradient(circle at 40% 35%, #fff 0%, var(--cc) 30%, rgba(0,0,0,.0) 72%);
+        background: radial-gradient(circle at 40% 35%, var(--sf-white) 0%, var(--cc) 30%, rgba(0,0,0,.0) 72%);
         box-shadow: 0 0 40px var(--cc); animation: breathe 2.6s ease-in-out infinite; }
       @keyframes breathe { 50% { transform: scale(1.08); filter: brightness(1.25); } }
       .core .txt { position:absolute; inset:0; display:grid; place-items:center; text-align:center; pointer-events:none; }
-      .core .txt b { display:block; font-family:Orbitron,sans-serif; font-size:clamp(14px, 2.2vw, 22px); color:#fff;
+      .core .txt b { display:block; font-family:Orbitron,sans-serif; font-size:clamp(14px, 2.2vw, 22px); color:var(--sf-strong);
         text-shadow:0 0 10px #000, 0 0 6px var(--cc); }
-      .core .txt span { font-size:9px; letter-spacing:.2em; color:#fff; text-shadow:0 0 6px #000; }
+      .core .txt span { font-size:9px; letter-spacing:.2em; color:var(--sf-strong); text-shadow:0 0 6px #000; }
       .foot { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:6px; }
       .foot > div { padding:8px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
-      .foot .v { font-family:Orbitron,sans-serif; font-size:16px; color:#fff; margin-top:3px; }`;
+      .foot .v { font-family:Orbitron,sans-serif; font-size:16px; color:var(--sf-strong); margin-top:3px; }`;
   }
   _dur(w) { // the more powerful, the faster the flow
     const a = Math.abs(w || 0);

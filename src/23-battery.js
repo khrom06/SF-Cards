@@ -37,20 +37,20 @@ class SfBatteryCard extends SfBase {
       .ring { position:relative; width:132px; height:132px; }
       .ring svg { width:100%; height:100%; transform:rotate(-90deg); }
       .ring .t { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-      .ring .t b { font-family:Orbitron,sans-serif; font-size:28px; color:#fff; }
+      .ring .t b { font-family:Orbitron,sans-serif; font-size:28px; color:var(--sf-strong); }
       .ring .t small { font-size:9px; letter-spacing:.14em; color:${SF_C.dim}; }
       .st { font-family:Orbitron,sans-serif; font-size:15px; letter-spacing:.1em; }
       .sub { margin-top:4px; font-size:11px; color:${SF_C.dim}; line-height:1.5; }
       .bats { margin-top:14px; display:grid; gap:6px; }
       .bats .b { display:grid; grid-template-columns: 1fr auto; gap:2px 10px; align-items:center; padding:7px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); }
-      .bats .n { font-size:12px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .bats .n { font-size:12px; color:var(--sf-strong); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .bats .p { font-size:11px; text-align:end; }
       .bats .lv { height:5px; border-radius:3px; background:rgb(var(--sf-fg-rgb) / .08); overflow:hidden; display:block; }
       .bats .lv i { display:block; height:100%; border-radius:3px; }
-      .bats .pc { font-family:Orbitron,sans-serif; font-size:12px; text-align:end; color:#fff; }
+      .bats .pc { font-family:Orbitron,sans-serif; font-size:12px; text-align:end; color:var(--sf-strong); }
       .stats { display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:8px; margin-top:14px; }
       .stats > div { padding:8px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
-      .stats .v { font-family:Orbitron,sans-serif; font-size:15px; color:#fff; margin-top:3px; }
+      .stats .v { font-family:Orbitron,sans-serif; font-size:15px; color:var(--sf-strong); margin-top:3px; }
       .modes { margin-top:14px; text-align:center; } .modes .lbl { margin-bottom:6px; } .modes .seg { justify-content:center; }`;
   }
   render() {

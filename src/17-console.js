@@ -35,7 +35,7 @@ class SfConsoleCard extends SfBase {
       .wide { grid-column: 1 / -1; min-height:0; }
       .row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
       .row .grow { flex:1; min-width:90px; }
-      .big { font-family:Orbitron,sans-serif; font-size:18px; color:#fff; }`;
+      .big { font-family:Orbitron,sans-serif; font-size:18px; color:var(--sf-strong); }`;
   }
   _item(x) {
     const s = this.st(x.entity), dead = x.entity && !this.ok(x.entity);

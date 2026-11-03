@@ -94,7 +94,7 @@ class SfLauncherCard extends SfBase {
       .tile .top { display:flex; align-items:center; gap:7px; font:700 10.5px Orbitron,sans-serif; letter-spacing:.14em;
         text-transform:uppercase; color:var(--tc); }
       .tile .top .go { margin-left:auto; opacity:.6; }
-      .tile .main { font:500 21px Orbitron,sans-serif; color:#fff; margin-top:8px; text-shadow:0 0 10px var(--tc); }
+      .tile .main { font:500 21px Orbitron,sans-serif; color:var(--sf-strong); margin-top:8px; text-shadow:0 0 10px var(--tc); }
       .tile .sub { font-size:10.5px; color:${SF_C.dim}; margin-top:4px; line-height:1.35; }
       .tile.hot { animation: tglow 2.2s ease-in-out infinite; }
       .tile.prio { border-color:var(--tc); box-shadow:0 0 16px -6px var(--tc), inset 0 0 14px -8px var(--tc); }

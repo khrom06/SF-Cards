@@ -12,7 +12,7 @@ class SfLedgerCard extends SfBase {
     return `
       .kpis { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin:12px 0 16px; }
       .kpi { padding:10px 12px; border-radius:10px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .14); }
-      .kpi .v { font-family:Orbitron,sans-serif; font-size:22px; color:#fff; margin-top:4px; }
+      .kpi .v { font-family:Orbitron,sans-serif; font-size:22px; color:var(--sf-strong); margin-top:4px; }
       .dev { display:grid; grid-template-columns: 150px 1fr 90px; gap:12px; align-items:center; padding:8px 0;
         border-bottom:1px solid rgb(var(--sf-cyan-rgb) / .08); }
       @media (max-width: 560px) { .dev { grid-template-columns: 1fr; gap:6px; } }

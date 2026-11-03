@@ -21,7 +21,7 @@ class SfAlertCard extends SfBase {
       .hud.alert .dot { background:${SF_C.red}; box-shadow:0 0 10px ${SF_C.red}; animation-duration:.6s; }
       @keyframes pulse { 50% { box-shadow: inset 0 0 60px rgb(var(--sf-red-rgb) / .35), 0 0 30px rgb(var(--sf-red-rgb) / .45); } }
       .big { font-family:Orbitron,sans-serif; font-weight:700; font-size:26px; letter-spacing:.08em;
-        color:#fff; text-shadow:0 0 14px rgb(var(--sf-red-rgb) / .9); margin:4px 0 10px; }
+        color:var(--sf-strong); text-shadow:0 0 14px rgb(var(--sf-red-rgb) / .9); margin:4px 0 10px; }
       .snap { width:100%; border-radius:10px; border:1px solid rgb(var(--sf-red-rgb) / .6); display:block; margin-top:6px; }
       .calm { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
       .calm .state { font-family:Orbitron,sans-serif; font-size:18px; color:${SF_C.green};

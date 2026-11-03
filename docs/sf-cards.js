@@ -734,7 +734,7 @@ const SF_C = {
   grey: "var(--sf-grey)", text: "var(--sf-text)", dim: "var(--sf-dim)",
 };
 const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; --sf-green:#2bff88; --sf-grey:#5b6b7d; --sf-text:#cfefff; --sf-dim:#7fa3bd;
-    --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff;`;
+    --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff; --sf-white:#fff;`;
 
 const SF_CSS = `
   :host { display:block; ${SF_VARS_DARK} }
@@ -779,8 +779,8 @@ const SF_CSS = `
   .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:7px 11px;
     border-radius:8px; border:1px solid rgb(var(--sf-cyan-rgb) / .25); background:rgb(var(--sf-cyan-rgb) / .05);
     color:${SF_C.text}; font-family:'B612 Mono',monospace; font-size:11px; letter-spacing:.06em; }
-  .btn:hover { border-color:${SF_C.cyan}; color:#fff; }
-  .btn.on { border-color:${SF_C.cyan}; background:rgb(var(--sf-cyan-rgb) / .18); color:#fff;
+  .btn:hover { border-color:${SF_C.cyan}; color:var(--sf-strong); }
+  .btn.on { border-color:${SF_C.cyan}; background:rgb(var(--sf-cyan-rgb) / .18); color:var(--sf-strong);
     box-shadow: inset 0 0 12px rgb(var(--sf-cyan-rgb) / .25), 0 0 10px rgb(var(--sf-cyan-rgb) / .25); }
   .seg { display:flex; flex-wrap:wrap; gap:6px; }
 `;
@@ -1104,7 +1104,7 @@ class SfAlertCard extends SfBase {
       .hud.alert .dot { background:${SF_C.red}; box-shadow:0 0 10px ${SF_C.red}; animation-duration:.6s; }
       @keyframes pulse { 50% { box-shadow: inset 0 0 60px rgb(var(--sf-red-rgb) / .35), 0 0 30px rgb(var(--sf-red-rgb) / .45); } }
       .big { font-family:Orbitron,sans-serif; font-weight:700; font-size:26px; letter-spacing:.08em;
-        color:#fff; text-shadow:0 0 14px rgb(var(--sf-red-rgb) / .9); margin:4px 0 10px; }
+        color:var(--sf-strong); text-shadow:0 0 14px rgb(var(--sf-red-rgb) / .9); margin:4px 0 10px; }
       .snap { width:100%; border-radius:10px; border:1px solid rgb(var(--sf-red-rgb) / .6); display:block; margin-top:6px; }
       .calm { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
       .calm .state { font-family:Orbitron,sans-serif; font-size:18px; color:${SF_C.green};
@@ -1238,7 +1238,7 @@ class SfHangarCard extends SfBase {
       .ring-bg { fill:none; stroke:rgb(var(--sf-fg-rgb) / .07); stroke-width:7; }
       .ring { fill:none; stroke-width:7; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%;
         transition: stroke-dashoffset 1s ease; }
-      .soc { font-family:Orbitron,sans-serif; font-size:20px; fill:#fff; }
+      .soc { font-family:Orbitron,sans-serif; font-size:20px; fill:var(--sf-strong); }
       .tick { stroke:rgb(var(--sf-cyan-rgb) / .25); stroke-width:1; }
       .borne { text-align:center; min-width:92px; }
       .borne .plug { font-size:26px; display:flex; justify-content:center; }
@@ -1257,7 +1257,7 @@ class SfHangarCard extends SfBase {
         color:${SF_C.amber}; border:1px solid rgb(var(--sf-amber-rgb) / .55); background:rgb(var(--sf-amber-rgb) / .09); animation: blink 2s infinite; }
       .fl3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:12px; }
       .fl3 > div { padding:7px 9px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
-      .tgt { stroke:#fff; stroke-width:2; }`;
+      .tgt { stroke:var(--sf-strong); stroke-width:2; }`;
   }
   _ring(car) {
     const soc = this.num(car.soc);
@@ -1424,7 +1424,7 @@ class SfRadarCard extends SfBase {
     const blip = (x, y, col, on, label) => `<g class="blip" opacity="${this.esc(on ? 1 : 0.28)}">
         <circle cx="${this.esc(x)}" cy="${this.esc(y)}" r="${this.esc(on ? 2.6 : 1.8)}" fill="${this.esc(col)}" style="filter:drop-shadow(0 0 2px ${this.esc(col)})"/>
         ${on ? `<circle cx="${this.esc(x)}" cy="${this.esc(y)}" r="2.6" fill="none" stroke="${this.esc(col)}" stroke-width=".6"><animate attributeName="r" from="2.6" to="7" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" from=".8" to="0" dur="1.8s" repeatCount="indefinite"/></circle>` : ""}
-        <text x="${this.esc(x)}" y="${this.esc(y - 3.8)}" text-anchor="middle" font-size="3.2" fill="${this.esc(on ? "#fff" : SF_C.grey)}">${this.esc(label)}</text></g>`;
+        <text x="${this.esc(x)}" y="${this.esc(y - 3.8)}" text-anchor="middle" font-size="3.2" fill="${this.esc(on ? "var(--sf-strong)" : SF_C.grey)}">${this.esc(label)}</text></g>`;
     const np = c.people.length, nr = c.rooms.length;
     let svg = `<circle class="ringl" cx="50" cy="50" r="${this.esc(R.outer)}"/><circle class="ringl" cx="50" cy="50" r="${this.esc(R.mid)}"/>
       <circle class="ringl" cx="50" cy="50" r="${this.esc(R.inner)}"/>
@@ -1559,7 +1559,7 @@ class SfMachinesCard extends SfBase {
       const txt = dead ? "—" : tm.actif ? (tm.reste === null ? "ON" : `${tm.reste} min`) : on ? "ON" : "OFF";
       return `<div class="tile" ${act} style="cursor:pointer">
         <span class="led" style="background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></span>
-        <div class="lbl">${this.esc(t.label)}</div><div class="v" style="color:${this.esc(dead ? SF_C.grey : "#fff")}">${txt}</div></div>`;
+        <div class="lbl">${this.esc(t.label)}</div><div class="v" style="color:${this.esc(dead ? SF_C.grey : "var(--sf-strong)")}">${txt}</div></div>`;
     }
     let v = "—", u = "", col = SF_C.grey, pct = null;
     if (this.ok(id)) {
@@ -1591,7 +1591,7 @@ class SfMachinesCard extends SfBase {
     const lvl = col === SF_C.red ? this.t("machines.critical") : col === SF_C.amber ? this.t("machines.warning") : "";
     return `<div class="tile click" data-e="${this.esc(id)}" aria-label="${this.esc(`${t.label}: ${v}${u}${lvl ? ` (${lvl})` : ""}`)}">
       <span class="led" style="background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></span>
-      <div class="lbl">${this.esc(t.label)}</div><div class="v" style="color:${this.esc(col === SF_C.grey ? SF_C.grey : "#fff")}">${this.esc(v)}<span class="u">${this.esc(u)}</span></div>
+      <div class="lbl">${this.esc(t.label)}</div><div class="v" style="color:${this.esc(col === SF_C.grey ? SF_C.grey : "var(--sf-strong)")}">${this.esc(v)}<span class="u">${this.esc(u)}</span></div>
       ${pct !== null ? `<div class="bar"><i style="width:${pct}%;background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></i></div>` : ""}${t.spark && col !== SF_C.grey && this._sparkTiles().some((x) => x.id === id) ? this._spark(t, col) : ""}</div>`;
   }
   render() {
@@ -1654,8 +1654,8 @@ class SfBridgeCard extends SfBase {
         background: linear-gradient(90deg, transparent, rgb(var(--sf-cyan-rgb) / .8), transparent); filter: blur(1px); }
       .top { position:relative; display:grid; grid-template-columns: auto 1fr auto; gap:28px; align-items:center; }
       @media (max-width: 900px) { .top { grid-template-columns: 1fr; gap:14px; } }
-      .clock { font-family:Orbitron,sans-serif; font-weight:700; font-size:54px; line-height:1; color:#fff;
-        text-shadow: 0 0 18px rgb(var(--sf-cyan-rgb) / .75), 0 0 2px #fff; letter-spacing:.04em; }
+      .clock { font-family:Orbitron,sans-serif; font-weight:700; font-size:54px; line-height:1; color:var(--sf-strong);
+        text-shadow: 0 0 18px rgb(var(--sf-cyan-rgb) / .75), 0 0 2px var(--sf-strong); letter-spacing:.04em; }
       .clock .s { font-size:22px; color:${SF_C.cyan}; margin-left:4px; }
       .date { margin-top:6px; letter-spacing:.24em; text-transform:uppercase; font-size:11px; color:${SF_C.dim}; }
       .status { text-align:center; }
@@ -1665,7 +1665,7 @@ class SfBridgeCard extends SfBase {
       .an.red { color:${SF_C.red}; border-color:rgb(var(--sf-red-rgb) / .6); background:rgb(var(--sf-red-rgb) / .1); animation: blink 1.2s infinite; }
       .an.amber { color:${SF_C.amber}; border-color:rgb(var(--sf-amber-rgb) / .5); background:rgb(var(--sf-amber-rgb) / .08); }
       .meta { display:grid; grid-template-columns: repeat(2, minmax(120px, auto)); gap:10px 22px; }
-      .meta .v { font-family:Orbitron,sans-serif; font-size:15px; color:#fff; margin-top:2px; display:flex; align-items:center; gap:6px; }
+      .meta .v { font-family:Orbitron,sans-serif; font-size:15px; color:var(--sf-strong); margin-top:2px; display:flex; align-items:center; gap:6px; }
       .crew { position:relative; display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; padding-top:12px;
         border-top:1px solid rgb(var(--sf-cyan-rgb) / .14); align-items:center; }
       .member { display:flex; align-items:center; gap:7px; padding:4px 12px 4px 4px; border-radius:20px;
@@ -1790,7 +1790,7 @@ class SfReactorCard extends SfBase {
         background: radial-gradient(circle at 35% 30%, rgb(var(--sf-fg-rgb) / .12), rgba(0,0,0,.4));
         border:1px solid currentColor; box-shadow: 0 0 12px -2px currentColor, inset 0 0 10px -4px currentColor; }
       .node .n { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:${SF_C.dim}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-      .node .w { font-family:Orbitron,sans-serif; font-size:13px; color:#fff; }
+      .node .w { font-family:Orbitron,sans-serif; font-size:13px; color:var(--sf-strong); }
       .node.idle { opacity:.4; }
       .core { position:absolute; left:50%; top:50%; width:min(30%, 190px); aspect-ratio:1; transform:translate(-50%,-50%);
         perspective: 600px; }
@@ -1803,16 +1803,16 @@ class SfReactorCard extends SfBase {
       @keyframes o2 { from { transform: rotateY(65deg) rotateZ(0); } to { transform: rotateY(65deg) rotateZ(-360deg); } }
       @keyframes o3 { from { transform: rotateX(-40deg) rotateY(30deg) rotateZ(0); } to { transform: rotateX(-40deg) rotateY(30deg) rotateZ(360deg); } }
       .core .orb { position:absolute; inset:28%; border-radius:50%;
-        background: radial-gradient(circle at 40% 35%, #fff 0%, var(--cc) 30%, rgba(0,0,0,.0) 72%);
+        background: radial-gradient(circle at 40% 35%, var(--sf-white) 0%, var(--cc) 30%, rgba(0,0,0,.0) 72%);
         box-shadow: 0 0 40px var(--cc); animation: breathe 2.6s ease-in-out infinite; }
       @keyframes breathe { 50% { transform: scale(1.08); filter: brightness(1.25); } }
       .core .txt { position:absolute; inset:0; display:grid; place-items:center; text-align:center; pointer-events:none; }
-      .core .txt b { display:block; font-family:Orbitron,sans-serif; font-size:clamp(14px, 2.2vw, 22px); color:#fff;
+      .core .txt b { display:block; font-family:Orbitron,sans-serif; font-size:clamp(14px, 2.2vw, 22px); color:var(--sf-strong);
         text-shadow:0 0 10px #000, 0 0 6px var(--cc); }
-      .core .txt span { font-size:9px; letter-spacing:.2em; color:#fff; text-shadow:0 0 6px #000; }
+      .core .txt span { font-size:9px; letter-spacing:.2em; color:var(--sf-strong); text-shadow:0 0 6px #000; }
       .foot { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:6px; }
       .foot > div { padding:8px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
-      .foot .v { font-family:Orbitron,sans-serif; font-size:16px; color:#fff; margin-top:3px; }`;
+      .foot .v { font-family:Orbitron,sans-serif; font-size:16px; color:var(--sf-strong); margin-top:3px; }`;
   }
   _dur(w) { // the more powerful, the faster the flow
     const a = Math.abs(w || 0);
@@ -1965,11 +1965,11 @@ class SfClimateCard extends SfBase {
       .dial { position:relative; width:100%; max-width:190px; margin:4px auto 0; }
       .dial svg { width:100%; display:block; }
       .dial .t { position:absolute; left:0; right:0; top:38%; text-align:center; }
-      .dial .t b { font-family:Orbitron,sans-serif; font-size:30px; color:#fff; text-shadow:0 0 10px var(--hc); }
+      .dial .t b { font-family:Orbitron,sans-serif; font-size:30px; color:var(--sf-strong); text-shadow:0 0 10px var(--hc); }
       .dial .t small { display:block; font-size:10px; color:${SF_C.dim}; margin-top:2px; letter-spacing:.08em; }
       .ctl { display:grid; grid-template-columns: 36px 1fr 36px; gap:6px; margin-top:4px; align-items:center; }
       .ctl .btn { padding:6px 0; }
-      .ctl .tg { text-align:center; font-family:Orbitron,sans-serif; font-size:15px; color:#fff; }
+      .ctl .tg { text-align:center; font-family:Orbitron,sans-serif; font-size:15px; color:var(--sf-strong); }
       .ctl .tg small { display:block; font-family:'B612 Mono',monospace; font-size:8px; letter-spacing:.2em; color:${SF_C.dim}; }
       .pw.on { color:var(--hc); border-color:var(--hc); box-shadow:0 0 10px -2px var(--hc); }
       .extras { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px dashed rgb(var(--sf-cyan-rgb) / .18); }`;
@@ -2080,7 +2080,7 @@ class SfConsoleCard extends SfBase {
       .wide { grid-column: 1 / -1; min-height:0; }
       .row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
       .row .grow { flex:1; min-width:90px; }
-      .big { font-family:Orbitron,sans-serif; font-size:18px; color:#fff; }`;
+      .big { font-family:Orbitron,sans-serif; font-size:18px; color:var(--sf-strong); }`;
   }
   _item(x) {
     const s = this.st(x.entity), dead = x.entity && !this.ok(x.entity);
@@ -2202,7 +2202,7 @@ class SfCameraCard extends SfBase {
                     radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.55)); }
       .ov { position:absolute; inset:0; z-index:2; pointer-events:none; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; }
       .ov .t, .ov .b { display:flex; justify-content:space-between; align-items:center; gap:8px; }
-      .tag { font-family:Orbitron,sans-serif; font-size:11px; letter-spacing:.18em; color:#fff; text-shadow:0 0 6px #000, 0 0 8px ${SF_C.cyan}; }
+      .tag { font-family:Orbitron,sans-serif; font-size:11px; letter-spacing:.18em; color:var(--sf-strong); text-shadow:0 0 6px #000, 0 0 8px ${SF_C.cyan}; }
       .rec { font-size:10px; color:${SF_C.red}; letter-spacing:.14em; display:flex; align-items:center; gap:5px; text-shadow:0 0 4px #000; }
       .rec::before { content:""; width:8px; height:8px; border-radius:50%; background:${SF_C.red}; box-shadow:0 0 8px ${SF_C.red}; animation: blink 1s infinite; }
       .pill { font-size:10px; padding:3px 8px; border-radius:10px; background:rgba(0,0,0,.55); border:1px solid rgb(var(--sf-cyan-rgb) / .35); color:${SF_C.text}; }
@@ -2254,7 +2254,7 @@ class SfSetpointsCard extends SfBase {
       td:last-child { border-right:1px solid rgb(var(--sf-cyan-rgb) / .1); border-radius:0 8px 8px 0; }
       .st { display:flex; align-items:center; justify-content:center; gap:4px; }
       .st .btn { padding:3px 8px; }
-      .st b { font-family:Orbitron,sans-serif; font-size:14px; min-width:44px; text-align:center; color:#fff; }
+      .st b { font-family:Orbitron,sans-serif; font-size:14px; min-width:44px; text-align:center; color:var(--sf-strong); }
       .st b.edit { cursor:pointer; padding:6px 4px; border-radius:6px; }
       .st b.edit:hover, .st b.edit:focus-visible { background:rgb(var(--sf-cyan-rgb) / .12); outline:none; }
       @media (max-width: 640px) { .st .btn { display:none; } .st b { min-width:56px; padding:10px 6px; } }
@@ -2262,7 +2262,7 @@ class SfSetpointsCard extends SfBase {
       .ed .who { font-size:13px; color:${SF_C.dim}; text-align:center; }
       .ed .who b { font-weight:600; }
       .ed .big { display:flex; align-items:center; justify-content:center; gap:18px; }
-      .ed .big output { font-family:Orbitron,sans-serif; font-size:38px; color:#fff; min-width:130px; text-align:center; }
+      .ed .big output { font-family:Orbitron,sans-serif; font-size:38px; color:var(--sf-strong); min-width:130px; text-align:center; }
       .ed .big button.btn { font-size:26px; line-height:1; min-width:56px; min-height:56px; padding:0; }
       .ed input[type=range] { width:100%; max-width:420px; height:36px; accent-color:var(--ed-col, ${SF_C.cyan}); }
       .ed .seg { flex-wrap:wrap; justify-content:center; }
@@ -2364,7 +2364,7 @@ class SfLedgerCard extends SfBase {
     return `
       .kpis { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin:12px 0 16px; }
       .kpi { padding:10px 12px; border-radius:10px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .14); }
-      .kpi .v { font-family:Orbitron,sans-serif; font-size:22px; color:#fff; margin-top:4px; }
+      .kpi .v { font-family:Orbitron,sans-serif; font-size:22px; color:var(--sf-strong); margin-top:4px; }
       .dev { display:grid; grid-template-columns: 150px 1fr 90px; gap:12px; align-items:center; padding:8px 0;
         border-bottom:1px solid rgb(var(--sf-cyan-rgb) / .08); }
       @media (max-width: 560px) { .dev { grid-template-columns: 1fr; gap:6px; } }
@@ -2533,7 +2533,7 @@ class SfLauncherCard extends SfBase {
       .tile .top { display:flex; align-items:center; gap:7px; font:700 10.5px Orbitron,sans-serif; letter-spacing:.14em;
         text-transform:uppercase; color:var(--tc); }
       .tile .top .go { margin-left:auto; opacity:.6; }
-      .tile .main { font:500 21px Orbitron,sans-serif; color:#fff; margin-top:8px; text-shadow:0 0 10px var(--tc); }
+      .tile .main { font:500 21px Orbitron,sans-serif; color:var(--sf-strong); margin-top:8px; text-shadow:0 0 10px var(--tc); }
       .tile .sub { font-size:10.5px; color:${SF_C.dim}; margin-top:4px; line-height:1.35; }
       .tile.hot { animation: tglow 2.2s ease-in-out infinite; }
       .tile.prio { border-color:var(--tc); box-shadow:0 0 16px -6px var(--tc), inset 0 0 14px -8px var(--tc); }
@@ -2719,20 +2719,20 @@ class SfBatteryCard extends SfBase {
       .ring { position:relative; width:132px; height:132px; }
       .ring svg { width:100%; height:100%; transform:rotate(-90deg); }
       .ring .t { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-      .ring .t b { font-family:Orbitron,sans-serif; font-size:28px; color:#fff; }
+      .ring .t b { font-family:Orbitron,sans-serif; font-size:28px; color:var(--sf-strong); }
       .ring .t small { font-size:9px; letter-spacing:.14em; color:${SF_C.dim}; }
       .st { font-family:Orbitron,sans-serif; font-size:15px; letter-spacing:.1em; }
       .sub { margin-top:4px; font-size:11px; color:${SF_C.dim}; line-height:1.5; }
       .bats { margin-top:14px; display:grid; gap:6px; }
       .bats .b { display:grid; grid-template-columns: 1fr auto; gap:2px 10px; align-items:center; padding:7px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); }
-      .bats .n { font-size:12px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .bats .n { font-size:12px; color:var(--sf-strong); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
       .bats .p { font-size:11px; text-align:end; }
       .bats .lv { height:5px; border-radius:3px; background:rgb(var(--sf-fg-rgb) / .08); overflow:hidden; display:block; }
       .bats .lv i { display:block; height:100%; border-radius:3px; }
-      .bats .pc { font-family:Orbitron,sans-serif; font-size:12px; text-align:end; color:#fff; }
+      .bats .pc { font-family:Orbitron,sans-serif; font-size:12px; text-align:end; color:var(--sf-strong); }
       .stats { display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:8px; margin-top:14px; }
       .stats > div { padding:8px 10px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
-      .stats .v { font-family:Orbitron,sans-serif; font-size:15px; color:#fff; margin-top:3px; }
+      .stats .v { font-family:Orbitron,sans-serif; font-size:15px; color:var(--sf-strong); margin-top:3px; }
       .modes { margin-top:14px; text-align:center; } .modes .lbl { margin-bottom:6px; } .modes .seg { justify-content:center; }`;
   }
   render() {
@@ -2803,7 +2803,7 @@ class SfRadiatorsCard extends SfBase {
         box-shadow:0 0 16px -6px var(--ac); }
       .rad.off { opacity:.6; }
       .rh { display:flex; align-items:center; gap:8px; }
-      .rh .nm { flex:1; min-width:0; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#fff; }
+      .rh .nm { flex:1; min-width:0; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--sf-strong); }
       .rh .st { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:${SF_C.dim}; }
       .rad.heat .rh .st { color:var(--ac); }
       .rad.heat .rh ha-icon { animation: rglow 2.2s ease-in-out infinite; }
@@ -2817,7 +2817,7 @@ class SfRadiatorsCard extends SfBase {
       .ctl .btn { min-width:44px; min-height:40px; font-size:16px; }
       .ctl .tg { text-align:center; min-width:96px; }
       .ctl .tg small { display:block; font-size:9px; letter-spacing:.14em; color:${SF_C.dim}; }
-      .ctl .tg b { font-family:Orbitron,sans-serif; font-size:20px; color:#fff; text-shadow:0 0 10px var(--ac); }
+      .ctl .tg b { font-family:Orbitron,sans-serif; font-size:20px; color:var(--sf-strong); text-shadow:0 0 10px var(--ac); }
       .meta { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:10px; color:${SF_C.dim}; }
       .meta .bar { flex:1; height:4px; border-radius:2px; background:rgb(var(--sf-fg-rgb) / .07); overflow:hidden; }
       .meta .bar i { display:block; height:100%; background:var(--ac); box-shadow:0 0 6px var(--ac); border-radius:2px; transition:width 1s; }
@@ -2913,18 +2913,18 @@ const SF_NS_CSS = `
   /* header */
   .hero { flex:0 0 auto; }
   .hrow { display:flex; align-items:flex-start; justify-content:space-between; gap:calc(var(--u)*2); }
-  .hm { font-size:calc(var(--u)*12); font-weight:700; line-height:1; letter-spacing:.02em; color:#fff; text-shadow:0 0 calc(var(--u)*3) var(--a); }
+  .hm { font-size:calc(var(--u)*12); font-weight:700; line-height:1; letter-spacing:.02em; color:var(--sf-strong); text-shadow:0 0 calc(var(--u)*3) var(--a); }
   .ns.nuit .hm { color:#e8c9c1; text-shadow:0 0 calc(var(--u)*2.4) rgba(217,87,63,.6); }
   .date { margin-top:calc(var(--u)*.9); font-size:calc(var(--u)*2.5); letter-spacing:.12em; text-transform:uppercase; color:var(--a); white-space:nowrap; }
   .wx { display:flex; align-items:center; gap:calc(var(--u)*1.6); cursor:pointer; text-align:right; }
   .wx ha-icon { --mdc-icon-size:calc(var(--u)*9); color:var(--a); }
-  .wx .t { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*7.2); font-weight:600; color:#fff; line-height:1; }
+  .wx .t { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*7.2); font-weight:600; color:var(--sf-strong); line-height:1; }
   .wx .c { font-size:calc(var(--u)*2.3); color:var(--sf-dim); margin-top:calc(var(--u)*.6); }
   .railWrap { position:relative; margin-top:calc(var(--u)*1.2); }
   .rail { display:flex; height:calc(var(--u)*.9); border-radius:99px; overflow:hidden; gap:2px; }
   .rail i { flex:1 1 0; background:rgb(var(--sf-fg-rgb) / .09); } .rail i.on { background:var(--a); box-shadow:0 0 calc(var(--u)*1.6) var(--a); }
   .rail b { position:absolute; top:50%; width:calc(var(--u)*2.4); height:calc(var(--u)*2.4); margin:calc(var(--u)*-1.2) 0 0 calc(var(--u)*-1.2);
-    border-radius:50%; background:#fff; box-shadow:0 0 calc(var(--u)*2) #fff, 0 0 calc(var(--u)*4) var(--a); }
+    border-radius:50%; background:var(--sf-white); box-shadow:0 0 calc(var(--u)*2) var(--sf-white), 0 0 calc(var(--u)*4) var(--a); }
   .modeTxt { position:absolute; right:0; top:calc(var(--u)*-3.4); font-size:calc(var(--u)*2.3); letter-spacing:.12em; text-transform:uppercase; color:var(--sf-dim); }
   .modeTxt b { color:var(--a); font-weight:400; }
 
@@ -2952,14 +2952,14 @@ const SF_NS_CSS = `
   .tap { cursor:pointer; user-select:none; -webkit-user-select:none; transition:transform .12s, box-shadow .2s, background .2s; }
   .tap:active { transform:scale(.96); }
   .sent { box-shadow:0 0 0 2px var(--a), 0 0 calc(var(--u)*4) var(--a) !important; }
-  .armed { border-color:var(--sf-amber) !important; background:rgb(var(--sf-amber-rgb) / .22) !important; color:#fff !important; animation:blink .5s infinite; }
+  .armed { border-color:var(--sf-amber) !important; background:rgb(var(--sf-amber-rgb) / .22) !important; color:var(--sf-strong) !important; animation:blink .5s infinite; }
   @keyframes blink { 50% { opacity:.35; } }
 
   /* weather */
   .wxP { display:flex; flex-direction:column; justify-content:space-between; }
   .wxTop { display:flex; align-items:center; gap:calc(var(--u)*2); }
   .wxTop ha-icon { --mdc-icon-size:calc(var(--u)*10); color:var(--a); filter:drop-shadow(0 0 calc(var(--u)*2) var(--a)); flex:0 0 auto; }
-  .wxTop .big { font-size:calc(var(--u)*7.2); font-weight:600; color:#fff; line-height:1; }
+  .wxTop .big { font-size:calc(var(--u)*7.2); font-weight:600; color:var(--sf-strong); line-height:1; }
   .wxTop .sub { color:#9fc3d9; font-size:calc(var(--u)*2.3); line-height:1.35; margin-top:calc(var(--u)*.4); }
   .rain { display:flex; align-items:flex-end; gap:calc(var(--u)*.7); height:calc(var(--u)*9); margin-bottom:calc(var(--u)*2.6); }
   .rb { flex:1; height:100%; position:relative; display:flex; align-items:flex-end; } .rb i { display:block; width:100%; border-radius:calc(var(--u)*.6); background:rgba(159,195,217,.28); }
@@ -2967,12 +2967,12 @@ const SF_NS_CSS = `
   .rb span { position:absolute; left:0; bottom:calc(var(--u)*-3); font-size:calc(var(--u)*1.9); color:var(--sf-dim); white-space:nowrap; }
   .wxTop .sub b.rain { color:#4fc3f7; font-weight:600; } .wxTop .sub b.dry { color:var(--sf-green); font-weight:600; }
   .dayB { display:flex; align-items:center; gap:calc(var(--u)*2); height:100%; } .dayB .dv { display:flex; flex-direction:column; flex:0 0 auto; }
-  .dayB .big { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*5.2); font-weight:600; color:#fff; line-height:1; } .dayB .big small { font-size:calc(var(--u)*2.4); color:var(--sf-dim); }
+  .dayB .big { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*5.2); font-weight:600; color:var(--sf-strong); line-height:1; } .dayB .big small { font-size:calc(var(--u)*2.4); color:var(--sf-dim); }
   .dayB .dc { display:flex; flex-wrap:wrap; gap:calc(var(--u)*1); margin-left:auto; justify-content:flex-end; }
   .chip.up { color:#ffb347; background:rgba(255,179,71,.12); }
   .fc { display:flex; justify-content:space-between; }
   .fc > div { flex:1; text-align:center; } .fc ha-icon { --mdc-icon-size:calc(var(--u)*4.6); color:var(--a); }
-  .fc .h { font-size:calc(var(--u)*2.1); color:var(--sf-dim); } .fc .n { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*3); color:#fff; }
+  .fc .h { font-size:calc(var(--u)*2.1); color:var(--sf-dim); } .fc .n { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*3); color:var(--sf-strong); }
 
   /* voitures (anneaux) */
   .cars { display:flex; gap:calc(var(--u)*1.4); height:100%; align-items:center; }
@@ -2988,7 +2988,7 @@ const SF_NS_CSS = `
   .pill { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:calc(var(--u)*2);
     border:1px solid rgb(var(--sf-fg-rgb) / .1); background:rgb(var(--sf-fg-rgb) / .04); padding:calc(var(--u)*.8) 0; }
   .pill ha-icon { --mdc-icon-size:calc(var(--u)*4.4); color:var(--a); }
-  .pill .num { font-size:calc(var(--u)*3.6); font-weight:600; color:#fff; margin-top:calc(var(--u)*.4); white-space:nowrap; }
+  .pill .num { font-size:calc(var(--u)*3.6); font-weight:600; color:var(--sf-strong); margin-top:calc(var(--u)*.4); white-space:nowrap; }
   .pill .num small { font-size:calc(var(--u)*2.2); color:var(--sf-dim); font-weight:400; }
   .pill .lbl { margin-top:calc(var(--u)*.2); max-width:100%; letter-spacing:.08em; }
   .pill.bad { border-color:var(--sf-red); background:rgb(var(--sf-red-rgb) / .15); } .pill.bad .num { color:#ff8095; }
@@ -3009,13 +3009,13 @@ const SF_NS_CSS = `
   .orbWrap { position:relative; width:100%; height:100%; }
   .orbWrap svg { position:absolute; inset:0; width:100%; height:100%; }
   .orbC { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none; }
-  .orbC .big { font-size:calc(var(--u)*8.4); font-weight:700; color:#fff; line-height:1; text-shadow:0 0 calc(var(--u)*3) var(--a); }
+  .orbC .big { font-size:calc(var(--u)*8.4); font-weight:700; color:var(--sf-strong); line-height:1; text-shadow:0 0 calc(var(--u)*3) var(--a); }
   .orbC .big small { font-size:calc(var(--u)*3.2); color:var(--a); font-weight:500; }
   .stats { display:flex; flex-direction:column; gap:calc(var(--u)*1.2); min-height:0; }
   .stat { flex:1 1 0; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:calc(var(--u)*.7); padding:0 calc(var(--u)*1.8); border-radius:calc(var(--u)*2); border:1px solid rgb(var(--sf-fg-rgb) / .1); background:rgb(var(--sf-fg-rgb) / .04); overflow:hidden; }
   .srow { display:flex; align-items:center; gap:calc(var(--u)*1.2); } .srow ha-icon { --mdc-icon-size:calc(var(--u)*4.2); flex:0 0 auto; }
   .srow .lbl { flex:1 1 auto; min-width:0; }
-  .stat .v { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*4.4); font-weight:600; color:#fff; line-height:1; white-space:nowrap; margin-left:auto; }
+  .stat .v { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*4.4); font-weight:600; color:var(--sf-strong); line-height:1; white-space:nowrap; margin-left:auto; }
   .stat .v small { font-size:calc(var(--u)*2.3); color:var(--sf-dim); font-weight:400; }
   .sbar { height:calc(var(--u)*1); border-radius:99px; background:rgb(var(--sf-fg-rgb) / .09); overflow:hidden; } .sbar i { display:block; height:100%; border-radius:99px; transition:width .8s; }
   .ssub { display:flex; align-items:center; gap:calc(var(--u)*1.2); min-height:calc(var(--u)*3.4); overflow:hidden; white-space:nowrap; }
@@ -3034,13 +3034,13 @@ const SF_NS_CSS = `
   .tile ha-icon { --mdc-icon-size:calc(var(--u)*7.4); flex:0 0 auto; }
   .tile .nm { flex:0 0 auto; line-height:1.35; font-weight:600; font-size:calc(var(--u)*2.6); letter-spacing:.08em; text-transform:uppercase; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .tile .st { flex:0 0 auto; font-size:calc(var(--u)*2.1); opacity:.8; }
-  .tile.on { color:#fff; border-color:var(--tc); background:color-mix(in srgb, var(--tc) 20%, transparent); box-shadow:inset 0 0 calc(var(--u)*5) color-mix(in srgb, var(--tc) 30%, transparent), 0 0 calc(var(--u)*3.5) color-mix(in srgb, var(--tc) 40%, transparent); }
+  .tile.on { color:var(--sf-strong); border-color:var(--tc); background:color-mix(in srgb, var(--tc) 20%, transparent); box-shadow:inset 0 0 calc(var(--u)*5) color-mix(in srgb, var(--tc) 30%, transparent), 0 0 calc(var(--u)*3.5) color-mix(in srgb, var(--tc) 40%, transparent); }
   .tile.on ha-icon { color:var(--tc); filter:drop-shadow(0 0 calc(var(--u)*2) var(--tc)); }
   .cars > .mini { flex:1 1 0; min-width:0; }
   .mini { display:flex; align-items:center; gap:calc(var(--u)*1.6); height:100%; cursor:pointer; }
   .mini .nm { font-weight:700; font-size:calc(var(--u)*2.4); letter-spacing:.08em; text-transform:uppercase; }
   .bar { flex:1 1 auto; height:calc(var(--u)*1.6); border-radius:99px; background:rgb(var(--sf-fg-rgb) / .1); overflow:hidden; } .bar i { display:block; height:100%; border-radius:99px; }
-  .mini .v { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*3.4); font-weight:600; color:#fff; white-space:nowrap; }
+  .mini .v { font-family:Orbitron, sans-serif; font-size:calc(var(--u)*3.4); font-weight:600; color:var(--sf-strong); white-space:nowrap; }
   .mini ha-icon { --mdc-icon-size:calc(var(--u)*3.6); }
 
   /* nuit */
@@ -3230,7 +3230,7 @@ class SfNsCard extends SfBase {
     const rail = seg.map(([x, y, m]) => `<i style="flex:${y - x}" class="${m === mode ? "on" : ""}"></i>`).join("");
     const wxh = (t !== null && !isNaN(t)) || wx ? `<div class="wx" data-info="${this.esc(c.weather || c.outdoor)}">${wx ? this.ic(wx[0]) : ""}<div><div class="t">${t === null || isNaN(t) ? "—" : this.f1(t)}°</div></div></div>` : "";
     return `<div class="hero"><div class="hrow"><div><div class="hm">${p(d.getHours())}:${p(d.getMinutes())}</div><div class="date">${this.esc(this.dateTxt(d))}</div></div>${wxh}</div>
-      <div class="railWrap"><div class="modeTxt"><b>${this.esc(this.t(SF_NS_MODES[mode].greet))}</b> · ${this.esc(this.t(SF_NS_MODES[mode].label))}</div><div class="rail">${rail}</div><b style="position:absolute;top:50%;left:${(frac * 100).toFixed(2)}%;width:calc(var(--u)*2.4);height:calc(var(--u)*2.4);margin:calc(var(--u)*-1.2) 0 0 calc(var(--u)*-1.2);border-radius:50%;background:#fff;box-shadow:0 0 calc(var(--u)*2) #fff,0 0 calc(var(--u)*4) var(--a)"></b></div></div>`;
+      <div class="railWrap"><div class="modeTxt"><b>${this.esc(this.t(SF_NS_MODES[mode].greet))}</b> · ${this.esc(this.t(SF_NS_MODES[mode].label))}</div><div class="rail">${rail}</div><b style="position:absolute;top:50%;left:${(frac * 100).toFixed(2)}%;width:calc(var(--u)*2.4);height:calc(var(--u)*2.4);margin:calc(var(--u)*-1.2) 0 0 calc(var(--u)*-1.2);border-radius:50%;background:var(--sf-white);box-shadow:0 0 calc(var(--u)*2) var(--sf-white),0 0 calc(var(--u)*4) var(--a)"></b></div></div>`;
   }
   panel(inner, cls, attrs) { return `<div class="panel ${cls || ""}" ${attrs || ""}>${inner}</div>`; }
 
@@ -3264,7 +3264,7 @@ class SfNsCard extends SfBase {
       return `<div class="car" data-info="${this.esc(car.soc)}"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgb(var(--sf-fg-rgb) / .09)" stroke-width="9"/>
         <circle cx="50" cy="50" r="${R}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"
           transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 3px ${col})"/>
-        <text x="50" y="58" text-anchor="middle" font-family="Orbitron,sans-serif" font-weight="700" font-size="27" fill="#fff">${s === null ? "—" : Math.round(s)}<tspan font-size="12" fill="#9fc3d9">%</tspan></text></svg>
+        <text x="50" y="58" text-anchor="middle" font-family="Orbitron,sans-serif" font-weight="700" font-size="27" fill="var(--sf-strong)">${s === null ? "—" : Math.round(s)}<tspan font-size="12" fill="#9fc3d9">%</tspan></text></svg>
         <div class="nm" style="color:${this.esc(car.color || "var(--sf-cyan)")}">${this.esc(car.name)}</div><div class="rg">${rg === null ? "—" : Math.round(rg)} km${st}</div></div>`;
     }).join("");
     return this.panel(`<div class="cars">${cars}</div>`);
@@ -3397,7 +3397,7 @@ class SfNsCard extends SfBase {
       .sheet{width:100%;height:100%;display:flex;flex-direction:column;gap:calc(var(--u)*2);padding:calc(var(--u)*2.4);border-radius:calc(var(--u)*3);border:1px solid var(--a);background:#06101d;box-shadow:0 0 calc(var(--u)*6) rgb(var(--sf-cyan-rgb) / .25)}
       .shead{display:flex;align-items:center;gap:calc(var(--u)*2);font-family:Orbitron,sans-serif;font-weight:700;font-size:calc(var(--u)*3.4);letter-spacing:.14em;text-transform:uppercase;color:var(--a)}
       .shead ha-icon{--mdc-icon-size:calc(var(--u)*5)} .shead .r{margin-left:auto;font-family:'B612 Mono',monospace;font-weight:400;font-size:calc(var(--u)*2.6);letter-spacing:.04em;text-transform:none;color:#9fc3d9}
-      .shead .x{width:calc(var(--u)*8);height:calc(var(--u)*8);display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgb(var(--sf-fg-rgb) / .2);color:#fff}
+      .shead .x{width:calc(var(--u)*8);height:calc(var(--u)*8);display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgb(var(--sf-fg-rgb) / .2);color:var(--sf-strong)}
       .btn.big ha-icon{--mdc-icon-size:calc(var(--u)*11)} .btn.big{font-size:calc(var(--u)*2.8)} .nrow{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:calc(var(--u)*1.7);min-height:0} .nrow>.panel{min-height:0}</style>
       <div class="ns ${mode.toLowerCase()}${this._kiosk ? " full" : ""}${a0 ? " tight" : ""}" style="--a:${M.a};--bg:${M.bg}">${this.hero(mode)}${alerts}<div class="main" style="${grid}">${main}</div>${mode === "Nuit" ? "" : this.dock()}${this.popup()}</div>`;
     // no rewrite if nothing changed (otherwise animations and long presses would be cut); the time is excluded from the comparison

@@ -28,7 +28,7 @@ class SfRadiatorsCard extends SfBase {
         box-shadow:0 0 16px -6px var(--ac); }
       .rad.off { opacity:.6; }
       .rh { display:flex; align-items:center; gap:8px; }
-      .rh .nm { flex:1; min-width:0; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#fff; }
+      .rh .nm { flex:1; min-width:0; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--sf-strong); }
       .rh .st { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:${SF_C.dim}; }
       .rad.heat .rh .st { color:var(--ac); }
       .rad.heat .rh ha-icon { animation: rglow 2.2s ease-in-out infinite; }
@@ -42,7 +42,7 @@ class SfRadiatorsCard extends SfBase {
       .ctl .btn { min-width:44px; min-height:40px; font-size:16px; }
       .ctl .tg { text-align:center; min-width:96px; }
       .ctl .tg small { display:block; font-size:9px; letter-spacing:.14em; color:${SF_C.dim}; }
-      .ctl .tg b { font-family:Orbitron,sans-serif; font-size:20px; color:#fff; text-shadow:0 0 10px var(--ac); }
+      .ctl .tg b { font-family:Orbitron,sans-serif; font-size:20px; color:var(--sf-strong); text-shadow:0 0 10px var(--ac); }
       .meta { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:10px; color:${SF_C.dim}; }
       .meta .bar { flex:1; height:4px; border-radius:2px; background:rgb(var(--sf-fg-rgb) / .07); overflow:hidden; }
       .meta .bar i { display:block; height:100%; background:var(--ac); box-shadow:0 0 6px var(--ac); border-radius:2px; transition:width 1s; }

@@ -18,7 +18,7 @@ class SfSetpointsCard extends SfBase {
       td:last-child { border-right:1px solid rgb(var(--sf-cyan-rgb) / .1); border-radius:0 8px 8px 0; }
       .st { display:flex; align-items:center; justify-content:center; gap:4px; }
       .st .btn { padding:3px 8px; }
-      .st b { font-family:Orbitron,sans-serif; font-size:14px; min-width:44px; text-align:center; color:#fff; }
+      .st b { font-family:Orbitron,sans-serif; font-size:14px; min-width:44px; text-align:center; color:var(--sf-strong); }
       .st b.edit { cursor:pointer; padding:6px 4px; border-radius:6px; }
       .st b.edit:hover, .st b.edit:focus-visible { background:rgb(var(--sf-cyan-rgb) / .12); outline:none; }
       @media (max-width: 640px) { .st .btn { display:none; } .st b { min-width:56px; padding:10px 6px; } }
@@ -26,7 +26,7 @@ class SfSetpointsCard extends SfBase {
       .ed .who { font-size:13px; color:${SF_C.dim}; text-align:center; }
       .ed .who b { font-weight:600; }
       .ed .big { display:flex; align-items:center; justify-content:center; gap:18px; }
-      .ed .big output { font-family:Orbitron,sans-serif; font-size:38px; color:#fff; min-width:130px; text-align:center; }
+      .ed .big output { font-family:Orbitron,sans-serif; font-size:38px; color:var(--sf-strong); min-width:130px; text-align:center; }
       .ed .big button.btn { font-size:26px; line-height:1; min-width:56px; min-height:56px; padding:0; }
       .ed input[type=range] { width:100%; max-width:420px; height:36px; accent-color:var(--ed-col, ${SF_C.cyan}); }
       .ed .seg { flex-wrap:wrap; justify-content:center; }

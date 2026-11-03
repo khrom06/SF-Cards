@@ -44,7 +44,7 @@ class SfRadarCard extends SfBase {
     const blip = (x, y, col, on, label) => `<g class="blip" opacity="${this.esc(on ? 1 : 0.28)}">
         <circle cx="${this.esc(x)}" cy="${this.esc(y)}" r="${this.esc(on ? 2.6 : 1.8)}" fill="${this.esc(col)}" style="filter:drop-shadow(0 0 2px ${this.esc(col)})"/>
         ${on ? `<circle cx="${this.esc(x)}" cy="${this.esc(y)}" r="2.6" fill="none" stroke="${this.esc(col)}" stroke-width=".6"><animate attributeName="r" from="2.6" to="7" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" from=".8" to="0" dur="1.8s" repeatCount="indefinite"/></circle>` : ""}
-        <text x="${this.esc(x)}" y="${this.esc(y - 3.8)}" text-anchor="middle" font-size="3.2" fill="${this.esc(on ? "#fff" : SF_C.grey)}">${this.esc(label)}</text></g>`;
+        <text x="${this.esc(x)}" y="${this.esc(y - 3.8)}" text-anchor="middle" font-size="3.2" fill="${this.esc(on ? "var(--sf-strong)" : SF_C.grey)}">${this.esc(label)}</text></g>`;
     const np = c.people.length, nr = c.rooms.length;
     let svg = `<circle class="ringl" cx="50" cy="50" r="${this.esc(R.outer)}"/><circle class="ringl" cx="50" cy="50" r="${this.esc(R.mid)}"/>
       <circle class="ringl" cx="50" cy="50" r="${this.esc(R.inner)}"/>

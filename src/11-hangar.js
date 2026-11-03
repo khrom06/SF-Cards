@@ -58,7 +58,7 @@ class SfHangarCard extends SfBase {
       .ring-bg { fill:none; stroke:rgb(var(--sf-fg-rgb) / .07); stroke-width:7; }
       .ring { fill:none; stroke-width:7; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%;
         transition: stroke-dashoffset 1s ease; }
-      .soc { font-family:Orbitron,sans-serif; font-size:20px; fill:#fff; }
+      .soc { font-family:Orbitron,sans-serif; font-size:20px; fill:var(--sf-strong); }
       .tick { stroke:rgb(var(--sf-cyan-rgb) / .25); stroke-width:1; }
       .borne { text-align:center; min-width:92px; }
       .borne .plug { font-size:26px; display:flex; justify-content:center; }
@@ -77,7 +77,7 @@ class SfHangarCard extends SfBase {
         color:${SF_C.amber}; border:1px solid rgb(var(--sf-amber-rgb) / .55); background:rgb(var(--sf-amber-rgb) / .09); animation: blink 2s infinite; }
       .fl3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:12px; }
       .fl3 > div { padding:7px 9px; border-radius:8px; background:rgb(var(--sf-cyan-rgb) / .04); border:1px solid rgb(var(--sf-cyan-rgb) / .12); text-align:center; }
-      .tgt { stroke:#fff; stroke-width:2; }`;
+      .tgt { stroke:var(--sf-strong); stroke-width:2; }`;
   }
   _ring(car) {
     const soc = this.num(car.soc);
