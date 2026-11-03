@@ -40,6 +40,7 @@ const HASS = (states, language) => ({ states: withIds(states), locale: { languag
 
 // Une configuration complète par carte (les identifiants ci-dessus sont fictifs).
 const FULL = {
+  "sf-trend-card": { title: "Trend", hours: 24, series: [{ entity: "sensor.temp_a", name: "A" }, { entity: "sensor.temp_b", name: "B", color: "#ffb300" }] },
   "sf-alert-card": { leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], alarm: "alarm_control_panel.home", hide_sim: true },
   "sf-hangar-card": { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range", target: "sensor.car_target", charging: "binary_sensor.charging" }],
     charger: { connected: "binary_sensor.connected", charging: "binary_sensor.charging", power: "sensor.ev", current: "number.current" }, mode: "input_select.mode",
@@ -801,6 +802,62 @@ __SF.SF_HOOK.tr = (lang, key) => {
       else { ed.hass = H2; if (sub._hass !== H2) fail("éditeur imbriqué : hass n'est pas propagé aux éditeurs de cartes imbriquées"); }
       ed.remove();
     } finally { window.setInterval = si; window.clearInterval = ci; live.forEach((id) => ci(id)); } }
+  // 5g. Carte de tendance : données (historique / statistiques), plages, échecs sans rafale de requêtes, données hostiles, survol.
+  { const now = Date.now(), calls = [];
+    const hist = (n, f) => Array.from({ length: n }, (_, i) => ({ s: String(f(i)), lu: (now - 86400000 + (i * 86400000) / n) / 1000 }));
+    const mk = (over) => { const h = { ...HASS({ ...base, "sensor.temp_a": { state: "21.5", attributes: { unit_of_measurement: "°C", friendly_name: "A" } },
+      "sensor.temp_b": { state: "48", attributes: { unit_of_measurement: "%", friendly_name: "B" } } }, "fr"),
+      callWS: async (m) => { calls.push(m); return over(m); } }; return h; };
+    const draw = async (cfg, hass, ms = 80) => { const el = document.createElement("sf-trend-card"); el.setConfig(cfg); document.body.appendChild(el); el.hass = hass; await wait(ms); return el; };
+    // a. historique 24 h : deux séries, unités différentes -> une courbe par ligne ; légende, valeurs actuelles, boutons de plage.
+    calls.length = 0;
+    const a = await draw({ series: [{ entity: "sensor.temp_a" }, { entity: "sensor.temp_b" }] }, mk(() => ({ "sensor.temp_a": hist(50, (i) => 18 + (i % 7)), "sensor.temp_b": hist(50, (i) => 40 + (i % 9)) })));
+    const ra = a.shadowRoot;
+    if (calls.length !== 1 || calls[0].type !== "history/history_during_period") fail(`tendance : 1 appel d'historique attendu, reçu ${JSON.stringify(calls.map((c) => c.type))}`);
+    if (ra.querySelectorAll(".ln2").length !== 2 || ra.querySelectorAll(".plot").length !== 2) fail("tendance : unités différentes = 2 graphes avec une courbe chacun");
+    if (ra.querySelectorAll(".lg .it").length !== 2 || !/21[.,]5/.test(ra.querySelector(".lg").textContent)) fail("tendance : légende ou valeur actuelle absente");
+    if (ra.querySelectorAll(".rg").length !== 3 || !ra.querySelector(".rg.on")) fail("tendance : boutons de plage 6 h / 24 h / 7 j absents");
+    // b. survol : valeur à l'instant visé.
+    const pl = ra.querySelector(".plot"); pl.getBoundingClientRect = () => ({ left: 0, width: 200, top: 0, height: 100, right: 200, bottom: 100 });
+    pl.dispatchEvent(new PointerEvent("pointermove", { clientX: 100, bubbles: true }));
+    if (!pl.classList.contains("hov") || !pl.querySelector(".ro").textContent.trim()) fail("tendance : le survol n'affiche pas de valeur");
+    a.remove();
+    // c. même unité -> superposées ; plage 7 j -> statistiques ; statistiques vides -> repli sur l'historique.
+    calls.length = 0;
+    const c1 = await draw({ hours: 168, series: [{ entity: "sensor.temp_a" }, { entity: "sensor.temp_a", color: "#ff7043" }] }, mk((m) => m.type.startsWith("recorder") ? { "sensor.temp_a": [] } : { "sensor.temp_a": hist(30, (i) => 20 + (i % 4)) }));
+    if (c1.shadowRoot.querySelectorAll(".plot").length !== 1) fail("tendance : même unité = un seul graphe superposé");
+    if (!calls.some((c) => c.type === "recorder/statistics_during_period") || !calls.some((c) => c.type === "history/history_during_period")) fail(`tendance : 7 j = statistiques puis repli historique (${JSON.stringify(calls.map((c) => c.type))})`);
+    if (!c1.shadowRoot.querySelector(".ln2")) fail("tendance : le repli sur l'historique n'a rien tracé");
+    // d. changement de plage au clic : nouvel appel, pas de boucle.
+    calls.length = 0;
+    const d1 = await draw({ series: [{ entity: "sensor.temp_a" }] }, mk(() => ({ "sensor.temp_a": hist(20, (i) => i) })));
+    d1.shadowRoot.querySelector('[data-rg="6"]').click(); await wait(80);
+    if (calls.length !== 2 || !d1.shadowRoot.querySelector('.rg.on[data-rg="6"]')) fail(`tendance : changer de plage = un nouvel appel (appels : ${calls.length})`);
+    d1.remove(); c1.remove();
+    // e. échec du serveur : message « Aucune donnée », et AU PLUS une nouvelle tentative par minute malgré les mises à jour de hass en rafale.
+    calls.length = 0;
+    const bad = mk(() => { throw new Error("boum"); });
+    const e1 = await draw({ series: [{ entity: "sensor.temp_a" }] }, bad);
+    for (let i = 0; i < 40; i++) { e1.hass = { ...bad }; await wait(4); }
+    if (calls.length > 1) fail(`tendance : ${calls.length} requêtes après un échec (retente à chaque mise à jour de hass)`);
+    if (!/Aucune donnée/.test(e1.shadowRoot.textContent)) fail("tendance : message d'échec absent");
+    e1.remove();
+    // f. données hostiles : 60 000 points, valeurs non numériques, NaN, entités mal formées -> rendu borné et rapide, rien d'injecté.
+    calls.length = 0;
+    const big = Array.from({ length: 60000 }, (_, i) => ({ s: i % 7 === 0 ? "unavailable" : String(i % 100), lu: (now - 86400000 + i * 1440) / 1000 }));
+    const t0 = performance.now();
+    const f1 = await draw({ series: [{ entity: "sensor.temp_a", name: "<img src=x onerror=window.__pwn=1>" }, { entity: "x\"><b>", name: "bad" }] }, mk(() => ({ "sensor.temp_a": big })), 150);
+    const path = f1.shadowRoot.querySelector(".ln2"), npts = path ? (path.getAttribute("d").match(/[ML]/g) || []).length : 0;
+    if (!path || npts > 240) fail(`tendance : ${npts} points tracés pour 60 000 reçus (240 maximum attendus)`);
+    if (performance.now() - t0 > 1500) fail("tendance : rendu de 60 000 points trop lent");
+    if (f1.shadowRoot.querySelector("img") || window.__pwn) fail("tendance : un nom d'entité hostile a été injecté dans le HTML");
+    if (calls.length && calls[0].entity_ids && calls[0].entity_ids.some((x) => /[<>"]/.test(x))) fail("tendance : un identifiant mal formé a été envoyé au serveur");
+    f1.remove();
+    // g. couleurs : jamais deux séries de la même teinte quand l'une est choisie explicitement.
+    const g1 = await draw({ series: [{ entity: "sensor.temp_a", color: "#ffb300" }, { entity: "sensor.temp_b" }, { entity: "sensor.temp_a" }] }, mk(() => ({})), 40);
+    const bg = [...g1.shadowRoot.querySelectorAll(".lg .it .dt")].map((e) => e.style.background);
+    if (bg.length !== 3 || new Set(bg).size !== bg.length) fail(`tendance : couleurs en double dans la légende (${bg.join(" | ")})`);
+    g1.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`erreur JavaScript : ${e}`);

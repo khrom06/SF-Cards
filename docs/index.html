@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SF Cards — live demo</title>
-<meta name="description" content="Sci-fi HUD cards for Home Assistant. Try all 16 cards live, in 11 languages, with fake data.">
+<meta name="description" content="Sci-fi HUD cards for Home Assistant. Try all 17 cards live, in 11 languages, with fake data.">
 <meta property="og:title" content="SF Cards — sci-fi HUD cards for Home Assistant">
 <meta property="og:description" content="16 Lovelace cards, visual editors, 11 languages, a 480×480 wall-panel dashboard. Try them live.">
 <meta property="og:image" content="https://khrom06.github.io/SF-Cards/social.png">
@@ -52,7 +52,7 @@ const U = (v, unit) => S(v, { unit_of_measurement: unit });
 const base = {
   "sensor.grid": U(850, "W"), "sensor.solar": U(2400, "W"), "sensor.ev": U(1800, "W"), "sensor.pac": U(600, "W"),
   "sensor.bat_soc": U(62, "%"), "sensor.bat_p": U(-1200, "W"), "sensor.kwh": U(2.1, "kWh"), "sensor.eur": U(1.2, "€"),
-  "sensor.price": U(0.18, "€"), "sensor.temp": U(20.5, "°C"), "sensor.hum": U(55, "%"), "sensor.out": U(11, "°C"),
+  "sensor.price": U(0.18, "€"), "sensor.temp": U(20.5, "°C"), "sensor.temp2": U(19.5, "°C"), "sensor.hum": U(55, "%"), "sensor.out": U(11, "°C"),
   "sensor.solar_left": U(4.2, "kWh"), "sensor.fossil": U(12, "%"),
   "weather.home": S("sunny", { temperature: 12 }),
   "climate.room": S("auto", { hvac_action: "heating", preset_modes: ["comfort", "eco", "away", "none"], preset_mode: "eco", temperature: 20, min_temp: 7, max_temp: 30 }),
@@ -67,7 +67,11 @@ const base = {
 };
 // Comme dans HA, chaque état porte son entity_id.
 const withIds = (states) => Object.fromEntries(Object.entries(states).map(([id, st]) => [id, { entity_id: id, last_changed: new Date().toISOString(), ...st }]));
-const HASS = (states, language) => ({ states: withIds(states), locale: { language }, language, callService: () => Promise.resolve() });
+// Historique fictif (sinusoïdes) pour la carte de tendance de la démo.
+const demoHistory = (m) => Object.fromEntries((m.entity_ids || m.statistic_ids || []).map((id, k) => [id, Array.from({ length: 120 }, (_, i) => {
+  const t = Date.now() - 86400000 + (i * 86400000) / 120, v = 21 + 2 * Math.sin(i / 120 * 12.5 + k * 1.3) + Math.sin(i * 1.7) * 0.25;
+  return { s: String(v.toFixed(2)), lu: t / 1000 }; })]));
+const HASS = (states, language) => ({ states: withIds(states), locale: { language }, language, callService: () => Promise.resolve(), callWS: async (m) => demoHistory(m) });
 
 // Une configuration complète par carte (les identifiants ci-dessus sont fictifs).
 const FULL = {
@@ -89,6 +93,7 @@ const FULL = {
   "sf-setpoints-card": { columns: [{ label: "Day" }], rows: [{ name: "Living", entities: ["input_number.target"] }] },
   "sf-ledger-card": { total_cost: "sensor.eur", solar_fraction: "sensor.fossil", avg_price: "sensor.price", devices: [{ name: "EV", total: "sensor.kwh", edf: "sensor.kwh", solar: "sensor.kwh", cost: "sensor.eur" }] },
   "sf-cells-card": {},
+  "sf-trend-card": { title: "Temperatures", series: [{ entity: "sensor.temp", name: "Living room" }, { entity: "sensor.temp2", name: "Bedroom" }] },
   "sf-radiators-card": { radiators: [{ name: "Room", climate: "climate.room", preset: "select.room_preset", kwh: "sensor.kwh" }], setpoint: false },
   "sf-battery-card": { soc: "sensor.bat_soc", power: "sensor.bat_p", capacity_kwh: 10, charged_today: "sensor.kwh", discharged_today: "sensor.kwh", temperature: "sensor.temp", health: "sensor.hum", cycles: "sensor.kwh", mode: "input_select.mode" },
   "sf-launcher-card": { tiles: [{ name: "Climate", summary: "room", card: { type: "custom:sf-climate-card", rooms: [{ name: "L", climate: "climate.room", temp: "sensor.temp", target: "input_number.target" }] } },

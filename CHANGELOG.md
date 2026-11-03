@@ -3,6 +3,8 @@
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
+### Added
+- `sf-trend-card`: **history curves** (read-only). Several series on one chart (same unit) or one line each, range buttons (default 6 h / 24 h / 7 d), hover / touch readout, long-term statistics beyond 48 h with fallback to the history. Failure-safe: at most one retry per minute, bounded point count, entity ids validated. Visual editor and 11 languages included.
 ### Fixed
 - Card editor: cards nested in a panel (launcher) now get `hass` updates in their own editor.
 - Every card now calls the base `disconnectedCallback`, so timers never stack or outlive a card when HA moves it in edit mode.

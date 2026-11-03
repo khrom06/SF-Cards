@@ -42,7 +42,7 @@
 
 ## Features
 
-- **16 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
+- **17 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone or on a wall tablet; idle devices can be hidden automatically and the number of displayed devices is capped.
@@ -96,6 +96,7 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-hangar-card`](#sf-hangar-card) | EV(s) + shared charger, charge‑mode selector, energy flows |
 | [`sf-machines-card`](#sf-machines-card) | Status tiles: values with thresholds, on/off, toggles with timers |
 | [`sf-cells-card`](#sf-cells-card) | Weakest sensor batteries first, discovered automatically |
+| [`sf-trend-card`](#sf-trend-card) | History curves (read-only): range buttons, several series on one chart or one line each, hover / touch readout |
 | [`sf-battery-card`](#sf-battery-card) | Home battery: level, flow, estimated time, daily energy, mode — only shows what you configure |
 | [`sf-radiators-card`](#sf-radiators-card) | Radiators: preset, setpoint, heating state and daily energy — works without a temperature probe |
 | [`sf-camera-card`](#sf-camera-card) | Camera mosaic with motion / person overlay |
@@ -329,6 +330,25 @@ limit: 12                # default 16
 exclude: [sensor.some_battery]
 include_pattern: ""      # optional regex on the entity id (a group with alternatives repeated with + or * is refused, see the console)
 exclude_pattern: ""      # optional regex: ignore matching entity ids
+```
+
+### sf-trend-card
+
+Read-only history curves in the HUD style — nothing is computed, the card draws what Home Assistant recorded. Series that share a unit are overlaid on one chart; series with different units get one line each (`layout` forces either). Range buttons switch the window; hover or touch a chart to read the value at that moment. Up to 48 h the full history is used; beyond that the long-term statistics (hourly mean), falling back to the history for an entity without statistics. Data is fetched once per range and refreshed at most every 2 minutes (10 minutes beyond 48 h); after an error it retries at most once a minute.
+
+```yaml
+type: custom:sf-trend-card
+title: Temperatures
+hours: 24                  # initial range
+ranges: [6, 24, 168]       # range buttons, in hours ([] = no buttons)
+layout: auto               # auto | combined | separate
+height: 150                # px, 80 to 400
+series:                    # up to 8
+  - entity: sensor.living_room_temperature
+    name: Living room      # optional
+    color: "#00e5ff"       # optional, otherwise the first free colour of the palette
+    unit: "°C"             # optional, otherwise the entity's unit
+    digits: 1
 ```
 
 ### sf-battery-card
