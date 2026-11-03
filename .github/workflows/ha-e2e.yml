@@ -1,0 +1,48 @@
+name: E2E on a real Home Assistant
+# Manuel pour l'instant (workflow_dispatch) : démarre un vrai Home Assistant en conteneur et pilote son frontend avec Playwright.
+# Détecte les gels et erreurs que les tests simulés (test/run.sh) ne peuvent pas voir. À passer en automatique une fois éprouvé.
+on:
+  workflow_dispatch:
+    inputs:
+      ha_version:
+        description: "Image Home Assistant (ex. 2026.10, stable, beta)"
+        default: "stable"
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Configuration Home Assistant de test
+        run: |
+          mkdir -p ha-config/www
+          cp dist/sf-cards.js ha-config/www/sf-cards.js
+          cat > ha-config/configuration.yaml <<'YAML'
+          default_config:
+          template:
+            - sensor:
+                - name: "E2E Temp A"
+                  unique_id: e2e_temp_a
+                  unit_of_measurement: "°C"
+                  device_class: temperature
+                  state: "21.5"
+                - name: "E2E Temp B"
+                  unique_id: e2e_temp_b
+                  unit_of_measurement: "°C"
+                  device_class: temperature
+                  state: "19.0"
+          YAML
+      - name: Démarrer Home Assistant
+        run: docker run -d --name ha -p 8123:8123 -v "$PWD/ha-config:/config" "ghcr.io/home-assistant/home-assistant:${{ inputs.ha_version }}"
+      - name: Installer Playwright
+        run: |
+          npm init -y >/dev/null
+          npm i --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Test E2E
+        run: node test/e2e/run.mjs
+      - name: Journal de Home Assistant (en cas d'échec)
+        if: failure()
+        run: docker logs ha 2>&1 | tail -80
