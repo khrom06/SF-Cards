@@ -62,6 +62,12 @@ const SF_LANGS = { en: 0, es: 1, de: 2, nl: 3, it: 4, pt: 5, pl: 6, ru: 7, zh: 8
 // HA language (user profile); unsupported language -> English.
 /* Required fields: per card, a function that returns the texts (translation keys) of what is missing. Deliberately lenient rules:
  * only a card that would show nothing useful is flagged. The editor shows a banner, the card a "to be completed" message. */
+// Friendly tag names (1.13): the original themed names stay valid forever; each friendly tag is a subclass registered under its own name
+// (see 30-registry.js) and shares the spec / required-field rules of its original tag.
+const SF_ALIAS = { "sf-energy-flow-card": "sf-reactor-card", "sf-vehicles-card": "sf-hangar-card", "sf-home-banner-card": "sf-bridge-card",
+  "sf-controls-card": "sf-console-card", "sf-presence-card": "sf-radar-card" };
+const SF_ALIAS_REV = Object.fromEntries(Object.entries(SF_ALIAS).map(([a, c]) => [c, a]));
+const sfCanon = (tag) => SF_ALIAS[tag] || tag;
 const sfHas = (v) => Array.isArray(v) ? v.length > 0 : !!v;
 const sfBatUsable = (c) => !!(c.soc || c.power || c.entity || (c.batteries || []).some((b) => b && (b.soc || b.power || b.entity)));
 const SF_REQ = {
@@ -226,7 +232,7 @@ const SF_EVSVG = {
 class SfBase extends HTMLElement {
   setConfig(config) {
     if (!config) throw new Error(`${this.localName} : config required`);
-    this._config = sfNormConfig(this.localName, this.defaults ? { ...this.defaults(), ...config } : { ...config });
+    this._config = sfNormConfig(sfCanon(this.localName), this.defaults ? { ...this.defaults(), ...config } : { ...config });
     if (!this.shadowRoot) this.attachShadow({ mode: "open" });
     this._dirty = true;
     this._schedule();
@@ -242,7 +248,7 @@ class SfBase extends HTMLElement {
       // HA calls `hass` on every state change of the whole house: the DOM is only
       // rewritten if the render really changed, otherwise the animations
       // (3D rotations, flows) would restart from zero several times per second.
-      const rq = SF_REQ[this.localName], miss = rq && this.localName !== "sf-battery-card" ? rq(this._config) : [];
+      const rq = SF_REQ[sfCanon(this.localName)], miss = rq && this.localName !== "sf-battery-card" ? rq(this._config) : [];
       const body = miss.length ? this.frame(this.esc(this.t("Carte à compléter")), "", `<div style="color:${SF_C.amber};line-height:1.6">${miss.map((m) => `• ${this.esc(this.t(m))}`).join("<br>")}</div>`) : this.render();
       const html = `<style>${SF_CSS}${this.css ? this.css() : ""}</style>${body}`;
       this.dir = this.lang === "ar" ? "rtl" : "ltr";
@@ -3332,7 +3338,13 @@ const SF_DEFS = [
 window.customCards = window.customCards || [];
 for (const [tag, cls, name, description] of SF_DEFS) {
   if (!customElements.get(tag)) customElements.define(tag, cls);
-  if (!window.customCards.some((c) => c.type === tag)) window.customCards.push({ type: tag, name, description });
+  // the card picker lists the friendly name instead of the original themed one (which keeps working in YAML)
+  const shown = SF_ALIAS_REV[tag] || tag;
+  if (!window.customCards.some((c) => c.type === shown)) window.customCards.push({ type: shown, name, description });
+}
+for (const [alias, canon] of Object.entries(SF_ALIAS)) {
+  const def = SF_DEFS.find((d) => d[0] === canon);
+  if (def && !customElements.get(alias)) customElements.define(alias, class extends def[1] {});
 }
 
 /* ============================================================ VISUAL EDITORS */
@@ -3431,7 +3443,7 @@ function sfMachineTile(t) {
 }
 
 const SF_CARD_NAMES = {};   // filled in below: tag -> title
-const sfCardTag = (c) => { const t = c && typeof c.type === "string" ? c.type.replace(/^custom:/, "") : ""; return SF_CARD_NAMES[t] ? t : ""; };
+const sfCardTag = (c) => { const t = c && typeof c.type === "string" ? c.type.replace(/^custom:/, "") : "", n = SF_ALIAS_REV[t] || t; return SF_CARD_NAMES[n] ? n : ""; };
 
 const SF_SPECS = {
   "sf-alert-card": {
@@ -3752,7 +3764,7 @@ class SfEditorBase extends HTMLElement {
   // "Missing required fields" banner: updated on every change.
   _banner() {
     const root = this.shadowRoot; if (!root) return;
-    const rq = SF_REQ[this.localName.replace(/-editor$/, "")], miss = rq ? rq(this._config || {}) : [];
+    const rq = SF_REQ[sfCanon(this.localName.replace(/-editor$/, ""))], miss = rq ? rq(this._config || {}) : [];
     let b = root.querySelector(".req");
     if (!b) { b = document.createElement("div"); b.className = "req"; const w = root.querySelector("div"); if (w) w.prepend(b); }
     b.hidden = !miss.length;
@@ -3928,7 +3940,8 @@ for (const [tag, lists] of Object.entries(SF_REQ_FIELDS)) for (const [key, names
   const l = (SF_SPECS[tag].lists || []).find((x) => x.key === key);
   if (l) { const orig = l.schema; l.schema = (x) => sfMarkReq(orig(x), names); }
 }
-for (const [tag, spec] of Object.entries(SF_SPECS)) if (tag !== "sf-launcher-card") SF_CARD_NAMES[tag] = spec.title;
+for (const [alias, canon] of Object.entries(SF_ALIAS)) SF_SPECS[alias] = SF_SPECS[canon];   // the friendly tags share the spec of the original ones
+for (const [tag, spec] of Object.entries(SF_SPECS)) if (tag !== "sf-launcher-card" && !SF_ALIAS_REV[tag]) SF_CARD_NAMES[tag] = spec.title;   // the editor offers the friendly names
 
 // One "<card>-editor" element per card, wired to the card's class.
 for (const [tag, spec] of Object.entries(SF_SPECS)) {

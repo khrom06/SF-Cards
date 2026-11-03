@@ -87,13 +87,13 @@ Every card can be configured in the visual editor; the YAML below is just for re
 
 | Card | What it is |
 |---|---|
-| [`sf-bridge-card`](#sf-bridge-card) | Welcome banner: clock, weather, tariff (peak / off‑peak + countdown), house mode, solar left, anomalies, presence |
-| [`sf-reactor-card`](#sf-reactor-card) | Energy flow around an animated core: solar, grid, devices |
+| [`sf-home-banner-card`](#sf-home-banner-card) | Welcome banner: clock, weather, tariff (peak / off‑peak + countdown), house mode, solar left, anomalies, presence |
+| [`sf-energy-flow-card`](#sf-energy-flow-card) | Energy flow around an animated core: solar, grid, devices |
 | [`sf-climate-card`](#sf-climate-card) | Room dials with target temperature, house mode, extra buttons |
-| [`sf-console-card`](#sf-console-card) | Grouped controls: lights, dimmers, covers, vacuum, scripts, sensors |
+| [`sf-controls-card`](#sf-controls-card) | Grouped controls: lights, dimmers, covers, vacuum, scripts, sensors |
 | [`sf-launcher-card`](#sf-launcher-card) | Summary tiles that open any card (SF, standard Home Assistant or custom) in a popup — made for phones |
 | [`sf-alert-card`](#sf-alert-card) | Full‑frame red alert: water leaks, doorbell, alarm, power cut |
-| [`sf-hangar-card`](#sf-hangar-card) | EV(s) + shared charger, charge‑mode selector, energy flows |
+| [`sf-vehicles-card`](#sf-vehicles-card) | EV(s) + shared charger, charge‑mode selector, energy flows |
 | [`sf-machines-card`](#sf-machines-card) | Status tiles: values with thresholds, on/off, toggles with timers |
 | [`sf-cells-card`](#sf-cells-card) | Weakest sensor batteries first, discovered automatically |
 | [`sf-assistant-card`](#sf-assistant-card) | State of an assistant: phase, last request, action, result, reply — works out of the box with Assist satellites (read-only) |
@@ -105,15 +105,17 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-camera-card`](#sf-camera-card) | Camera mosaic with motion / person overlay |
 | [`sf-setpoints-card`](#sf-setpoints-card) | Setpoint matrix per room; tap a value to edit (slider, scope: value / program / room) |
 | [`sf-ledger-card`](#sf-ledger-card) | Consumption per device and period |
-| [`sf-radar-card`](#sf-radar-card) | Presence from three never‑merged sources (advanced) |
+| [`sf-presence-card`](#sf-presence-card) | Presence from three never‑merged sources (advanced) |
 | [`sf-ns-card`](#sf-ns-card) | **Full‑screen dashboard for wall panels** (NSPanel Pro, 480×480): morning / day / evening / night modes, kiosk mode |
 
-### sf-bridge-card
+> **Friendly names (1.13).** Five cards were renamed with plainer names: `sf-reactor-card` → `sf-energy-flow-card`, `sf-hangar-card` → `sf-vehicles-card`, `sf-bridge-card` → `sf-home-banner-card`, `sf-console-card` → `sf-controls-card`, `sf-radar-card` → `sf-presence-card`. **The original names keep working forever** (same card, same options, same editor); the card picker and this documentation just use the new ones.
+
+### sf-home-banner-card
 
 <img src="assets/bridge.png" alt="Bridge card" width="780">
 
 ```yaml
-type: custom:sf-bridge-card
+type: custom:sf-home-banner-card
 weather: weather.home
 outdoor: sensor.outdoor_temperature
 price: sensor.electricity_price_now        # €/kWh — decides peak vs off-peak
@@ -134,12 +136,12 @@ footer: "text"                             # optional text on the right of the p
 home_states: [home]                        # states counted as "home" — add your custom zone name if it is smaller than the Home zone
 ```
 
-### sf-reactor-card
+### sf-energy-flow-card
 
 <img src="assets/reactor.png" alt="Reactor card" width="780">
 
 ```yaml
-type: custom:sf-reactor-card
+type: custom:sf-energy-flow-card
 solar: sensor.solar_power
 grid: sensor.grid_power            # positive = import, negative = export
 battery_power: sensor.battery_power  # optional, W — positive = discharging (battery_invert: true to flip)
@@ -186,12 +188,12 @@ extras:
 # switch_script: script.my_room_toggle   # optional; default = climate.turn_on / turn_off
 ```
 
-### sf-console-card
+### sf-controls-card
 
 <img src="assets/console.png" alt="Console card" width="780">
 
 ```yaml
-type: custom:sf-console-card
+type: custom:sf-controls-card
 title: Controls
 groups:
   - title: Lighting
@@ -257,12 +259,12 @@ power: sensor.ups_input_voltage          # optional, alert below power_below (20
 hide_sim: true                           # hides the "simulate a doorbell" test button
 ```
 
-### sf-hangar-card
+### sf-vehicles-card
 
 <img src="assets/hangar.png" alt="Hangar card" width="640">
 
 ```yaml
-type: custom:sf-hangar-card
+type: custom:sf-vehicles-card
 cars:                                          # up to 3 cars
   - { name: Car A, soc: sensor.car_a_battery, range: sensor.car_a_range, target: sensor.car_a_target, charging: binary_sensor.car_a_charging, color: "#00e5ff" }
 distance_unit: auto                            # auto (the range sensor's own unit) | km | mi — converts if needed
@@ -547,12 +549,12 @@ devices:
     cost: sensor.ev_cost
 ```
 
-### sf-radar-card
+### sf-presence-card
 
 Advanced and opinionated: three rings, three sources that are **never merged** (home/away from `person.*`, last camera that recognised a face, anonymous room occupancy).
 
 ```yaml
-type: custom:sf-radar-card
+type: custom:sf-presence-card
 people: [{ name: Alice, person: person.alice, face: sensor.alice_last_camera, color: "#00e5ff" }]
 rooms:  [{ label: Living room, entity: binary_sensor.living_room_occupancy }]
 ```
@@ -646,7 +648,7 @@ Want another language? Translations live in one table (`SF_T`, near the top of `
 The cards are dark neon by default. For a light dashboard:
 
 ```yaml
-type: custom:sf-reactor-card   # any SF card
+type: custom:sf-energy-flow-card   # any SF card
 theme: light                  # dark (default) | light | auto
 ```
 
@@ -700,7 +702,7 @@ Sources: [Matter Alpha — "Home Assistant embraces HACS into core as the market
 - The code comments in `dist/sf-cards.js` are still in French (the UI itself is translated).
 - Screenshots use fictional demo data.
 - Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. Home Assistant itself is not part of the tests.
-- `sf-radar-card` and the Frigate‑related options are tied to a specific setup and are documented as advanced.
+- `sf-presence-card` and the Frigate‑related options are tied to a specific setup and are documented as advanced.
 
 ## Credits
 

@@ -2,6 +2,12 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+### Changed
+- The library is now written as modules in `src/` and built into the single `dist/sf-cards.js` (byte-for-byte concatenation); `./test/run.sh` also checks 440 render snapshots (every card, language and theme) so that behaviour-preserving refactorings can be proven.
+### Added
+- **Friendly card names**: `sf-energy-flow-card` (was `sf-reactor-card`), `sf-vehicles-card` (`sf-hangar-card`), `sf-home-banner-card` (`sf-bridge-card`), `sf-controls-card` (`sf-console-card`), `sf-presence-card` (`sf-radar-card`). The original names keep working (same card, options and editor); the card picker lists the friendly names.
+
 ## [1.12.0]
 ### Added
 - `sf-trend-card`: **forecast against reality**. `window: today` (local midnight to midnight, with a "now" marker and a "Today" range button), per-series `attribute` (draws, dashed, a time-indexed attribute of the entity's current state, e.g. the `watts` forecast of a solar-forecast sensor) and per-series `factor` (e.g. 1000 to compare a kW sensor with a forecast in W). The attribute read is bounded (5,000 entries).

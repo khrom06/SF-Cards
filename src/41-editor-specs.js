@@ -32,7 +32,7 @@ function sfMachineTile(t) {
 }
 
 const SF_CARD_NAMES = {};   // filled in below: tag -> title
-const sfCardTag = (c) => { const t = c && typeof c.type === "string" ? c.type.replace(/^custom:/, "") : ""; return SF_CARD_NAMES[t] ? t : ""; };
+const sfCardTag = (c) => { const t = c && typeof c.type === "string" ? c.type.replace(/^custom:/, "") : "", n = SF_ALIAS_REV[t] || t; return SF_CARD_NAMES[n] ? n : ""; };
 
 const SF_SPECS = {
   "sf-alert-card": {

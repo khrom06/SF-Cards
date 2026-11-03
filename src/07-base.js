@@ -7,7 +7,7 @@ const SF_EVSVG = {
 class SfBase extends HTMLElement {
   setConfig(config) {
     if (!config) throw new Error(`${this.localName} : config required`);
-    this._config = sfNormConfig(this.localName, this.defaults ? { ...this.defaults(), ...config } : { ...config });
+    this._config = sfNormConfig(sfCanon(this.localName), this.defaults ? { ...this.defaults(), ...config } : { ...config });
     if (!this.shadowRoot) this.attachShadow({ mode: "open" });
     this._dirty = true;
     this._schedule();
@@ -23,7 +23,7 @@ class SfBase extends HTMLElement {
       // HA calls `hass` on every state change of the whole house: the DOM is only
       // rewritten if the render really changed, otherwise the animations
       // (3D rotations, flows) would restart from zero several times per second.
-      const rq = SF_REQ[this.localName], miss = rq && this.localName !== "sf-battery-card" ? rq(this._config) : [];
+      const rq = SF_REQ[sfCanon(this.localName)], miss = rq && this.localName !== "sf-battery-card" ? rq(this._config) : [];
       const body = miss.length ? this.frame(this.esc(this.t("Carte à compléter")), "", `<div style="color:${SF_C.amber};line-height:1.6">${miss.map((m) => `• ${this.esc(this.t(m))}`).join("<br>")}</div>`) : this.render();
       const html = `<style>${SF_CSS}${this.css ? this.css() : ""}</style>${body}`;
       this.dir = this.lang === "ar" ? "rtl" : "ltr";

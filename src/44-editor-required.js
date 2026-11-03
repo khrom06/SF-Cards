@@ -31,5 +31,6 @@ for (const [tag, lists] of Object.entries(SF_REQ_FIELDS)) for (const [key, names
   const l = (SF_SPECS[tag].lists || []).find((x) => x.key === key);
   if (l) { const orig = l.schema; l.schema = (x) => sfMarkReq(orig(x), names); }
 }
-for (const [tag, spec] of Object.entries(SF_SPECS)) if (tag !== "sf-launcher-card") SF_CARD_NAMES[tag] = spec.title;
+for (const [alias, canon] of Object.entries(SF_ALIAS)) SF_SPECS[alias] = SF_SPECS[canon];   // the friendly tags share the spec of the original ones
+for (const [tag, spec] of Object.entries(SF_SPECS)) if (tag !== "sf-launcher-card" && !SF_ALIAS_REV[tag]) SF_CARD_NAMES[tag] = spec.title;   // the editor offers the friendly names
 

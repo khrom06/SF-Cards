@@ -1006,6 +1006,29 @@ __SF.SF_HOOK.tr = (lang, key) => {
       const el = document.createElement(tag); document.body.appendChild(el); el.hass = { ...HASS(base, "fr"), callWS: async () => ({}) };
       await wait(30); try { el.setConfig(FULL[tag]); } catch (e) { fail(`${tag}: setConfig after hass threw (${e.message})`); } await wait(60); el.remove(); }
     if (window.__errors.length > before) fail(`config-less start: ${window.__errors.slice(before).join(" | ")}`); }
+  // 5m. Friendly tag names: each alias is a real element that renders exactly like the original tag, has its editor, shows in the card picker
+  // instead of the original name, and works as the type of a card embedded in a launcher tile (original names keep working there too).
+  { const AL = { "sf-energy-flow-card": "sf-reactor-card", "sf-vehicles-card": "sf-hangar-card", "sf-home-banner-card": "sf-bridge-card", "sf-controls-card": "sf-console-card", "sf-presence-card": "sf-radar-card" };
+    for (const [alias, canon] of Object.entries(AL)) {
+      if (!customElements.get(alias)) { fail(`alias ${alias}: element not defined`); continue; }
+      const a = mount(alias, FULL[canon], "fr"), c = mount(canon, FULL[canon], "fr"); await wait(30);
+      if (a.shadowRoot.innerHTML !== c.shadowRoot.innerHTML) fail(`alias ${alias}: renders differently from ${canon}`);
+      a.remove(); c.remove();
+      const e = document.createElement(alias + "-editor"); e.hass = HASS(base, "fr"); e.setConfig(JSON.parse(JSON.stringify(FULL[canon]))); document.body.appendChild(e); await wait(30);
+      if (!e.shadowRoot.querySelectorAll("ha-form").length) fail(`alias ${alias}: the editor builds no form`); e.remove();
+      const empty = document.createElement(alias); empty.setConfig({}); document.body.appendChild(empty); empty.hass = HASS(base, "fr"); await wait(30);
+      const need = window.__SF.SF_REQ[canon]; if (need && need({}).length && !/complét/i.test(empty.shadowRoot.textContent)) fail(`alias ${alias}: an empty config must show the 'to be completed' message`);
+      empty.remove();
+      if (!customElements.get(alias).getStubConfig || typeof customElements.get(alias).getStubConfig() !== "object") fail(`alias ${alias}: getStubConfig missing`);
+      if (!window.customCards.some((x) => x.type === alias)) fail(`alias ${alias}: missing from the card picker (window.customCards)`);
+      if (window.customCards.some((x) => x.type === canon)) fail(`alias ${alias}: the original name ${canon} should no longer be listed in the card picker`);
+      for (const ty of [alias, canon]) {   // a launcher tile whose card uses either name gets the nested editor
+        const ed = document.createElement("sf-launcher-card-editor"); ed.hass = HASS(base, "fr"); ed.setConfig({ tiles: [{ name: "T", card: { type: "custom:" + ty, ...FULL[canon] } }] }); document.body.appendChild(ed); await wait(30);
+        const nested = [...ed.shadowRoot.querySelectorAll("*")].find((x) => x.localName === alias + "-editor");
+        if (!nested) fail(`alias ${alias}: nested editor missing for a launcher tile typed ${ty}`); ed.remove(); }
+    }
+    const el = document.createElement("sf-launcher-card"); el.setConfig({ tiles: [{ name: "E", summary: "energy", card: { type: "custom:sf-energy-flow-card", ...FULL["sf-reactor-card"] } }] }); document.body.appendChild(el); el.hass = HASS(base, "fr"); await wait(40);
+    if (!el.shadowRoot.querySelector(".tile")) fail("launcher: a tile whose card uses a friendly name must render"); el.remove(); }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`traduction manquante — ${m}`);
   for (const e of window.__errors) fail(`JavaScript error: ${e}`);

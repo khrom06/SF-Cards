@@ -30,7 +30,7 @@ class SfEditorBase extends HTMLElement {
   // "Missing required fields" banner: updated on every change.
   _banner() {
     const root = this.shadowRoot; if (!root) return;
-    const rq = SF_REQ[this.localName.replace(/-editor$/, "")], miss = rq ? rq(this._config || {}) : [];
+    const rq = SF_REQ[sfCanon(this.localName.replace(/-editor$/, ""))], miss = rq ? rq(this._config || {}) : [];
     let b = root.querySelector(".req");
     if (!b) { b = document.createElement("div"); b.className = "req"; const w = root.querySelector("div"); if (w) w.prepend(b); }
     b.hidden = !miss.length;

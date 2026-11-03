@@ -1,6 +1,12 @@
 // HA language (user profile); unsupported language -> English.
 /* Required fields: per card, a function that returns the texts (translation keys) of what is missing. Deliberately lenient rules:
  * only a card that would show nothing useful is flagged. The editor shows a banner, the card a "to be completed" message. */
+// Friendly tag names (1.13): the original themed names stay valid forever; each friendly tag is a subclass registered under its own name
+// (see 30-registry.js) and shares the spec / required-field rules of its original tag.
+const SF_ALIAS = { "sf-energy-flow-card": "sf-reactor-card", "sf-vehicles-card": "sf-hangar-card", "sf-home-banner-card": "sf-bridge-card",
+  "sf-controls-card": "sf-console-card", "sf-presence-card": "sf-radar-card" };
+const SF_ALIAS_REV = Object.fromEntries(Object.entries(SF_ALIAS).map(([a, c]) => [c, a]));
+const sfCanon = (tag) => SF_ALIAS[tag] || tag;
 const sfHas = (v) => Array.isArray(v) ? v.length > 0 : !!v;
 const sfBatUsable = (c) => !!(c.soc || c.power || c.entity || (c.batteries || []).some((b) => b && (b.soc || b.power || b.entity)));
 const SF_REQ = {

@@ -23,6 +23,12 @@ const SF_DEFS = [
 window.customCards = window.customCards || [];
 for (const [tag, cls, name, description] of SF_DEFS) {
   if (!customElements.get(tag)) customElements.define(tag, cls);
-  if (!window.customCards.some((c) => c.type === tag)) window.customCards.push({ type: tag, name, description });
+  // the card picker lists the friendly name instead of the original themed one (which keeps working in YAML)
+  const shown = SF_ALIAS_REV[tag] || tag;
+  if (!window.customCards.some((c) => c.type === shown)) window.customCards.push({ type: shown, name, description });
+}
+for (const [alias, canon] of Object.entries(SF_ALIAS)) {
+  const def = SF_DEFS.find((d) => d[0] === canon);
+  if (def && !customElements.get(alias)) customElements.define(alias, class extends def[1] {});
 }
 
