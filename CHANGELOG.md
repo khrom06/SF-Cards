@@ -2,7 +2,11 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.14.0]
+### Added
+- **Real light theme**: a dedicated light palette built on CSS custom properties (`--sf-*`) replaces the previous brightness-inversion filter. Better contrast, no filter cost on animations, images untouched.
+### Changed
+- All colours in the code are semantic tokens; a lint rule forbids hard-coded colours. SVG attributes using `var()` are mirrored to inline styles for Safari.
 ### Removed
 - **Seasonal themes** (Halloween / Christmas decorations, `events: false`, `window.SF_EVENTS`, `?event=`): removed to keep the library focused. An `events:` option left in an existing configuration is ignored without any warning.
 

@@ -653,9 +653,10 @@ theme: light                  # dark (default) | light | auto
 
 - `auto` follows the Home Assistant theme: light when HA is in light mode, dark otherwise.
 - **Set it once for every card**: add `sf-theme: light` (or `auto`) to your Home Assistant theme — HA turns every theme key into a CSS variable, here `--sf-theme` — then leave `theme` out of the cards (a `theme` set on a card always wins).
-- The light variant is the same card with its brightness inverted, hues kept, images left untouched. It is a convenient alternative to the dark HUD, not a separate design.
-- In a launcher popup, the sheet gets a light look and SF cards switch to light themselves; other cards (standard Home Assistant cards) keep their own look. Camera snapshots keep their real colours.
-- The light variant keeps animations running through a filter: on a slow wall tablet, prefer the dark theme or turn on *reduce motion*.
+- The light variant is a **real palette** (not a colour inversion): every colour is a CSS custom property (`--sf-*`) defined for dark on `:host` and overridden for light, so text contrast, tints and glows are tuned for a light background and images/camera snapshots are never touched.
+- In a launcher popup, the sheet gets a light look and SF cards switch to light themselves; other cards (standard Home Assistant cards) keep their own look.
+- The wall-panel card (`sf-ns-card`) is dark-only by design (always-on screen).
+- No filter is involved any more, so animations cost the same in both themes.
 
 ## Accessibility
 

@@ -29,10 +29,10 @@
 
 (function () {
 if (window.SF_CARDS_VERSION) {   // resource declared twice (HACS + manual file): the first loaded version stays active, and we say so clearly
-  console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.13.0) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
+  console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.14.0) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
   return;
 }
-window.SF_CARDS_VERSION = "1.13.0";
+window.SF_CARDS_VERSION = "1.14.0";
 
 // Embedded fonts (OFL 1.1, see THIRD_PARTY_NOTICES.md). Orbitron is a variable font.
 if (!document.getElementById("sf-hud-fonts")) {
@@ -4572,7 +4572,7 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
   }
 }
 
-console.info("%c SF-CARDS %c v1.13.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
+console.info("%c SF-CARDS %c v1.14.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
 
 /* ============================================================== VALIDATION */
 /*
