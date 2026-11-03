@@ -834,7 +834,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (/indisponible/.test(txt) || /Leak|fuite/.test(txt)) fail("timeline: an unavailable state or an untracked entity is displayed");
     if (!/Alarme/.test(txt)) fail("timeline: the chosen name is not used");
     if (!ra.querySelector(".day") || !/Aujourd/.test(ra.querySelector(".day").textContent)) fail("timeline: day separator 'Aujourd\'hui' missing");
-    const alarmRow = rows.find((r) => /déclenchée/.test(r.textContent)); if (!alarmRow || !/255, ?51, ?85|#ff3355/i.test(alarmRow.getAttribute("style") || "")) fail("timeline: the triggered alarm is not red");
+    const alarmRow = rows.find((r) => /déclenchée/.test(r.textContent)); if (!alarmRow || !/var\(--sf-red\)|255, ?51, ?85|#ff3355/i.test(alarmRow.getAttribute("style") || "")) fail("timeline: the triggered alarm is not red");
     a.remove();
     // merging repeats: three consecutive "open" with different states in between -> × 2 only if identical and consecutive
     const g = await draw({ entities: ["binary_sensor.door"] }, mk(() => [{ entity_id: "binary_sensor.door", state: "on", when: sec(30) }, { entity_id: "binary_sensor.door", state: "off", when: sec(20) }, { entity_id: "binary_sensor.door", state: "on", when: sec(10) }]));
@@ -941,7 +941,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
     const l1 = await mkL([{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical" }, { name: "Wifi", entity: "binary_sensor.wifi", ok: ["on"] }, { name: "UPS", entity: "sensor.ups", min: 30 }, { name: "Ok", entity: "binary_sensor.fine", ok: ["on"] }]);
     const t1 = l1.shadowRoot.querySelector(".tile");
     if (!/3 anomalies/.test(t1.querySelector(".main").textContent) || !/Internet · Wifi/.test(t1.querySelector(".sub").textContent)) fail(`launcher health: '3 anomalies' and the first two names expected (${t1.textContent.trim().slice(0, 80)})`);
-    if (!t1.classList.contains("hot") || !/ff3355|255, ?51, ?85/i.test(t1.getAttribute("style") || "")) fail("launcher health: a critical anomaly must make the tile hot and red");
+    if (!t1.classList.contains("hot") || !/var\(--sf-red\)|ff3355|255, ?51, ?85/i.test(t1.getAttribute("style") || "")) fail("launcher health: a critical anomaly must make the tile hot and red");
     l1.remove();
     const l2 = await mkL([{ name: "Ok", entity: "binary_sensor.fine", ok: ["on"] }, { entity: "x\"><b>" }, null]);
     const t2 = l2.shadowRoot.querySelector(".tile");

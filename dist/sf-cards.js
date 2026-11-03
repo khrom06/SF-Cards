@@ -726,13 +726,18 @@ function sfTr(lang, key, vars) {
   return vars ? s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? "")) : s;
 }
 
+// Colour tokens. `SF_C.*` are CSS references (var(--sf-*)) usable in any style / CSS template; the palettes themselves (dark, light) are the
+// custom properties set on :host below, so that a card re-colours itself by changing `theme`, without any filter. `*-rgb` tokens are
+// space-separated channels for translucent variants: rgb(var(--sf-cyan-rgb) / .25).
 const SF_C = {
-  cyan: "#00e5ff", amber: "#ffb300", red: "#ff3355", green: "#2bff88",
-  grey: "#5b6b7d", text: "#cfefff", dim: "#7fa3bd",
+  cyan: "var(--sf-cyan)", amber: "var(--sf-amber)", red: "var(--sf-red)", green: "var(--sf-green)",
+  grey: "var(--sf-grey)", text: "var(--sf-text)", dim: "var(--sf-dim)",
 };
+const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; --sf-green:#2bff88; --sf-grey:#5b6b7d; --sf-text:#cfefff; --sf-dim:#7fa3bd;
+    --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff;`;
 
 const SF_CSS = `
-  :host { display:block; }
+  :host { display:block; ${SF_VARS_DARK} }
   .lbl, .kpi, .foot > div, .stats > div, .fl3 > div, .tile { min-width:0; overflow-wrap:anywhere; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; } }
   [role="button"]:focus-visible, .tile:focus-visible { outline:2px solid ${SF_C.cyan}; outline-offset:2px; border-radius:6px; }
@@ -2454,6 +2459,7 @@ class SfCellsCard extends SfBase {
  *     card: { type: custom:sf-climate-card, ... }   # any card: SF, standard HA (vertical-stack, history-graph…) or another custom card
  */
 const SF_POP_CSS = `
+  :host { ${SF_VARS_DARK} }
   @media (prefers-reduced-motion: reduce) { .back, .sheet { transition:none !important; } }
   :host([theme="light"]) .sheet { background: linear-gradient(180deg, #f3f8fc 0%, #e3edf5 100%); border-color:rgba(0,110,150,.45); box-shadow:0 -10px 40px rgba(0,90,130,.22); }
   :host([theme="light"]) .back { background:rgba(180,200,215,.55); }
@@ -2886,7 +2892,7 @@ const SF_NS_WX = {
 const SF_NS_ALIAS = { matin: "Matin", morning: "Matin", jour: "Jour", day: "Jour", soir: "Soir", evening: "Soir", nuit: "Nuit", night: "Nuit" };
 
 const SF_NS_CSS = `
-  :host { display:block; height:100%; }
+  :host { display:block; height:100%; ${SF_VARS_DARK} }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   .ns { direction:ltr; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; } }

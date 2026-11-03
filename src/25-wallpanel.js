@@ -22,7 +22,7 @@ const SF_NS_WX = {
 const SF_NS_ALIAS = { matin: "Matin", morning: "Matin", jour: "Jour", day: "Jour", soir: "Soir", evening: "Soir", nuit: "Nuit", night: "Nuit" };
 
 const SF_NS_CSS = `
-  :host { display:block; height:100%; }
+  :host { display:block; height:100%; ${SF_VARS_DARK} }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   .ns { direction:ltr; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; } }
