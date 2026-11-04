@@ -39,6 +39,7 @@ class SfReactorCard extends SfBase {
       .node .n { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:${SF_C.dim}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .node .w { font-family:Orbitron,sans-serif; font-size:13px; color:var(--sf-strong); }
       .node.idle { opacity:.4; }
+      :host([theme="light"]) .node.idle { opacity:.65; }
       .core { position:absolute; left:50%; top:50%; width:min(30%, 190px); aspect-ratio:1; transform:translate(-50%,-50%);
         perspective: 600px; }
       .core .r { position:absolute; inset:0; border-radius:50%; border:2px solid var(--cc);

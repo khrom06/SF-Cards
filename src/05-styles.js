@@ -11,7 +11,7 @@ const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; -
     --sf-alert0:#4a0714; --sf-alert1:#1a0308; --sf-alert2:#0a0104;
     --sf-orange:#ff7a45; --sf-heat:#ff7043; --sf-cool:#4fc3f7; --sf-dry:#ffca28; --sf-fan:#66bb6a; --sf-auto:#b388ff; --sf-pink:#ff4fd8; --sf-yellow:#ffd54f; --sf-halo:#000;`;
 // Light palette: accents re-tuned for contrast on a light surface (>= 4.5:1 against white for text), neutral overlays darken instead of lighten.
-const SF_VARS_LIGHT = `--sf-cyan:#00798f; --sf-amber:#a85f00; --sf-red:#c8173d; --sf-green:#08783f; --sf-grey:#6a7b8b; --sf-text:#1c3a4e; --sf-dim:#4f6c84;
+const SF_VARS_LIGHT = `--sf-cyan:#00798f; --sf-amber:#a85f00; --sf-red:#c8173d; --sf-green:#08783f; --sf-grey:#52687a; --sf-text:#1c3a4e; --sf-dim:#37536a;
     --sf-cyan-rgb:0 121 143; --sf-amber-rgb:168 95 0; --sf-red-rgb:200 23 61; --sf-green-rgb:8 120 63; --sf-fg-rgb:4 40 62; --sf-strong:#04141f; --sf-white:#fff;
     --sf-bg0:#fbfdff; --sf-bg1:#eef5fb; --sf-bg2:#e2edf6; --sf-bg-rgb:255 255 255; --sf-scrim-rgb:206 220 232; --sf-sheet0:#f6fafd; --sf-shade-rgb:40 90 125; --sf-on-accent:#fff;
     --sf-alert0:#ffe1e7; --sf-alert1:#ffd0d9; --sf-alert2:#ffc2ce;

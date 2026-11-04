@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.14.1]
+### Fixed
+- Light theme: small secondary text (labels, units, state captions) and unavailable tiles are now darker and more contrasted.
+
 ## [1.14.0]
 ### Added
 - **Real light theme**: a dedicated light palette built on CSS custom properties (`--sf-*`) replaces the previous brightness-inversion filter. Better contrast, no filter cost on animations, images untouched.

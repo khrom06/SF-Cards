@@ -32,6 +32,7 @@ class SfConsoleCard extends SfBase {
         box-shadow: 0 0 14px -4px var(--ac, ${SF_C.amber}); }
       .it.on ha-icon { color:var(--ac, ${SF_C.amber}); filter: drop-shadow(0 0 4px var(--ac, ${SF_C.amber})); }
       .it.dead { opacity:.35; }
+      :host([theme="light"]) .it.dead { opacity:.6; }
       .wide { grid-column: 1 / -1; min-height:0; }
       .row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
       .row .grow { flex:1; min-width:90px; }

@@ -29,10 +29,10 @@
 
 (function () {
 if (window.SF_CARDS_VERSION) {   // resource declared twice (HACS + manual file): the first loaded version stays active, and we say so clearly
-  console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.14.0) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
+  console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.14.1) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
   return;
 }
-window.SF_CARDS_VERSION = "1.14.0";
+window.SF_CARDS_VERSION = "1.14.1";
 
 // Embedded fonts (OFL 1.1, see THIRD_PARTY_NOTICES.md). Orbitron is a variable font.
 if (!document.getElementById("sf-hud-fonts")) {
@@ -739,7 +739,7 @@ const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; -
     --sf-alert0:#4a0714; --sf-alert1:#1a0308; --sf-alert2:#0a0104;
     --sf-orange:#ff7a45; --sf-heat:#ff7043; --sf-cool:#4fc3f7; --sf-dry:#ffca28; --sf-fan:#66bb6a; --sf-auto:#b388ff; --sf-pink:#ff4fd8; --sf-yellow:#ffd54f; --sf-halo:#000;`;
 // Light palette: accents re-tuned for contrast on a light surface (>= 4.5:1 against white for text), neutral overlays darken instead of lighten.
-const SF_VARS_LIGHT = `--sf-cyan:#00798f; --sf-amber:#a85f00; --sf-red:#c8173d; --sf-green:#08783f; --sf-grey:#6a7b8b; --sf-text:#1c3a4e; --sf-dim:#4f6c84;
+const SF_VARS_LIGHT = `--sf-cyan:#00798f; --sf-amber:#a85f00; --sf-red:#c8173d; --sf-green:#08783f; --sf-grey:#52687a; --sf-text:#1c3a4e; --sf-dim:#37536a;
     --sf-cyan-rgb:0 121 143; --sf-amber-rgb:168 95 0; --sf-red-rgb:200 23 61; --sf-green-rgb:8 120 63; --sf-fg-rgb:4 40 62; --sf-strong:#04141f; --sf-white:#fff;
     --sf-bg0:#fbfdff; --sf-bg1:#eef5fb; --sf-bg2:#e2edf6; --sf-bg-rgb:255 255 255; --sf-scrim-rgb:206 220 232; --sf-sheet0:#f6fafd; --sf-shade-rgb:40 90 125; --sf-on-accent:#fff;
     --sf-alert0:#ffe1e7; --sf-alert1:#ffd0d9; --sf-alert2:#ffc2ce;
@@ -1808,6 +1808,7 @@ class SfReactorCard extends SfBase {
       .node .n { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:${SF_C.dim}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
       .node .w { font-family:Orbitron,sans-serif; font-size:13px; color:var(--sf-strong); }
       .node.idle { opacity:.4; }
+      :host([theme="light"]) .node.idle { opacity:.65; }
       .core { position:absolute; left:50%; top:50%; width:min(30%, 190px); aspect-ratio:1; transform:translate(-50%,-50%);
         perspective: 600px; }
       .core .r { position:absolute; inset:0; border-radius:50%; border:2px solid var(--cc);
@@ -2093,6 +2094,7 @@ class SfConsoleCard extends SfBase {
         box-shadow: 0 0 14px -4px var(--ac, ${SF_C.amber}); }
       .it.on ha-icon { color:var(--ac, ${SF_C.amber}); filter: drop-shadow(0 0 4px var(--ac, ${SF_C.amber})); }
       .it.dead { opacity:.35; }
+      :host([theme="light"]) .it.dead { opacity:.6; }
       .wide { grid-column: 1 / -1; min-height:0; }
       .row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
       .row .grow { flex:1; min-width:90px; }
@@ -4572,7 +4574,7 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
   }
 }
 
-console.info("%c SF-CARDS %c v1.14.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
+console.info("%c SF-CARDS %c v1.14.1 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
 
 /* ============================================================== VALIDATION */
 /*
