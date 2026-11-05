@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Layout demo (fake data only): the Energy and Climate cards side by side in a 2-column grid, to see how they adapt to the room they get.
+     ?w=1000  total width of the grid (px)    ?h=0  forced row height (px, 0 = natural)    ?theme=dark|light   ?rooms=5   ?modes=6   ?lang=en|fr|ar   ?single=climate|reactor   ?nomode=1 -->
+<body style="margin:0;padding:12px;background:#050b14">
+<script>
+class FakeIcon extends HTMLElement { connectedCallback() { this.style.cssText = "display:inline-block;width:1em;height:1em;background:currentColor;border-radius:3px;opacity:.5;vertical-align:middle"; } }
+customElements.define("ha-icon", FakeIcon);
+</script>
+<script src="../dist/sf-cards.js"></script>
+<script src="fixtures.js"></script>
+<script>
+const q = new URLSearchParams(location.search), W = +(q.get("w") || 1000), Hh = +(q.get("h") || 0), theme = q.get("theme") || "dark";
+const nRooms = +(q.get("rooms") || 5), nModes = +(q.get("modes") || 6), single = q.get("single"), lang = q.get("lang") || "en", nomode = q.get("nomode");
+document.body.style.background = theme === "light" ? "#e9f0f6" : "#050b14";
+const MODES = (lang === "fr" ? ["Climatisation", "Déshumidification", "Ventilation", "Chauffage", "Libre", "Absent", "Éco", "Nuit"] : ["Cooling", "Dehumidify", "Ventilation", "Heating", "Manual", "Away", "Eco", "Night"]).slice(0, nModes);
+const states = { ...base, "input_select.mode": { state: "Heating", attributes: { options: MODES } } };
+const names = ["Living room", "Kitchen", "Office", "Bedroom", "Nursery", "Garage", "Attic", "Cellar"], rooms = [];
+for (let i = 0; i < nRooms; i++) {
+  states[`climate.r${i}`] = { state: i % 2 ? "off" : "heat", attributes: { hvac_action: i % 2 ? "idle" : "heating", current_temperature: 19 + i * 0.4 } };
+  states[`sensor.t${i}`] = { state: String(19 + i * 0.4), attributes: { unit_of_measurement: "°C" } };
+  states[`input_number.g${i}`] = { state: "19.5", attributes: { unit_of_measurement: "°C" } };
+  rooms.push({ name: names[i], climate: `climate.r${i}`, temp: `sensor.t${i}`, hum: "sensor.hum", target: `input_number.g${i}` });
+}
+const grid = document.createElement("div");
+grid.style.cssText = `display:grid;grid-template-columns:${single ? "1fr" : "1fr 1fr"};gap:16px;width:${W}px;align-items:stretch;${Hh ? `grid-auto-rows:${Hh}px;` : ""}`;
+const mk = (tag, cfg) => { const e = document.createElement(tag); e.setConfig({ ...cfg, theme }); const w = document.createElement("div"); w.style.cssText = "min-width:0;height:100%"; w.appendChild(e); grid.appendChild(w); e.hass = HASS(states, lang); return e; };
+if (single !== "climate") mk("sf-reactor-card", FULL["sf-reactor-card"]);
+if (single !== "reactor") mk("sf-climate-card", { ...(nomode ? {} : { mode: "input_select.mode" }), rooms, extras: [{ label: "Solar boost", entity: "input_boolean.auto", icon: "mdi:white-balance-sunny" }, { label: "Humidity control", entity: "input_boolean.auto", icon: "mdi:water-percent" }] });
+document.body.appendChild(grid);
+</script>

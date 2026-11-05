@@ -25,7 +25,9 @@ class SfReactorCard extends SfBase {
   disconnectedCallback() { super.disconnectedCallback(); if (this._ro) { this._ro.disconnect(); this._ro = null; } }
   css() {
     return `
+      :host { height:100%; }
       .stage { position:relative; width:100%; aspect-ratio: 16 / 9; min-height:260px; }
+      .hud.fill .stage { flex:1 0 auto; }
       .stage svg { position:absolute; inset:0; width:100%; height:100%; }
       .ln { fill:none; stroke-width:2; stroke-linecap:round; }
       .ln.bg { stroke:rgb(var(--sf-fg-rgb) / .06); stroke-width:6; }
@@ -168,7 +170,7 @@ class SfReactorCard extends SfBase {
           <div class="txt"><div><b>${this.kw(home)}</b><span>${this.t("reactor.home")}</span></div></div></div>
         ${nodes.join("")}
       </div>
-      ${foot.length ? `<div class="foot" style="grid-template-columns:repeat(${this.esc(foot.length)},minmax(0,1fr))">${foot.join("")}</div>` : ""}`);
+      ${foot.length ? `<div class="foot" style="grid-template-columns:repeat(${this.esc(foot.length)},minmax(0,1fr))">${foot.join("")}</div>` : ""}`, "fill");
   }
   _node([x, y], name, icon, w, color, id) {
     const idle = w === null || Math.abs(w) < 20;
@@ -176,5 +178,7 @@ class SfReactorCard extends SfBase {
       <div class="ic">${this.icon(icon, 22)}</div><div class="n">${this.esc(name)}</div><div class="w">${this.kw(w)}</div></div>`;
   }
   getCardSize() { return 7; }
+  // Sections view: this card may take half a section or more, and fills the height of its cell.
+  getGridOptions() { return { columns: 12, rows: "auto", min_columns: 8, min_rows: 6 }; }
 }
 

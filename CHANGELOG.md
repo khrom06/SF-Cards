@@ -2,6 +2,15 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.15.0]
+### Added
+- **Layout that follows the room you give a card** (energy flow and climate cards first). The card measures its own width and chooses its arrangement from that, not from the screen: the house modes sit on even rows (six modes become 3 + 3, never 5 + 1), the rooms on balanced columns (five rooms become 3 + 2, never 4 + 1), the modes shrink to icons when the card is very narrow, and long labels are shortened with "…" instead of wrapping. The re-render only happens when a column count changes (never on every pixel), so resizing cannot loop and animations are not restarted.
+- **Equal heights**: in a sections view, when you give a card more rows (drag its resize handle, or `grid_options: { rows: N }`) the content takes the extra height — the energy flow spreads out, the rooms grow — so two cards side by side line up. In a cell shorter than the content the card scrolls instead of cutting controls off. Nothing changes when the cell is not taller than the content.
+- Sections-view grid options for both cards (`getGridOptions`): minimum size so they cannot be dragged to an unusable width.
+- `test/layout.mjs` (run by `./test/run.sh`): columns at 8 widths in LTR and RTL, no overflow, equal heights, no render loop, grid options. `test/demo_layout.html` is a fake-data page to look at the arrangement at any width.
+### Changed
+- Climate card: the house-mode label is now on its own line above the buttons, and the mode "Dehumidify" gets the drop icon.
+
 ## [1.14.1]
 ### Fixed
 - Light theme: small secondary text (labels, units, state captions) and unavailable tiles are now darker and more contrasted.

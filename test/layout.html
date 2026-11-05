@@ -1,0 +1,104 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Layout test: run by test/layout.mjs in headless Chrome (real time: ResizeObserver needs real frames). The cards that adapt to the room they are given (sf-climate-card, sf-reactor-card):
+     columns follow the width, rows stay even, cells keep equal heights, nothing overflows, and a resize never causes a render loop.
+     Writes its verdict (JSON) into #result. No dependency. -->
+<body style="margin:0">
+<script>
+class FakeIcon extends HTMLElement { connectedCallback() { this.style.cssText = "display:inline-block;width:1em;height:1em"; } }
+customElements.define("ha-icon", FakeIcon);
+window.__errors = [];
+window.addEventListener("error", (e) => window.__errors.push(`${e.message} @${(e.filename || "").split("/").pop()}:${e.lineno}`));
+window.__SF_TEST = true;
+</script>
+<script src="../dist/sf-cards.js"></script>
+<script src="fixtures.js"></script>
+<script>
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const problems = [], lfail = (m) => problems.push(m);
+const MODES = ["Cooling", "Dehumidify", "Ventilation", "Heating", "Manual", "Away"];
+const states = { ...base, "input_select.mode": { state: "Heating", attributes: { options: MODES } } }, rooms = [];
+for (let i = 0; i < 5; i++) {
+  states[`climate.r${i}`] = { state: "heat", attributes: { hvac_action: "heating", current_temperature: 20 } };
+  states[`sensor.t${i}`] = { state: "20", attributes: { unit_of_measurement: "°C" } };
+  states[`input_number.g${i}`] = { state: "19.5", attributes: { unit_of_measurement: "°C" } };
+  rooms.push({ name: `Room ${i}`, climate: `climate.r${i}`, temp: `sensor.t${i}`, target: `input_number.g${i}` });
+}
+const CLIMATE = { mode: "input_select.mode", rooms, extras: [{ label: "Boost", entity: "input_boolean.auto" }] };
+const cell = (w, h) => { const d = document.createElement("div"); d.style.cssText = `width:${w}px;${h ? `height:${h}px;` : ""}position:relative`; document.body.appendChild(d); return d; };
+const mount = (parent, tag, cfg, lang = "en") => { const e = document.createElement(tag); e.setConfig(cfg); parent.appendChild(e); e.hass = HASS(states, lang); return e; };
+const cols = (el, sel, v) => { const n = el.shadowRoot.querySelector(sel); return n ? +getComputedStyle(n).getPropertyValue(v) : NaN; };
+const settle = () => wait(200);
+
+(async () => {
+  try {
+    const SfBase = Object.getPrototypeOf(customElements.get("sf-climate-card"));
+    const B = (n, m, g, w) => SfBase.prototype.balance.call({}, n, m, g, w);
+    // 1. balance(): as many columns as fit, evened out; never an orphan row when it can be avoided.
+    const bal = [[5, 150, 12, 1000, 5], [5, 150, 12, 700, 3], [5, 150, 12, 470, 2], [5, 150, 12, 300, 1], [6, 160, 6, 1000, 6], [6, 160, 6, 520, 3], [6, 160, 6, 330, 2],
+      [7, 100, 6, 450, 4], [1, 150, 12, 800, 1], [0, 150, 12, 800, 1], [4, 150, 12, 0, 4]];
+    for (const [n, m, g, w, want] of bal) { const got = B(n, m, g, w); if (got !== want) lfail(`balance(${n}, ${m}, ${g}, ${w}) = ${got}, expected ${want}`); }
+
+    // 2. Climate card: columns follow the width, rows are even, nothing overflows (LTR, RTL), at every width.
+    for (const lang of ["en", "ar"]) for (const w of [220, 300, 380, 470, 600, 760, 1000, 1500]) {
+      const c = cell(w), el = mount(c, "sf-climate-card", CLIMATE, lang); await settle();
+      const mc = cols(el, ".modes", "--mc"), rc = cols(el, ".rooms", "--rc");
+      const rows = Math.ceil(5 / rc), fit = Math.max(1, Math.floor((w - 38 + 12) / 162));
+      if (!(rc >= 1 && rc <= 5)) lfail(`climate ${lang} ${w}px: --rc=${rc} out of range`);
+      if (rc > 1 && rows !== Math.ceil(5 / Math.min(5, fit)) && rc !== 5) lfail(`climate ${lang} ${w}px: ${rc} columns give ${rows} rows, not the minimum for ${fit} that fit`);
+      if (!(mc >= 1 && mc <= 6)) lfail(`climate ${lang} ${w}px: --mc=${mc} out of range`);
+      if (mc < 6 && 6 % mc !== 0 && Math.ceil(6 / mc) * mc - 6 > 1) lfail(`climate ${lang} ${w}px: ${mc} mode columns leave ${Math.ceil(6 / mc) * mc - 6} holes`);
+      const hud = el.shadowRoot.querySelector(".hud"), box = hud.getBoundingClientRect();
+      if (hud.scrollWidth > hud.clientWidth + 1) lfail(`climate ${lang} ${w}px: horizontal overflow (${hud.scrollWidth} > ${hud.clientWidth})`);
+      for (const n of el.shadowRoot.querySelectorAll(".room, .modes .btn")) { const r = n.getBoundingClientRect(); if (r.left < box.left - 1 || r.right > box.right + 1) { lfail(`climate ${lang} ${w}px: an element sticks out of the card`); break; } }
+      if (w >= 1000 && mc !== 6) lfail(`climate ${w}px: 6 modes should fit on one row, got ${mc} columns`);
+      if (w >= 380 && w <= 470 && el.shadowRoot.querySelector(".modes.io")) lfail(`climate ${w}px: icon-only modes too early`);
+      if (w <= 220 && !el.shadowRoot.querySelector(".modes.io")) lfail(`climate ${lang} ${w}px: modes should be icon-only when very narrow (width ${el.width}, geo ${JSON.stringify(el._geo())})`);
+      c.remove();
+    }
+
+    // 3. Equal heights: two cards side by side in a taller cell both fill it (hud height = cell height), and the extra space goes to the content.
+    for (const [tag, cfg] of [["sf-reactor-card", FULL["sf-reactor-card"]], ["sf-climate-card", CLIMATE]]) {
+      const natural = cell(700), a = mount(natural, "sf-reactor-card", FULL["sf-reactor-card"]); await settle();
+      const hNat = mount(natural, tag, cfg); await settle();
+      const nat = hNat.shadowRoot.querySelector(".hud").getBoundingClientRect().height; natural.remove();
+      const tall = cell(700, Math.round(nat) + 260), e = mount(tall, tag, cfg); await settle();
+      const hud = e.shadowRoot.querySelector(".hud"), got = hud.getBoundingClientRect().height;
+      if (Math.abs(got - (Math.round(nat) + 260)) > 1.5) lfail(`${tag}: in a cell 260px taller the card is ${got}px (cell ${Math.round(nat) + 260})`);
+      const grow = tag === "sf-reactor-card" ? e.shadowRoot.querySelector(".stage") : e.shadowRoot.querySelector(".rooms");
+      if (grow.getBoundingClientRect().height < 200) lfail(`${tag}: the content did not take the extra height`);
+      tall.remove();
+      // ...and in a cell SHORTER than the content nothing is lost: the card keeps the cell height and scrolls (no controls cut off, no overlap).
+      const short = cell(700, 120), s = mount(short, tag, cfg); await settle();
+      const sh = s.shadowRoot.querySelector(".hud");
+      if (Math.abs(sh.getBoundingClientRect().height - 120) > 1.5) lfail(`${tag}: in a 120px cell the card is ${sh.getBoundingClientRect().height}px`);
+      if (sh.scrollHeight < nat - 16)   // the bottom padding is not part of scrollHeight
+         lfail(`${tag}: in a short cell the content is cut off (scrollHeight ${sh.scrollHeight} < natural ${Math.round(nat)})`);
+      if (getComputedStyle(sh).overflowY !== "auto") lfail(`${tag}: a short cell must make the card scroll, overflow-y is ${getComputedStyle(sh).overflowY}`);
+      short.remove();
+    }
+
+    // 4. Resizing never loops: the DOM is rewritten only when a column count changes, then stays still.
+    {
+      const c = cell(1000), el = mount(c, "sf-climate-card", CLIMATE); await settle();
+      let writes = 0; new MutationObserver((m) => { writes += m.length; }).observe(el.shadowRoot, { childList: true, subtree: true });
+      let prev = el.shadowRoot.querySelector(".hud"), changes = 0, keys = new Set();
+      for (const w of [1000, 999, 998, 997, 996, 995, 990, 985, 980, 1000]) { c.style.width = w + "px"; await settle(); keys.add(`${cols(el, ".modes", "--mc")}|${cols(el, ".rooms", "--rc")}`); }
+      if (writes !== 0) lfail(`climate: ${writes} DOM writes while resizing 1000 → 980 px (same column counts), expected 0`);
+      for (const w of [700, 450, 300, 450, 700, 1000]) { c.style.width = w + "px"; await settle(); }
+      const after = writes; await wait(600);
+      if (writes !== after) lfail(`climate: the DOM kept being rewritten after the resize stopped (${writes - after} writes)`);
+      if (writes > 40) lfail(`climate: ${writes} DOM mutations for 6 resizes, suspiciously many`);
+      c.remove();
+    }
+
+    // 5. Sections-view grid options: a card may take half a section or more, and says so.
+    for (const [tag, minCols] of [["sf-climate-card", 6], ["sf-reactor-card", 8], ["sf-energy-flow-card", 8]]) {
+      const e = document.createElement(tag), g = e.getGridOptions && e.getGridOptions();
+      if (!g || g.columns !== 12 || g.min_columns !== minCols || g.rows !== "auto") lfail(`${tag}: unexpected getGridOptions() ${JSON.stringify(g)}`);
+    }
+    for (const e of window.__errors) lfail(`JavaScript error: ${e}`);
+  } catch (e) { lfail(`the test crashed: ${e && e.stack || e}`); }
+  finally { const out = document.createElement("pre"); out.id = "result"; out.textContent = JSON.stringify({ ok: problems.length === 0, failures: problems }); document.body.appendChild(out); }
+})();
+</script>

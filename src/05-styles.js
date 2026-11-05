@@ -31,6 +31,12 @@ const SF_CSS = `
     border:1px solid rgb(var(--sf-cyan-rgb) / .22); color:${SF_C.text};
     font-family:'B612 Mono', ui-monospace, monospace; font-size:13px;
     box-shadow: inset 0 0 40px rgb(var(--sf-cyan-rgb) / .06), 0 0 22px rgb(var(--sf-cyan-rgb) / .07); }
+  /* "fill": the card stretches to the height its cell gives it (cards side by side in a dashboard keep equal heights); only the zone
+     marked .grow takes the extra space. Without a taller cell nothing changes; in a cell SHORTER than the content the card scrolls
+     instead of cutting controls off. */
+  .hud.fill { display:flex; flex-direction:column; height:100%; box-sizing:border-box; overflow-x:hidden; overflow-y:auto; scrollbar-width:thin; }
+  .hud.fill > .head { flex:none; }
+  .hud.fill > .grow { flex:1 1 auto; }
   .hud::after { content:""; position:absolute; inset:0; pointer-events:none;
     background: repeating-linear-gradient(0deg, rgb(var(--sf-fg-rgb) / .022) 0 1px, transparent 1px 3px); }
   .c { position:absolute; width:14px; height:14px; border-color:${SF_C.cyan}; border-style:solid; opacity:.8; }

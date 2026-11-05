@@ -179,7 +179,38 @@ class SfBase extends HTMLElement {
     return this._llv;
   }
   // A card rendered before being attached re-reads its theme as soon as it is (CSS variables do not exist outside the DOM).
-  connectedCallback() { this._cssRead = false; this._lastHtml = null; this._schedule(); }
+  connectedCallback() { this._cssRead = false; this._lastHtml = null; this._schedule(); this._watchSize(); }
+  /*
+   * Size awareness (layout that follows the room the user gives the card, not the screen): the card measures its OWN width and a card
+   * that declares `layoutKey(width)` is re-rendered only when that key changes (e.g. the number of columns), never on every pixel.
+   * Safe by construction: only the width is read (the height changes when the content changes, so it is ignored), and the key is a
+   * small value that depends on the width alone, so a re-render cannot trigger another one.
+   */
+  _watchSize() {
+    if (typeof ResizeObserver === "undefined" || this._sfRo) return;
+    this._sfRo = new ResizeObserver((entries) => {
+      const w = Math.round(entries[entries.length - 1].contentRect.width);
+      if (!w || w === this._w) return;   // 0 = not laid out / hidden (a hidden tab): keep the last known width
+      this._w = w;
+      if (this.layoutKey) { const k = this.layoutKey(w); if (k !== this._lk) { this._lk = k; this._schedule(); } }
+    });
+    this._sfRo.observe(this);
+  }
+  // Width of the card in px. Before its first render the element has no shadow styles yet (display:inline, width 0): its parent's width is
+  // then the best estimate (a card fills its cell), and the observer corrects it as soon as the real width is known.
+  get width() {
+    if (this._w) return this._w;
+    const own = Math.round(this.getBoundingClientRect().width), par = this.parentElement;
+    return own || (par ? Math.round(par.clientWidth) : 0) || 0;
+  }
+  // Columns for `n` equal items of at least `minW` px: as many as fit, then evened out so that the last row is never nearly empty
+  // (5 items in a row of 4 become 3 + 2, not 4 + 1). Without a measured width, everything on one row.
+  balance(n, minW, gap, w) {
+    if (n <= 1) return 1;
+    if (!(w > 0)) return n;
+    const fit = Math.max(1, Math.floor((w + gap) / (minW + gap)));
+    return fit >= n ? n : Math.ceil(n / Math.ceil(n / fit));
+  }
   get lang() { return sfLang(this._hass); }
   // HA profile language, normalised ("en_US" → "en-US") and validated: a value rejected by the Intl APIs falls back to "en", never an exception.
   get loc() {
@@ -207,7 +238,10 @@ class SfBase extends HTMLElement {
     const fin = Date.parse(t.attributes.finishes_at);
     return { actif: true, reste: isNaN(fin) ? null : Math.max(1, Math.ceil((fin - Date.now()) / 60000)) };
   }
-  disconnectedCallback() { if (this._ti) { clearInterval(this._ti); this._ti = null; } }
+  disconnectedCallback() {
+    if (this._ti) { clearInterval(this._ti); this._ti = null; }
+    if (this._sfRo) { this._sfRo.disconnect(); this._sfRo = null; }
+  }
   getCardSize() { return 4; }
 }
 

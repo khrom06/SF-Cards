@@ -19,9 +19,16 @@ class SfClimateCard extends SfBase {
   defaults() { return { rooms: [], extras: [], switch_script: "", min: 15, max: 30 }; }
   css() {
     return `
-      .modes { margin-bottom:14px; }
-      .rooms { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
-      .room { position:relative; padding:12px 12px 10px; border-radius:12px; overflow:hidden;
+      :host { height:100%; }
+      /* House modes: equal columns, the count chosen from the real width (see _geo) so the rows are even, never "5 + 1". */
+      .modes { display:grid; grid-template-columns:repeat(var(--mc, 6), minmax(0, 1fr)); gap:6px; margin-bottom:14px; }
+      .modes .ml { grid-column:1 / -1; }
+      .modes .btn { min-width:0; white-space:nowrap; }
+      .modes .tx { overflow:hidden; text-overflow:ellipsis; }
+      .modes.io .tx { display:none; }
+      /* Rooms: balanced columns (5 rooms = 3 + 2), equal row heights, and they share any extra height the cell gives the card. */
+      .rooms { display:grid; grid-template-columns:repeat(var(--rc, 1), minmax(0, 1fr)); grid-auto-rows:minmax(min-content, 1fr); gap:12px; }
+      .room { position:relative; padding:12px 12px 10px; border-radius:12px; overflow:hidden; display:flex; flex-direction:column;
         background: linear-gradient(165deg, color-mix(in srgb, var(--hc) 16%, transparent), rgb(var(--sf-bg-rgb) / .6));
         border:1px solid color-mix(in srgb, var(--hc) 45%, transparent); }
       .room.active { animation: glow 2.4s ease-in-out infinite; }
@@ -30,18 +37,33 @@ class SfClimateCard extends SfBase {
       .rh .fl { margin-left:auto; display:flex; gap:6px; align-items:center; }
       .rh .pw { padding:4px 6px; border-radius:50%; }
       .rh ha-icon, .rh .fl { flex-shrink:0; }
-      .dial { position:relative; width:100%; max-width:190px; margin:4px auto 0; }
+      .dial { position:relative; width:100%; max-width:190px; margin:auto; padding-top:4px; }
       .dial svg { width:100%; display:block; }
       .dial .t { position:absolute; left:0; right:0; top:38%; text-align:center; }
       .dial .t b { font-family:Orbitron,sans-serif; font-size:30px; color:var(--sf-strong); text-shadow:0 0 10px var(--hc); }
       .dial .t small { display:block; font-size:10px; color:${SF_C.dim}; margin-top:2px; letter-spacing:.08em; }
-      .ctl { display:grid; grid-template-columns: 36px 1fr 36px; gap:6px; margin-top:4px; align-items:center; }
+      .ctl { flex:none; display:grid; grid-template-columns: 36px 1fr 36px; gap:6px; margin-top:4px; align-items:center; }
       .ctl .btn { padding:6px 0; }
       .ctl .tg { text-align:center; font-family:Orbitron,sans-serif; font-size:15px; color:var(--sf-strong); }
       .ctl .tg small { display:block; font-family:'B612 Mono',monospace; font-size:8px; letter-spacing:.2em; color:${SF_C.dim}; }
       .pw.on { color:var(--hc); border-color:var(--hc); box-shadow:0 0 10px -2px var(--hc); }
-      .extras { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px dashed rgb(var(--sf-cyan-rgb) / .18); }`;
+      .extras { flex:none; display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px dashed rgb(var(--sf-cyan-rgb) / .18); }`;
   }
+  // Layout that follows the width the card is given: columns for the house modes and for the rooms (balanced rows), icon-only modes when
+  // very narrow. Depends on the width and the configuration only, so it can never feed back into the size it reads.
+  _geo(w) {
+    const c = this._config, m = this.st(c.mode), opts = m ? (m.attributes.options || []) : [];
+    const inner = (w || this.width) - 38;   // minus the frame padding and border
+    const longest = opts.reduce((a, o) => Math.max(a, String(o).replace(/^[^\p{L}]+/u, "").length), 0);
+    const io = inner > 0 && inner < 240 && opts.length > 0;
+    // Width one mode button really needs (icon + text + padding); columns are chosen so that it fits, evened out. When even two columns
+    // would not fit (long labels on a phone) two columns still win over a tall single column: the longest label is shortened with "…".
+    const need = Math.round(Math.min(220, Math.max(84, longest * 7.4 + 50)));
+    let mc = this.balance(opts.length, io ? 44 : need, 6, inner);
+    if (!io && mc === 1 && opts.length > 1 && inner >= 200) mc = 2;
+    return { io, mc, rc: this.balance(c.rooms.length, 150, 12, inner) };
+  }
+  layoutKey(w) { const g = this._geo(w); return `${g.mc}|${g.rc}|${g.io}`; }
   _arc(cx, cy, r, a0, a1) {
     const p = (a) => [cx + r * Math.cos((a * Math.PI) / 180), cy + r * Math.sin((a * Math.PI) / 180)];
     const [x0, y0] = p(a0), [x1, y1] = p(a1);
@@ -91,12 +113,13 @@ class SfClimateCard extends SfBase {
   }
   render() {
     const c = this._config, m = this.st(c.mode);
-    const ICO = [[/^(clim|cool|fr[ií]o|k[üu]hl)/i, "mdi:snowflake"], [/^(d[ée]shu|dry|des|entf)/i, "mdi:water-percent"], [/^(ventil|fan|l[üu]ft)/i, "mdi:fan"], [/^(chauff|heat|calef|calor|heiz)/i, "mdi:fire"], [/^(libre|free|manual|frei)/i, "mdi:hand-back-right"], [/^(absent|away|ausente|abwesend)/i, "mdi:home-export-outline"]];
+    const ICO = [[/^(clim|cool|fr[ií]o|k[üu]hl)/i, "mdi:snowflake"], [/^(d[ée]shu|dehum|dry|des|entf)/i, "mdi:water-percent"], [/^(ventil|fan|l[üu]ft)/i, "mdi:fan"], [/^(chauff|heat|calef|calor|heiz)/i, "mdi:fire"], [/^(libre|free|manual|frei)/i, "mdi:hand-back-right"], [/^(absent|away|ausente|abwesend)/i, "mdi:home-export-outline"]];
     const modes = m ? (m.attributes.options || []).map((o) => {
       const txt = o.replace(/^[^\p{L}]+/u, "");
       const ic = (ICO.find(([k]) => k.test(txt)) || [0, "mdi:circle-small"])[1];
-      return `<span class="btn ${this.esc(m.state === o ? "on" : "")}" ${this.call("input_select.select_option", { entity_id: c.mode, option: o })}>${this.icon(ic, 15)}${this.esc(txt)}</span>`;
+      return `<span class="btn ${this.esc(m.state === o ? "on" : "")}" title="${this.esc(txt)}" ${this.call("input_select.select_option", { entity_id: c.mode, option: o })}>${this.icon(ic, 15)}<span class="tx">${this.esc(txt)}</span></span>`;
     }).join("") : "";
+    const geo = this._geo();
     const temps = c.rooms.map((r) => this.num(r.temp)).filter((x) => x !== null);
     const avg = temps.length ? this.nf(temps.reduce((a, b) => a + b, 0) / temps.length, 1) : null;
     const extras = c.extras.map((x) => {
@@ -104,10 +127,12 @@ class SfClimateCard extends SfBase {
       return `<span class="btn ${this.esc(tm.actif || this.isOn(x.entity) ? "on" : "")}" ${act}>${this.icon(x.icon || "mdi:toggle-switch", 15)}${this.esc(x.label)}${tm.actif && tm.reste ? ` · ${tm.reste} min` : ""}</span>`;
     }).join("");
     return this.frame(this.t("climate.climate"), avg === null ? "" : this.t("climate.t_average", { t: avg }), `
-      ${modes ? `<div class="seg modes"><span class="lbl" style="align-self:center;margin-right:4px">${this.t("common.house_mode")}</span>${modes}</div>` : ""}
-      <div class="rooms">${c.rooms.map((r) => this._room(r)).join("")}</div>
-      ${extras ? `<div class="extras">${extras}</div>` : ""}`);
+      ${modes ? `<div class="seg modes ${this.esc(geo.io ? "io" : "")}" style="--mc:${this.esc(geo.mc)}"><span class="lbl ml">${this.t("common.house_mode")}</span>${modes}</div>` : ""}
+      <div class="rooms grow" style="--rc:${this.esc(geo.rc)}">${c.rooms.map((r) => this._room(r)).join("")}</div>
+      ${extras ? `<div class="extras">${extras}</div>` : ""}`, "fill");
   }
   getCardSize() { return 8; }
+  // Sections view: this card may take half a section or more, and fills the height of its cell.
+  getGridOptions() { return { columns: 12, rows: "auto", min_columns: 6, min_rows: 5 }; }
 }
 

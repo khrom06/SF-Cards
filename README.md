@@ -34,7 +34,7 @@
 - [Installation](#installation) (HACS or manual)
 - [The cards](#the-cards)
 - [Visual editor](#visual-editor)
-- [Languages](#languages) · [Light theme](#light-theme) · [Accessibility](#accessibility) · [Numbers](#numbers)
+- [Languages](#languages) · [Light theme](#light-theme) · [Layout](#layout) · [Accessibility](#accessibility) · [Numbers](#numbers)
 - [Optional theme](#optional-theme) · [Requirements](#requirements) · [Security](#security) · [Development](#development)
 - [About HACS and its future](#about-hacs-and-its-future)
 - [Limitations](#limitations)
@@ -657,6 +657,17 @@ theme: light                  # dark (default) | light | auto
 - In a launcher popup, the sheet gets a light look and SF cards switch to light themselves; other cards (standard Home Assistant cards) keep their own look.
 - The wall-panel card (`sf-ns-card`) is dark-only by design (always-on screen).
 - No filter is involved any more, so animations cost the same in both themes.
+
+## Layout
+
+The energy flow and climate cards **adapt their arrangement to the room you give them** (their own width, not the screen's), and fill the height of their cell — something Home Assistant does not do for custom cards on its own.
+
+<p align="center"><img src="assets/layout.png" alt="Energy flow and climate cards side by side, same height, in a Home Assistant sections view" width="820"></p>
+
+- **Even rows**: house modes in as many columns as fit, evened out (6 modes → 3 + 3), rooms on balanced columns (5 rooms → 3 + 2); icon-only modes when very narrow; long labels end with "…".
+- **Equal heights** (sections view): drag the card's resize handle taller, or set `grid_options: { rows: 13 }`: the content takes the extra height (the energy flow spreads out, the rooms grow). Give the two cards side by side the same number of rows and they line up. In a cell shorter than the content the card scrolls instead of cutting controls off.
+- **Width in a section**: set `grid_options: { columns: full }` to use the whole width of a section of 2 or more columns (the Home Assistant default is half a section).
+- It is safe: only a change in the number of columns triggers a redraw, never every pixel, so resizing cannot loop or restart the animations. `./test/run.sh` checks columns, overflow, equal heights and the absence of render loops.
 
 ## Accessibility
 
