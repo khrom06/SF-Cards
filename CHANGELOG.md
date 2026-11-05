@@ -2,6 +2,16 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.17.0]
+### Added
+- **`sf-ns-card`: `layout` option** — reorder the blocks of each screen (Morning / Day / Evening / Night) in config, e.g. to put the energy wheel on the right instead of the left. Default unchanged if you don't set it; an unknown block name is ignored, an unlisted one keeps its place (nothing can disappear). Evening and Night size each row to what's actually in it in the order you chose, so an unused block never leaves an empty gap. One known limitation documented in the README: the Day screen's `energy_stats` block needs the tall cell, forcing it into the small one can make its text overlap.
+- **`sf-ns-card`: the evening tiles (`tiles:`) now use balanced columns** from the real number of tiles (2 tiles → 2 columns, not always 3), the same `balance()` mechanism as the other SF-Cards tile grids.
+- **`sf-ns-card`: confirmed compatible with every current Sonoff NSPanel screen size** (480×320, 480×480, and the 120‑type's two orientations, 1334×750 and 750×1334) — checked with real screenshots of all 4 modes at each size, not just assumed from the `vmin` sizing. See the README table.
+### Fixed
+- **`sf-alert-card`: the triggered (full-frame red) state is now announced to screen readers** (`role="alert"`, `aria-live="assertive"`), and the doorbell snapshot image has an `alt` text (it had none). Verified in a real browser; this state has no automated render-test coverage yet (not exercised by the default fixtures).
+### Changed
+- `test/render.html` gained render tests for both new `sf-ns-card` behaviours (layout reorder, tile column count).
+
 ## [1.16.1]
 ### Changed
 - `dist/sf-cards.js` (the file HACS/Lovelace loads) is now minified at build time (esbuild): ~12% smaller over the wire after gzip, which HA already serves. No behaviour change — pixel-identical renders, same 440 snapshots, confirmed with a pixel-by-pixel screenshot comparison against the previous build. `src/` stays the readable source of truth; `test/lint.js`'s reliability rules now scan `src/*.js` instead of the (now minified) `dist/sf-cards.js`, so their line numbers stay meaningful.

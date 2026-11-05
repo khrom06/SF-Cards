@@ -61,7 +61,7 @@ class SfAlertCard extends SfBase {
         : this.t("alert.at_t", { t: new Date(this.st(c.ring).last_changed).toLocaleTimeString(this.locLatn, { hour: "2-digit", minute: "2-digit" }) }); }
       const snapState = this.st(c.snapshot);
       const snapUrl = snapState ? sfSafeUrl(snapState.attributes.entity_picture) : "";
-      const img = ring && snapUrl ? `<img class="snap click" data-e="${this.esc(c.snapshot)}" src="${this.esc(snapUrl)}">` : "";
+      const img = ring && snapUrl ? `<img class="snap click" data-e="${this.esc(c.snapshot)}" src="${this.esc(snapUrl)}" alt="${this.esc(title)}">` : "";
       return this.frame(this.t("alert.alert_2"), new Date().toLocaleTimeString(this.locLatn),
         `<div class="big">${title}</div><div>${what}</div>${img}`, "alert");
     }

@@ -560,7 +560,16 @@ rooms:  [{ label: Living room, entity: binary_sensor.living_room_occupancy }]
 
 ### sf-ns-card
 
-A full‑screen card for small wall panels, tuned for the **Sonoff NSPanel Pro (480 × 480, square)** but sized in `vmin`, so it adapts to any screen. It shows different things depending on the time of day:
+A full‑screen card for small wall panels, tuned for the **Sonoff NSPanel Pro (480 × 480, square)** but sized in `vmin`, so it adapts to any screen. Tested (real screenshots, every mode) on every current Sonoff NSPanel screen size:
+
+| Screen | Resolution | Result |
+|---|---|---|
+| NSPanel (original) | 480 × 320 | works, no overflow |
+| NSPanel Pro / Pro Gen2 (86‑type, square) | 480 × 480 | works — the size it is designed around |
+| NSPanel Pro 120‑type, landscape | 1334 × 750 | works, balanced |
+| NSPanel Pro 120‑type, portrait | 750 × 1334 | works, but panels have more empty space than on the other sizes — this extreme a screen is not yet tuned for density |
+
+(The 120‑type's exact resolution comes from a Sonoff test subdomain, not its final public spec sheet — treat it as indicative rather than a guarantee for that specific model.) It shows different things depending on the time of day:
 
 | Mode | When (default) | What it shows |
 |---|---|---|
@@ -614,6 +623,19 @@ energy:
 ```
 
 Every entity is optional: a block without its entities is simply not displayed. The cost shown in the evening is an estimate (hourly statistics weighted by your off‑peak windows). Entity ids above are placeholders; the visual editor offers drop‑downs for everything except the free‑form `energy.devices` and `energy.day` objects, which are set in YAML.
+
+**Rearranging a screen.** Each mode is built from a fixed set of named blocks. By default they appear in the order described in the table above, but you can reorder them with `layout` — for example to put the energy wheel on the right instead of the left:
+
+```yaml
+layout:
+  jour: [energy_stats, energy_dec, energy_orb, fridge]   # was: energy_orb, energy_stats, energy_dec, fridge
+```
+
+Block names: `matin: [weather, cars, rooms, shortcuts]` · `jour: [energy_orb, energy_stats, energy_dec, fridge]` (only with `energy.solar` set) · `soir: [tiles, day, cars]` · `nuit: [sentinel, rooms]`. You only need to list the ones you want to move — anything you leave out keeps its place, nothing can disappear by a typo or an outdated list. Morning and Day keep a fixed 2×2 grid (reordering changes which of the 4 cells a block lands in — a block moved out of its usual, bigger cell gets the smaller one instead, the same way a real dashboard would resize it); Evening and Night size each row to what is actually in it, in the order you chose, so an unused block never leaves an empty gap.
+
+**One combination to avoid:** on the Day screen, `energy_stats` (the three stacked Home / Charger / Grid tiles) is designed for the tall cell. Move `energy_orb` or `fridge` into the small cell instead — both were checked there and stay readable; `energy_stats` wasn't, and its text can run into itself if forced into the small cell.
+
+The evening tiles (`tiles:`, up to 6) and this `layout` option were both verified with real screenshots at 2, 4 and 6 tiles and several custom orders, not just read from the code.
 
 <p align="center"><img src="assets/ns-evening.png" alt="Evening mode" width="300"></p>
 

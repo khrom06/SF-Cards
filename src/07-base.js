@@ -226,7 +226,10 @@ class SfBase extends HTMLElement {
     const h = Math.round(m / 60); return h < 48 ? this.t("common.n_h_ago", { n: h }) : this.t("common.n_d_ago", { n: Math.round(h / 24) });
   }
   frame(title, sub, body, extraClass = "") {
-    return `<div class="hud fill ${this.esc(extraClass)}"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+    // The "alert" variant (sf-alert-card's full-frame red state: leak, intrusion, power cut, doorbell) is announced immediately by a screen
+    // reader, the same way a visible user cannot miss it.
+    const live = extraClass === "alert" ? ` role="alert" aria-live="assertive"` : "";
+    return `<div class="hud fill ${this.esc(extraClass)}"${live}><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
       <div class="head"><span class="dot"></span>${title}<span class="sub">${sub || ""}</span></div>${body}</div>`;
   }
   // Timer of a button (e.g. towel dryer): { active, remaining (min) }. A refresh

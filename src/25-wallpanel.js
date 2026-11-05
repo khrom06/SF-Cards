@@ -158,7 +158,7 @@ const SF_NS_CSS = `
   .dec span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .dec .r { margin-left:auto; color:var(--sf-dim); font-size:calc(var(--u)*2.2); flex:0 0 auto; }
 
   /* evening tiles */
-  .tiles { display:grid; grid-template-columns:repeat(3, 1fr); grid-auto-rows:1fr; gap:calc(var(--u)*1.7); min-height:0; }
+  .tiles { display:grid; grid-template-columns:repeat(var(--c, 3), minmax(0, 1fr)); grid-auto-rows:1fr; gap:calc(var(--u)*1.7); min-height:0; }
   .tile { position:relative; min-width:0; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:calc(var(--u)*.6);
     border-radius:calc(var(--u)*2.6); border:1px solid rgb(var(--sf-fg-rgb) / .12); background:rgb(var(--sf-fg-rgb) / .04); color:#9fc3d9; text-align:center; padding:calc(var(--u)*1); }
   .tile ha-icon { --mdc-icon-size:calc(var(--u)*7.4); flex:0 0 auto; }
@@ -364,6 +364,27 @@ class SfNsCard extends SfBase {
   }
   panel(inner, cls, attrs) { return `<div class="panel ${cls || ""}" ${attrs || ""}>${inner}</div>`; }
 
+  // ---------------------------------------------------------------- layout (configurable block order)
+  // `layout: { matin: [...], jour: [...], soir: [...], nuit: [...] }` (optional): the order of the blocks of that screen, by name
+  // (see the comment above _render() for the names of each screen). Unknown names are ignored; a name you don't list is kept, appended
+  // after the ones you did list — nothing can disappear by omission. No config -> the original, built-in order.
+  _order(modeKey, names) {
+    const want = this._config.layout && this._config.layout[modeKey];
+    if (!Array.isArray(want)) return names;
+    const kept = want.filter((n) => typeof n === "string" && names.includes(n));
+    return kept.concat(names.filter((n) => !kept.includes(n)));
+  }
+  // For a single-column screen (Soir, Nuit): blocks is [[name, html, rowSize], ...] in the SCREEN'S DEFAULT order. Empty html (a block with
+  // nothing to show) is dropped entirely — its row never reserves space. The remaining blocks are then put in the configured order, and
+  // grid-template-rows is built from their sizes in THAT order, so a reordered screen always sizes its rows for what's actually in them.
+  _stack(modeKey, blocks) {
+    const present = blocks.filter(([, html]) => html);
+    const order = this._order(modeKey, present.map(([n]) => n));
+    const byName = Object.fromEntries(present.map(([n, html, size]) => [n, [html, size]]));
+    const ordered = order.map((n) => byName[n]).filter(Boolean);
+    return { html: ordered.map(([html]) => html).join(""), rows: ordered.map(([, size]) => size).join(" ") };
+  }
+
   weatherBlock() {
     const c = this._config, w = this.st(c.weather); if (!w) return "";
     const wx = this.own(SF_NS_WX, w.state) || ["mdi:weather-cloudy", w.state], a = w.attributes || {};
@@ -446,10 +467,14 @@ class SfNsCard extends SfBase {
       <span class="r">${this.num(e.ev_day) !== null ? this.f1(this.num(e.ev_day)) + " kWh" : ""}</span></div>`) : "<div></div>";
     return [orb, stats, decP];
   }
+  // Balanced columns from the real width (5 tiles = 3 + 2, never 4 + 1), like the other SF-Cards tile grids — see SfBase.balance().
+  _tileCols(w) { return this.balance(this._nTiles || 0, 100, 14, (w || this.width) - 38); }
+  layoutKey(w) { return this._tileCols(w); }
   tilesBlock() {
     const list = this._config.tiles;
     if (!list.length) return this.panel(`<div class="lbl">${this.esc(this.t("wallpanel.no_tile_configured"))}</div>`);
-    return `<div class="tiles">${list.slice(0, 6).map((x) => { const eid = String(x.entity || ""), on = this.isOn(eid) && !eid.startsWith("scene."), cv = eid.startsWith("cover."), s = this.st(eid);
+    this._nTiles = Math.min(list.length, 6);
+    return `<div class="tiles" style="--c:${this._tileCols()}">${list.slice(0, 6).map((x) => { const eid = String(x.entity || ""), on = this.isOn(eid) && !eid.startsWith("scene."), cv = eid.startsWith("cover."), s = this.st(eid);
       const CV = { open: "ouverts", closed: "fermés", opening: "ouverture…", closing: "fermeture…" };
       const txt = this.t(cv ? this.own(CV, s && s.state) || "" : eid.startsWith("scene.") ? "scène" : on ? "allumé" : "éteint");
       return `<div class="tile tap ${on ? "on" : ""}" style="--tc:${this.esc(x.color || "var(--sf-cyan)")}" data-act="toggle" data-e="${this.esc(eid)}">${this.ic(x.icon)}<div class="nm">${this.esc(x.name)}</div><div class="st">${this.esc(txt)}</div></div>`; }).join("")}</div>`;
@@ -518,11 +543,30 @@ class SfNsCard extends SfBase {
     const al = this.alerts().sort((x, y) => (x.warn ? 1 : 0) - (y.warn ? 1 : 0)), a0 = al[0], more = al.length - 1;
     const alerts = a0 ? `<div class="alerts"><div class="alert tap ${a0.warn ? "warn" : ""}" data-info="${this.esc(a0.e)}">${this.ic(a0.i)}<span>${this.esc(a0.t)}</span>${more > 0 ? `<em>+${more}</em>` : ""}</div></div>` : "";
     const H = (n) => `calc(var(--u)*${n})`; let main = "", grid = "";
-    if (mode === "Matin") { main = this.weatherBlock() + this.carsBlock() + this.pills(c.rooms) + this.shortcuts(); grid = "grid-template-columns:1fr 1fr;grid-template-rows:1.15fr 1fr"; }
-    else if (mode === "Jour") { const e = this.energyBlocks(); main = (e ? e.join("") : "") + this.pills(c.fridge, true); grid = `grid-template-columns:1.2fr 1fr;grid-template-rows:1fr ${H(12.5)}`;
-      if (!e) { main = this.pills(c.fridge); grid = "grid-template-columns:1fr"; } else if (!c.fridge.length) { grid = `grid-template-columns:1.2fr 1fr;grid-template-rows:1fr ${H(12.5)}`; } }
-    else if (mode === "Soir") { const dy = this.dayBlock(); main = this.tilesBlock() + dy + this.carsMini(); grid = `grid-template-columns:1fr;grid-template-rows:1fr ${dy ? H(11) + " " : ""}${H(10.5)}`; }
-    else { const n = this.sentinel(); main = n[0] + `<div class="nrow">${n[1]}</div>`; grid = `grid-template-columns:1fr;grid-template-rows:1fr ${H(15)}`; }
+    // Each screen is built from named blocks. Their order (and, for Soir / Nuit, the size of the row each one gets) can be overridden with
+    // `layout: { <screen>: [names…] }` (see _order() / _stack() above) — the two-column screens (Matin, Jour) keep a fixed grid (reordering
+    // only changes which block lands in which of the 4 cells, e.g. the energy wheel left or right); the one-column screens (Soir, Nuit) size
+    // each row from what is actually in it, in the configured order, so an empty block never reserves space.
+    if (mode === "Matin") {
+      const order = this._order("matin", ["weather", "cars", "rooms", "shortcuts"]);
+      const blocks = { weather: this.weatherBlock(), cars: this.carsBlock(), rooms: this.pills(c.rooms), shortcuts: this.shortcuts() };
+      main = order.map((n) => blocks[n]).join(""); grid = "grid-template-columns:1fr 1fr;grid-template-rows:1.15fr 1fr";
+    } else if (mode === "Jour") {
+      const e = this.energyBlocks();
+      if (!e) { main = this.pills(c.fridge); grid = "grid-template-columns:1fr"; }
+      else {
+        const order = this._order("jour", ["energy_orb", "energy_stats", "energy_dec", "fridge"]);
+        const blocks = { energy_orb: e[0], energy_stats: e[1], energy_dec: e[2], fridge: this.pills(c.fridge, true) };
+        main = order.map((n) => blocks[n]).join(""); grid = `grid-template-columns:1.2fr 1fr;grid-template-rows:1fr ${H(12.5)}`;
+      }
+    } else if (mode === "Soir") {
+      const s = this._stack("soir", [["tiles", this.tilesBlock(), "1fr"], ["day", this.dayBlock(), H(11)], ["cars", this.carsMini(), H(10.5)]]);
+      main = s.html; grid = `grid-template-columns:1fr;grid-template-rows:${s.rows}`;
+    } else {
+      const n = this.sentinel();
+      const s = this._stack("nuit", [["sentinel", n[0], "1fr"], ["rooms", n[1] ? `<div class="nrow">${n[1]}</div>` : "", H(15)]]);
+      main = s.html; grid = `grid-template-columns:1fr;grid-template-rows:${s.rows}`;
+    }
     const html = `<style>${SF_NS_CSS}.pop{position:absolute;inset:0;z-index:5;background:rgba(2,6,12,.82);display:flex;align-items:center;justify-content:center;padding:calc(var(--u)*3)}
       .sheet{width:100%;height:100%;display:flex;flex-direction:column;gap:calc(var(--u)*2);padding:calc(var(--u)*2.4);border-radius:calc(var(--u)*3);border:1px solid var(--a);background:#06101d;box-shadow:0 0 calc(var(--u)*6) rgb(var(--sf-cyan-rgb) / .25)}
       .shead{display:flex;align-items:center;gap:calc(var(--u)*2);font-family:Orbitron,sans-serif;font-weight:700;font-size:calc(var(--u)*3.4);letter-spacing:.14em;text-transform:uppercase;color:var(--a)}

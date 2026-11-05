@@ -659,6 +659,28 @@ __SF.SF_HOOK.tr = (lang, key) => {
       const off = el.shadowRoot.querySelector('[data-act="lights_off"]'); off.click(); await wait(10); if (calls.includes("light.turn_off")) fail("sf-ns-card: 'Éteindre' must send nothing on the first press");
       el.shadowRoot.querySelector('[data-act="lights_off"]').click(); await wait(10); if (!calls.includes("light.turn_off")) fail("sf-ns-card: the second press on 'Éteindre' must send light.turn_off");
       const ar = el.shadowRoot.querySelectorAll('[role="button"]'); if (ar.length < 4) fail("sf-ns-card: clickable elements without a button role"); el.remove(); }
+    // layout: reordering a screen's blocks changes which one gets the first grid cell; an unlisted block is kept, not dropped; an unknown
+    // name in the list is ignored instead of crashing; the one-column screens (Soir, Nuit) drop the row of a block that has nothing to show.
+    // energy_stats and fridge (both sized for the tall row) swap with each other and move into the tall row's 2 cells; the orb and the
+    // decision row (both fine at a smaller size, confirmed with real screenshots) take the short row instead of their usual tall/short cell.
+    { const el = await mk({ ...NS, layout: { jour: ["energy_stats", "fridge", "energy_orb", "nope_not_a_real_name"] } }, { ...base, "input_select.ns_mode": S("Jour") }, "en", conn); await wait(40);
+      const first = el.shadowRoot.querySelector(".main > *");
+      if (!first || !/home/i.test(first.textContent)) fail(`sf-ns-card layout: 'energy_stats' first should put the stat tiles in the first grid cell, got '${first && first.className}'`);
+      if (!el.shadowRoot.querySelector(".pill")) fail("sf-ns-card layout: 'fridge' (listed, kept) must still appear");
+      if (el.shadowRoot.querySelectorAll(".main > *").length !== 4) fail("sf-ns-card layout: an unknown name in the list must be ignored, not change the block count");
+      overflow(el, "sf-ns-card layout reorder (jour)"); el.remove(); }
+    { const el = await mk({ ...NS, layout: { soir: ["cars", "tiles"] } }, { ...base, "input_select.ns_mode": S("Soir") }, "en", conn); await wait(40);
+      const kids = [...el.shadowRoot.querySelectorAll(".main > *")];
+      if (!kids[0] || !kids[0].querySelector(".mini")) fail(`sf-ns-card layout: 'cars' first (soir) should put the mini car bar in the first grid row, got '${kids[0] && kids[0].className}'`);
+      overflow(el, "sf-ns-card layout reorder (soir)"); el.remove(); }
+    // tiles: columns follow the real number of tiles (2 tiles -> 2 columns, not always 3) — balance(), same mechanism as the other tile grids.
+    for (const n of [2, 4, 6]) {
+      const cfg = { ...NS, tiles: Array.from({ length: n }, (_, i) => ({ name: "T" + i, icon: "mdi:lightbulb", entity: "light.t" + i })) };
+      const el = await mk(cfg, { ...base, "input_select.ns_mode": S("Soir") }, "en", conn); await wait(40);
+      const grid = el.shadowRoot.querySelector(".tiles"); const c = grid && parseInt(grid.style.getPropertyValue("--c"), 10);
+      if (!(c >= 1 && c <= n)) fail(`sf-ns-card tiles: ${n} tiles -> --c='${grid && grid.style.getPropertyValue("--c")}' (expected a column count between 1 and ${n})`);
+      overflow(el, `sf-ns-card tiles (${n})`); el.remove();
+    }
     box.remove(); }
   // 5c. Regression 2026-11-03: the red marking of required fields must NEVER loop. `:scope > style` matched nothing inside a
   // ShadowRoot: every pass added a <style>, the observer re-triggered itself on its own mutation and the tab froze as soon as an
