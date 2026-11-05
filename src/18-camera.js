@@ -29,7 +29,7 @@ class SfCameraCard extends SfBase {
   }
   css() {
     return `
-      .cams { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:12px; }
+      .cams { display:grid; grid-template-columns:repeat(var(--c, 1), minmax(0, 1fr)); gap:12px; align-content:start; }
       .cam { position:relative; aspect-ratio:16/9; border-radius:10px; overflow:hidden; background:#000;
         border:1px solid rgb(var(--sf-cyan-rgb) / .25); }
       .cam img { width:100%; height:100%; object-fit:cover; display:block; opacity:0; transition:opacity .4s; filter:saturate(.85) contrast(1.05); }
@@ -52,6 +52,7 @@ class SfCameraCard extends SfBase {
       .nofeed { position:absolute; inset:0; display:grid; place-items:center; color:${SF_C.grey}; font-size:11px; letter-spacing:.2em; }`;
   }
   render() {
+    this._n = this._config.cameras.length;
     const cams = this._config.cameras.map((k) => {
       const s = this.st(k.entity);
       const motion = k.motion && this.st(k.motion) && this.st(k.motion).state === "on";
@@ -66,8 +67,10 @@ class SfCameraCard extends SfBase {
             ${pc !== null ? `<span class="pill ${this.esc(pc > 0 ? "hot" : "")}">${this.t("camera.n_person_s", { n: pc })}</span>` : ""}
             ${rv && rv !== "NONE" ? `<span class="pill ${this.esc(rv === "ALERT" ? "red" : "hot")}">${rv === "ALERT" ? this.t("camera.frigate_alert") : this.t("camera.detection")}</span>` : ""}</div></div></div>`;
     }).join("");
-    return this.frame(this.t("camera.cameras"), this.t("camera.refreshed_every_n_s_tap_live", { n: this._every() }), `<div class="cams">${cams}</div>`);
+    return this.frame(this.t("camera.cameras"), this.t("camera.refreshed_every_n_s_tap_live", { n: this._every() }), `<div class="cams grow" style="--c:${this.esc(this._cols())}">${cams}</div>`);
   }
+  _cols(w) { return this.balance(this._n || 0, 300, 12, (w || this.width) - 38); }
+  layoutKey(w) { return this._cols(w); }
   getCardSize() { return 6; }
 }
 

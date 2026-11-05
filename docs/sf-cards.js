@@ -29,10 +29,10 @@
 
 (function () {
 if (window.SF_CARDS_VERSION) {   // resource declared twice (HACS + manual file): the first loaded version stays active, and we say so clearly
-  console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.15.0) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
+  console.warn(`SF Cards ${window.SF_CARDS_VERSION} is already loaded: this copy (v1.16.0) is ignored. Remove the duplicate resource (Settings → Dashboards → Resources).`);
   return;
 }
-window.SF_CARDS_VERSION = "1.15.0";
+window.SF_CARDS_VERSION = "1.16.0";
 
 // Embedded fonts (OFL 1.1, see THIRD_PARTY_NOTICES.md). Orbitron is a variable font.
 if (!document.getElementById("sf-hud-fonts")) {
@@ -746,7 +746,7 @@ const SF_VARS_LIGHT = `--sf-cyan:#00798f; --sf-amber:#a85f00; --sf-red:#c8173d; 
     --sf-orange:#b8430f; --sf-heat:#bf3f16; --sf-cool:#0a6f9c; --sf-dry:#8a6600; --sf-fan:#2a7a2e; --sf-auto:#6a3bc4; --sf-pink:#a80f78; --sf-yellow:#7d6200; --sf-halo:rgb(255 255 255 / .85);`;
 
 const SF_CSS = `
-  :host { display:block; ${SF_VARS_DARK} }
+  :host { display:block; height:100%; ${SF_VARS_DARK} }
   :host([theme="light"]) { ${SF_VARS_LIGHT} }
   .lbl, .kpi, .foot > div, .stats > div, .fl3 > div, .tile { min-width:0; overflow-wrap:anywhere; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; } }
@@ -764,6 +764,7 @@ const SF_CSS = `
      instead of cutting controls off. */
   .hud.fill { display:flex; flex-direction:column; height:100%; box-sizing:border-box; overflow-x:hidden; overflow-y:auto; scrollbar-width:thin; }
   .hud.fill > .head { flex:none; }
+  .hud.fill > * { min-width:0; }   /* flex items must be able to shrink below their content, like the block children they replace */
   .hud.fill > .grow { flex:1 1 auto; }
   .hud::after { content:""; position:absolute; inset:0; pointer-events:none;
     background: repeating-linear-gradient(0deg, rgb(var(--sf-fg-rgb) / .022) 0 1px, transparent 1px 3px); }
@@ -1090,7 +1091,7 @@ class SfBase extends HTMLElement {
     const h = Math.round(m / 60); return h < 48 ? this.t("common.n_h_ago", { n: h }) : this.t("common.n_d_ago", { n: Math.round(h / 24) });
   }
   frame(title, sub, body, extraClass = "") {
-    return `<div class="hud ${this.esc(extraClass)}"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+    return `<div class="hud fill ${this.esc(extraClass)}"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
       <div class="head"><span class="dot"></span>${title}<span class="sub">${sub || ""}</span></div>${body}</div>`;
   }
   // Timer of a button (e.g. towel dryer): { active, remaining (min) }. A refresh
@@ -1107,6 +1108,9 @@ class SfBase extends HTMLElement {
     if (this._sfRo) { this._sfRo.disconnect(); this._sfRo = null; }
   }
   getCardSize() { return 4; }
+  // Sections view: HA's own defaults (full width of one section column, height from the content) plus a minimum width so the card cannot
+  // be dragged to an unusable size. Cards with their own needs override it.
+  getGridOptions() { return { columns: 12, rows: "auto", min_columns: 4 }; }
 }
 
 /* ================================================================== LOADER */
@@ -1584,7 +1588,7 @@ class SfMachinesCard extends SfBase {
   }
   css() {
     return `
-      .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap:10px; }
+      .grid { display:grid; grid-template-columns:repeat(var(--c, 1), minmax(0, 1fr)); grid-auto-rows:minmax(min-content, 1fr); gap:10px; }
       .tile { position:relative; padding:10px 11px 12px; border-radius:10px;
         background: linear-gradient(160deg, rgb(var(--sf-cyan-rgb) / .07), rgb(var(--sf-cyan-rgb) / .015));
         border:1px solid rgb(var(--sf-cyan-rgb) / .16); }
@@ -1652,11 +1656,15 @@ class SfMachinesCard extends SfBase {
   }
   render() {
     const tiles = this._config.tiles;
+    this._n = tiles.length;
     const bad = tiles.filter((t) => !this.ok(t.entity)).length;
     return this.frame(this.esc(this._config.title || this.t("machines.equipment")), bad ? this.t("machines.n_sensor_s_not_responding", { n: bad }) : this.t("machines.all_good"),
-      `<div class="grid">${tiles.map((t) => this._tile(t)).join("")}</div>
+      `<div class="grid grow" style="--c:${this.esc(this._cols())}">${tiles.map((t) => this._tile(t)).join("")}</div>
        <svg class="pulse" viewBox="0 0 200 26" preserveAspectRatio="none" width="100%"><path d="M0 13 H70 L78 4 L86 22 L94 13 H200"/></svg>`);
   }
+  // Balanced columns (5 tiles = 3 + 2, never 4 + 1) from the real width; see SfBase.balance().
+  _cols(w) { return this.balance(this._n || 0, 132, 10, (w || this.width) - 38); }
+  layoutKey(w) { return this._cols(w); }
   getCardSize() { return 5; }
 }
 
@@ -1785,7 +1793,7 @@ class SfBridgeCard extends SfBase {
       return `<span class="member click ${this.esc(home ? "" : "away")}" data-e="${this.esc(p.entity)}"><span class="av" style="background:${this.esc(p.color || SF_C.cyan)};box-shadow:0 0 8px ${this.esc(p.color || SF_C.cyan)}">${this.esc(String(p.name || "?")[0])}</span>${this.esc(p.name)} · ${home ? this.t("common.home") : this.t("common.away")}</span>`;
     }).join("");
 
-    return `<div class="hud bridge"><div class="floor"></div><div class="horizon"></div>
+    return `<div class="hud fill bridge"><div class="floor"></div><div class="horizon"></div>
       <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
       <div class="top">
         <div><div class="clock">${hh}:${mm}<span class="s">${String(now.getSeconds()).padStart(2, "0")}</span></div>
@@ -1834,7 +1842,6 @@ class SfReactorCard extends SfBase {
   disconnectedCallback() { super.disconnectedCallback(); if (this._ro) { this._ro.disconnect(); this._ro = null; } }
   css() {
     return `
-      :host { height:100%; }
       .stage { position:relative; width:100%; aspect-ratio: 16 / 9; min-height:260px; }
       .hud.fill .stage { flex:1 0 auto; }
       .stage svg { position:absolute; inset:0; width:100%; height:100%; }
@@ -1979,7 +1986,7 @@ class SfReactorCard extends SfBase {
           <div class="txt"><div><b>${this.kw(home)}</b><span>${this.t("reactor.home")}</span></div></div></div>
         ${nodes.join("")}
       </div>
-      ${foot.length ? `<div class="foot" style="grid-template-columns:repeat(${this.esc(foot.length)},minmax(0,1fr))">${foot.join("")}</div>` : ""}`, "fill");
+      ${foot.length ? `<div class="foot" style="grid-template-columns:repeat(${this.esc(foot.length)},minmax(0,1fr))">${foot.join("")}</div>` : ""}`);
   }
   _node([x, y], name, icon, w, color, id) {
     const idle = w === null || Math.abs(w) < 20;
@@ -2012,7 +2019,6 @@ class SfClimateCard extends SfBase {
   defaults() { return { rooms: [], extras: [], switch_script: "", min: 15, max: 30 }; }
   css() {
     return `
-      :host { height:100%; }
       /* House modes: equal columns, the count chosen from the real width (see _geo) so the rows are even, never "5 + 1". */
       .modes { display:grid; grid-template-columns:repeat(var(--mc, 6), minmax(0, 1fr)); gap:6px; margin-bottom:14px; }
       .modes .ml { grid-column:1 / -1; }
@@ -2122,7 +2128,7 @@ class SfClimateCard extends SfBase {
     return this.frame(this.t("climate.climate"), avg === null ? "" : this.t("climate.t_average", { t: avg }), `
       ${modes ? `<div class="seg modes ${this.esc(geo.io ? "io" : "")}" style="--mc:${this.esc(geo.mc)}"><span class="lbl ml">${this.t("common.house_mode")}</span>${modes}</div>` : ""}
       <div class="rooms grow" style="--rc:${this.esc(geo.rc)}">${c.rooms.map((r) => this._room(r)).join("")}</div>
-      ${extras ? `<div class="extras">${extras}</div>` : ""}`, "fill");
+      ${extras ? `<div class="extras">${extras}</div>` : ""}`);
   }
   getCardSize() { return 8; }
   // Sections view: this card may take half a section or more, and fills the height of its cell.
@@ -2279,7 +2285,7 @@ class SfCameraCard extends SfBase {
   }
   css() {
     return `
-      .cams { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:12px; }
+      .cams { display:grid; grid-template-columns:repeat(var(--c, 1), minmax(0, 1fr)); gap:12px; align-content:start; }
       .cam { position:relative; aspect-ratio:16/9; border-radius:10px; overflow:hidden; background:#000;
         border:1px solid rgb(var(--sf-cyan-rgb) / .25); }
       .cam img { width:100%; height:100%; object-fit:cover; display:block; opacity:0; transition:opacity .4s; filter:saturate(.85) contrast(1.05); }
@@ -2302,6 +2308,7 @@ class SfCameraCard extends SfBase {
       .nofeed { position:absolute; inset:0; display:grid; place-items:center; color:${SF_C.grey}; font-size:11px; letter-spacing:.2em; }`;
   }
   render() {
+    this._n = this._config.cameras.length;
     const cams = this._config.cameras.map((k) => {
       const s = this.st(k.entity);
       const motion = k.motion && this.st(k.motion) && this.st(k.motion).state === "on";
@@ -2316,8 +2323,10 @@ class SfCameraCard extends SfBase {
             ${pc !== null ? `<span class="pill ${this.esc(pc > 0 ? "hot" : "")}">${this.t("camera.n_person_s", { n: pc })}</span>` : ""}
             ${rv && rv !== "NONE" ? `<span class="pill ${this.esc(rv === "ALERT" ? "red" : "hot")}">${rv === "ALERT" ? this.t("camera.frigate_alert") : this.t("camera.detection")}</span>` : ""}</div></div></div>`;
     }).join("");
-    return this.frame(this.t("camera.cameras"), this.t("camera.refreshed_every_n_s_tap_live", { n: this._every() }), `<div class="cams">${cams}</div>`);
+    return this.frame(this.t("camera.cameras"), this.t("camera.refreshed_every_n_s_tap_live", { n: this._every() }), `<div class="cams grow" style="--c:${this.esc(this._cols())}">${cams}</div>`);
   }
+  _cols(w) { return this.balance(this._n || 0, 300, 12, (w || this.width) - 38); }
+  layoutKey(w) { return this._cols(w); }
   getCardSize() { return 6; }
 }
 
@@ -2497,7 +2506,7 @@ class SfCellsCard extends SfBase {
   defaults() { return { warn: 30, crit: 15, limit: 16, exclude: [] }; }
   css() {
     return `
-      .cells { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:8px; }
+      .cells { display:grid; grid-template-columns:repeat(var(--c, 1), minmax(0, 1fr)); grid-auto-rows:minmax(min-content, 1fr); gap:8px; }
       .cell { display:grid; grid-template-columns: 26px 1fr; gap:8px; align-items:center; padding:7px 9px; border-radius:8px;
         background:rgb(var(--sf-cyan-rgb) / .03); border:1px solid rgb(var(--sf-cyan-rgb) / .1); }
       .bat { position:relative; width:14px; height:24px; border:1.5px solid currentColor; border-radius:3px; margin:0 auto; }
@@ -2513,14 +2522,17 @@ class SfCellsCard extends SfBase {
       && s.attributes.device_class === "battery" && !c.exclude.includes(s.entity_id) && (!re || re.test(s.entity_id)) && (!ex || !ex.test(s.entity_id))
       && !isNaN(parseFloat(s.state))).map((s) => [s, parseFloat(s.state)]).sort((a, b) => a[1] - b[1]);
     const low = list.filter(([, v]) => v <= c.warn).length;
+    this._n = Math.min(list.length, c.limit);
     const cells = list.slice(0, c.limit).map(([s, v]) => {
       const col = v <= c.crit ? SF_C.red : v <= c.warn ? SF_C.amber : SF_C.green;
       const nm = String(s.attributes.friendly_name || s.entity_id).slice(0, 120).replace(/\s*(Batterie|Battery( level)?|Battery Level)$/i, "");
       return `<div class="cell click" data-e="${this.esc(s.entity_id)}" style="color:${this.esc(col)}"><div class="bat"><i style="height:calc(${this.esc(Math.max(4, Math.min(100, v)))}% - 3px)"></i></div>
         <div><div class="nm" style="color:${SF_C.text}" title="${this.esc(nm)}">${this.esc(nm)}</div><div class="pc">${Math.round(v)} %</div></div></div>`;
     }).join("");
-    return this.frame(this.t("cells.sensor_batteries"), this.t("cells.n_sensors_m_to_replace_soon", { n: list.length, m: low }), `<div class="cells">${cells}</div>`);
+    return this.frame(this.t("cells.sensor_batteries"), this.t("cells.n_sensors_m_to_replace_soon", { n: list.length, m: low }), `<div class="cells grow" style="--c:${this.esc(this._cols())}">${cells}</div>`);
   }
+  _cols(w) { return this.balance(this._n || 0, 150, 8, (w || this.width) - 38); }
+  layoutKey(w) { return this._cols(w); }
   getCardSize() { return 5; }
 }
 
@@ -2879,7 +2891,7 @@ class SfRadiatorsCard extends SfBase {
       .hud { --ac:${ac}; }
       .head, .hud .c { color:var(--ac); border-color:var(--ac); text-shadow:0 0 8px color-mix(in srgb, var(--ac) 60%, transparent); }
       .dot { background:var(--ac); box-shadow:0 0 8px var(--ac); }
-      .list { display:grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap:10px; }
+      .list { display:grid; grid-template-columns:repeat(var(--c, 1), minmax(0, 1fr)); grid-auto-rows:minmax(min-content, 1fr); gap:10px; }
       .rad { padding:11px 12px 12px; border-radius:12px; background:rgb(var(--sf-fg-rgb) / .03);
         border:1px solid color-mix(in srgb, var(--ac) 22%, transparent); }
       .rad.heat { border-color:color-mix(in srgb, var(--ac) 70%, transparent); background:color-mix(in srgb, var(--ac) 9%, transparent);
@@ -2943,11 +2955,14 @@ class SfRadiatorsCard extends SfBase {
   }
   render() {
     const c = this._config, rs = c.radiators || [];
+    this._n = rs.length;
     const n = rs.filter((r) => { const s = this.st(r.climate); return s && s.attributes.hvac_action === "heating" && s.state !== "off"; }).length;
     const tot = rs.reduce((t, r) => { const v = r.kwh ? this.num(r.kwh) : null; return t + (v === null ? 0 : (this.unit(r.kwh).toLowerCase() === "wh" ? v / 1000 : v)); }, 0);
     return this.frame(this.esc(c.title || this.t("radiators.radiators")),
-      `${this.t("radiators.n_heating", { n })} · ${this.nf(tot, 1)} kWh`, `<div class="list">${rs.map((r) => this._rad(r)).join("")}</div>`);
+      `${this.t("radiators.n_heating", { n })} · ${this.nf(tot, 1)} kWh`, `<div class="list grow" style="--c:${this.esc(this._cols())}">${rs.map((r) => this._rad(r)).join("")}</div>`);
   }
+  _cols(w) { return this.balance(this._n || 0, 280, 10, (w || this.width) - 38); }
+  layoutKey(w) { return this._cols(w); }
   getCardSize() { return 2 + (this._config.radiators || []).length * 2; }
 }
 
@@ -4643,7 +4658,7 @@ for (const [tag, spec] of Object.entries(SF_SPECS)) {
   }
 }
 
-console.info("%c SF-CARDS %c v1.15.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
+console.info("%c SF-CARDS %c v1.16.0 ", "color:#03080f;background:#00e5ff;font-weight:700", "color:#00e5ff;background:#03080f");
 
 /* ============================================================== VALIDATION */
 /*

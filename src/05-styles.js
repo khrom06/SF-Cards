@@ -18,7 +18,7 @@ const SF_VARS_LIGHT = `--sf-cyan:#00798f; --sf-amber:#a85f00; --sf-red:#c8173d; 
     --sf-orange:#b8430f; --sf-heat:#bf3f16; --sf-cool:#0a6f9c; --sf-dry:#8a6600; --sf-fan:#2a7a2e; --sf-auto:#6a3bc4; --sf-pink:#a80f78; --sf-yellow:#7d6200; --sf-halo:rgb(255 255 255 / .85);`;
 
 const SF_CSS = `
-  :host { display:block; ${SF_VARS_DARK} }
+  :host { display:block; height:100%; ${SF_VARS_DARK} }
   :host([theme="light"]) { ${SF_VARS_LIGHT} }
   .lbl, .kpi, .foot > div, .stats > div, .fl3 > div, .tile { min-width:0; overflow-wrap:anywhere; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; } }
@@ -36,6 +36,7 @@ const SF_CSS = `
      instead of cutting controls off. */
   .hud.fill { display:flex; flex-direction:column; height:100%; box-sizing:border-box; overflow-x:hidden; overflow-y:auto; scrollbar-width:thin; }
   .hud.fill > .head { flex:none; }
+  .hud.fill > * { min-width:0; }   /* flex items must be able to shrink below their content, like the block children they replace */
   .hud.fill > .grow { flex:1 1 auto; }
   .hud::after { content:""; position:absolute; inset:0; pointer-events:none;
     background: repeating-linear-gradient(0deg, rgb(var(--sf-fg-rgb) / .022) 0 1px, transparent 1px 3px); }

@@ -2,6 +2,15 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.16.0]
+### Added
+- **Equal heights for every card** (sections view): all cards now fill the height of their cell, so cards side by side line up when you give them the same number of rows (drag the resize handle, or `grid_options: { rows: N }`). Nothing changes when the cell is not taller than the content; in a cell shorter than the content the card scrolls.
+- **Balanced columns** for the tile cards too — equipment (`sf-machines-card`), sensor batteries (`sf-cells-card`), radiators and cameras: as many columns as fit, evened out (5 tiles become 3 + 2, never 4 + 1), re-rendered only when a column count changes.
+- Sections-view grid options for every card (minimum width so it cannot be dragged to an unusable size).
+- `test/layout.mjs` now also checks, for every card at phone / tablet / desktop widths, that nothing overflows and that the card stretches to a taller cell.
+### Changed
+- The equipment tiles are 3 pixels shorter at the bottom (a stray text-baseline gap is gone).
+
 ## [1.15.0]
 ### Added
 - **Layout that follows the room you give a card** (energy flow and climate cards first). The card measures its own width and chooses its arrangement from that, not from the screen: the house modes sit on even rows (six modes become 3 + 3, never 5 + 1), the rooms on balanced columns (five rooms become 3 + 2, never 4 + 1), the modes shrink to icons when the card is very narrow, and long labels are shortened with "…" instead of wrapping. The re-render only happens when a column count changes (never on every pixel), so resizing cannot loop and animations are not restarted.

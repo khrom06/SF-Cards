@@ -60,7 +60,7 @@ class SfMachinesCard extends SfBase {
   }
   css() {
     return `
-      .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap:10px; }
+      .grid { display:grid; grid-template-columns:repeat(var(--c, 1), minmax(0, 1fr)); grid-auto-rows:minmax(min-content, 1fr); gap:10px; }
       .tile { position:relative; padding:10px 11px 12px; border-radius:10px;
         background: linear-gradient(160deg, rgb(var(--sf-cyan-rgb) / .07), rgb(var(--sf-cyan-rgb) / .015));
         border:1px solid rgb(var(--sf-cyan-rgb) / .16); }
@@ -128,11 +128,15 @@ class SfMachinesCard extends SfBase {
   }
   render() {
     const tiles = this._config.tiles;
+    this._n = tiles.length;
     const bad = tiles.filter((t) => !this.ok(t.entity)).length;
     return this.frame(this.esc(this._config.title || this.t("machines.equipment")), bad ? this.t("machines.n_sensor_s_not_responding", { n: bad }) : this.t("machines.all_good"),
-      `<div class="grid">${tiles.map((t) => this._tile(t)).join("")}</div>
+      `<div class="grid grow" style="--c:${this.esc(this._cols())}">${tiles.map((t) => this._tile(t)).join("")}</div>
        <svg class="pulse" viewBox="0 0 200 26" preserveAspectRatio="none" width="100%"><path d="M0 13 H70 L78 4 L86 22 L94 13 H200"/></svg>`);
   }
+  // Balanced columns (5 tiles = 3 + 2, never 4 + 1) from the real width; see SfBase.balance().
+  _cols(w) { return this.balance(this._n || 0, 132, 10, (w || this.width) - 38); }
+  layoutKey(w) { return this._cols(w); }
   getCardSize() { return 5; }
 }
 

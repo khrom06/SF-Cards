@@ -92,6 +92,38 @@ const settle = () => wait(200);
       c.remove();
     }
 
+    // 4a. Tile-grid cards use balanced columns too: the grid never ends with a nearly empty row when it can be avoided (5 tiles: 3 + 2, not 4 + 1).
+    {
+      const tiles = [1, 2, 3, 4, 5].map((i) => ({ name: `T${i}`, label: `T${i}`, entity: "sensor.temp" })), rads = [1, 2, 3].map((i) => ({ name: `R${i}`, climate: "climate.room" }));
+      const cams = [1, 2, 3].map((i) => ({ name: `C${i}`, entity: "camera.front" }));
+      for (const [tag, cfg, sel, n, minW, gap] of [["sf-machines-card", { tiles }, ".grid", 5, 132, 10], ["sf-radiators-card", { radiators: rads }, ".list", 3, 280, 10], ["sf-camera-card", { cameras: cams }, ".cams", 3, 300, 12]]) {
+        for (const w of [300, 420, 560, 760, 1100]) {
+          const c = cell(w), el = mount(c, tag, cfg); await settle();
+          const cc = cols(el, sel, "--c"), fit = Math.max(1, Math.floor((w - 38 + gap) / (minW + gap))), rows = Math.ceil(n / cc);
+          if (!(cc >= 1 && cc <= n)) lfail(`${tag} ${w}px: --c=${cc} out of range`);
+          else if (rows !== Math.ceil(n / Math.min(n, fit))) lfail(`${tag} ${w}px: ${cc} columns give ${rows} rows, the minimum for ${fit} that fit is ${Math.ceil(n / Math.min(n, fit))}`);
+          const hud = el.shadowRoot.querySelector(".hud"); if (hud.scrollWidth > hud.clientWidth + 1) lfail(`${tag} ${w}px: horizontal overflow`);
+          c.remove();
+        }
+      }
+    }
+    // 4b. Every card keeps its frame inside its cell at phone / tablet / desktop widths (no horizontal overflow) and, in a taller cell,
+    // stretches to it (cards side by side line up). Skipped silently for cards without the standard frame (the wall-panel card).
+    for (const tag of Object.keys(FULL)) {
+      if (!customElements.get(tag)) continue;
+      for (const w of [360, 520, 900]) {
+        const c = cell(w), el = mount(c, tag, FULL[tag]); await settle();
+        const hud = el.shadowRoot && el.shadowRoot.querySelector(".hud");
+        if (!hud) { c.remove(); continue; }
+        // The welcome banner has decorative layers (horizon, floor) wider than the card, clipped by design.
+        if (tag !== "sf-bridge-card" && hud.scrollWidth > hud.clientWidth + 1) lfail(`${tag} ${w}px: horizontal overflow (${hud.scrollWidth} > ${hud.clientWidth})`);
+        const nat = hud.getBoundingClientRect().height; c.remove();
+        const t = cell(w, Math.round(nat) + 150), e2 = mount(t, tag, FULL[tag]); await settle();
+        const h2 = e2.shadowRoot.querySelector(".hud").getBoundingClientRect().height;
+        if (Math.abs(h2 - (Math.round(nat) + 150)) > 1.5) lfail(`${tag} ${w}px: in a cell 150px taller the card is ${Math.round(h2)}px, expected ${Math.round(nat) + 150}`);
+        t.remove();
+      }
+    }
     // 5. Sections-view grid options: a card may take half a section or more, and says so.
     for (const [tag, minCols] of [["sf-climate-card", 6], ["sf-reactor-card", 8], ["sf-energy-flow-card", 8]]) {
       const e = document.createElement(tag), g = e.getGridOptions && e.getGridOptions();

@@ -226,7 +226,7 @@ class SfBase extends HTMLElement {
     const h = Math.round(m / 60); return h < 48 ? this.t("common.n_h_ago", { n: h }) : this.t("common.n_d_ago", { n: Math.round(h / 24) });
   }
   frame(title, sub, body, extraClass = "") {
-    return `<div class="hud ${this.esc(extraClass)}"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+    return `<div class="hud fill ${this.esc(extraClass)}"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
       <div class="head"><span class="dot"></span>${title}<span class="sub">${sub || ""}</span></div>${body}</div>`;
   }
   // Timer of a button (e.g. towel dryer): { active, remaining (min) }. A refresh
@@ -243,5 +243,8 @@ class SfBase extends HTMLElement {
     if (this._sfRo) { this._sfRo.disconnect(); this._sfRo = null; }
   }
   getCardSize() { return 4; }
+  // Sections view: HA's own defaults (full width of one section column, height from the content) plus a minimum width so the card cannot
+  // be dragged to an unusable size. Cards with their own needs override it.
+  getGridOptions() { return { columns: 12, rows: "auto", min_columns: 4 }; }
 }
 

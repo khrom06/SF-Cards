@@ -21,7 +21,7 @@ class SfRadiatorsCard extends SfBase {
       .hud { --ac:${ac}; }
       .head, .hud .c { color:var(--ac); border-color:var(--ac); text-shadow:0 0 8px color-mix(in srgb, var(--ac) 60%, transparent); }
       .dot { background:var(--ac); box-shadow:0 0 8px var(--ac); }
-      .list { display:grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap:10px; }
+      .list { display:grid; grid-template-columns:repeat(var(--c, 1), minmax(0, 1fr)); grid-auto-rows:minmax(min-content, 1fr); gap:10px; }
       .rad { padding:11px 12px 12px; border-radius:12px; background:rgb(var(--sf-fg-rgb) / .03);
         border:1px solid color-mix(in srgb, var(--ac) 22%, transparent); }
       .rad.heat { border-color:color-mix(in srgb, var(--ac) 70%, transparent); background:color-mix(in srgb, var(--ac) 9%, transparent);
@@ -85,11 +85,14 @@ class SfRadiatorsCard extends SfBase {
   }
   render() {
     const c = this._config, rs = c.radiators || [];
+    this._n = rs.length;
     const n = rs.filter((r) => { const s = this.st(r.climate); return s && s.attributes.hvac_action === "heating" && s.state !== "off"; }).length;
     const tot = rs.reduce((t, r) => { const v = r.kwh ? this.num(r.kwh) : null; return t + (v === null ? 0 : (this.unit(r.kwh).toLowerCase() === "wh" ? v / 1000 : v)); }, 0);
     return this.frame(this.esc(c.title || this.t("radiators.radiators")),
-      `${this.t("radiators.n_heating", { n })} · ${this.nf(tot, 1)} kWh`, `<div class="list">${rs.map((r) => this._rad(r)).join("")}</div>`);
+      `${this.t("radiators.n_heating", { n })} · ${this.nf(tot, 1)} kWh`, `<div class="list grow" style="--c:${this.esc(this._cols())}">${rs.map((r) => this._rad(r)).join("")}</div>`);
   }
+  _cols(w) { return this.balance(this._n || 0, 280, 10, (w || this.width) - 38); }
+  layoutKey(w) { return this._cols(w); }
   getCardSize() { return 2 + (this._config.radiators || []).length * 2; }
 }
 

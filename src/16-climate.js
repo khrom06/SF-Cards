@@ -19,7 +19,6 @@ class SfClimateCard extends SfBase {
   defaults() { return { rooms: [], extras: [], switch_script: "", min: 15, max: 30 }; }
   css() {
     return `
-      :host { height:100%; }
       /* House modes: equal columns, the count chosen from the real width (see _geo) so the rows are even, never "5 + 1". */
       .modes { display:grid; grid-template-columns:repeat(var(--mc, 6), minmax(0, 1fr)); gap:6px; margin-bottom:14px; }
       .modes .ml { grid-column:1 / -1; }
@@ -129,7 +128,7 @@ class SfClimateCard extends SfBase {
     return this.frame(this.t("climate.climate"), avg === null ? "" : this.t("climate.t_average", { t: avg }), `
       ${modes ? `<div class="seg modes ${this.esc(geo.io ? "io" : "")}" style="--mc:${this.esc(geo.mc)}"><span class="lbl ml">${this.t("common.house_mode")}</span>${modes}</div>` : ""}
       <div class="rooms grow" style="--rc:${this.esc(geo.rc)}">${c.rooms.map((r) => this._room(r)).join("")}</div>
-      ${extras ? `<div class="extras">${extras}</div>` : ""}`, "fill");
+      ${extras ? `<div class="extras">${extras}</div>` : ""}`);
   }
   getCardSize() { return 8; }
   // Sections view: this card may take half a section or more, and fills the height of its cell.

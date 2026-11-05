@@ -660,12 +660,13 @@ theme: light                  # dark (default) | light | auto
 
 ## Layout
 
-The energy flow and climate cards **adapt their arrangement to the room you give them** (their own width, not the screen's), and fill the height of their cell — something Home Assistant does not do for custom cards on its own.
+The cards **adapt their arrangement to the room you give them** (their own width, not the screen's), and fill the height of their cell — something Home Assistant does not do for custom cards on its own. The energy flow and climate cards reorganise themselves; the tile cards (equipment, sensor batteries, radiators, cameras) use balanced columns; every card stretches to a taller cell.
 
 <p align="center"><img src="assets/layout.png" alt="Energy flow and climate cards side by side, same height, in a Home Assistant sections view" width="820"></p>
 
-- **Even rows**: house modes in as many columns as fit, evened out (6 modes → 3 + 3), rooms on balanced columns (5 rooms → 3 + 2); icon-only modes when very narrow; long labels end with "…".
-- **Equal heights** (sections view): drag the card's resize handle taller, or set `grid_options: { rows: 13 }`: the content takes the extra height (the energy flow spreads out, the rooms grow). Give the two cards side by side the same number of rows and they line up. In a cell shorter than the content the card scrolls instead of cutting controls off.
+- **Even rows**: house modes in as many columns as fit, evened out (6 modes → 3 + 3), rooms and tiles on balanced columns (5 → 3 + 2); icon-only modes when very narrow; long labels end with "…".
+- **Equal heights** (sections view): drag the card's resize handle taller, or set `grid_options: { rows: 13 }`: the content takes the extra height (the energy flow spreads out, the rooms grow). Give the cards side by side the same number of rows and they line up (any SF card). In a cell shorter than the content the card scrolls instead of cutting controls off.
+- Equal heights work in a **sections** view and in a **panel** view (the card fills the screen). Home Assistant does not stretch custom cards inside a `horizontal-stack`; use a sections view there.
 - **Width in a section**: set `grid_options: { columns: full }` to use the whole width of a section of 2 or more columns (the Home Assistant default is half a section).
 - It is safe: only a change in the number of columns triggers a redraw, never every pixel, so resizing cannot loop or restart the animations. `./test/run.sh` checks columns, overflow, equal heights and the absence of render loops.
 

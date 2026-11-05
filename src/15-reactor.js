@@ -25,7 +25,6 @@ class SfReactorCard extends SfBase {
   disconnectedCallback() { super.disconnectedCallback(); if (this._ro) { this._ro.disconnect(); this._ro = null; } }
   css() {
     return `
-      :host { height:100%; }
       .stage { position:relative; width:100%; aspect-ratio: 16 / 9; min-height:260px; }
       .hud.fill .stage { flex:1 0 auto; }
       .stage svg { position:absolute; inset:0; width:100%; height:100%; }
@@ -170,7 +169,7 @@ class SfReactorCard extends SfBase {
           <div class="txt"><div><b>${this.kw(home)}</b><span>${this.t("reactor.home")}</span></div></div></div>
         ${nodes.join("")}
       </div>
-      ${foot.length ? `<div class="foot" style="grid-template-columns:repeat(${this.esc(foot.length)},minmax(0,1fr))">${foot.join("")}</div>` : ""}`, "fill");
+      ${foot.length ? `<div class="foot" style="grid-template-columns:repeat(${this.esc(foot.length)},minmax(0,1fr))">${foot.join("")}</div>` : ""}`);
   }
   _node([x, y], name, icon, w, color, id) {
     const idle = w === null || Math.abs(w) < 20;
