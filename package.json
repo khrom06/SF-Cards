@@ -1,0 +1,12 @@
+{
+  "name": "sf-cards",
+  "private": true,
+  "description": "Build tooling for SF-Cards (no runtime dependency: Lovelace loads dist/sf-cards.js directly, no bundler).",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:check": "node scripts/build.mjs --check"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

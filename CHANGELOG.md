@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.16.1]
+### Changed
+- `dist/sf-cards.js` (the file HACS/Lovelace loads) is now minified at build time (esbuild): ~12% smaller over the wire after gzip, which HA already serves. No behaviour change — pixel-identical renders, same 440 snapshots, confirmed with a pixel-by-pixel screenshot comparison against the previous build. `src/` stays the readable source of truth; `test/lint.js`'s reliability rules now scan `src/*.js` instead of the (now minified) `dist/sf-cards.js`, so their line numbers stay meaningful.
+
 ## [1.16.0]
 ### Added
 - **Equal heights for every card** (sections view): all cards now fill the height of their cell, so cards side by side line up when you give them the same number of rows (drag the resize handle, or `grid_options: { rows: N }`). Nothing changes when the cell is not taller than the content; in a cell shorter than the content the card scrolls.

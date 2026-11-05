@@ -1,7 +1,20 @@
-// Reliability rules on dist/sf-cards.js (patterns that have already frozen a browser or leaked in production). Non-zero exit code if a rule fails.
+// Reliability rules on the readable src/*.js concatenation (patterns that have already frozen a browser or leaked in production). Scans src/, not
+// dist/sf-cards.js: since dist/ is minified (scripts/build.mjs), line numbers and identifier names there no longer mean anything for these checks.
+// Non-zero exit code if a rule fails.
 const fs = require("fs");
-const src = fs.readFileSync(__dirname + "/../dist/sf-cards.js", "utf8"), lines = src.split("\n"), bad = [];
-const at = (i) => `dist/sf-cards.js:${i + 1}`;
+const path = require("path");
+const srcDir = path.join(__dirname, "..", "src");
+const srcFiles = fs.readdirSync(srcDir).filter((f) => f.endsWith(".js")).sort();
+// lines[] / fileOfLine[] / lineOfLine[]: built file by file (not by splitting a joined string) so the file:line of each concatenation line is exact,
+// with one blank separator line kept between files (its position is never matched by the rules below, which all look for real code).
+const lines = [], fileOfLine = [], lineOfLine = [];
+srcFiles.forEach((f, fi) => {
+  const fileLines = fs.readFileSync(path.join(srcDir, f), "utf8").split("\n");
+  fileLines.forEach((l, j) => { lines.push(l); fileOfLine.push(f); lineOfLine.push(j + 1); });
+  if (fi < srcFiles.length - 1) { lines.push(""); fileOfLine.push(f); lineOfLine.push(fileLines.length + 1); }
+});
+const src = lines.join("\n"), bad = [];
+const at = (i) => `src/${fileOfLine[i] || "?"}:${lineOfLine[i] ?? i + 1}`;
 // 1. `:scope` matches nothing in a ShadowRoot (Chrome / WebKit): an existence test that uses it always answers "absent" (endless loop observed on 2026-11-03).
 lines.forEach((l, i) => { if (/(shadowRoot|\broot|\bsr)\.querySelector(All)?\(\s*["'`]:scope/.test(l)) bad.push(`${at(i)} : ":scope" on a shadow root (never matches)`); });
 // 2. Every setInterval stored in this.X must have its clearInterval(this.X).
