@@ -105,6 +105,17 @@ const SF_SPECS = {
       schema: () => [sfE("entity"), sfG(sfT("name"), sfT("group")), { name: "ok", selector: { text: { multiple: true } } }, { name: "bad", selector: { text: { multiple: true } } },
         sfG(sfN("min", -100000, 100000, 0.1), sfN("max", -100000, 100000, 0.1)), sfN("stale", 0, 100000), sfS("severity", [["warning", "Attention (orange)"], ["critical", "Critique (rouge)"]])] }],
   },
+  "sf-host-card": {
+    title: "Hôte (ordinateur / serveur)",
+    stub: {},
+    labels: { online: "Entité « en ligne » (facultatif)", cpu: "Processeur (%)", cpu_temp: "Température du processeur", gpu: "Carte graphique (%)", gpu_temp: "Température de la carte graphique",
+      gpu_power: "Puissance de la carte graphique (W)", gpu_vram: "Mémoire vidéo (%)", ram: "Mémoire (%)", ram_used: "Mémoire utilisée (Go)", swap: "Swap (%)", disk: "Disque (%)",
+      disk_free: "Espace disque libre", net_rx: "Réseau reçu", net_tx: "Réseau émis", wifi: "Signal Wi-Fi (dBm)", containers: "Conteneurs actifs", load: "Charge système",
+      uptime: "Durée de fonctionnement (heures)", power: "Consommation totale (W)", energy_total: "Compteur d'énergie (kWh)", power_estimate: "Valeurs estimées (affiche « ≈ »)", warn: "Orange à partir de (%)", crit: "Rouge à partir de (%)", temp_warn: "Orange à partir de (°C)", temp_crit: "Rouge à partir de (°C)" },
+    fields: () => [sfT("title"), sfE("online"), sfG(sfE("cpu", "sensor"), sfE("cpu_temp", "sensor")), sfG(sfE("gpu", "sensor"), sfE("gpu_temp", "sensor")), sfG(sfE("gpu_power", "sensor"), sfE("gpu_vram", "sensor")),
+      sfG(sfE("ram", "sensor"), sfE("ram_used", "sensor")), sfG(sfE("swap", "sensor"), sfE("disk", "sensor")), sfE("disk_free", "sensor"), sfG(sfE("net_rx", "sensor"), sfE("net_tx", "sensor")),
+      sfG(sfE("wifi", "sensor"), sfE("containers", "sensor")), sfG(sfE("load", "sensor"), sfE("uptime", "sensor")), sfG(sfE("power", "sensor"), sfE("energy_total", "sensor")), sfB("power_estimate"), sfG(sfN("warn", 0, 100), sfN("crit", 0, 100)), sfG(sfN("temp_warn", 0, 150), sfN("temp_crit", 0, 150))],
+  },
   "sf-assistant-card": {
     title: "Assistant",
     stub: {},

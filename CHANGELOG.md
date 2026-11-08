@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.18.0]
+### Added
+- **New `sf-host-card`: monitoring of a computer or server.** Three animated gauges (CPU, GPU, memory) with temperatures and power, bars for video memory, disk and swap, a live network curve, and a footer with power draw, energy counter, containers, Wi-Fi signal and load. It only displays states already in Home Assistant, so any exporter works (MQTT discovery script, System Monitor, Glances, Proxmox…). Amber / red thresholds are configurable, `power_estimate: true` marks estimated power with "≈", and the card greys out when the host is offline. Dark and light themes, 11 languages, visual editor.
+
 ## [1.17.0]
 ### Added
 - **`sf-ns-card`: `layout` option** — reorder the blocks of each screen (Morning / Day / Evening / Night) in config, e.g. to put the energy wheel on the right instead of the left. Default unchanged if you don't set it; an unknown block name is ignored, an unlisted one keeps its place (nothing can disappear). Evening and Night size each row to what's actually in it in the order you chose, so an unused block never leaves an empty gap. One known limitation documented in the README: the Day screen's `energy_stats` block needs the tall cell, forcing it into the small one can make its text overlap.

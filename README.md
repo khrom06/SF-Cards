@@ -1,6 +1,6 @@
 # SF Cards
 
-**Sci‑fi "HUD" cards for Home Assistant** — a set of 16 Lovelace cards with a glowing, cinematic look: an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… and a **visual editor for every card**, so nobody has to write YAML.
+**Sci‑fi "HUD" cards for Home Assistant** — a set of 17 Lovelace cards with a glowing, cinematic look: an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… and a **visual editor for every card**, so nobody has to write YAML.
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -97,6 +97,7 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-cells-card`](#sf-cells-card) | Weakest sensor batteries first, discovered automatically |
 | [`sf-assistant-card`](#sf-assistant-card) | State of an assistant: phase, last request, action, result, reply — works out of the box with Assist satellites (read-only) |
 | [`sf-health-card`](#sf-health-card) | Overview of your own checks: overall verdict and anomalies by severity, grouped by subsystem |
+| [`sf-host-card`](#sf-host-card) | Monitoring of a computer or server: CPU / GPU / memory gauges, VRAM, disk and swap bars, live network curve, power draw (read-only) |
 | [`sf-timeline-card`](#sf-timeline-card) | Latest state changes of the chosen entities, grouped by day, in plain words (read-only) |
 | [`sf-trend-card`](#sf-trend-card) | History curves (read-only): range buttons, several series on one chart or one line each, hover / touch readout |
 | [`sf-battery-card`](#sf-battery-card) | Home battery: level, flow, estimated time, daily energy, mode — only shows what you configure |
@@ -363,6 +364,44 @@ actions:                                     # optional buttons (up to 6)
     service: script.assistant_stop           # domain.service
     confirm: "Stop?"                         # optional: asks to press twice
 ```
+
+### sf-host-card
+
+<img src="assets/host.png" alt="Host card, dark theme" width="420"> <img src="assets/host-light.png" alt="Host card, light theme" width="420">
+
+Monitoring of a computer or server from sensors you already have in Home Assistant (an MQTT discovery script, System Monitor, Glances, Proxmox…): three animated gauges (CPU, GPU, memory) with temperatures and power, bars for video memory, disk and swap, a live network curve, and a footer with power draw, energy, containers, Wi-Fi signal and load. Colours turn amber then red past your thresholds, and the whole card greys out when the host is offline. Every entity is optional; read-only.
+
+```yaml
+type: custom:sf-host-card
+title: Workstation             # optional
+online: binary_sensor.pc_online  # optional; without it the host is offline when no measurement is available
+cpu: sensor.pc_cpu             # percent
+cpu_temp: sensor.pc_cpu_temp
+gpu: sensor.pc_gpu
+gpu_temp: sensor.pc_gpu_temp
+gpu_power: sensor.pc_gpu_power
+gpu_vram: sensor.pc_vram_percent
+ram: sensor.pc_ram_percent
+ram_used: sensor.pc_ram_gb
+swap: sensor.pc_swap
+disk: sensor.pc_disk
+disk_free: sensor.pc_disk_free
+net_rx: sensor.pc_rx           # kB/s (B/s, MB/s, GB/s and Mbit/s units are converted)
+net_tx: sensor.pc_tx
+wifi: sensor.pc_wifi           # dBm
+containers: sensor.pc_containers
+load: sensor.pc_load
+uptime: sensor.pc_uptime       # hours
+power: sensor.pc_power         # total draw in W
+energy_total: sensor.pc_energy # energy counter in kWh
+power_estimate: true           # shows "≈" when power / energy are estimated rather than metered
+warn: 75                       # amber from (percent), default 75
+crit: 90                       # red from (percent), default 90
+temp_warn: 75                  # amber from (°C), default 75
+temp_crit: 88                  # red from (°C), default 88
+```
+
+The traffic curve is built from what the card sees while the page is open (no history request).
 
 ### sf-health-card
 

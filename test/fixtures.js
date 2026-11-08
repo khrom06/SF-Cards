@@ -17,6 +17,9 @@ const base = {
   "sensor.car_soc": U(55, "%"), "sensor.car_range": U(180, "km"), "sensor.car_target": U(80, "%"),
   "lock.car": S("locked"), "vacuum.robot": S("docked"), "sensor.robot_bat": U(80, "%"), "button.sc1": S("unknown"), "scene.dim": S("scening"), "media_player.tv": S("off"),
   "input_select.ns_mode": S("Jour"), "sensor.fridge": U(4.2, "°C"), "sensor.freezer": U(-19, "°C"), "number.cur": U(8, "A"), "sensor.kwh_imp": U(1, "kWh"), "sensor.kwh_sol": U(2, "kWh"), "sensor.kwh_exp": U(0.5, "kWh"),
+  "sensor.h_cpu": U(34, "%"), "sensor.h_cpu_t": U(61, "°C"), "sensor.h_gpu": U(88, "%"), "sensor.h_gpu_t": U(72, "°C"), "sensor.h_gpu_p": U(240, "W"), "sensor.h_vram": U(86, "%"),
+  "sensor.h_ram": U(67, "%"), "sensor.h_ram_gb": U(9.8, "GB"), "sensor.h_swap": U(9, "%"), "sensor.h_disk": U(21, "%"), "sensor.h_disk_free": U(417, "GB"),
+  "sensor.h_rx": U(820, "kB/s"), "sensor.h_tx": U(95, "kB/s"), "sensor.h_wifi": U(-48, "dBm"), "sensor.h_ct": S(3), "sensor.h_load": S(1.2), "sensor.h_up": U(75.5, "h"), "sensor.h_pw": U(310, "W"), "sensor.h_en": U(12.4, "kWh"), "binary_sensor.h_online": S("on"),
   "sensor.dev_bat": S(18, { unit_of_measurement: "%", device_class: "battery", friendly_name: "Sensor A battery" }),
 };
 // As in HA, every state carries its entity_id.
@@ -26,6 +29,8 @@ const HASS = (states, language) => ({ states: withIds(states), locale: { languag
 // One full configuration per card (the identifiers above are fictitious).
 const FULL = {
   "sf-assistant-card": { name: "Assistant", state: "assist_satellite.kitchen", request: "sensor.as_req", action: "sensor.as_act", result: "sensor.as_res", reply: "sensor.as_rep", actions: [{ name: "Stop", icon: "mdi:stop", service: "script.stop", confirm: "Stop?" }] },
+  "sf-host-card": { title: "Workstation", online: "binary_sensor.h_online", cpu: "sensor.h_cpu", cpu_temp: "sensor.h_cpu_t", gpu: "sensor.h_gpu", gpu_temp: "sensor.h_gpu_t", gpu_power: "sensor.h_gpu_p", gpu_vram: "sensor.h_vram",
+    ram: "sensor.h_ram", ram_used: "sensor.h_ram_gb", swap: "sensor.h_swap", disk: "sensor.h_disk", disk_free: "sensor.h_disk_free", net_rx: "sensor.h_rx", net_tx: "sensor.h_tx", wifi: "sensor.h_wifi", containers: "sensor.h_ct", load: "sensor.h_load", uptime: "sensor.h_up", power: "sensor.h_pw", energy_total: "sensor.h_en", power_estimate: true },
   "sf-health-card": { title: "Health", checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Network" }, { name: "UPS", entity: "sensor.ups", min: 30 }] },
   "sf-timeline-card": { title: "Log", hours: 24, entities: ["binary_sensor.door", { entity: "alarm_control_panel.home", name: "Alarm", states: ["triggered"], min_gap: 5 }] },
   "sf-trend-card": { title: "Trend", window: "today", ranges: ["today", 24], series: [{ entity: "sensor.temp_a", name: "A", factor: 1 }, { entity: "sensor.temp_b", name: "B", color: "#ffb300", axis: "right", attribute: "watts" }] },

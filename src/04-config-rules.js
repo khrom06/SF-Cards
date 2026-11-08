@@ -25,6 +25,7 @@ const SF_REQ = {
   "sf-trend-card": (c) => (Array.isArray(c.series) ? c.series : []).some((x) => x && x.entity) ? [] : ["Au moins une série"],
   "sf-timeline-card": (c) => (Array.isArray(c.entities) ? c.entities : []).some((x) => x && (typeof x === "string" ? x : x.entity)) ? [] : ["Au moins une entité"],
   "sf-health-card": (c) => (Array.isArray(c.checks) ? c.checks : []).some((x) => x && x.entity) ? [] : ["Au moins un contrôle"],
+  "sf-host-card": (c) => ["cpu", "gpu", "ram", "disk", "gpu_vram"].some((k) => c[k]) ? [] : ["host.need"],
   "sf-assistant-card": (c) => ["state", "request", "action", "result", "reply"].some((k) => c[k]) ? [] : ["Au moins une entité : état, demande, action, résultat ou réponse"],
   "sf-radar-card": (c) => (sfHas(c.people) || sfHas(c.rooms)) ? [] : ["Au moins une personne ou une pièce"],
   "sf-ns-card": (c) => { const e = c.energy || {}; return (c.weather || c.outdoor || e.solar || e.grid || e.home || ["rooms", "fridge", "cars", "tiles", "shortcuts", "leaks"].some((k) => sfHas(c[k]))) ? [] : ["Au moins un élément : météo, énergie, pièce, voiture, tuile ou raccourci"]; },

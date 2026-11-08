@@ -18,6 +18,7 @@ const SF_DEFS = [
   ["sf-trend-card", SfTrendCard, "SF · Trend", "History curves (read-only) with range buttons, several series or one line per series."],
   ["sf-assistant-card", SfAssistantCard, "SF · Assistant", "State of an assistant: phase, last request, action, result, reply (read-only, works with Assist satellites)."],
   ["sf-health-card", SfHealthCard, "SF · Health", "Overview of your checks: overall verdict and anomalies by severity (rules defined by you)."],
+  ["sf-host-card", SfHostCard, "SF · Host", "Monitoring of a computer or server: CPU, GPU, memory gauges, disk, network curve and status (read-only)."],
   ["sf-timeline-card", SfTimelineCard, "SF · Timeline", "Latest state changes of the chosen entities, grouped by day, in plain words (read-only)."],
 ];
 window.customCards = window.customCards || [];
