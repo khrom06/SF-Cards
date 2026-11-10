@@ -2,6 +2,19 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.19.0]
+### Added
+- **New `sf-upkeep-card`: maintenance forecast.** Filters, brushes, salt, descaling, detectors at end of life: each item shows *when* it will be due, learnt from the entity's own wear rate (least squares since the last reset, glitches ignored, long-term statistics beyond the raw history). Percent, time-left, date and "problem" entities; timeline of what is due; optional two-press reset button.
+- **New `sf-air-card`: "should I open the windows?"** A verdict (open wide / quick airing / not needed / keep closed) from absolute humidity inside vs outside, CO₂, indoor and outdoor PM2.5, rain, wind and the comfort range, with its reasons and the best hour of the next 12 (hourly forecast). **Several rooms** (`rooms:`): one line and one verdict per room, the most urgent one leads; per-room thresholds; `areas` for open-plan spaces covered by the same sensors; `openings` (window / door contacts) to confirm the room is being aired, or to say "close it" when it has been open long enough or should not be open at all.
+- **New `sf-automations-card`: health of your automations.** Broken (invalid config, error on the last run), pointing at an unavailable or missing entity, silent for N days, disabled, running now; health ring, counters and a 24 h pulse of runs. Read-only.
+- **New `sf-cycles-card`: appliance cycles from a power plug.** Live cycle with animated drum, elapsed time, expected end learnt from past cycles, energy and cost; last cycle and the week otherwise.
+- All four: visual editor, dark / light themes, 11 languages.
+- **Animated previews of every card** in the README (`assets/anim/*.webp`), recorded from the live demo with invented data.
+- The live demo now shows all 25 cards, including the host card and the four new ones.
+### Changed
+- `sf-trend-card`: the range buttons (`ranges`) can now be set in the visual editor.
+- README: installation through Marketplace (Home Assistant 2026.11) / HACS default catalogue.
+
 ## [1.18.0]
 ### Added
 - **New `sf-host-card`: monitoring of a computer or server.** Three animated gauges (CPU, GPU, memory) with temperatures and power, bars for video memory, disk and swap, a live network curve, and a footer with power draw, energy counter, containers, Wi-Fi signal and load. It only displays states already in Home Assistant, so any exporter works (MQTT discovery script, System Monitor, Glances, Proxmox…). Amber / red thresholds are configurable, `power_estimate: true` marks estimated power with "≈", and the card greys out when the host is offline. Dark and light themes, 11 languages, visual editor.

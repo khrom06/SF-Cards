@@ -19,6 +19,10 @@ const SF_DEFS = [
   ["sf-assistant-card", SfAssistantCard, "SF · Assistant", "State of an assistant: phase, last request, action, result, reply (read-only, works with Assist satellites)."],
   ["sf-health-card", SfHealthCard, "SF · Health", "Overview of your checks: overall verdict and anomalies by severity (rules defined by you)."],
   ["sf-host-card", SfHostCard, "SF · Host", "Monitoring of a computer or server: CPU, GPU, memory gauges, disk, network curve and status (read-only)."],
+  ["sf-upkeep-card", SfUpkeepCard, "SF · Upkeep", "Filters, consumables and servicing: level and the date each one will be due, learnt from its own wear rate."],
+  ["sf-air-card", SfAirCard, "SF · Fresh air", "Should I open the windows? One verdict from indoor and outdoor air (absolute humidity, CO2, PM2.5, rain, wind) and the best hour."],
+  ["sf-automations-card", SfAutomationsCard, "SF · Automations", "Health of your automations: broken, pointing at a missing entity, silent, disabled, running, and a 24 h pulse."],
+  ["sf-cycles-card", SfCyclesCard, "SF · Appliance cycles", "Cycles found in a power plug: running with expected end, finished, energy and cost per cycle, the week."],
   ["sf-timeline-card", SfTimelineCard, "SF · Timeline", "Latest state changes of the chosen entities, grouped by day, in plain words (read-only)."],
 ];
 window.customCards = window.customCards || [];

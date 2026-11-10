@@ -718,6 +718,29 @@ __SF.SF_HOOK.tr = (lang, key) => {
     for (let i = 0; i < 40; i++) { el.hass = { ...h }; await wait(5); }
     if (calls > 2) fail(`NSPanel: ${calls} weather subscriptions attempted in 40 hass updates (retries every time)`);
     el.remove(); }
+  // 5g. Fresh air with several rooms: one line and one verdict per room, the most urgent first, shared outside reasons shown once,
+  // indoor PM2.5 only counts when the outside air is cleaner, per-room thresholds override the card ones.
+  { const cfg = { ...FULL["sf-air-card"], rooms: [
+      { name: "Living", areas: ["Kitchen corner", "Dining"], temperature: "sensor.air_ti", humidity: "sensor.air_hi", co2: "sensor.air_co2", openings: ["binary_sensor.air_w0", "binary_sensor.air_w1"] },
+      { name: "Bathroom", temperature: "sensor.air_bt", humidity: "sensor.air_bh", humidity_max: 95, openings: "binary_sensor.air_w2" },
+      { name: "Kitchen", temperature: "sensor.air_kt", humidity: "sensor.air_kh", pm25: "sensor.air_kpm" },
+      { name: "Empty" }] };
+    const win = { "binary_sensor.air_w0": S("off"), "binary_sensor.air_w1": S("on"), "binary_sensor.air_w2": S("on") };
+    const el = mount("sf-air-card", cfg, "en", { ...base, ...win }); await wait(20);
+    const sr = el.shadowRoot, rows = [...sr.querySelectorAll(".rm")].map((r) => r.querySelector(".nm b").textContent);
+    if (rows.length !== 3) fail(`air rooms: ${rows.length} room lines instead of 3 (a room without entity is skipped)`);
+    if (rows[rows.length - 1] !== "Bathroom") fail(`air rooms: the bathroom (no need, own humidity_max) should come last, order = ${rows.join(", ")}`);
+    if (!/PM2\.5 38 inside/.test(sr.textContent)) fail("air rooms: the kitchen PM2.5 reason is missing");
+    if (!sr.querySelector(".side .t.n") || !/2\/3/.test(sr.querySelector(".side .t.n").textContent)) fail(`air rooms: the counter should read 2/3, got ${sr.querySelector(".side .t.n") && sr.querySelector(".side .t.n").textContent}`);
+    const pill = (n) => { const r = [...sr.querySelectorAll(".rm")].find((x) => x.querySelector(".nm b").textContent === n); return r && r.querySelector(".pl").textContent; };
+    if (pill("Living") !== "Airing") fail(`air rooms: an open window in a room to air must read "Airing", got ${pill("Living")}`);
+    if (pill("Bathroom") !== "Close it!") fail(`air rooms: an open window in a room that should stay closed must read "Close it!", got ${pill("Bathroom")}`);
+    if (!/Kitchen corner · Dining/.test(sr.textContent)) fail("air rooms: the covered spaces of an open-plan room are missing");
+    el.hass = HASS({ ...base, ...win, "binary_sensor.air_w1": S("off"), "binary_sensor.air_w2": S("off"), "sensor.air_pm": U(60, "µg/m³") }, "en"); await wait(20);
+    const pills = [...sr.querySelectorAll(".rm .pl")].map((p) => p.textContent);
+    if (pills.some((p) => p !== "Closed")) fail(`air rooms: dirty outside air must close every room, pills = ${pills.join(", ")}`);
+    if (sr.querySelectorAll(".why span").length !== 1) fail(`air rooms: the shared outside reason must be shown once (${sr.querySelectorAll(".why span").length} chips)`);
+    el.remove(); }
   // 5f. Connect / disconnect cycles (HA moves cards in edit mode): timers do not stack, everything is cleaned up at the end;
   // and a nested editor receives the `hass` updates.
   { const live = new Set(), si = window.setInterval, ci = window.clearInterval;

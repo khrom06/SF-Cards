@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SF Cards — live demo</title>
-<meta name="description" content="Sci-fi HUD cards for Home Assistant. Try all 20 cards live, in 11 languages, with fake data.">
+<meta name="description" content="Sci-fi HUD cards for Home Assistant. Try all 25 cards live, in 11 languages, with fake data.">
 <meta property="og:title" content="SF Cards — sci-fi HUD cards for Home Assistant">
-<meta property="og:description" content="16 Lovelace cards, visual editors, 11 languages, a 480×480 wall-panel dashboard. Try them live.">
+<meta property="og:description" content="25 Lovelace cards, visual editors, 11 languages, a 480×480 wall-panel dashboard. Try them live.">
 <meta property="og:image" content="https://khrom06.github.io/SF-Cards/social.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
 <style>
@@ -110,6 +110,58 @@ const FULL = {
     { name: "Health", icon: "mdi:heart-pulse", color: "#2bff88", summary: "health", card: { type: "custom:sf-health-card", checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical" }, { name: "Heat pump", entity: "sensor.pac", max: 500 }] } }] },
 };
 
+// New cards (1.18–1.19): extra fake states, history, traces and an hourly forecast.
+const now=Date.now(), H=3600e3, D=86400e3, MIN=60e3;
+const ago=(ms)=>new Date(now-ms).toISOString();
+Object.assign(base,{
+ "sensor.hepa":U(18,"%"),"sensor.pre":U(27,"%"),"sensor.carbon":U(100,"%"),"sensor.brush":U(148,"h"),
+ "binary_sensor.co_end":S("off",{device_class:"problem"}),"sensor.descale":S(ago(24*D),{device_class:"timestamp"}),"sensor.water_salt":U(9,"%"),"button.reset":S("unknown"),
+ "sensor.liv_t":U(22.6,"°C"),"sensor.liv_h":U(64,"%"),"sensor.liv_co2":U(1180,"ppm"),"sensor.liv_pm":U(22,"µg/m³"),
+ "sensor.bed_t":U(19.4,"°C"),"sensor.bed_h":U(58,"%"),"sensor.kid_t":U(20.1,"°C"),"sensor.kid_h":U(55,"%"),"sensor.bath_t":U(23.4,"°C"),"sensor.bath_h":U(84,"%"),
+ "sensor.to":U(9.4,"°C"),"sensor.ho":U(81,"%"),"sensor.pm_out":U(9,"µg/m³"),"sensor.wind":U(11,"km/h"),"sensor.rain":U(20,"%"),
+ "binary_sensor.w_liv":S("off",{device_class:"window"}),"binary_sensor.w_bath":S("off",{device_class:"window"}),"binary_sensor.w_bed":S("off",{device_class:"window"}),
+ "weather.air":S("partlycloudy",{temperature:9.4,humidity:81,wind_speed:11,wind_speed_unit:"km/h"}),
+ "sensor.washer":U(1840,"W"),"sensor.dish":U(0.6,"W"),"sensor.dryer":U(0,"W"),"sensor.kwh_price":U(0.1744,"€/kWh"),
+ "binary_sensor.h_online":S("on"),"sensor.h_cpu":U(34,"%"),"sensor.h_cpu_t":U(61,"°C"),"sensor.h_gpu":U(88,"%"),"sensor.h_gpu_t":U(72,"°C"),"sensor.h_gpu_p":U(240,"W"),"sensor.h_vram":U(86,"%"),
+ "sensor.h_ram":U(67,"%"),"sensor.h_ram_gb":U(9.8,"GB"),"sensor.h_swap":U(9,"%"),"sensor.h_disk":U(21,"%"),"sensor.h_disk_free":U(417,"GB"),"sensor.h_rx":U(820,"kB/s"),"sensor.h_tx":U(95,"kB/s"),
+ "sensor.h_wifi":U(-48,"dBm"),"sensor.h_ct":S(3),"sensor.h_load":S(1.2),"sensor.h_up":U(75.5,"h"),"sensor.h_pw":U(310,"W"),"sensor.h_en":U(12.4,"kWh"),
+});
+const autos=[["Lights at dusk","on",2*H],["Morning shutters","on",9*H],["Nursery heating","on",0.3*H],["Water leak alert","on",3*D],["Holiday mode","off",null],["Garage frost guard","on",95*D],["Doorbell → phone","on",5*H],["Certificate renewal","unavailable",null],["Garden watering","on",40*D],["Morning routine","on",0.02*H],["Aquarium light","on",1*H],["Laundry done → phone","on",26*H]];
+autos.forEach(([n,s,a],i)=>{base["automation.a"+i]=S(s,{id:String(100+i),friendly_name:n,last_triggered:a===null?null:ago(a),current:i===9?1:0})});
+const histNew=(id)=>{
+ if(id==="sensor.hepa") return Array.from({length:60},(_,i)=>({s:String(Math.round(18+(59-i)*0.55)),lu:(now-(59-i)*D)/1000}));
+ if(id==="sensor.pre") return Array.from({length:60},(_,i)=>({s:String(Math.round(27+(59-i)*1.1)%100),lu:(now-(59-i)*D)/1000}));
+ if(id==="sensor.carbon") return [{s:"100",lu:(now-60*D)/1000},{s:"100",lu:now/1000}];
+ if(id==="sensor.brush") return Array.from({length:40},(_,i)=>({s:String(148+(39-i)*1.3),lu:(now-(39-i)*D)/1000}));
+ if(id==="sensor.water_salt") return Array.from({length:30},(_,i)=>({s:String(9+(29-i)*2.9),lu:(now-(29-i)*D)/1000}));
+ const cyc=(s,dur,w)=>{const o=[];for(let t=0;t<dur;t+=5*60e3){const ph=t/dur;const p=ph<.15?2100:ph<.75?(t/60e3%20<10?380:160):ph<.9?650:90;o.push({s:String(p*(w||1)),lu:(s+t)/1000})}o.push({s:"0.5",lu:(s+dur)/1000});return o};
+ if(id==="sensor.washer"){let o=[{s:"0.4",lu:(now-7*D)/1000}];[6.6,5.2,3.7,2.4,1.3].forEach(d=>o=o.concat(cyc(now-d*D,97*60e3)));o=o.concat(cyc(now-52*60e3,52*60e3+1).slice(0,-1));return o}
+ if(id==="sensor.dish"){let o=[{s:"0.4",lu:(now-7*D)/1000}];[6.2,4.1,2.1,0.9].forEach(d=>o=o.concat(cyc(now-d*D,135*60e3,0.9)));o=o.concat(cyc(now-160*60e3,135*60e3,0.9));return o}
+ if(id==="sensor.dryer"){let o=[{s:"0",lu:(now-7*D)/1000}];[5.5,3.4].forEach(d=>o=o.concat(cyc(now-d*D,80*60e3,1.1)));return o}
+ return null;
+};
+const traces=[];autos.forEach((a,i)=>{for(let k=0;k<5;k++){const t=now-((i*5+k)*0.37%1)*D;traces.push({item_id:String(100+i),timestamp:{start:new Date(t).toISOString()},script_execution:i===3&&k===0?"error":k%3===2?"failed_conditions":"finished",error:i===3&&k===0?"notify.mobile_app_phone: action not found":undefined})}});
+const fc=Array.from({length:14},(_,i)=>{const h=new Date(now+i*H);const hr=h.getHours();return {datetime:h.toISOString(),temperature:8+5*Math.sin((hr-9)/24*2*Math.PI),precipitation_probability:i>=6&&i<=8?80:10,condition:i>=6&&i<=8?"rainy":"partlycloudy",wind_speed:10}});
+const HASS2=(states,lang)=>{const h=HASS(states,lang);const ws=h.callWS;h.themes={darkMode:true};
+ h.callWS=async(m)=>{ if(m.type==="history/history_during_period"){const ids=m.entity_ids||[];if(ids.some(e=>histNew(e))){const o={};ids.forEach(e=>o[e]=histNew(e)||[]);return o}}
+  if(m.type==="recorder/statistics_during_period") return {};
+  if(m.type==="trace/list") return traces;
+  if(m.type==="search/related") return {entity:m.item_id==="automation.a6"?["sensor.gone"]:["sensor.out"]};
+  return ws(m)};
+ h.connection={subscribeMessage:async(cb)=>{setTimeout(()=>cb({forecast:fc}),10);return ()=>{}}};
+ return h;};
+Object.assign(FULL,{
+ "sf-host-card":{title:"Workstation",online:"binary_sensor.h_online",cpu:"sensor.h_cpu",cpu_temp:"sensor.h_cpu_t",gpu:"sensor.h_gpu",gpu_temp:"sensor.h_gpu_t",gpu_power:"sensor.h_gpu_p",gpu_vram:"sensor.h_vram",ram:"sensor.h_ram",ram_used:"sensor.h_ram_gb",swap:"sensor.h_swap",disk:"sensor.h_disk",disk_free:"sensor.h_disk_free",net_rx:"sensor.h_rx",net_tx:"sensor.h_tx",wifi:"sensor.h_wifi",containers:"sensor.h_ct",load:"sensor.h_load",uptime:"sensor.h_up",power:"sensor.h_pw",energy:"sensor.h_en"},
+ "sf-upkeep-card":{title:"Upkeep",horizon:60,items:[{name:"Purifier HEPA filter",entity:"sensor.hepa",reset:"button.reset",icon:"mdi:air-filter"},{name:"Purifier pre-filter",entity:"sensor.pre",icon:"mdi:air-filter"},{name:"Carbon filter",entity:"sensor.carbon",icon:"mdi:air-purifier"},{name:"Robot vacuum brush",entity:"sensor.brush",life:300,icon:"mdi:robot-vacuum"},{name:"CO detector",entity:"binary_sensor.co_end",icon:"mdi:molecule-co"},{name:"Coffee machine descaling",entity:"sensor.descale",every_days:30,icon:"mdi:coffee-maker"},{name:"Water softener salt",entity:"sensor.water_salt",icon:"mdi:shaker-outline"}]},
+ "sf-air-card":{title:"Fresh air",outdoor_temperature:"sensor.to",outdoor_humidity:"sensor.ho",outdoor_pm25:"sensor.pm_out",wind:"sensor.wind",rain_chance:"sensor.rain",weather:"weather.air",rooms:[
+   {name:"Living area",areas:["Living room","Kitchen","Dining"],temperature:"sensor.liv_t",humidity:"sensor.liv_h",co2:"sensor.liv_co2",pm25:"sensor.liv_pm",openings:["binary_sensor.w_liv"]},
+   {name:"Bathroom",temperature:"sensor.bath_t",humidity:"sensor.bath_h",openings:"binary_sensor.w_bath"},
+   {name:"Bedroom",temperature:"sensor.bed_t",humidity:"sensor.bed_h",openings:"binary_sensor.w_bed"},
+   {name:"Kids' room",temperature:"sensor.kid_t",humidity:"sensor.kid_h"}]},
+ "sf-automations-card":{title:"Automations"},
+ "sf-cycles-card":{title:"Appliances",price:"sensor.kwh_price",appliances:[{name:"Washing machine",power:"sensor.washer",icon:"mdi:washing-machine"},{name:"Dishwasher",power:"sensor.dish",icon:"mdi:dishwasher"},{name:"Tumble dryer",power:"sensor.dryer",icon:"mdi:tumble-dryer"}]},
+});
+
 const live = {};   // animated values so that the demo feels alive
 const tick = () => { const t = Date.now() / 1000;
   base["sensor.solar"] = U(Math.round(2400 + 900 * Math.sin(t / 6)), "W"); base["sensor.grid"] = U(Math.round(300 + 500 * Math.sin(t / 9)), "W");
@@ -137,8 +189,8 @@ const nsLoad = () => { nsif.src = "ns.html?mode=" + nsMode + "&lang=" + sel.valu
   b.onclick = () => { nsMode = m; [...document.querySelectorAll("#modes button")].forEach((x) => x.classList.toggle("on", x === b)); nsLoad(); }; if (m === nsMode) b.classList.add("on"); document.getElementById("modes").appendChild(b); });
 sel.addEventListener("change", nsLoad); nsLoad();
 const apply = () => { document.documentElement.dir = sel.value === "ar" ? "rtl" : "ltr"; tick();
-  els.forEach(([el, cfg]) => { try { el.setConfig({ ...cfg, theme: theme === "light" ? "light" : undefined }); } catch (e) {} el.hass = HASS(base, sel.value); }); };
+  els.forEach(([el, cfg]) => { try { el.setConfig({ ...cfg, theme: theme === "light" ? "light" : undefined }); } catch (e) {} el.hass = HASS2(base, sel.value); }); };
 sel.onchange = apply; document.getElementById("theme").onclick = () => { theme = theme === "dark" ? "light" : "dark"; document.body.style.background = theme === "light" ? "#e9f0f6" : ""; apply(); };
-apply(); setInterval(() => { tick(); els.forEach(([el]) => { el.hass = HASS(base, sel.value); }); }, 2500);
+apply(); setInterval(() => { tick(); els.forEach(([el]) => { el.hass = HASS2(base, sel.value); }); }, 2500);
 </script>
 </body></html>

@@ -1,20 +1,34 @@
 # SF Cards
 
-**Sci‑fi "HUD" cards for Home Assistant** — a set of 17 Lovelace cards with a glowing, cinematic look: an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… and a **visual editor for every card**, so nobody has to write YAML.
+**Sci‑fi "HUD" cards for Home Assistant** — a set of 25 Lovelace cards with a glowing, cinematic look: an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… and a **visual editor for every card**, so nobody has to write YAML.
 
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
+[![Marketplace](https://img.shields.io/badge/Marketplace%20%2F%20HACS-default-41BDF5.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Languages](https://img.shields.io/badge/languages-11-00e5ff)
 [![Live demo](https://img.shields.io/badge/live-demo-2bff88)](https://khrom06.github.io/SF-Cards/)
 [![Add to HACS](https://img.shields.io/badge/HACS-add%20this%20repository-00e5ff)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 
 <p align="center">
-  <img src="assets/reactor.png" alt="Energy card" width="780">
+  <img src="assets/anim/reactor.webp" alt="Energy flow card, animated" width="780">
 </p>
 
 > **▶ [Try every card live, with fake data](https://khrom06.github.io/SF-Cards/)** — no install, 11 languages, light / dark.
 
-### New: a dashboard for wall panels (NSPanel Pro, 480×480 and other small screens)
+### New in 1.19: four cards that answer everyday questions
+
+<p align="center">
+  <img src="assets/anim/upkeep.webp" alt="Upkeep card: when each filter, brush or consumable will be due" width="390"> <img src="assets/anim/air.webp" alt="Fresh air card: should I open the windows, room by room" width="390">
+</p>
+<p align="center">
+  <img src="assets/anim/automations.webp" alt="Automations card: which automations are broken, silent or running" width="390"> <img src="assets/anim/cycles.webp" alt="Appliance cycles card: washing machine and dishwasher cycles, time left and cost" width="390">
+</p>
+
+- **[Upkeep](#sf-upkeep-card)** — *"When do I change that filter?"* Learns how fast each filter, brush or consumable wears from its own history and predicts the date.
+- **[Fresh air](#sf-air-card)** — *"Should I open the windows?"* One verdict per room from indoor / outdoor absolute humidity, CO₂, PM2.5, rain and wind, plus the best hour; window sensors confirm you are airing, or tell you to close.
+- **[Automations](#sf-automations-card)** — *"Is everything still working?"* Broken, failing, silent and disabled automations at a glance, with a 24 h pulse of runs.
+- **[Appliance cycles](#sf-cycles-card)** — *"When will the washing machine be done?"* Detects cycles from a power plug, estimates the time left from past cycles and shows the cost.
+
+### A dashboard for wall panels (NSPanel Pro, 480×480 and other small screens)
 
 `sf-ns-card` fills a whole square panel and **changes with the time of day**:
 
@@ -31,18 +45,18 @@
 ## Contents
 
 - [Features](#features)
-- [Installation](#installation) (HACS or manual)
+- [Installation](#installation) (Marketplace / HACS or manual)
 - [The cards](#the-cards)
 - [Visual editor](#visual-editor)
 - [Languages](#languages) · [Light theme](#light-theme) · [Layout](#layout) · [Accessibility](#accessibility) · [Numbers](#numbers)
 - [Optional theme](#optional-theme) · [Requirements](#requirements) · [Security](#security) · [Development](#development)
-- [About HACS and its future](#about-hacs-and-its-future)
+- [About HACS and Marketplace](#about-hacs-and-marketplace)
 - [Limitations](#limitations)
 - [Credits](#credits) · [License](#license)
 
 ## Features
 
-- **20 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
+- **25 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone or on a wall tablet; idle devices can be hidden automatically and the number of displayed devices is capped.
@@ -54,23 +68,25 @@
 
 ## Installation
 
-### Option A — HACS (custom repository)
+### Option A — Marketplace (Home Assistant 2026.11 and later) or HACS
 
-1. In Home Assistant open **HACS**.
-2. Menu **⋮ → Custom repositories**.
-3. Repository: `https://github.com/khrom06/SF-Cards` — Type: **Dashboard** (called *Lovelace* in older HACS versions). Click **Add**.
-4. Search for **SF Cards**, click **Download**.
-5. **Reload your browser** (hard refresh, or restart the companion app). HACS registers the resource for you.
+SF Cards is in the default catalogue, so there is nothing to add by hand:
 
-If your dashboards are in YAML mode, add the resource yourself:
+1. Open **Marketplace** (or **HACS** on older versions).
+2. Search for **SF Cards** and click **Download** (or **Install**).
+3. **Reload your browser** (hard refresh, or restart the companion app). The dashboard resource is registered for you.
+
+[![Open in Home Assistant](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
+
+Updates then show up like any other update in **Settings**.
+
+If your dashboards are in YAML mode, add the resource yourself (the exact URL is shown in **Settings → Dashboards → ⋮ → Resources** once installed):
 
 ```yaml
 resources:
   - url: /hacsfiles/SF-Cards/sf-cards.js
     type: module
 ```
-
-(The exact URL is shown in **Settings → Dashboards → ⋮ → Resources** once HACS has installed it.)
 
 ### Option B — manual
 
@@ -106,13 +122,17 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-setpoints-card`](#sf-setpoints-card) | Setpoint matrix per room; tap a value to edit (slider, scope: value / program / room) |
 | [`sf-ledger-card`](#sf-ledger-card) | Consumption per device and period |
 | [`sf-presence-card`](#sf-presence-card) | Presence from three never‑merged sources (advanced) |
+| [`sf-upkeep-card`](#sf-upkeep-card) | **New** · maintenance forecast: filters, brushes, consumables, service dates — learns the wear rate, one-tap reset |
+| [`sf-air-card`](#sf-air-card) | **New** · "should I open the windows?" — one verdict per room, window sensors, best hour of the next 12 |
+| [`sf-automations-card`](#sf-automations-card) | **New** · health of your automations: broken, failing, silent, disabled, running, 24 h pulse (read-only) |
+| [`sf-cycles-card`](#sf-cycles-card) | **New** · appliance cycles from a power plug: live progress, time left, cost, last 7 days |
 | [`sf-ns-card`](#sf-ns-card) | **Full‑screen dashboard for wall panels** (NSPanel Pro, 480×480): morning / day / evening / night modes, kiosk mode |
 
 > **Friendly names (1.13).** Five cards were renamed with plainer names: `sf-reactor-card` → `sf-energy-flow-card`, `sf-hangar-card` → `sf-vehicles-card`, `sf-bridge-card` → `sf-home-banner-card`, `sf-console-card` → `sf-controls-card`, `sf-radar-card` → `sf-presence-card`. **The original names keep working forever** (same card, same options, same editor); the card picker and this documentation just use the new ones.
 
 ### sf-home-banner-card
 
-<img src="assets/bridge.png" alt="Bridge card" width="780">
+<img src="assets/anim/bridge.webp" alt="Home banner card" width="780">
 
 ```yaml
 type: custom:sf-home-banner-card
@@ -138,7 +158,7 @@ home_states: [home]                        # states counted as "home" — add yo
 
 ### sf-energy-flow-card
 
-<img src="assets/reactor.png" alt="Reactor card" width="780">
+<img src="assets/anim/reactor.webp" alt="Energy flow card" width="780">
 
 ```yaml
 type: custom:sf-energy-flow-card
@@ -163,7 +183,7 @@ The layout adapts to the number of visible devices and to the width: up to three
 
 ### sf-climate-card
 
-<img src="assets/climate.png" alt="Climate card" width="780">
+<img src="assets/anim/climate.webp" alt="Climate card" width="640">
 
 ```yaml
 type: custom:sf-climate-card
@@ -190,7 +210,7 @@ extras:
 
 ### sf-controls-card
 
-<img src="assets/console.png" alt="Console card" width="780">
+<img src="assets/anim/console.webp" alt="Controls card" width="640">
 
 ```yaml
 type: custom:sf-controls-card
@@ -216,7 +236,7 @@ Other options: card `subtitle`; group `span` (1–4 columns); item `color`, `dig
 
 ### sf-launcher-card
 
-<img src="assets/launcher.png" alt="Launcher card" width="420">
+<img src="assets/anim/launcher.webp" alt="Launcher card" width="420">
 
 Each tile shows a live summary and opens a card in a popup — an SF card, a standard Home Assistant card (`vertical-stack`, `history-graph`…) or any other custom card:
 
@@ -244,7 +264,7 @@ With `mode_entity` (any `input_select` / `select` / `sensor`, e.g. Morning / Day
 
 ### sf-alert-card
 
-<img src="assets/alert.png" alt="Alert card" width="520">
+<img src="assets/anim/alert.webp" alt="Alert card: a water leak turns the whole frame red" width="520">
 
 Calm and discreet when everything is fine (or hide it with a `conditional` card), full red and pulsing when something happens.
 
@@ -261,7 +281,7 @@ hide_sim: true                           # hides the "simulate a doorbell" test 
 
 ### sf-vehicles-card
 
-<img src="assets/hangar.png" alt="Hangar card" width="640">
+<img src="assets/anim/hangar.webp" alt="Vehicles card" width="640">
 
 ```yaml
 type: custom:sf-vehicles-card
@@ -313,7 +333,7 @@ chargers:
 
 ### sf-machines-card
 
-<img src="assets/machines.png" alt="Machines card" width="640">
+<img src="assets/anim/machines.webp" alt="Machines card" width="640">
 
 ```yaml
 type: custom:sf-machines-card
@@ -333,7 +353,7 @@ Other tile options: `unit` (force the unit), `invert: true` (alert when the valu
 
 ### sf-cells-card
 
-<img src="assets/cells.png" alt="Cells card" width="640">
+<img src="assets/anim/cells.webp" alt="Sensor batteries card" width="640">
 
 ```yaml
 type: custom:sf-cells-card
@@ -346,6 +366,8 @@ exclude_pattern: ""      # optional regex: ignore matching entity ids
 ```
 
 ### sf-assistant-card
+
+<img src="assets/anim/assistant.webp" alt="Assistant card" width="520">
 
 State of an assistant (voice or chat), read-only: its current phase (idle / listening / thinking / running / replying / error), the last request, the current action, its result and the last reply, plus optional action buttons. It works out of the box with Home Assistant **Assist satellites** (`assist_satellite.*`: idle / listening / processing / responding); for anything else, map the entity's states to phases with `phases`. The card interprets nothing — it shows what the entities contain (text capped at 300 characters, ages refreshed every minute).
 
@@ -367,7 +389,7 @@ actions:                                     # optional buttons (up to 6)
 
 ### sf-host-card
 
-<img src="assets/host.png" alt="Host card, dark theme" width="420"> <img src="assets/host-light.png" alt="Host card, light theme" width="420">
+<img src="assets/anim/host.webp" alt="Host card, dark theme" width="420"> <img src="assets/host-light.png" alt="Host card, light theme" width="420">
 
 Monitoring of a computer or server from sensors you already have in Home Assistant (an MQTT discovery script, System Monitor, Glances, Proxmox…): three animated gauges (CPU, GPU, memory) with temperatures and power, bars for video memory, disk and swap, a live network curve, and a footer with power draw, energy, containers, Wi-Fi signal and load. Colours turn amber then red past your thresholds, and the whole card greys out when the host is offline. Every entity is optional; read-only.
 
@@ -403,7 +425,120 @@ temp_crit: 88                  # red from (°C), default 88
 
 The traffic curve is built from what the card sees while the page is open (no history request).
 
+### sf-upkeep-card
+
+<img src="assets/anim/upkeep.webp" alt="Upkeep card" width="560">
+
+**"When do I change that filter?"** Filters, brushes, salt, descaling, detectors at end of life — anything that wears out. Instead of a bare percentage, each item shows **when** it will need attention: the card learns the wear rate from the entity's own history (since the last reset, glitches ignored, long-term statistics used beyond the recorder's raw history) and projects the date. A timeline shows what is due in the coming weeks; the item due first leads the header. An optional reset button (press twice) restarts an item after a replacement. Works with a percentage left, a time left (h / min / d), a date (timestamp, `input_datetime`) or a "problem" binary sensor.
+
+```yaml
+type: custom:sf-upkeep-card
+title: Upkeep
+horizon: 30              # days shown on the timeline; items due within it are "to plan"
+soon: 14                 # amber below this many days
+learn_days: 180          # history used to learn the wear rate
+items:
+  - name: Purifier HEPA filter
+    entity: sensor.purifier_filter_life      # % left
+    reset: button.purifier_reset_filter      # optional (button, input_button, script or input_datetime)
+    icon: mdi:air-filter
+  - name: Robot vacuum brush
+    entity: sensor.robot_main_brush_left     # time left in hours
+    life: 300                                # full life in the entity's unit (otherwise the highest value seen)
+  - name: Coffee machine descaling
+    entity: input_datetime.last_descaling    # a date = the LAST service…
+    every_days: 30                           # …the next one is due 30 days later
+  - name: CO detector
+    entity: binary_sensor.co_detector_end_of_life   # "on" = due now
+```
+
+### sf-air-card
+
+<img src="assets/anim/air.webp" alt="Fresh air card" width="560">
+
+**"Should I open the windows?"** One clear verdict — *open wide*, *quick airing*, *not needed*, *keep closed* — with its reasons and the best hour of the next 12. Moisture is compared in **absolute humidity** (g/m³): 80 % outside at 5 °C is drier than 55 % inside at 21 °C, so airing really does dry the house. It also weighs CO₂, indoor and outdoor fine particles (PM2.5), rain, wind, and whether opening would chill (or heat) the house.
+
+- **One room or several.** With `rooms:` every room gets its own line and verdict, the outside is shared, and the most urgent room leads the window animation.
+- **Open-plan spaces.** One sensor often covers several rooms (living room + kitchen + dining): list them in `areas` and they are shown under the room name.
+- **Window sensors.** Add the room's window / door contacts in `openings`: the card confirms *airing* when it is the right time, says *close it* once a quick airing has lasted long enough, and *close it!* when the window should not be open at all.
+- Thresholds can be set for the whole card or per room (a bathroom can tolerate more humidity).
+
+```yaml
+type: custom:sf-air-card
+title: Fresh air
+outdoor_temperature: sensor.outdoor_temperature   # or a weather entity alone
+outdoor_humidity: sensor.outdoor_humidity
+outdoor_pm25: sensor.outdoor_pm25                 # optional: polluted outside air blocks the verdict
+wind: sensor.wind_speed                           # optional (km/h, m/s, mph and knots converted)
+rain_chance: sensor.rain_chance                   # optional
+weather: weather.home                             # optional: fallbacks + hourly forecast (best hour)
+rooms:
+  - name: Living area
+    areas: [Living room, Kitchen, Dining]         # optional: open-plan spaces covered by the same sensors
+    temperature: sensor.living_temperature
+    humidity: sensor.living_humidity
+    co2: sensor.living_co2                        # optional
+    pm25: sensor.air_purifier_pm25                # optional: indoor fine particles
+    openings: [binary_sensor.living_window, binary_sensor.patio_door]   # optional
+  - name: Bathroom
+    temperature: sensor.bathroom_temperature
+    humidity: sensor.bathroom_humidity
+    humidity_max: 70                              # per-room threshold (also comfort_min / comfort_max)
+    openings: binary_sensor.bathroom_window
+comfort_min: 19          # °C
+comfort_max: 24
+humidity_max: 60         # %
+co2_max: 1000            # ppm
+pm25_max: 25             # µg/m³ outside
+pm25_in_max: 15          # µg/m³ inside
+wind_max: 40             # km/h
+```
+
+For a single room you can skip `rooms:` and use `indoor_temperature`, `indoor_humidity`, `co2`, `indoor_pm25` and `openings` at the top level.
+
+### sf-automations-card
+
+<img src="assets/anim/automations.webp" alt="Automations card" width="560">
+
+**"Is everything still working?"** The health of your automations without opening the traces one by one: a health ring, counters, a 24-hour pulse of every run, and the list of what needs a look — **broken** (invalid configuration, error on the last run), pointing at an entity that is **unavailable or gone**, **silent** for too long, **disabled**, or **running** right now. Tap a line to open the automation. Reads the automation states, their latest traces and (for administrators) the entities each one uses; read-only.
+
+```yaml
+type: custom:sf-automations-card
+title: Automations
+stale_days: 30                 # enabled but not triggered for 30 days = silent (0 = never flag)
+include: [automation.heating_*]   # optional patterns; exclude: [automation.test_*]
+show_disabled: true            # list the disabled ones (otherwise only counted)
+max_items: 8
+check_entities: true           # look for unavailable / missing entities (admin only, every 15 min)
+```
+
+### sf-cycles-card
+
+<img src="assets/anim/cycles.webp" alt="Appliance cycles card" width="560">
+
+**"When will the washing machine be done?"** All you need is a smart plug that measures power. The card finds the cycles in the power history, then shows the one running — an animated drum, elapsed time, **expected end** learnt from the previous cycles, energy and cost so far — or the last one (finished X min ago, duration, kWh, cost), with the power curve and the week's count. Works for washing machines, dryers, dishwashers, ovens, towel heaters…
+
+```yaml
+type: custom:sf-cycles-card
+title: Appliances
+price: sensor.electricity_price      # €/kWh: an entity or a number (optional)
+days: 7                              # history used (cycles, typical duration)
+appliances:
+  - name: Washing machine
+    power: sensor.washing_machine_power   # W (kW converted)
+    icon: mdi:washing-machine
+  - name: Dishwasher
+    power: sensor.dishwasher_power
+    start: 8          # a cycle starts above 8 W…
+    stop: 3           # …and ends below 3 W…
+    stop_delay: 5     # …for 5 minutes (pauses in the middle are not mistaken for an end)
+    min_minutes: 3    # shorter bursts are ignored
+    done_hold: 120    # "finished" stays highlighted for 2 hours
+```
+
 ### sf-health-card
+
+<img src="assets/anim/health.webp" alt="Health card" width="520">
 
 An overview of **your own checks**: you list entities and what is normal for each; the card gives one verdict (all good / warning / critical) and lists the anomalies, critical ones first, grouped so that ten alerts from one subsystem read as one. It decides nothing — it applies your rules to states Home Assistant already has (no request, no hidden calculation). An age check (`stale`) is re-evaluated every minute.
 
@@ -433,6 +568,8 @@ Rules of a check: unavailable / unknown is always an anomaly; then `ok`, `bad`, 
 
 ### sf-timeline-card
 
+<img src="assets/anim/timeline.webp" alt="Timeline card" width="520">
+
 Read-only timeline of the latest state changes of the entities you choose (Home Assistant's logbook), grouped by day, with a plain sentence per entity type: door open / closed, motion detected, leak detected, alarm armed (home / away / night) or triggered, lock, presence… Alerts are coloured (red: leak, smoke, alarm triggered; amber: opening, unlocked). Nothing is computed or decided — it only shows the log. Loaded once, refreshed at most every 60 s; after an error, at most one retry per minute.
 
 ```yaml
@@ -454,6 +591,8 @@ entities:                  # up to 40: an entity id, or an object
 ```
 
 ### sf-trend-card
+
+<img src="assets/anim/trend.webp" alt="Trend card" width="520">
 
 Read-only history curves in the HUD style — nothing is computed, the card draws what Home Assistant recorded. Series that share a unit are overlaid on one chart; series with different units get one line each (`layout` forces either). Range buttons switch the window; hover or touch a chart to read the value at that moment. Up to 48 h the full history is used; beyond that the long-term statistics (hourly mean), falling back to the history for an entity without statistics. Data is fetched once per range and refreshed at most every 2 minutes (10 minutes beyond 48 h); after an error it retries at most once a minute.
 
@@ -491,7 +630,7 @@ A series that did not change during the window (a parked car, a stable setpoint)
 
 ### sf-battery-card
 
-<img src="assets/battery.png" alt="Battery card" width="420">
+<img src="assets/anim/battery.webp" alt="Battery card" width="420">
 
 Home battery. Everything is optional — only configured entities are shown, and without `soc` or `power` the card hides itself.
 
@@ -528,7 +667,7 @@ The **energy card** shows the battery as one node: `battery_power` / `battery_so
 
 ### sf-radiators-card
 
-<img src="assets/radiators.png" alt="Radiators card" width="420">
+<img src="assets/anim/radiators.webp" alt="Radiators card" width="420">
 
 For radiators driven by presets (Voltalis, Netatmo, Tado…), which often have no room probe. One column and large touch targets, built for phones. Presets come from the device itself (`preset_modes`, or the options of a `select` entity); the setpoint buttons call `climate.set_temperature` and can be turned off for pilot-wire (fil pilote) heaters, which only know modes.
 
@@ -552,6 +691,8 @@ radiators:
 
 ### sf-camera-card
 
+<img src="assets/anim/camera.webp" alt="Camera card" width="520">
+
 ```yaml
 type: custom:sf-camera-card
 refresh: 5
@@ -560,6 +701,8 @@ cameras:
 ```
 
 ### sf-setpoints-card
+
+<img src="assets/anim/setpoints.webp" alt="Setpoints card" width="520">
 
 ```yaml
 type: custom:sf-setpoints-card
@@ -571,6 +714,8 @@ rows:
 ```
 
 ### sf-ledger-card
+
+<img src="assets/anim/ledger.webp" alt="Energy summary card" width="520">
 
 ```yaml
 type: custom:sf-ledger-card
@@ -588,6 +733,8 @@ devices:
 ```
 
 ### sf-presence-card
+
+<img src="assets/anim/radar.webp" alt="Presence card" width="520">
 
 Advanced and opinionated: three rings, three sources that are **never merged** (home/away from `person.*`, last camera that recognised a face, anonymous room occupancy).
 
@@ -761,17 +908,17 @@ Text that comes from entities (names, states, units, picture URLs) is always esc
 
 See the [changelog](CHANGELOG.md) for what changed in each version.
 
-## About HACS and its future
+## About HACS and Marketplace
 
-At the time of writing (October 2026), Home Assistant is reported to be **bringing HACS into Core under the name "Marketplace"**, targeted for Home Assistant 2026.11. According to the coverage, existing HACS installations — custom repositories, update entities and dashboard resources — are supposed to **migrate automatically** on the first start after the update, and existing HACS links keep working. Custom cards are **not** being merged into Core's built‑in card set: they stay community content that Home Assistant does not test or support.
+Since **Home Assistant 2026.11**, HACS ships inside Core as **Marketplace**. Existing HACS installations (repositories, update entities, dashboard resources) are migrated automatically, and SF Cards is listed in the default catalogue there. Custom cards are still community content: Home Assistant does not test or support them.
 
-SF Cards is a plain JavaScript dashboard resource, so it works the same way with HACS, with Marketplace, or installed manually. Please double‑check the details in the official Home Assistant release notes once 2026.11 is out — they are still subject to change.
+SF Cards is a plain JavaScript dashboard resource, so it works the same way with Marketplace, with HACS on older versions, or installed manually.
 
 Sources: [Matter Alpha — "Home Assistant embraces HACS into core as the marketplace"](https://www.matteralpha.com/news/home-assistant-embraces-hacs-into-core-as-the-marketplace) · [Home Assistant community thread on integrating popular HACS custom cards into standard cards](https://community.home-assistant.io/t/integrating-popular-frontend-custom-cards-on-hacs-to-standard-ha-cards/741706).
 
 ## Limitations
 
-- Developed and tested on **Home Assistant 2026.10** (Chrome and the iOS / Android companion apps). Older versions may work but have not been tried.
+- Developed and tested on **Home Assistant 2026.11** (Chrome and the iOS / Android companion apps). Older versions may work but have not been tried.
 - The code comments in `dist/sf-cards.js` are still in French (the UI itself is translated).
 - Screenshots use fictional demo data.
 - Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. Home Assistant itself is not part of the tests.

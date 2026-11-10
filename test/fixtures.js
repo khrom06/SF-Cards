@@ -21,6 +21,15 @@ const base = {
   "sensor.h_ram": U(67, "%"), "sensor.h_ram_gb": U(9.8, "GB"), "sensor.h_swap": U(9, "%"), "sensor.h_disk": U(21, "%"), "sensor.h_disk_free": U(417, "GB"),
   "sensor.h_rx": U(820, "kB/s"), "sensor.h_tx": U(95, "kB/s"), "sensor.h_wifi": U(-48, "dBm"), "sensor.h_ct": S(3), "sensor.h_load": S(1.2), "sensor.h_up": U(75.5, "h"), "sensor.h_pw": U(310, "W"), "sensor.h_en": U(12.4, "kWh"), "binary_sensor.h_online": S("on"),
   "sensor.dev_bat": S(18, { unit_of_measurement: "%", device_class: "battery", friendly_name: "Sensor A battery" }),
+  "sensor.uk_hepa": U(18, "%"), "sensor.uk_pre": U(64, "%"), "sensor.uk_brush": U(148, "h"), "binary_sensor.uk_co_end": S("off", { device_class: "problem" }), "sensor.uk_descale": S(new Date(Date.now() - 20 * 86400000).toISOString(), { device_class: "timestamp" }), "button.uk_reset": S("unknown"),
+  "sensor.air_ti": U(22.4, "°C"), "sensor.air_hi": U(67, "%"), "sensor.air_co2": U(1240, "ppm"), "sensor.air_to": U(9.5, "°C"), "sensor.air_ho": U(78, "%"), "sensor.air_pm": U(12, "µg/m³"), "sensor.air_wind": U(14, "km/h"), "sensor.air_rain": U(20, "%"), "sensor.air_bt": U(23.1, "°C"), "sensor.air_bh": U(82, "%"), "sensor.air_kt": U(19.2, "°C"), "sensor.air_kh": U(48, "%"), "sensor.air_kpm": U(38, "µg/m³"),
+  "weather.air": S("partlycloudy", { temperature: 9.5, humidity: 78, wind_speed: 14, wind_speed_unit: "km/h" }),
+  "automation.a_ok": S("on", { id: "1", friendly_name: "Lights at dusk", last_triggered: new Date(Date.now() - 3600000).toISOString(), current: 0 }),
+  "automation.a_off": S("off", { id: "2", friendly_name: "Holiday mode", last_triggered: null, current: 0 }),
+  "automation.a_silent": S("on", { id: "3", friendly_name: "Frost guard", last_triggered: new Date(Date.now() - 90 * 86400000).toISOString(), current: 0 }),
+  "automation.a_bad": S("unavailable", { friendly_name: "Broken one" }),
+  "automation.a_run": S("on", { id: "5", friendly_name: "Morning routine", last_triggered: new Date().toISOString(), current: 1 }),
+  "sensor.cy_washer": U(1840, "W"), "sensor.cy_dish": U(0.4, "W"), "sensor.cy_price": U(0.1744, "€/kWh"),
 };
 // As in HA, every state carries its entity_id.
 const withIds = (states) => Object.fromEntries(Object.entries(states).map(([id, st]) => [id, { entity_id: id, last_changed: new Date().toISOString(), ...st }]));
@@ -29,6 +38,12 @@ const HASS = (states, language) => ({ states: withIds(states), locale: { languag
 // One full configuration per card (the identifiers above are fictitious).
 const FULL = {
   "sf-assistant-card": { name: "Assistant", state: "assist_satellite.kitchen", request: "sensor.as_req", action: "sensor.as_act", result: "sensor.as_res", reply: "sensor.as_rep", actions: [{ name: "Stop", icon: "mdi:stop", service: "script.stop", confirm: "Stop?" }] },
+  "sf-upkeep-card": { title: "Upkeep", horizon: 60, items: [{ name: "HEPA filter", entity: "sensor.uk_hepa", reset: "button.uk_reset", icon: "mdi:air-filter" }, { name: "Pre-filter", entity: "sensor.uk_pre" },
+    { name: "Robot brush", entity: "sensor.uk_brush", life: 300 }, { name: "CO detector", entity: "binary_sensor.uk_co_end" }, { name: "Descaling", entity: "sensor.uk_descale", every_days: 30 }] },
+  "sf-air-card": { title: "Fresh air", indoor_temperature: "sensor.air_ti", indoor_humidity: "sensor.air_hi", co2: "sensor.air_co2", outdoor_temperature: "sensor.air_to", outdoor_humidity: "sensor.air_ho",
+    outdoor_pm25: "sensor.air_pm", wind: "sensor.air_wind", rain_chance: "sensor.air_rain", weather: "weather.air" },
+  "sf-automations-card": { title: "Automations", stale_days: 30 },
+  "sf-cycles-card": { title: "Appliances", price: "sensor.cy_price", appliances: [{ name: "Washing machine", power: "sensor.cy_washer", icon: "mdi:washing-machine" }, { name: "Dishwasher", power: "sensor.cy_dish", icon: "mdi:dishwasher" }] },
   "sf-host-card": { title: "Workstation", online: "binary_sensor.h_online", cpu: "sensor.h_cpu", cpu_temp: "sensor.h_cpu_t", gpu: "sensor.h_gpu", gpu_temp: "sensor.h_gpu_t", gpu_power: "sensor.h_gpu_p", gpu_vram: "sensor.h_vram",
     ram: "sensor.h_ram", ram_used: "sensor.h_ram_gb", swap: "sensor.h_swap", disk: "sensor.h_disk", disk_free: "sensor.h_disk_free", net_rx: "sensor.h_rx", net_tx: "sensor.h_tx", wifi: "sensor.h_wifi", containers: "sensor.h_ct", load: "sensor.h_load", uptime: "sensor.h_up", power: "sensor.h_pw", energy_total: "sensor.h_en", power_estimate: true },
   "sf-health-card": { title: "Health", checks: [{ name: "Internet", entity: "binary_sensor.net", ok: ["on"], severity: "critical", group: "Network" }, { name: "UPS", entity: "sensor.ups", min: 30 }] },
