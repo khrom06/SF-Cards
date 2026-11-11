@@ -28,13 +28,15 @@
 - **[Automations](#sf-automations-card)** — *"Is everything still working?"* Broken, failing, silent and disabled automations at a glance, with a 24 h pulse of runs.
 - **[Appliance cycles](#sf-cycles-card)** — *"When will the washing machine be done?"* Detects cycles from a power plug, estimates the time left from past cycles and shows the cost.
 
-### A dashboard for wall panels (NSPanel Pro, 480×480 and other small screens)
+### A dashboard for wall panels (square, landscape or portrait: NSPanel 480×320, NSPanel Pro 480×480, 120‑type 1334×750, wall tablets)
 
-`sf-ns-card` fills a whole square panel and **changes with the time of day**:
+`sf-ns-card` fills a whole panel — **square, landscape or portrait** — and **changes with the time of day**:
 
 <p align="center">
   <img src="assets/ns-morning.png" alt="Morning" width="230"> <img src="assets/ns-day.png" alt="Day" width="230"> <img src="assets/ns-evening.png" alt="Evening" width="230"> <img src="assets/ns-night.png" alt="Night" width="230">
 </p>
+
+Shown here on the square 480×480 NSPanel Pro; it is sized in `vmin`, so it also fills rectangular and larger screens (tested sizes in the [card's section](#sf-ns-card)). The other cards re‑flow from phone to wide desktop dashboards.
 
 [Jump to the card](#sf-ns-card)
 
@@ -59,7 +61,7 @@
 - **25 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
-- **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone or on a wall tablet; idle devices can be hidden automatically and the number of displayed devices is capped.
+- **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone, a wall tablet or a wide desktop dashboard; idle devices can be hidden automatically and the number of displayed devices is capped.
 - **Eleven languages** — English, French, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese and Arabic (right-to-left), picked automatically from each user's Home Assistant profile (English for any other language).
 - **Light or dark** — dark neon by default; `theme: light` or `auto` (follows the Home Assistant theme) per card, or once for all cards with a CSS variable.
 - **Accessible** — keyboard and screen-reader friendly (real buttons, focus ring, Enter / Space), respects *reduce motion*, alert levels are spelled out, popups are proper dialogs.
@@ -126,7 +128,7 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-air-card`](#sf-air-card) | **New** · "should I open the windows?" — one verdict per room, window sensors, best hour of the next 12 |
 | [`sf-automations-card`](#sf-automations-card) | **New** · health of your automations: broken, failing, silent, disabled, running, 24 h pulse (read-only) |
 | [`sf-cycles-card`](#sf-cycles-card) | **New** · appliance cycles from a power plug: live progress, time left, cost, last 7 days |
-| [`sf-ns-card`](#sf-ns-card) | **Full‑screen dashboard for wall panels** (NSPanel Pro, 480×480): morning / day / evening / night modes, kiosk mode |
+| [`sf-ns-card`](#sf-ns-card) | **Full‑screen dashboard for wall panels and tablets** (square, landscape or portrait — NSPanel 480×320, Pro 480×480, 1334×750…): morning / day / evening / night modes, kiosk mode |
 
 > **Friendly names (1.13).** Five cards were renamed with plainer names: `sf-reactor-card` → `sf-energy-flow-card`, `sf-hangar-card` → `sf-vehicles-card`, `sf-bridge-card` → `sf-home-banner-card`, `sf-console-card` → `sf-controls-card`, `sf-radar-card` → `sf-presence-card`. **The original names keep working forever** (same card, same options, same editor); the card picker and this documentation just use the new ones.
 
@@ -746,7 +748,7 @@ rooms:  [{ label: Living room, entity: binary_sensor.living_room_occupancy }]
 
 ### sf-ns-card
 
-A full‑screen card for small wall panels, tuned for the **Sonoff NSPanel Pro (480 × 480, square)** but sized in `vmin`, so it adapts to any screen. Tested (real screenshots, every mode) on every current Sonoff NSPanel screen size:
+A full‑screen card for wall panels and tablets, tuned for the **Sonoff NSPanel Pro (480 × 480, square)** but sized in `vmin`, so it adapts to any screen shape — square, landscape or portrait. Tested (real screenshots, every mode) on every current Sonoff NSPanel screen size:
 
 | Screen | Resolution | Result |
 |---|---|---|
