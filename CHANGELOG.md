@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.19.1]
+### Fixed
+- `sf-launcher-card`: tapping a value inside a popup (thermostat dial, setpoint, any clickable entity) now opens the entity dialog. The popup panel is attached to `<body>`, outside Home Assistant, so the `hass-more-info` events of the cards it holds never reached HA; the launcher now relays them.
+
 ## [1.19.0]
 ### Added
 - **New `sf-upkeep-card`: maintenance forecast.** Filters, brushes, salt, descaling, detectors at end of life: each item shows *when* it will be due, learnt from the entity's own wear rate (least squares since the last reset, glitches ignored, long-term statistics beyond the raw history). Percent, time-left, date and "problem" entities; timeline of what is due; optional two-press reset button.

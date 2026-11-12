@@ -215,6 +215,9 @@ class SfLauncherCard extends SfBase {
     root.querySelector(".bar button").addEventListener("click", close);
     this._esc = (ev) => { if (ev.key === "Escape") close(); };
     document.addEventListener("keydown", this._esc);
+    // The panel lives on <body>, outside <home-assistant>: the "hass-more-info" events of the cards it holds never reach HA's listener.
+    // We relay them from the launcher card (which sits inside HA) so that a tap on a value opens the entity dialog.
+    host.addEventListener("hass-more-info", (ev) => { ev.stopPropagation(); this._moreInfo(ev.detail && ev.detail.entityId); });
     document.body.appendChild(host);
     this._pop = { host, card, hash: t.hash || "" };
     this._opener = this.shadowRoot && this.shadowRoot.activeElement;   // to give focus back on closing
