@@ -17,10 +17,10 @@
 ### New in 1.20: a dashboard that builds itself, rooms, daily life and a calm look
 
 <p align="center">
-  <img src="assets/room.png" alt="Room card in its three sizes: compact tile, standard with controls, large with history and devices" width="820">
+  <img src="assets/anim/room.webp" alt="Room card: presence detected, lights turning on one by one, shutters opening" width="330"> <img src="assets/anim/report.webp" alt="Energy report card: this week, the week before, the month and the year" width="460">
 </p>
 <p align="center">
-  <img src="assets/daily.png" alt="Media, weather with clock and agenda cards" width="820">
+  <img src="assets/anim/media.webp" alt="Media card: track playing, pause, next track, volume" width="260"> <img src="assets/anim/weather.webp" alt="Weather card: clock, current weather, next hours and days" width="260"> <img src="assets/anim/agenda.webp" alt="Agenda card: timers counting down, waste collection chip, next events" width="260">
 </p>
 
 - **[Automatic dashboard](#automatic-dashboard)** — two lines of YAML and Home Assistant builds a whole dashboard of SF cards from your areas: rooms, climate, energy, security, system. A new lamp or room shows up by itself.
@@ -199,6 +199,8 @@ To go further than the options allow, use **⋮ → Take control**: Home Assista
 
 ### sf-room-card
 
+<img src="assets/anim/room.webp" alt="Room card, animated" width="390">
+
 <img src="assets/room.png" alt="Room card: compact, standard and large sizes" width="780">
 
 **One room at a glance and under the finger.** Give it a Home Assistant **area** and it finds everything itself — the temperature and humidity sensors (the ones set on the area first), CO₂, presence, thermostat, lights, covers, window sensors, media player — skipping hidden and diagnostic entities. Whatever you set by hand wins; `exclude` removes an entity; an empty list (`lights: []`) hides a block.
@@ -233,6 +235,8 @@ Without an area the card works with the entities you list. In a sections view, `
 
 ### sf-media-card
 
+<img src="assets/anim/media.webp" alt="Media card, animated" width="460">
+
 **What is playing, and the remote.** Artwork, title, artist and album, a progress bar that moves on its own, previous / play-pause / next, volume and mute. Only the buttons your player supports are drawn. With several players, the one that plays is shown and the others are one tap away.
 
 ```yaml
@@ -247,6 +251,8 @@ Artwork is only loaded from Home Assistant itself or an `http(s)` address; tappi
 
 ### sf-weather-card
 
+<img src="assets/anim/weather.webp" alt="Weather and clock card, animated" width="460">
+
 **The weather with the time.** A large clock and the date, the current conditions (temperature, humidity, wind, feels-like, today's high and low), then the next hours with the rain risk and the next days. It uses the forecasts Home Assistant already has for your weather entity; the number of hours and days follows the width of the card.
 
 ```yaml
@@ -259,6 +265,8 @@ weather: weather.home
 ```
 
 ### sf-agenda-card
+
+<img src="assets/anim/agenda.webp" alt="Agenda card, animated" width="420">
 
 **What is coming.** Running timers with a live countdown, pinned reminders, and the next events of your calendars grouped by day (today, tomorrow, then the weekday), with the one in progress highlighted.
 
@@ -282,7 +290,7 @@ calendars:
 
 ### sf-report-card
 
-<img src="assets/report.png" alt="Energy report card: week, month and year" width="780">
+<img src="assets/anim/report.webp" alt="Energy report card, animated: week, previous week, month, year" width="560">
 
 **"How was the week?"** The energy report in plain words: consumption, solar used, autonomy and cost, each **compared with the period before**; one bar per day split into solar and grid, the heaviest day highlighted; who consumes; three facts worth knowing; and **Export as an image** (1080 × 1350, in the colours of your theme) to share or keep. Week (7 days), month (30 days) or year (12 months), with a button to go back in time.
 

@@ -88,10 +88,12 @@ class SfReportCard extends SfBase {
   }
   // KPI tiles: [label, value, delta text, tone] — tone "good" / "bad" / "" (less energy or cost is good, more solar is good).
   _kpis(M) {
+    // energy totals: kWh, or MWh from 10 000 kWh (a year of a whole house) so the value fits its tile
+    const kwh = (v) => (v >= 9999.5 ? `${this.nf(v / 1000, 1)} MWh` : `${this.nf(v, 0)} kWh`);
     const pct = (a, b) => (b > 0.05 ? ((a - b) / b) * 100 : null), sg = (x, d = 0) => `${Math.abs(x) < 0.5 * Math.pow(10, -d) ? "" : x > 0 ? "+" : "−"}${this.nf(Math.abs(x), d)}`, k = [];
-    const dC = pct(M.cur.cons, M.prev.cons); k.push([this.t("report.consumption"), `${this.nf(M.cur.cons, 0)} kWh`, dC === null ? "" : `${sg(dC)} %`, dC === null || Math.abs(dC) < 0.5 ? "" : dC < 0 ? "good" : "bad"]);
+    const dC = pct(M.cur.cons, M.prev.cons); k.push([this.t("report.consumption"), kwh(M.cur.cons), dC === null ? "" : `${sg(dC)} %`, dC === null || Math.abs(dC) < 0.5 ? "" : dC < 0 ? "good" : "bad"]);
     if (M.hasSolar) {
-      const dS = pct(M.cur.solar, M.prev.solar); k.push([this.t("report.solar_used"), `${this.nf(M.cur.solar, 0)} kWh`, dS === null ? "" : `${sg(dS)} %`, dS === null || Math.abs(dS) < 0.5 ? "" : dS > 0 ? "good" : "bad"]);
+      const dS = pct(M.cur.solar, M.prev.solar); k.push([this.t("report.solar_used"), kwh(M.cur.solar), dS === null ? "" : `${sg(dS)} %`, dS === null || Math.abs(dS) < 0.5 ? "" : dS > 0 ? "good" : "bad"]);
       const dA = M.cur.auto !== null && M.prev.auto !== null ? M.cur.auto - M.prev.auto : null;
       k.push([this.t("report.autonomy"), M.cur.auto === null ? "—" : `${this.nf(M.cur.auto, 0)} %`, dA === null ? "" : this.t("report.points", { n: sg(dA) }), dA === null || Math.abs(dA) < 0.5 ? "" : dA > 0 ? "good" : "bad"]);
     }

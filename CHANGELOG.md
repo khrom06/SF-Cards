@@ -2,6 +2,12 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.20.1]
+### Fixed
+- `sf-report-card`: a yearly total of 10 000 kWh or more was cut off in its tile ("10723 k…"); it is now shown in MWh ("10.7 MWh").
+### Added
+- Animated previews of the five 1.20 cards in the README.
+
 ## [1.20.0]
 ### Added
 - **Automatic dashboard (`strategy: { type: custom:sf-home }`).** A dashboard whose configuration is two lines builds itself from what Home Assistant knows: a home view (banner, one tile per room, weather and clock, agenda, media, water leaks), every room in full, climate, energy (the report, from the Energy dashboard settings), security (cameras, log of openings) and system (sensor batteries, automations). Hidden, diagnostic and configuration entities are ignored; empty views are left out; options choose the areas, the views, the theme / look / accent, and add your own cards or views.
