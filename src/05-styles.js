@@ -9,17 +9,23 @@ const SF_VARS_DARK = `--sf-cyan:#00e5ff; --sf-amber:#ffb300; --sf-red:#ff3355; -
     --sf-cyan-rgb:0 229 255; --sf-amber-rgb:255 179 0; --sf-red-rgb:255 51 85; --sf-green-rgb:43 255 136; --sf-fg-rgb:255 255 255; --sf-strong:#fff; --sf-white:#fff;
     --sf-bg0:#0d2440; --sf-bg1:#06101d; --sf-bg2:#03080f; --sf-bg-rgb:3 8 15; --sf-scrim-rgb:1 4 9; --sf-sheet0:#071426; --sf-shade-rgb:0 0 0; --sf-on-accent:#03080f;
     --sf-alert0:#4a0714; --sf-alert1:#1a0308; --sf-alert2:#0a0104;
-    --sf-orange:#ff7a45; --sf-heat:#ff7043; --sf-cool:#4fc3f7; --sf-dry:#ffca28; --sf-fan:#66bb6a; --sf-auto:#b388ff; --sf-pink:#ff4fd8; --sf-yellow:#ffd54f; --sf-halo:#000;`;
+    --sf-orange:#ff7a45; --sf-heat:#ff7043; --sf-cool:#4fc3f7; --sf-dry:#ffca28; --sf-fan:#66bb6a; --sf-auto:#b388ff; --sf-pink:#ff4fd8; --sf-pink-rgb:255 79 216; --sf-yellow:#ffd54f; --sf-halo:#000;`;
 // Light palette: accents re-tuned for contrast on a light surface (>= 4.5:1 against white for text), neutral overlays darken instead of lighten.
 const SF_VARS_LIGHT = `--sf-cyan:#00798f; --sf-amber:#a85f00; --sf-red:#c8173d; --sf-green:#08783f; --sf-grey:#52687a; --sf-text:#1c3a4e; --sf-dim:#37536a;
     --sf-cyan-rgb:0 121 143; --sf-amber-rgb:168 95 0; --sf-red-rgb:200 23 61; --sf-green-rgb:8 120 63; --sf-fg-rgb:4 40 62; --sf-strong:#04141f; --sf-white:#fff;
     --sf-bg0:#fbfdff; --sf-bg1:#eef5fb; --sf-bg2:#e2edf6; --sf-bg-rgb:255 255 255; --sf-scrim-rgb:206 220 232; --sf-sheet0:#f6fafd; --sf-shade-rgb:40 90 125; --sf-on-accent:#fff;
     --sf-alert0:#ffe1e7; --sf-alert1:#ffd0d9; --sf-alert2:#ffc2ce;
-    --sf-orange:#b8430f; --sf-heat:#bf3f16; --sf-cool:#0a6f9c; --sf-dry:#8a6600; --sf-fan:#2a7a2e; --sf-auto:#6a3bc4; --sf-pink:#a80f78; --sf-yellow:#7d6200; --sf-halo:rgb(255 255 255 / .85);`;
+    --sf-orange:#b8430f; --sf-heat:#bf3f16; --sf-cool:#0a6f9c; --sf-dry:#8a6600; --sf-fan:#2a7a2e; --sf-auto:#6a3bc4; --sf-pink:#a80f78; --sf-pink-rgb:168 15 120; --sf-yellow:#7d6200; --sf-halo:rgb(255 255 255 / .85);`;
 
 const SF_CSS = `
   :host { display:block; height:100%; ${SF_VARS_DARK} }
   :host([theme="light"]) { ${SF_VARS_LIGHT} }
+  /* Accent presets (accent: amber | green | pink | red, or the theme variable --sf-accent): the main colour of the card follows the palette of
+     the current theme. A custom hex accent is set inline on the host by SfBase._applyLook(). */
+  :host([accent="amber"]) { --sf-cyan:var(--sf-amber); --sf-cyan-rgb:var(--sf-amber-rgb); }
+  :host([accent="green"]) { --sf-cyan:var(--sf-green); --sf-cyan-rgb:var(--sf-green-rgb); }
+  :host([accent="pink"]) { --sf-cyan:var(--sf-pink); --sf-cyan-rgb:var(--sf-pink-rgb); }
+  :host([accent="red"]) { --sf-cyan:var(--sf-red); --sf-cyan-rgb:var(--sf-red-rgb); }
   .lbl, .kpi, .foot > div, .stats > div, .fl3 > div, .tile { min-width:0; overflow-wrap:anywhere; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; } }
   [role="button"]:focus-visible, .tile:focus-visible { outline:2px solid ${SF_C.cyan}; outline-offset:2px; border-radius:6px; }
@@ -70,6 +76,15 @@ const SF_CSS = `
   .btn.on { border-color:${SF_C.cyan}; background:rgb(var(--sf-cyan-rgb) / .18); color:var(--sf-strong);
     box-shadow: inset 0 0 12px rgb(var(--sf-cyan-rgb) / .25), 0 0 10px rgb(var(--sf-cyan-rgb) / .25); }
   .seg { display:flex; flex-wrap:wrap; gap:6px; }
+  /* Calm look (look: calm, or the theme variable --sf-look): same layout and colours, without the glow, the corner brackets, the scan lines
+     and the blinking dot. Made for a wall screen at night and for dashboards that mix SF cards with standard ones. */
+  :host([look="calm"]) .hud { border-radius:16px; background:var(--sf-bg1); border-color:rgb(var(--sf-fg-rgb) / .14); box-shadow:none; }
+  :host([look="calm"][theme="light"]) .hud { background:var(--sf-bg0); }
+  :host([look="calm"]) .hud::after, :host([look="calm"]) .c { display:none; }
+  :host([look="calm"]) .head { letter-spacing:.12em; color:var(--sf-text); }
+  :host([look="calm"]) .dot { animation:none; box-shadow:none; }
+  :host([look="calm"]) * { text-shadow:none !important; }
+  :host([look="calm"]) .btn.on { box-shadow:none; }
 `;
 
 // A badly typed configuration (a string instead of a list, an empty entry…) must never crash the card: the expected lists

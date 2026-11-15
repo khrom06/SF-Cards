@@ -124,6 +124,19 @@ const settle = () => wait(200);
         t.remove();
       }
     }
+    // 4c. v1.20 cards at every width, left-to-right and right-to-left: nothing sticks out; the room card picks its size from its width.
+    for (const tag of ["sf-room-card", "sf-media-card", "sf-weather-card", "sf-agenda-card", "sf-report-card"]) for (const lang of ["en", "ar"]) for (const w of [200, 240, 300, 420, 640, 1100]) {
+      const cfg = tag === "sf-room-card" ? { ...FULL[tag], size: "auto" } : FULL[tag], c = cell(w), el = mount(c, tag, cfg, lang); await settle();
+      const hud = el.shadowRoot.querySelector(".hud"), box = hud.getBoundingClientRect();
+      if (hud.scrollWidth > hud.clientWidth + 1) lfail(tag + " " + lang + " " + w + "px: horizontal overflow (" + hud.scrollWidth + " > " + hud.clientWidth + ")");
+      for (const n of hud.querySelectorAll(".btn, .kpi, .rw, .cv, .ev, .tmr, .chip, .st > div, .who, .bars .col")) { const r = n.getBoundingClientRect(); if (r.width && (r.left < box.left - 1 || r.right > box.right + 1)) { lfail(tag + " " + lang + " " + w + "px: an element sticks out of the card (" + n.className + ")"); break; } }
+      if (tag === "sf-room-card") { const want = w < 280 ? "cp" : w < 620 ? "st" : "lg"; if (!hud.classList.contains(want)) lfail("room " + w + "px: size class " + want + " expected, got " + hud.className); }
+      c.remove();
+    }
+    {
+      const e = document.createElement("sf-room-card"), g = e.getGridOptions();
+      if (g.columns !== 12 || g.rows !== "auto" || g.min_columns !== 3) lfail("sf-room-card: unexpected getGridOptions() " + JSON.stringify(g));
+    }
     // 5. Sections-view grid options: a card may take half a section or more, and says so.
     for (const [tag, minCols] of [["sf-climate-card", 6], ["sf-reactor-card", 8], ["sf-energy-flow-card", 8]]) {
       const e = document.createElement(tag), g = e.getGridOptions && e.getGridOptions();

@@ -23,6 +23,7 @@ class SfBase extends HTMLElement {
       const html = `<style>${SF_CSS}${this.css ? this.css() : ""}</style>${body}`;
       this.dir = this.lang === "ar" ? "rtl" : "ltr";
       const th = this._theme(); if (this.getAttribute("theme") !== th) this.setAttribute("theme", th);
+      this._applyLook();
       if (html === this._lastHtml) return;
       this._lastHtml = html;
       this.shadowRoot.innerHTML = html;
@@ -173,13 +174,43 @@ class SfBase extends HTMLElement {
     if (t === "auto") t = this._hass && this._hass.themes && this._hass.themes.darkMode === false ? "light" : "dark";
     return t === "light" ? "light" : "dark";
   }
+  // A text option read from the HA theme (CSS variable on the card), cached per HA theme like `--sf-theme`.
+  _cssOpt(name) {
+    const read = () => { try { return getComputedStyle(this).getPropertyValue(name).trim().replace(/['"]/g, "").toLowerCase(); } catch (e) { return ""; } };
+    if (!this.isConnected) return read();
+    const th = this._hass && this._hass.themes, key = th ? `${th.theme}|${th.darkMode}` : "";
+    if (this._cssOK !== key) {
+      const first = this._cssOK === undefined;
+      this._cssOK = key; this._cssO = {};
+      // HA applies the theme variables a moment after publishing the change: read once more, a little later.
+      if (!first) setTimeout(() => { this._cssO = {}; this._lastHtml = null; this._schedule(); }, 300);
+    }
+    const o = this._cssO || (this._cssO = {});
+    return name in o ? o[name] : (o[name] = read());
+  }
+  // Look and accent, as attributes / custom properties of the card itself (the markup does not change):
+  //   look: calm            (or --sf-look in the HA theme)    no glow, brackets, scan lines
+  //   accent: amber | green | pink | red | #rrggbb   (or --sf-accent)    main colour of the card
+  // sf-radiators-card keeps its own historical `accent` option (colour of the radiators): only the theme variable applies to it.
+  _applyLook() {
+    const c = this._config || {}, own = this.localName === "sf-radiators-card" ? "" : c.accent;
+    const lk = String(c.look || this._cssOpt("--sf-look") || "").toLowerCase() === "calm" ? "calm" : "";
+    if ((this.getAttribute("look") || "") !== lk) { if (lk) this.setAttribute("look", lk); else this.removeAttribute("look"); }
+    const a = String(own || this._cssOpt("--sf-accent") || "").trim().toLowerCase(), pre = ["amber", "green", "pink", "red"].includes(a) ? a : "";
+    if ((this.getAttribute("accent") || "") !== pre) { if (pre) this.setAttribute("accent", pre); else this.removeAttribute("accent"); }
+    const m = pre ? null : /^#([0-9a-f]{3}|[0-9a-f]{6})$/.exec(a), hex = m ? (m[1].length === 3 ? m[1].replace(/./g, "$&$&") : m[1]) : "";
+    if (hex === (this._acHex || "")) return;
+    this._acHex = hex;
+    if (hex) { const n = parseInt(hex, 16); this.style.setProperty("--sf-cyan", `#${hex}`); this.style.setProperty("--sf-cyan-rgb", `${n >> 16} ${(n >> 8) & 255} ${n & 255}`); }
+    else { this.style.removeProperty("--sf-cyan"); this.style.removeProperty("--sf-cyan-rgb"); }
+  }
   // Language for numbers and dates: Latin digits everywhere, even with a language such as ar-SA.
   get locLatn() {
     if (this._ll !== this.loc) { this._ll = this.loc; try { this._llv = new Intl.Locale(this.loc, { numberingSystem: "latn" }).toString(); } catch (e) { this._llv = "en"; } }
     return this._llv;
   }
   // A card rendered before being attached re-reads its theme as soon as it is (CSS variables do not exist outside the DOM).
-  connectedCallback() { this._cssRead = false; this._lastHtml = null; this._schedule(); this._watchSize(); }
+  connectedCallback() { this._cssRead = false; this._cssOK = undefined; this._lastHtml = null; this._schedule(); this._watchSize(); }
   /*
    * Size awareness (layout that follows the room the user gives the card, not the screen): the card measures its OWN width and a card
    * that declares `layoutKey(width)` is re-rendered only when that key changes (e.g. the number of columns), never on every pixel.

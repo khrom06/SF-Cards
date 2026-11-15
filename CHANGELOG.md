@@ -2,6 +2,22 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.20.0]
+### Added
+- **Automatic dashboard (`strategy: { type: custom:sf-home }`).** A dashboard whose configuration is two lines builds itself from what Home Assistant knows: a home view (banner, one tile per room, weather and clock, agenda, media, water leaks), every room in full, climate, energy (the report, from the Energy dashboard settings), security (cameras, log of openings) and system (sensor batteries, automations). Hidden, diagnostic and configuration entities are ignored; empty views are left out; options choose the areas, the views, the theme / look / accent, and add your own cards or views.
+- **New `sf-room-card`: one room, found from its Home Assistant area.** Temperature and humidity (the sensors set on the area first), CO₂, presence, thermostat, lights, covers, window sensors and media player are discovered; anything set by hand wins. Three sizes that follow the width: a compact tile (opens the room in a popup, or navigates), standard (dial, one button per light, covers, scenes, "all off") and large (temperature curve with min / max / target, devices of the room).
+- **New `sf-media-card`:** artwork, title, artist, live progress, previous / play-pause / next, volume and mute — only what the player supports — and chips to switch between several players.
+- **New `sf-weather-card`:** large clock and date, current conditions, the next hours (with rain risk) and the next days, from the forecasts of the weather entity.
+- **New `sf-agenda-card`:** running timers with a live countdown, pinned reminders (`pin: true`, made for waste collection), and the next calendar events grouped by day.
+- **New `sf-report-card`: the energy report of the week, month or year.** Consumption, solar used, autonomy and cost compared with the period before, one bar per day (solar / grid), who consumes, three facts worth knowing, navigation back in time, and **export as an image**. Reads the long-term statistics of your energy counters (`solar` + `export` accepted, like the Energy dashboard).
+- **`look: calm` on every card** — same layout and colours without the glow, the corner brackets, the scan lines and the blinking dot; and **`accent`** (`amber`, `green`, `pink`, `red` or any `#rrggbb`) to recolour a card. Both can be set once for the whole dashboard from the Home Assistant theme (`sf-look`, `sf-accent`) and are in every visual editor.
+- All five cards: visual editor, dark / light themes, 11 languages, keyboard and screen-reader support.
+### Fixed
+- `sf-launcher-card`: `summary: health` no longer raises a false configuration warning, and is back in the editor's list.
+### Changed
+- The live demo shows the 30 cards.
+- `sf-radiators-card` keeps its own `accent` option (colour of the radiators); the new global accent reaches it through the theme variable only.
+
 ## [1.19.1]
 ### Fixed
 - `sf-launcher-card`: tapping a value inside a popup (thermostat dial, setpoint, any clickable entity) now opens the entity dialog. The popup panel is attached to `<body>`, outside Home Assistant, so the `hass-more-info` events of the cards it holds never reached HA; the launcher now relays them.

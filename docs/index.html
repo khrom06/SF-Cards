@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SF Cards — live demo</title>
-<meta name="description" content="Sci-fi HUD cards for Home Assistant. Try all 25 cards live, in 11 languages, with fake data.">
+<meta name="description" content="Sci-fi HUD cards for Home Assistant. Try all 30 cards live, in 11 languages, with fake data.">
 <meta property="og:title" content="SF Cards — sci-fi HUD cards for Home Assistant">
-<meta property="og:description" content="25 Lovelace cards, visual editors, 11 languages, a 480×480 wall-panel dashboard. Try them live.">
+<meta property="og:description" content="30 Lovelace cards, an automatic dashboard, visual editors, 11 languages, a 480×480 wall-panel dashboard. Try them live.">
 <meta property="og:image" content="https://khrom06.github.io/SF-Cards/social.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
 <style>
@@ -126,9 +126,34 @@ Object.assign(base,{
  "sensor.h_ram":U(67,"%"),"sensor.h_ram_gb":U(9.8,"GB"),"sensor.h_swap":U(9,"%"),"sensor.h_disk":U(21,"%"),"sensor.h_disk_free":U(417,"GB"),"sensor.h_rx":U(820,"kB/s"),"sensor.h_tx":U(95,"kB/s"),
  "sensor.h_wifi":U(-48,"dBm"),"sensor.h_ct":S(3),"sensor.h_load":S(1.2),"sensor.h_up":U(75.5,"h"),"sensor.h_pw":U(310,"W"),"sensor.h_en":U(12.4,"kWh"),
 });
+// v1.20: room, media, weather + clock, agenda, energy report
+Object.assign(base,{
+ "sensor.lr_t":S(20.4,{unit_of_measurement:"°C",device_class:"temperature"}),"sensor.lr_h":S(48,{unit_of_measurement:"%",device_class:"humidity"}),"sensor.lr_co2":S(610,{unit_of_measurement:"ppm",device_class:"carbon_dioxide"}),"sensor.lr_w":S(412,{unit_of_measurement:"W",device_class:"power"}),
+ "binary_sensor.lr_occ":S("on",{device_class:"occupancy",friendly_name:"Living room presence"}),"climate.lr":S("heat",{hvac_action:"heating",temperature:19.5,current_temperature:20.4,friendly_name:"Living room air conditioning"}),
+ "light.lr_a":S("on",{friendly_name:"Living room ceiling"}),"light.lr_b":S("on",{friendly_name:"Living room floor lamp"}),"light.lr_c":S("off",{friendly_name:"Living room LED strip"}),
+ "cover.lr":S("open",{current_position:80,friendly_name:"Living room shutters"}),"binary_sensor.lr_win":S("off",{device_class:"window",friendly_name:"Living room window"}),"switch.lr_tv":S("on",{friendly_name:"Living room television"}),
+ "scene.movie":S("unknown",{friendly_name:"Movie"}),"scene.reading":S("unknown",{friendly_name:"Reading"}),
+ "sensor.of_t":S(19.1,{unit_of_measurement:"°C",device_class:"temperature"}),"light.of_a":S("off",{friendly_name:"Office desk lamp"}),"binary_sensor.of_occ":S("off",{device_class:"occupancy"}),
+ "media_player.speaker":S("playing",{friendly_name:"Living room speaker",media_title:"Demo track",media_artist:"Demo artist",media_album_name:"Demo album",media_duration:228,media_position:71,media_position_updated_at:new Date().toISOString(),volume_level:0.35,is_volume_muted:false,supported_features:1|4|8|16|32|1024|16384}),
+ "media_player.kitchen":S("off",{friendly_name:"Kitchen speaker",supported_features:128}),
+ "weather.demo":S("partlycloudy",{temperature:11.2,temperature_unit:"°C",humidity:71,wind_speed:14,wind_speed_unit:"km/h",apparent_temperature:9}),
+ "timer.oven":S("active",{friendly_name:"Oven",duration:"0:20:00",finishes_at:new Date(now+252000).toISOString()}),"calendar.family":S("off",{friendly_name:"Family"}),"calendar.bins":S("off",{friendly_name:"Bins"}),
+ "sensor.rp_grid":U(5200,"kWh"),"sensor.rp_solar":U(1800,"kWh"),"sensor.rp_cost":U(940,"EUR"),"sensor.rp_car":U(900,"kWh"),"sensor.rp_heat":U(700,"kWh"),"sensor.rp_tank":U(300,"kWh"),"sensor.rp_wash":U(120,"kWh"),
+});
+const demoAreas={living:{area_id:"living",name:"Living room",icon:"mdi:sofa",temperature_entity_id:"sensor.lr_t",humidity_entity_id:"sensor.lr_h"},office:{area_id:"office",name:"Office",icon:"mdi:desk",temperature_entity_id:"sensor.of_t"}};
+const demoEnts=Object.fromEntries([...["sensor.lr_t","sensor.lr_h","sensor.lr_co2","sensor.lr_w","binary_sensor.lr_occ","climate.lr","light.lr_a","light.lr_b","light.lr_c","cover.lr","binary_sensor.lr_win","switch.lr_tv","media_player.speaker"].map(e=>[e,"living"]),...["sensor.of_t","light.of_a","binary_sensor.of_occ"].map(e=>[e,"office"])].map(([e,a])=>[e,{entity_id:e,area_id:a}]));
+const dayStr=(t)=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const demoEvents=(path)=>/calendar\.bins/.test(path)?[{start:{date:dayStr(now+D)},end:{date:dayStr(now+2*D)},summary:"Yellow bin"}]
+ :[{start:{dateTime:new Date(now+1.5*H).toISOString()},end:{dateTime:new Date(now+2.5*H).toISOString()},summary:"Dentist"},{start:{dateTime:new Date(now+D+2*H).toISOString()},end:{dateTime:new Date(now+D+3.5*H).toISOString()},summary:"Parents' evening"},{start:{date:dayStr(now+3*D)},end:{date:dayStr(now+4*D)},summary:"Birthday"}];
+const demoStats=(m)=>{const t0=Date.parse(m.start_time),step=m.period==="month"?30.44*D:D,n=Math.round((Date.parse(m.end_time)-t0)/step),o={};
+ const f={"sensor.rp_grid":(i)=>14+9*Math.abs(Math.sin(i*1.7))+(i%7===3?8:0),"sensor.rp_solar":(i)=>4+7*Math.abs(Math.cos(i*0.9)),"sensor.rp_cost":(i)=>2.6+1.7*Math.abs(Math.sin(i*1.7)),"sensor.rp_car":(i)=>6+5*Math.abs(Math.sin(i*2.1)),"sensor.rp_heat":(i)=>5+3*Math.abs(Math.cos(i*1.3)),"sensor.rp_tank":(i)=>3,"sensor.rp_wash":(i)=>i%2?2.4:0.2};
+ for(const id of m.statistic_ids||[]) if(f[id]) o[id]=Array.from({length:n},(_,i)=>({start:t0+i*step,end:t0+(i+1)*step,change:f[id](i)*(m.period==="month"?30:1)}));
+ return o};
+const fcDaily=Array.from({length:8},(_,i)=>({datetime:new Date(now+(i+1)*D).toISOString(),condition:["sunny","partlycloudy","cloudy","rainy","partlycloudy","sunny","rainy","cloudy"][i],temperature:13-i*0.4,templow:5-i*0.2}));
 const autos=[["Lights at dusk","on",2*H],["Morning shutters","on",9*H],["Nursery heating","on",0.3*H],["Water leak alert","on",3*D],["Holiday mode","off",null],["Garage frost guard","on",95*D],["Doorbell → phone","on",5*H],["Certificate renewal","unavailable",null],["Garden watering","on",40*D],["Morning routine","on",0.02*H],["Aquarium light","on",1*H],["Laundry done → phone","on",26*H]];
 autos.forEach(([n,s,a],i)=>{base["automation.a"+i]=S(s,{id:String(100+i),friendly_name:n,last_triggered:a===null?null:ago(a),current:i===9?1:0})});
 const histNew=(id)=>{
+ if(id==="sensor.lr_t") return Array.from({length:96},(_,i)=>({s:String(19.6+0.9*Math.sin(i/14)+(i>60?0.5:0)),lu:(now-(96-i)*900000)/1000}));
  if(id==="sensor.hepa") return Array.from({length:60},(_,i)=>({s:String(Math.round(18+(59-i)*0.55)),lu:(now-(59-i)*D)/1000}));
  if(id==="sensor.pre") return Array.from({length:60},(_,i)=>({s:String(Math.round(27+(59-i)*1.1)%100),lu:(now-(59-i)*D)/1000}));
  if(id==="sensor.carbon") return [{s:"100",lu:(now-60*D)/1000},{s:"100",lu:now/1000}];
@@ -144,11 +169,12 @@ const traces=[];autos.forEach((a,i)=>{for(let k=0;k<5;k++){const t=now-((i*5+k)*
 const fc=Array.from({length:14},(_,i)=>{const h=new Date(now+i*H);const hr=h.getHours();return {datetime:h.toISOString(),temperature:8+5*Math.sin((hr-9)/24*2*Math.PI),precipitation_probability:i>=6&&i<=8?80:10,condition:i>=6&&i<=8?"rainy":"partlycloudy",wind_speed:10}});
 const HASS2=(states,lang)=>{const h=HASS(states,lang);const ws=h.callWS;h.themes={darkMode:true};
  h.callWS=async(m)=>{ if(m.type==="history/history_during_period"){const ids=m.entity_ids||[];if(ids.some(e=>histNew(e))){const o={};ids.forEach(e=>o[e]=histNew(e)||[]);return o}}
-  if(m.type==="recorder/statistics_during_period") return {};
+  if(m.type==="recorder/statistics_during_period") return (m.statistic_ids||[]).some(e=>/^sensor\.rp_/.test(e))?demoStats(m):{};
   if(m.type==="trace/list") return traces;
   if(m.type==="search/related") return {entity:m.item_id==="automation.a6"?["sensor.gone"]:["sensor.out"]};
   return ws(m)};
- h.connection={subscribeMessage:async(cb)=>{setTimeout(()=>cb({forecast:fc}),10);return ()=>{}}};
+ h.connection={subscribeMessage:async(cb,m)=>{setTimeout(()=>cb({forecast:m&&m.forecast_type==="daily"?fcDaily:fc}),10);return ()=>{}}};
+ h.areas=demoAreas;h.entities=demoEnts;h.devices={};h.callApi=async(method,path)=>demoEvents(String(path));
  return h;};
 Object.assign(FULL,{
  "sf-host-card":{title:"Workstation",online:"binary_sensor.h_online",cpu:"sensor.h_cpu",cpu_temp:"sensor.h_cpu_t",gpu:"sensor.h_gpu",gpu_temp:"sensor.h_gpu_t",gpu_power:"sensor.h_gpu_p",gpu_vram:"sensor.h_vram",ram:"sensor.h_ram",ram_used:"sensor.h_ram_gb",swap:"sensor.h_swap",disk:"sensor.h_disk",disk_free:"sensor.h_disk_free",net_rx:"sensor.h_rx",net_tx:"sensor.h_tx",wifi:"sensor.h_wifi",containers:"sensor.h_ct",load:"sensor.h_load",uptime:"sensor.h_up",power:"sensor.h_pw",energy:"sensor.h_en"},
@@ -159,6 +185,14 @@ Object.assign(FULL,{
    {name:"Bedroom",temperature:"sensor.bed_t",humidity:"sensor.bed_h",openings:"binary_sensor.w_bed"},
    {name:"Kids' room",temperature:"sensor.kid_t",humidity:"sensor.kid_h"}]},
  "sf-automations-card":{title:"Automations"},
+ "sf-room-card":{area:"living",size:"standard",actions:[{name:"Movie",icon:"mdi:movie-open",entity:"scene.movie"},{name:"Reading",icon:"mdi:book-open-variant",entity:"scene.reading"}]},
+ "sf-room-card@2":{area:"living",size:"large"},
+ "sf-room-card@3":{area:"office",size:"compact"},
+ "sf-room-card@4":{area:"living",size:"standard",look:"calm",accent:"amber"},
+ "sf-media-card":{title:"Music",entities:["media_player.speaker","media_player.kitchen"]},
+ "sf-weather-card":{title:"Weather",weather:"weather.demo"},
+ "sf-agenda-card":{title:"Agenda",timers:["timer.oven"],calendars:["calendar.family",{entity:"calendar.bins",name:"Bins",icon:"mdi:trash-can",color:"var(--sf-green)",pin:true}]},
+ "sf-report-card":{grid:"sensor.rp_grid",solar:"sensor.rp_solar",cost:"sensor.rp_cost",devices:[{name:"Car",entity:"sensor.rp_car"},{name:"Heating",entity:"sensor.rp_heat"},{name:"Water heater",entity:"sensor.rp_tank"},{name:"Washing machine",entity:"sensor.rp_wash"}]},
  "sf-cycles-card":{title:"Appliances",price:"sensor.kwh_price",appliances:[{name:"Washing machine",power:"sensor.washer",icon:"mdi:washing-machine"},{name:"Dishwasher",power:"sensor.dish",icon:"mdi:dishwasher"},{name:"Tumble dryer",power:"sensor.dryer",icon:"mdi:tumble-dryer"}]},
 });
 
@@ -175,7 +209,7 @@ const gal = document.getElementById("gallery");
 Object.entries(FULL).forEach(([key, cfg]) => {
   const tag = key.split("@")[0];   // "sf-trend-card@2": a second example of the same card
   if (!customElements.get(tag)) return;
-  const sec = document.createElement("section"); sec.innerHTML = `<h2>${tag.replace("sf-", "").replace("-card", "")}</h2>`;
+  const sec = document.createElement("section"); sec.innerHTML = `<h2>${tag.replace("sf-", "").replace("-card", "")}${cfg.size ? " · " + cfg.size : ""}${cfg.look ? " · " + cfg.look : ""}</h2>`;
   const el = document.createElement(tag); sec.appendChild(el); gal.appendChild(sec);
   els.push([el, cfg]);
 });

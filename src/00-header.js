@@ -21,6 +21,14 @@
  *   custom:sf-ledger-card    — consumption per device and period
  *   custom:sf-radar-card     — presence from three never-merged sources (advanced)
  *   custom:sf-ns-card        — full-screen panel for a wall tablet / NSPanel Pro (480 x 480) that changes with the time of day
+ *   custom:sf-room-card      — one room found from its Home Assistant area: temperature, presence, lights, covers, scenes (3 sizes)
+ *   custom:sf-media-card     — what is playing and the remote (several players)
+ *   custom:sf-weather-card   — clock, current weather, next hours and days
+ *   custom:sf-agenda-card    — timers, pinned reminders and calendar events
+ *   custom:sf-report-card    — energy report of the week / month / year, exportable as an image
+ *
+ * Automatic dashboard (no card to place): a dashboard whose YAML is only `strategy: { type: custom:sf-home }` builds itself from your areas.
+ * Every card also accepts `look: calm` (no glow) and `accent: amber | green | pink | red | #rrggbb`.
  *
  * Fonts (Orbitron, B612 Mono — SIL Open Font License 1.1) are embedded below: no network access needed.
  * Note: the French text of each label is also its translation key (see the i18n tables); code comments are in English.

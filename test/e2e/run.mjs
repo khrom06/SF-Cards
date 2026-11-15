@@ -37,7 +37,7 @@ function ws(token) {
 }
 
 const tags = Object.keys(FULL);
-const EDIT_TAGS = ["sf-trend-card", "sf-timeline-card", "sf-health-card", "sf-assistant-card", "sf-launcher-card", "sf-machines-card"].filter((t) => FULL[t]);
+const EDIT_TAGS = ["sf-trend-card", "sf-timeline-card", "sf-health-card", "sf-assistant-card", "sf-launcher-card", "sf-machines-card", "sf-room-card", "sf-media-card", "sf-weather-card", "sf-agenda-card", "sf-report-card"].filter((t) => FULL[t]);
 const dashConfig = { views: [{ title: "e2e", path: "e2e", type: "masonry", cards: tags.map((t) => ({ type: "custom:" + t, ...FULL[t] })) },
   ...EDIT_TAGS.map((t) => ({ title: "ed " + t, path: "ed-" + t, type: "masonry", cards: [{ type: "custom:" + t, ...FULL[t] }] })),
   { title: "pick", path: "pick", type: "masonry", cards: [{ type: "custom:sf-machines-card", title: "Pick", tiles: [{ label: "A", entity: "sensor.e2e_temp_a", kind: "value", digits: 1 }] }] }] };
@@ -49,6 +49,9 @@ async function main() {
   let r = await W.call({ type: "lovelace/resources/create", res_type: "module", url: "/local/sf-cards.js" }); if (!r.success) throw new Error("resource: " + JSON.stringify(r));
   r = await W.call({ type: "lovelace/dashboards/create", url_path: "e2e-test", title: "e2e", mode: "storage", require_admin: false, show_in_sidebar: false }); if (!r.success) throw new Error("dashboard : " + JSON.stringify(r));
   r = await W.call({ type: "lovelace/config/save", url_path: "e2e-test", config: dashConfig }); if (!r.success) throw new Error("config: " + JSON.stringify(r));
+  // Automatic dashboard (v1.20): a dashboard whose whole configuration is the SF strategy.
+  r = await W.call({ type: "lovelace/dashboards/create", url_path: "e2e-auto", title: "auto", mode: "storage", require_admin: false, show_in_sidebar: false }); if (!r.success) throw new Error("dashboard auto: " + JSON.stringify(r));
+  r = await W.call({ type: "lovelace/config/save", url_path: "e2e-auto", config: { strategy: { type: "custom:sf-home" } } }); if (!r.success) throw new Error("config auto: " + JSON.stringify(r));
   W.close(); log("dashboard created (" + tags.length + " cards)");
 
   const browser = await chromium.launch(), ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
@@ -103,6 +106,14 @@ async function main() {
       await page.keyboard.press("Escape"); await sleep(500);
     } catch (e) { if (e.message === "freeze") throw e; fails.push(`${tag} : ${String(e.message).split("\n")[0]}`); }
   }
+  // 4. Automatic dashboard: Home Assistant asks the strategy for the views; the home view must show the banner, and nothing freezes.
+  try {
+    await page.goto(HA + "/e2e-auto/home", { waitUntil: "domcontentloaded" }); await sleep(7000); await alive("automatic dashboard");
+    const auto = await page.evaluate(() => { const f = (root, acc = []) => { root.querySelectorAll("*").forEach((e) => { if (/^sf-[a-z-]+-card$/.test(e.localName)) acc.push(e.localName); if (e.shadowRoot) f(e.shadowRoot, acc); }); return acc; }; return f(document); });
+    log("automatic dashboard cards:", auto.join(", ") || "none");
+    if (!auto.includes("sf-bridge-card")) fails.push("automatic dashboard: the home view did not render the banner (strategy not loaded?)");
+    await page.goto(HA + "/e2e-auto/system", { waitUntil: "domcontentloaded" }); await sleep(5000); await alive("automatic dashboard, system view");
+  } catch (e) { if (e.message === "freeze") throw e; fails.push("automatic dashboard: " + String(e.message).split("\n")[0]); }
   if (errs.length) fails.push(...[...new Set(errs)].slice(0, 8).map((e) => "erreur JS : " + e));
   await browser.close();
 }

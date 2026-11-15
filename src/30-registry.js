@@ -23,6 +23,11 @@ const SF_DEFS = [
   ["sf-air-card", SfAirCard, "SF · Fresh air", "Should I open the windows? One verdict from indoor and outdoor air (absolute humidity, CO2, PM2.5, rain, wind) and the best hour."],
   ["sf-automations-card", SfAutomationsCard, "SF · Automations", "Health of your automations: broken, pointing at a missing entity, silent, disabled, running, and a 24 h pulse."],
   ["sf-cycles-card", SfCyclesCard, "SF · Appliance cycles", "Cycles found in a power plug: running with expected end, finished, energy and cost per cycle, the week."],
+  ["sf-room-card", SfRoomCard, "SF · Room", "One room: temperature, air, presence, lights, covers and scenes, found from its Home Assistant area. Three sizes."],
+  ["sf-media-card", SfMediaCard, "SF · Media", "What is playing and the remote: artwork, progress, previous / play / next, volume, several players."],
+  ["sf-weather-card", SfWeatherCard, "SF · Weather and clock", "Large clock and date, current conditions, the next hours and the next days."],
+  ["sf-agenda-card", SfAgendaCard, "SF · Agenda", "Running timers, pinned reminders (waste collection…) and the next calendar events, grouped by day."],
+  ["sf-report-card", SfReportCard, "SF · Energy report", "The week, month or year in review: consumption, solar, autonomy, cost, who consumes, and an image to share."],
   ["sf-timeline-card", SfTimelineCard, "SF · Timeline", "Latest state changes of the chosen entities, grouped by day, in plain words (read-only)."],
 ];
 window.customCards = window.customCards || [];

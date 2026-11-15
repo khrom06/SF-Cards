@@ -1,6 +1,6 @@
 # SF Cards
 
-**Sci‑fi "HUD" cards for Home Assistant** — a set of 25 Lovelace cards with a glowing, cinematic look: an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… and a **visual editor for every card**, so nobody has to write YAML.
+**Sci‑fi "HUD" cards for Home Assistant** — a set of 30 Lovelace cards with a glowing, cinematic look (or a calm one, your choice): an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… a **dashboard that builds itself from your rooms**, and a **visual editor for every card**, so nobody has to write YAML.
 
 [![Marketplace](https://img.shields.io/badge/Marketplace%20%2F%20HACS-default-41BDF5.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -14,7 +14,22 @@
 
 > **▶ [Try every card live, with fake data](https://khrom06.github.io/SF-Cards/)** — no install, 11 languages, light / dark.
 
-### New in 1.19: four cards that answer everyday questions
+### New in 1.20: a dashboard that builds itself, rooms, daily life and a calm look
+
+<p align="center">
+  <img src="assets/room.png" alt="Room card in its three sizes: compact tile, standard with controls, large with history and devices" width="820">
+</p>
+<p align="center">
+  <img src="assets/daily.png" alt="Media, weather with clock and agenda cards" width="820">
+</p>
+
+- **[Automatic dashboard](#automatic-dashboard)** — two lines of YAML and Home Assistant builds a whole dashboard of SF cards from your areas: rooms, climate, energy, security, system. A new lamp or room shows up by itself.
+- **[Room](#sf-room-card)** — *"What is going on in the living room?"* Give it a Home Assistant area: it finds the temperature, presence, lights, covers and devices itself. Three sizes, from a tile to a full panel; the tile opens the room in a popup.
+- **[Media](#sf-media-card)**, **[Weather and clock](#sf-weather-card)**, **[Agenda](#sf-agenda-card)** — the everyday cards: what is playing and the remote, the forecast hour by hour and day by day, timers, waste collection and the next events.
+- **[Energy report](#sf-report-card)** — *"How was the week?"* Consumption, solar, autonomy and cost against the week before, who consumes, three facts worth knowing, and an image to share.
+- **[Calm look and accent colours](#look-and-accent)** — `look: calm` removes the glow, brackets and scan lines; `accent: amber` (or any colour) recolours a card. For one card or the whole dashboard.
+
+### From 1.19: four cards that answer everyday questions
 
 <p align="center">
   <img src="assets/anim/upkeep.webp" alt="Upkeep card: when each filter, brush or consumable will be due" width="390"> <img src="assets/anim/air.webp" alt="Fresh air card: should I open the windows, room by room" width="390">
@@ -48,9 +63,9 @@ Shown here on the square 480×480 NSPanel Pro; it is sized in `vmin`, so it also
 
 - [Features](#features)
 - [Installation](#installation) (Marketplace / HACS or manual)
-- [The cards](#the-cards)
+- [The cards](#the-cards) · [Automatic dashboard](#automatic-dashboard)
 - [Visual editor](#visual-editor)
-- [Languages](#languages) · [Light theme](#light-theme) · [Layout](#layout) · [Accessibility](#accessibility) · [Numbers](#numbers)
+- [Languages](#languages) · [Light theme](#light-theme) · [Look and accent](#look-and-accent) · [Layout](#layout) · [Accessibility](#accessibility) · [Numbers](#numbers)
 - [Optional theme](#optional-theme) · [Requirements](#requirements) · [Security](#security) · [Development](#development)
 - [About HACS and Marketplace](#about-hacs-and-marketplace)
 - [Limitations](#limitations)
@@ -58,7 +73,7 @@ Shown here on the square 480×480 NSPanel Pro; it is sized in `vmin`, so it also
 
 ## Features
 
-- **25 cards, one look** — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
+- **30 cards, one look** (neon, or `look: calm`) — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone, a wall tablet or a wide desktop dashboard; idle devices can be hidden automatically and the number of displayed devices is capped.
@@ -124,13 +139,171 @@ Every card can be configured in the visual editor; the YAML below is just for re
 | [`sf-setpoints-card`](#sf-setpoints-card) | Setpoint matrix per room; tap a value to edit (slider, scope: value / program / room) |
 | [`sf-ledger-card`](#sf-ledger-card) | Consumption per device and period |
 | [`sf-presence-card`](#sf-presence-card) | Presence from three never‑merged sources (advanced) |
-| [`sf-upkeep-card`](#sf-upkeep-card) | **New** · maintenance forecast: filters, brushes, consumables, service dates — learns the wear rate, one-tap reset |
-| [`sf-air-card`](#sf-air-card) | **New** · "should I open the windows?" — one verdict per room, window sensors, best hour of the next 12 |
-| [`sf-automations-card`](#sf-automations-card) | **New** · health of your automations: broken, failing, silent, disabled, running, 24 h pulse (read-only) |
-| [`sf-cycles-card`](#sf-cycles-card) | **New** · appliance cycles from a power plug: live progress, time left, cost, last 7 days |
+| [`sf-room-card`](#sf-room-card) | **New** · one room from its Home Assistant area: temperature, presence, lights, covers, scenes, devices — tile, standard or large |
+| [`sf-media-card`](#sf-media-card) | **New** · what is playing and the remote: artwork, progress, transport, volume, several players |
+| [`sf-weather-card`](#sf-weather-card) | **New** · large clock, current weather, the next hours and days |
+| [`sf-agenda-card`](#sf-agenda-card) | **New** · running timers, pinned reminders (waste collection…), next calendar events by day |
+| [`sf-report-card`](#sf-report-card) | **New** · energy report of the week / month / year: consumption, solar, autonomy, cost, who consumes, exportable image |
+| [`sf-upkeep-card`](#sf-upkeep-card) | maintenance forecast: filters, brushes, consumables, service dates — learns the wear rate, one-tap reset |
+| [`sf-air-card`](#sf-air-card) | "should I open the windows?" — one verdict per room, window sensors, best hour of the next 12 |
+| [`sf-automations-card`](#sf-automations-card) | health of your automations: broken, failing, silent, disabled, running, 24 h pulse (read-only) |
+| [`sf-cycles-card`](#sf-cycles-card) | appliance cycles from a power plug: live progress, time left, cost, last 7 days |
 | [`sf-ns-card`](#sf-ns-card) | **Full‑screen dashboard for wall panels and tablets** (square, landscape or portrait — NSPanel 480×320, Pro 480×480, 1334×750…): morning / day / evening / night modes, kiosk mode |
 
 > **Friendly names (1.13).** Five cards were renamed with plainer names: `sf-reactor-card` → `sf-energy-flow-card`, `sf-hangar-card` → `sf-vehicles-card`, `sf-bridge-card` → `sf-home-banner-card`, `sf-console-card` → `sf-controls-card`, `sf-radar-card` → `sf-presence-card`. **The original names keep working forever** (same card, same options, same editor); the card picker and this documentation just use the new ones.
+
+### Automatic dashboard
+
+**A whole dashboard without placing a single card.** Create a dashboard (Settings → Dashboards → Add dashboard → *New dashboard from scratch*), open it, then **Edit → ⋮ → Raw configuration editor** and replace everything with:
+
+```yaml
+strategy:
+  type: custom:sf-home
+```
+
+Home Assistant then asks SF Cards for the dashboard every time it is opened, so it always matches the house:
+
+| View | What it shows | Built from |
+|---|---|---|
+| **Home** | Welcome banner, one tile per room (tap = the room in a popup), weather and clock, agenda, media, water leaks | areas, `person`, `weather`, `calendar`, `media_player`, moisture sensors |
+| **Rooms** | Every room in full: temperature, presence, lights, covers, scenes | each area |
+| **Climate** | Thermostats and the "should I open the windows?" verdict | `climate` entities, rooms with temperature + humidity |
+| **Energy** | The energy report (and the live flow if you give the powers) | your **Energy dashboard** settings |
+| **Security** | Cameras and the log of doors, windows, locks and alarm | `camera`, opening sensors, `lock`, `alarm_control_panel` |
+| **System** | Sensor batteries and the health of your automations | found automatically |
+
+A view with nothing to show is left out. Hidden, diagnostic and configuration entities are ignored. Everything is optional:
+
+```yaml
+strategy:
+  type: custom:sf-home
+  areas: [living_room, kitchen, bedroom]     # only these areas, in this order (ids or names)
+  exclude_areas: [garage]                    # …or everything except these
+  exclude: [light.all_lights]                # entities to leave out everywhere
+  views: [home, rooms, climate, energy]      # which views, in which order
+  weather: weather.home                      # default: the first weather entity
+  theme: auto                                # dark | light | auto — passed to every card
+  look: calm                                 # see "Look and accent"
+  accent: amber
+  energy: { grid: sensor.grid_power, solar: sensor.solar_power }     # live powers (W) → adds the energy flow card
+  report: { grid: sensor.grid_kwh, solar: sensor.solar_kwh, export: sensor.export_kwh, cost: sensor.grid_cost }   # default: Energy dashboard settings
+  home_cards:                                # your own cards, added to the home view
+    - type: custom:sf-vehicles-card
+      cars: [{ name: Car, soc: sensor.car_battery }]
+  extra_views:                               # your own views, after the generated ones
+    - title: Garden
+      cards: []
+```
+
+To go further than the options allow, use **⋮ → Take control**: Home Assistant turns the generated dashboard into a normal, editable one (it then stops following the house).
+
+### sf-room-card
+
+<img src="assets/room.png" alt="Room card: compact, standard and large sizes" width="780">
+
+**One room at a glance and under the finger.** Give it a Home Assistant **area** and it finds everything itself — the temperature and humidity sensors (the ones set on the area first), CO₂, presence, thermostat, lights, covers, window sensors, media player — skipping hidden and diagnostic entities. Whatever you set by hand wins; `exclude` removes an entity; an empty list (`lights: []`) hides a block.
+
+Three sizes, chosen from the width the dashboard gives the card (or forced with `size`):
+
+- **compact** — a tile: temperature, humidity, presence, and what is on ("2 lights · media on · 1 open"). Tapping it opens the standard card in a popup (made for phones), or goes to a page with `navigate`.
+- **standard** — a dial with the target temperature, humidity / CO₂ / heating / power, one button per light, covers with open / stop / close, your scenes and an "all off" button for the lights of the room.
+- **large** — adds the temperature curve (24 h by default, min / max and target) and the devices of the room, each one opening its Home Assistant dialog.
+
+```yaml
+type: custom:sf-room-card
+area: living_room               # fills everything below that is not set
+# name: Living room             icon: mdi:sofa
+# size: auto                    # auto | compact | standard | large
+# temperature: sensor.living_temperature      humidity: sensor.living_humidity
+# co2: sensor.living_co2        power: sensor.living_power
+# occupancy: binary_sensor.living_presence    climate: climate.living     media: media_player.living
+# lights: [light.ceiling, light.floor_lamp]   covers: [cover.shutters]    windows: [binary_sensor.window]
+# exclude: [light.all_lights]
+# all_off: true                 # "all off" button (false to hide it)
+# history: 24                   # hours of the temperature curve, large size (0 = none)
+# tap: popup                    # compact tile: popup | none          navigate: /lovelace/living
+actions:
+  - { name: Movie, icon: mdi:movie-open, entity: scene.movie }
+  - { name: Vacuum, icon: mdi:robot-vacuum, service: vacuum.start, data: { entity_id: vacuum.robot }, confirm: "Start?" }
+# devices:                      # rows of the large size (default: found in the area)
+#   - { entity: switch.tv, name: Television, icon: mdi:television }
+```
+
+Without an area the card works with the entities you list. In a sections view, `grid_options: { columns: 6 }` puts two tiles side by side.
+
+### sf-media-card
+
+**What is playing, and the remote.** Artwork, title, artist and album, a progress bar that moves on its own, previous / play-pause / next, volume and mute. Only the buttons your player supports are drawn. With several players, the one that plays is shown and the others are one tap away.
+
+```yaml
+type: custom:sf-media-card
+title: Music
+entity: media_player.living_room                 # one player…
+entities: [media_player.kitchen, media_player.tv]   # …or several (chips to switch)
+# artwork: true      volume: true
+```
+
+Artwork is only loaded from Home Assistant itself or an `http(s)` address; tapping it opens the player's dialog (sources, grouping…).
+
+### sf-weather-card
+
+**The weather with the time.** A large clock and the date, the current conditions (temperature, humidity, wind, feels-like, today's high and low), then the next hours with the rain risk and the next days. It uses the forecasts Home Assistant already has for your weather entity; the number of hours and days follows the width of the card.
+
+```yaml
+type: custom:sf-weather-card
+weather: weather.home
+# temperature: sensor.outdoor_temperature   # your own outdoor sensor instead of the weather entity's value
+# clock: true
+# forecast: both        # both | hourly | daily | none
+# hours: 8              days: 5
+```
+
+### sf-agenda-card
+
+**What is coming.** Running timers with a live countdown, pinned reminders, and the next events of your calendars grouped by day (today, tomorrow, then the weekday), with the one in progress highlighted.
+
+```yaml
+type: custom:sf-agenda-card
+title: Agenda
+days: 7                   # days ahead
+max: 8                    # events listed
+timers: [timer.oven, timer.laundry]
+calendars:
+  - calendar.family
+  - calendar.work
+  - entity: calendar.waste_collection
+    name: Bins
+    icon: mdi:trash-can
+    color: var(--sf-green)
+    pin: true             # its next event becomes a chip on top: "Yellow bin · Tomorrow"
+```
+
+`pin: true` is made for waste-collection and school calendars: the next event is always visible and glows the day before. Read-only.
+
+### sf-report-card
+
+<img src="assets/report.png" alt="Energy report card: week, month and year" width="780">
+
+**"How was the week?"** The energy report in plain words: consumption, solar used, autonomy and cost, each **compared with the period before**; one bar per day split into solar and grid, the heaviest day highlighted; who consumes; three facts worth knowing; and **Export as an image** (1080 × 1350, in the colours of your theme) to share or keep. Week (7 days), month (30 days) or year (12 months), with a button to go back in time.
+
+It reads the **long-term statistics** Home Assistant already keeps for energy counters (the same sensors as the Energy dashboard): nothing to install, and years of history are available at once.
+
+```yaml
+type: custom:sf-report-card
+grid: sensor.grid_import_energy          # kWh counter: energy taken from the grid
+solar: sensor.solar_production_energy    # kWh counter: solar production…
+export: sensor.grid_export_energy        # …minus what went back to the grid = solar used by the home
+# (if you have a "self-consumed solar" counter, give it as `solar` and leave `export` out)
+cost: sensor.grid_import_cost            # money counter (optional)…
+# price: 0.21                            # …or a price per kWh (number or entity; an estimate: one price for the whole period)
+# currency: "€"
+# period: week                           # week | month | year (the buttons switch)
+devices:
+  - { name: Car, entity: sensor.car_charger_energy }
+  - { name: Heating, entity: sensor.heat_pump_energy }
+```
+
+Without solar the card shows consumption and cost only. The automatic dashboard fills this card from your Energy dashboard settings.
 
 ### sf-home-banner-card
 
@@ -867,6 +1040,24 @@ theme: light                  # dark (default) | light | auto
 - In a launcher popup, the sheet gets a light look and SF cards switch to light themselves; other cards (standard Home Assistant cards) keep their own look.
 - The wall-panel card (`sf-ns-card`) is dark-only by design (always-on screen).
 - No filter is involved any more, so animations cost the same in both themes.
+
+## Look and accent
+
+<p align="center"><img src="assets/looks.png" alt="The same room card: neon, calm dark, calm light, amber accent, pink accent on light" width="820"></p>
+
+Two options work on **every** card, without changing its layout:
+
+```yaml
+type: custom:sf-room-card     # any SF card
+look: calm                    # neon (default) | calm
+accent: amber                 # amber | green | pink | red | any #rrggbb colour
+```
+
+- **`look: calm`** keeps the layout, fonts and colours but removes the glow, the corner brackets, the scan lines and the blinking dot. It reads better on a wall screen at night and sits well next to standard Home Assistant or Mushroom cards. Combine it with `theme: light` for a plain light card.
+- **`accent`** replaces the main cyan. The four presets follow the dark and light palettes (readable in both); a custom `#rrggbb` is used as is.
+- **Set them once for every card**: add `sf-look: calm` and / or `sf-accent: amber` to your Home Assistant theme (like `sf-theme`), then leave the options out of the cards. An option set on a card always wins.
+- Both are in the visual editor of every card ("Style" and "Accent colour").
+- `sf-radiators-card` already had an `accent` option (the colour of the radiators): it keeps that meaning there; use the theme variable to recolour its frame.
 
 ## Layout
 

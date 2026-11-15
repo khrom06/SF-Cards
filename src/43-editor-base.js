@@ -60,7 +60,10 @@ class SfEditorBase extends HTMLElement {
     this._banner();
     const emit = () => this._emit(), rebuild = () => this._build();
     const themeField = sfS("theme", [["dark", "Sombre"], ["light", "Clair"], ["auto", "Automatique (selon le thème de HA)"]]);
-    wrap.appendChild(this._form(this._config, (d) => [...(spec.fields ? spec.fields(d) : []), themeField], labels, emit));
+    // Look and accent (see SfBase._applyLook). The radiators card already has its own `accent` field.
+    const lookField = sfS("look", [["neon", "Néon (lueur, coins, balayage)"], ["calm", "Calme (sans lueur)"]]);
+    const more = this.localName === "sf-radiators-card-editor" ? [themeField, lookField] : [themeField, sfG(lookField, sfT("accent"))];
+    wrap.appendChild(this._form(this._config, (d) => [...(spec.fields ? spec.fields(d) : []), ...more], labels, emit));
     for (const o of spec.objects || []) {
       const h = document.createElement("h3"); h.textContent = this._t(o.title); wrap.appendChild(h);
       if (!this._config[o.key] || typeof this._config[o.key] !== "object") this._config[o.key] = {};

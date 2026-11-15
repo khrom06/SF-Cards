@@ -30,6 +30,17 @@ const base = {
   "automation.a_bad": S("unavailable", { friendly_name: "Broken one" }),
   "automation.a_run": S("on", { id: "5", friendly_name: "Morning routine", last_triggered: new Date().toISOString(), current: 1 }),
   "sensor.cy_washer": U(1840, "W"), "sensor.cy_dish": U(0.4, "W"), "sensor.cy_price": U(0.1744, "€/kWh"),
+  // v1.20: room, media, weather, agenda, report
+  "sensor.rm_temp": S(20.4, { unit_of_measurement: "°C", device_class: "temperature" }), "sensor.rm_hum": S(48, { unit_of_measurement: "%", device_class: "humidity" }), "sensor.rm_co2": U(610, "ppm"), "sensor.rm_pw": U(412, "W"),
+  "binary_sensor.rm_occ": S("on", { device_class: "occupancy" }), "climate.rm": S("heat", { hvac_action: "heating", temperature: 19.5, current_temperature: 20.4 }),
+  "light.rm_a": S("on", { friendly_name: "Living room ceiling" }), "light.rm_b": S("off", { friendly_name: "Living room lamp" }), "cover.rm": S("open", { current_position: 80, friendly_name: "Living room shutters" }),
+  "binary_sensor.rm_win": S("off", { device_class: "window", friendly_name: "Living room window" }), "scene.rm_movie": S("unknown"),
+  "media_player.mp_a": S("playing", { friendly_name: "Living room speaker", media_title: "Track title", media_artist: "Artist", media_album_name: "Album", media_duration: 240, media_position: 62,
+    media_position_updated_at: new Date().toISOString(), volume_level: 0.35, is_volume_muted: false, supported_features: 1 | 4 | 8 | 16 | 32 | 1024 | 16384 }),
+  "media_player.mp_b": S("off", { friendly_name: "Kitchen speaker", supported_features: 128 }),
+  "weather.wx": S("partlycloudy", { temperature: 11.2, temperature_unit: "°C", humidity: 71, wind_speed: 14, wind_speed_unit: "km/h", apparent_temperature: 9 }),
+  "timer.ag_oven": S("active", { friendly_name: "Oven", duration: "0:20:00", finishes_at: new Date(Date.now() + 252000).toISOString() }), "calendar.ag_family": S("off", { friendly_name: "Family" }), "calendar.ag_bins": S("off", { friendly_name: "Bins" }),
+  "sensor.rp_grid": U(5200, "kWh"), "sensor.rp_solar": U(1800, "kWh"), "sensor.rp_cost": U(940, "EUR"), "sensor.rp_car": U(900, "kWh"),
 };
 // As in HA, every state carries its entity_id.
 const withIds = (states) => Object.fromEntries(Object.entries(states).map(([id, st]) => [id, { entity_id: id, last_changed: new Date().toISOString(), ...st }]));
@@ -37,6 +48,12 @@ const HASS = (states, language) => ({ states: withIds(states), locale: { languag
 
 // One full configuration per card (the identifiers above are fictitious).
 const FULL = {
+  "sf-room-card": { name: "Living room", icon: "mdi:sofa", size: "standard", temperature: "sensor.rm_temp", humidity: "sensor.rm_hum", co2: "sensor.rm_co2", power: "sensor.rm_pw", occupancy: "binary_sensor.rm_occ", climate: "climate.rm",
+    lights: ["light.rm_a", "light.rm_b"], covers: ["cover.rm"], windows: ["binary_sensor.rm_win"], media: "media_player.mp_a", actions: [{ name: "Movie", icon: "mdi:movie", entity: "scene.rm_movie" }] },
+  "sf-media-card": { title: "Music", entity: "media_player.mp_a", entities: ["media_player.mp_b"] },
+  "sf-weather-card": { title: "Weather", weather: "weather.wx", temperature: "sensor.out" },
+  "sf-agenda-card": { title: "Agenda", days: 7, timers: ["timer.ag_oven"], calendars: ["calendar.ag_family", { entity: "calendar.ag_bins", name: "Bins", icon: "mdi:trash-can", pin: true }] },
+  "sf-report-card": { title: "Energy report", grid: "sensor.rp_grid", solar: "sensor.rp_solar", cost: "sensor.rp_cost", devices: [{ name: "Car", entity: "sensor.rp_car" }] },
   "sf-assistant-card": { name: "Assistant", state: "assist_satellite.kitchen", request: "sensor.as_req", action: "sensor.as_act", result: "sensor.as_res", reply: "sensor.as_rep", actions: [{ name: "Stop", icon: "mdi:stop", service: "script.stop", confirm: "Stop?" }] },
   "sf-upkeep-card": { title: "Upkeep", horizon: 60, items: [{ name: "HEPA filter", entity: "sensor.uk_hepa", reset: "button.uk_reset", icon: "mdi:air-filter" }, { name: "Pre-filter", entity: "sensor.uk_pre" },
     { name: "Robot brush", entity: "sensor.uk_brush", life: 300 }, { name: "CO detector", entity: "binary_sensor.uk_co_end" }, { name: "Descaling", entity: "sensor.uk_descale", every_days: 30 }] },

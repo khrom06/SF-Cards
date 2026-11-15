@@ -1094,6 +1094,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
     w = V("sf-trend-card", { title: "T", my_custom_flag: true, series: [{ entity: "sensor.a", something_else_entirely: 1 }] });
     if (w.length) fail(`validation: far-away unknown keys must NOT be flagged (no false alarm on YAML-only options): ${JSON.stringify(w)}`);
     w = V("sf-trend-card", { series: ["sensor.a", null, 5], hours: "24", window: "today" }); if (w.length) fail(`validation: tolerated shapes (string items, numeric strings) must not be flagged: ${JSON.stringify(w)}`);
+    if (V("sf-launcher-card", { tiles: [{ name: "Health", summary: "health", card: { type: "custom:sf-health-card", checks: [] } }] }).length) fail("validation: the launcher's health summary is a valid choice");
     w = V("sf-health-card", { checks: [{ entity: "sensor.a", severiti: "critical", min: "abc" }] });
     if (!has(w, "checks[0].severiti", /severity/) || !has(w, "checks[0].min", /expected a number/)) fail(`validation: health card item checks (${JSON.stringify(w)})`);
     // never throws, bounded output
@@ -1114,6 +1115,234 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (!circles.length) fail("svg tokens: the battery gauge is expected to use a var() stroke");
     for (const c of circles) for (const a of ["stroke", "fill"]) { const v = c.getAttribute(a); if (v && /var\(/.test(v) && c.style.getPropertyValue(a) !== v) fail(`svg tokens: ${a}="${v}" must be copied into the inline style`); }
     el.remove(); }
+  // 5s. v1.20 — room card: entities found from the HA area, sizes, controls, popup, hostile names.
+  { const st = { ...base, "light.rm_c": S("off", { friendly_name: "<img src=x onerror=window.__pwn=1>" }), "light.hidden": S("on"), "light.other": S("on"), "sensor.rm_diag": S(1, { device_class: "temperature" }),
+      "binary_sensor.rm_win": S("on", { device_class: "window", friendly_name: "Living room window" }), "switch.rm_tv": S("on", { friendly_name: "Living room TV" }) };
+    const e = (id, area, x = {}) => [id, { entity_id: id, area_id: area, ...x }];
+    const calls = [], hs = { ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d + "." + s, data]); return Promise.resolve(); },
+      areas: { lr: { area_id: "lr", name: "Living room", icon: "mdi:sofa", temperature_entity_id: "sensor.rm_temp" } }, devices: { d1: { area_id: "lr" } },
+      entities: Object.fromEntries([e("sensor.rm_temp", "lr"), e("sensor.rm_hum", "lr"), e("light.rm_a", "lr"), e("light.rm_b", null, { device_id: "d1" }), e("light.rm_c", "lr"), e("light.hidden", "lr", { hidden: true }), e("sensor.rm_diag", "lr", { entity_category: "diagnostic" }),
+        e("light.other", "kitchen"), e("cover.rm", "lr"), e("binary_sensor.rm_win", "lr"), e("binary_sensor.rm_occ", "lr"), e("climate.rm", "lr"), e("switch.rm_tv", "lr")]) };
+    const mk = (cfg) => { const el = document.createElement("sf-room-card"); el.setConfig(cfg); document.body.appendChild(el); el.hass = hs; return el; };
+    const a = mk({ area: "lr", size: "standard" }); await wait(40);
+    const m = a._m();
+    if (m.name !== "Living room" || m.temperature !== "sensor.rm_temp" || m.humidity !== "sensor.rm_hum" || m.climate !== "climate.rm" || m.occupancy !== "binary_sensor.rm_occ") fail("room: the area must fill name, temperature, humidity, climate, presence: " + JSON.stringify(m));
+    if (m.lights.join() !== "light.rm_a,light.rm_b,light.rm_c") fail("room: lights of the area (directly or through their device), hidden / other-area ones left out: " + m.lights.join());
+    if (m.covers.join() !== "cover.rm" || m.windows.join() !== "binary_sensor.rm_win") fail("room: covers and openings of the area expected");
+    if (window.__pwn || a.shadowRoot.querySelector("img")) fail("room: a hostile friendly name must be escaped");
+    const lb = [...a.shadowRoot.querySelectorAll(".lts .btn")]; if (lb.length !== 3 || !lb[0].classList.contains("on") || lb[1].classList.contains("on")) fail("room: one button per light, lit ones highlighted");
+    if (!/ceiling/i.test(lb[0].textContent) || /Living room/i.test(lb[0].textContent)) fail("room: the room name is removed from the light names (Living room ceiling -> Ceiling): " + lb[0].textContent);
+    lb[1].click(); if (!calls.some((c) => c[0] === "light.toggle" && c[1].entity_id === "light.rm_b")) fail("room: a light button must toggle its light");
+    const cb = [...a.shadowRoot.querySelectorAll(".cv .btn")]; cb[0].click(); cb[2].click();
+    if (!calls.some((c) => c[0] === "cover.open_cover" && c[1].entity_id === "cover.rm") || !calls.some((c) => c[0] === "cover.close_cover")) fail("room: cover buttons must call open / close");
+    if (!cb.every((b) => b.getAttribute("aria-label"))) fail("room: icon-only cover buttons need an accessible name");
+    const off = [...a.shadowRoot.querySelectorAll(".acts .btn")].pop(); off.click();
+    const oc = calls.find((c) => c[0] === "light.turn_off"); if (!oc || oc[1].entity_id.join() !== m.lights.join()) fail("room: all off must turn off the lights of this room only");
+    if (!/1 open/.test(a._summary(m).text) || !/1 light/.test(a._summary(m).text)) fail("room: the summary counts lights on and openings: " + a._summary(m).text);
+    a.remove();
+    // several temperature probes in the area and none set on it: the one that reads like a room wins over a freezer or an unknown value
+    { const st3 = { ...st, "sensor.a_freezer": S(-19, { device_class: "temperature", unit_of_measurement: "°C" }), "sensor.b_unknown": S("unknown", { device_class: "temperature" }), "sensor.c_room": S(21, { device_class: "temperature", unit_of_measurement: "°C" }) };
+      const h3 = { ...HASS(st3, "en"), areas: { z: { area_id: "z", name: "Zone" } }, devices: {}, entities: Object.fromEntries([e("sensor.a_freezer", "z"), e("sensor.b_unknown", "z"), e("sensor.c_room", "z")]) };
+      const z = document.createElement("sf-room-card"); z.setConfig({ area: "z" }); document.body.appendChild(z); z.hass = h3; await wait(30);
+      const st4 = { ...st3, "sensor.a_freezer_h": S(40, { device_class: "humidity" }), "sensor.c_room_h": S(55, { device_class: "humidity" }) }, ee = (id, dv) => [id, { entity_id: id, area_id: "z", device_id: dv }];
+      const h4 = { ...HASS(st4, "en"), areas: { z: { area_id: "z", name: "Zone" } }, devices: {}, entities: Object.fromEntries([ee("sensor.a_freezer", "df"), ee("sensor.a_freezer_h", "df"), ee("sensor.c_room", "dr"), ee("sensor.c_room_h", "dr")]) };
+      const z4 = document.createElement("sf-room-card"); z4.setConfig({ area: "z" }); document.body.appendChild(z4); z4.hass = h4; await wait(30);
+      if (z4._m().humidity !== "sensor.c_room_h") fail("room: the hygrometer of the thermometer's device must be preferred, got " + z4._m().humidity); z4.remove();
+      if (z._m().temperature !== "sensor.c_room") fail("room: the temperature probe that reads like a room must be preferred, got " + z._m().temperature); z.remove(); }
+    // explicit values win; an excluded entity disappears; lights: [] hides them; all_off: false hides the button
+    const b = mk({ area: "lr", size: "standard", temperature: "sensor.temp", exclude: ["light.rm_c"], all_off: false }); await wait(40);
+    if (b._m().temperature !== "sensor.temp" || b._m().lights.includes("light.rm_c")) fail("room: explicit entities win and exclude removes entities");
+    if (b.shadowRoot.querySelector(".acts")) fail("room: all_off: false hides the button"); b.remove();
+    const b2 = mk({ area: "lr", size: "standard", lights: [] }); await wait(40); if (b2.shadowRoot.querySelector(".lts")) fail("room: lights: [] must hide the lights"); b2.remove();
+    // sizes
+    for (const [size, sel] of [["compact", ".hud.cp"], ["standard", ".hud.st"], ["large", ".hud.lg"]]) { const x = mk({ area: "lr", size }); await wait(40); if (!x.shadowRoot.querySelector(sel)) fail("room: size " + size + " not rendered"); x.remove(); }
+    // large: history requested once, drawn, failure not retried on every hass update
+    let ws = 0; const hl = { ...hs, callWS: async (q) => { ws++; return { [q.entity_ids[0]]: Array.from({ length: 40 }, (_, i) => ({ s: String(19 + i / 20), lu: Date.now() / 1000 - (40 - i) * 600 })) }; } };
+    const L = document.createElement("sf-room-card"); L.setConfig({ area: "lr", size: "large" }); document.body.appendChild(L); L.hass = hl; await wait(60); for (let i = 0; i < 20; i++) L.hass = hl; await wait(60);
+    if (ws !== 1) fail("room: the history must be requested once, not on every hass update (got " + ws + ")");
+    if (!L.shadowRoot.querySelector(".hist polyline") || !/min 19/.test(L.shadowRoot.textContent)) fail("room: the large size draws the temperature curve with min / max");
+    if (!L.shadowRoot.querySelectorAll(".rw").length) fail("room: the large size lists the devices of the room"); L.remove();
+    let wf = 0; const hf = { ...hs, callWS: async () => { wf++; throw new Error("no recorder"); } };
+    const F = document.createElement("sf-room-card"); F.setConfig({ area: "lr", size: "large" }); document.body.appendChild(F); F.hass = hf; await wait(40); for (let i = 0; i < 30; i++) { F.hass = hf; } await wait(60);
+    if (wf !== 1) fail("room: a failing history request must not be retried in bursts (got " + wf + ")"); if (!F.shadowRoot.querySelector(".hud.lg")) fail("room: the card must still render without history"); F.remove();
+    // compact tile: keyboard-reachable, opens the standard card in a popup that follows hass and closes with the card
+    const isPop = (x) => x.shadowRoot && x.shadowRoot.querySelector('[role="dialog"]');
+    const c = mk({ area: "lr", size: "compact" }); await wait(40);
+    const tile = c.shadowRoot.querySelector(".hud.cp"); if (tile.getAttribute("role") !== "button" || tile.getAttribute("tabindex") !== "0") fail("room: the compact tile must be a keyboard button");
+    tile.click(); await wait(60);
+    const pop = [...document.body.children].find(isPop);
+    if (!pop) fail("room: tapping the compact tile must open a popup");
+    else { const inner = pop.shadowRoot.querySelector("sf-room-card"); if (!inner || inner._config.size !== "standard" || inner._config.tap !== "none") fail("room: the popup holds the standard room card");
+      const st2 = { ...st, "light.rm_b": S("on", { friendly_name: "Living room lamp" }) }; c.hass = { ...hs, states: withIds(st2) }; await wait(40);
+      if (inner && inner._hass.states["light.rm_b"].state !== "on") fail("room: the popup card must follow hass"); }
+    c.remove(); await wait(400); if ([...document.body.children].some(isPop)) fail("room: the popup must close when the card is removed");
+    const n = mk({ area: "lr", size: "compact", tap: "none" }); await wait(40); n.shadowRoot.querySelector(".hud.cp").click(); await wait(40);
+    if ([...document.body.children].some(isPop)) fail("room: tap: none must open nothing"); n.remove();
+    // navigation only to a local path (a protocol-relative URL is refused: the popup opens instead)
+    const nv = mk({ area: "lr", size: "compact", navigate: "//evil.example/x" }); await wait(40); nv.shadowRoot.querySelector(".hud.cp").click(); await wait(40);
+    if (/evil/.test(location.href)) fail("room: navigate must only accept a local path"); nv.remove(); await wait(400);
+    // hostile / empty inputs never throw
+    for (const bad of [{ area: 5 }, { area: "nope" }, { area: "lr", lights: "light.rm_a" }, { area: "lr", lights: [null, 5, {}] }, { area: "lr", actions: "x" }, { area: "lr", actions: [null, { service: "bad service" }, { entity: 5 }], devices: [{ entity: "x" }] }, { temperature: "sensor.missing", size: "large" }, { area: "lr", size: "huge", history: "abc" }]) {
+      try { const x = mk(bad); await wait(20); if (/undefined|NaN|\[object/.test(x.shadowRoot.textContent)) fail("room: suspicious text with " + JSON.stringify(bad)); x.remove(); } catch (err) { fail("room: throws with " + JSON.stringify(bad) + ": " + err.message); } }
+  }
+  // 5t. Look and accent: attributes / custom properties on the card, never a change of markup; theme variables; invalid values ignored.
+  { const mk = (tag, cfg) => { const el = document.createElement(tag); el.setConfig(cfg); document.body.appendChild(el); el.hass = HASS(base, "en"); return el; };
+    const plain = mk("sf-machines-card", FULL["sf-machines-card"]), calm = mk("sf-machines-card", { ...FULL["sf-machines-card"], look: "calm" }), amber = mk("sf-machines-card", { ...FULL["sf-machines-card"], accent: "amber" }), hex = mk("sf-machines-card", { ...FULL["sf-machines-card"], accent: "#F0a" });
+    const bad = mk("sf-machines-card", { ...FULL["sf-machines-card"], accent: "red;background:url(x)", look: "disco" }), rad = mk("sf-radiators-card", { ...FULL["sf-radiators-card"], accent: "#e07a4f" }); await wait(50);
+    const body = (el) => el.shadowRoot.innerHTML.replace(/<style>[\s\S]*?<\/style>/g, "");
+    if (plain.hasAttribute("look") || plain.hasAttribute("accent") || plain.style.getPropertyValue("--sf-cyan")) fail("look: nothing is set by default");
+    if (calm.getAttribute("look") !== "calm") fail("look: calm must set the attribute");
+    if (body(calm) !== body(plain) || body(amber) !== body(plain)) fail("look / accent must not change the markup of a card");
+    if (getComputedStyle(calm.shadowRoot.querySelector(".hud")).boxShadow !== "none" || getComputedStyle(calm.shadowRoot.querySelector(".c")).display !== "none") fail("look: calm removes the glow and the corner brackets");
+    if (getComputedStyle(plain.shadowRoot.querySelector(".hud")).boxShadow === "none") fail("look: the default keeps the glow");
+    if (amber.getAttribute("accent") !== "amber" || getComputedStyle(amber).getPropertyValue("--sf-cyan").trim() !== getComputedStyle(amber).getPropertyValue("--sf-amber").trim()) fail("accent: a preset maps the main colour to the palette colour");
+    if (hex.style.getPropertyValue("--sf-cyan") !== "#ff00aa" || hex.style.getPropertyValue("--sf-cyan-rgb") !== "255 0 170") fail("accent: a hex colour sets --sf-cyan and its channels (" + hex.style.getPropertyValue("--sf-cyan") + " / " + hex.style.getPropertyValue("--sf-cyan-rgb") + ")");
+    if (bad.hasAttribute("accent") || bad.hasAttribute("look") || bad.style.getPropertyValue("--sf-cyan")) fail("look / accent: invalid values are ignored");
+    if (rad.hasAttribute("accent") || rad.style.getPropertyValue("--sf-cyan")) fail("accent: the radiators card keeps its own accent option (colour of the radiators only)");
+    hex.setConfig({ ...FULL["sf-machines-card"] }); await wait(40); if (hex.style.getPropertyValue("--sf-cyan")) fail("accent: removing the option restores the default colour");
+    [plain, calm, amber, hex, bad, rad].forEach((x) => x.remove());
+    const host = document.createElement("div"); host.style.setProperty("--sf-look", "calm"); host.style.setProperty("--sf-accent", "green"); document.body.appendChild(host);
+    const v = document.createElement("sf-machines-card"); v.setConfig(FULL["sf-machines-card"]); host.appendChild(v); v.hass = HASS(base, "en"); await wait(50);
+    if (v.getAttribute("look") !== "calm" || v.getAttribute("accent") !== "green") fail("look / accent: the theme variables --sf-look / --sf-accent apply to every card");
+    const v2 = document.createElement("sf-machines-card"); v2.setConfig({ ...FULL["sf-machines-card"], accent: "pink" }); host.appendChild(v2); v2.hass = HASS(base, "en"); await wait(50);
+    if (v2.getAttribute("accent") !== "pink") fail("accent: the card option wins over the theme variable"); host.remove();
+    const w = __SF.sfValidate("sf-machines-card", { ...FULL["sf-machines-card"], look: "calm", accent: "amber" }); if (w.length) fail("look / accent must not raise validation warnings");
+  }
+  // 5u. Media card: what plays, only the supported buttons, services, progress, several players, hostile picture.
+  { const calls = [], mkh = (st) => ({ ...HASS(st, "en"), callService: (d, s, data) => { calls.push([d + "." + s, data]); return Promise.resolve(); } });
+    const fresh = { ...base, "media_player.mp_a": S("playing", { ...base["media_player.mp_a"].attributes, media_position_updated_at: new Date().toISOString() }) };   // the fixture's timestamp is as old as this test run
+    const el = document.createElement("sf-media-card"); el.setConfig(FULL["sf-media-card"]); document.body.appendChild(el); el.hass = mkh(fresh); await wait(40);
+    const t = el.shadowRoot.textContent; if (!/Track title/.test(t) || !/Artist/.test(t) || !/Album/.test(t)) fail("media: title, artist and album expected");
+    if (!/1:0\d/.test(t) || !/4:00/.test(t)) fail("media: position and duration expected (1:02 / 4:00): " + t.replace(/\s+/g, " ").slice(0, 120));
+    const btn = (svc) => [...el.shadowRoot.querySelectorAll("[data-call]")].find((x) => x.dataset.call === "media_player." + svc);
+    for (const s of ["media_previous_track", "media_play_pause", "media_next_track", "volume_down", "volume_up", "volume_mute"]) if (!btn(s)) fail("media: button " + s + " missing");
+    btn("media_play_pause").click(); btn("volume_mute").click();
+    if (!calls.some((c) => c[0] === "media_player.media_play_pause" && c[1].entity_id === "media_player.mp_a")) fail("media: play / pause must call the service on the shown player");
+    if (!calls.some((c) => c[0] === "media_player.volume_mute" && c[1].is_volume_muted === true)) fail("media: mute must send is_volume_muted: true");
+    if (![...el.shadowRoot.querySelectorAll("[data-call]")].every((x) => x.getAttribute("aria-label"))) fail("media: every icon button needs an accessible name");
+    const chips = [...el.shadowRoot.querySelectorAll("[data-p]")]; if (chips.length !== 2) fail("media: one chip per player");
+    else { chips[1].click(); await wait(40); if (!/Nothing playing/.test(el.shadowRoot.textContent) || !btn("turn_on") || btn("media_next_track")) fail("media: the chosen player is shown with its own buttons (off: power only)"); }
+    el.remove();
+    const evil = { ...base, "media_player.mp_a": S("playing", { friendly_name: "<b>x</b>", media_title: "<script>window.__pwn2=1<\/script>", entity_picture: "javascript:alert(1)", supported_features: 0 }) };
+    const e2 = document.createElement("sf-media-card"); e2.setConfig({ entity: "media_player.mp_a" }); document.body.appendChild(e2); e2.hass = mkh(evil); await wait(40);
+    if (e2.shadowRoot.querySelector("img, script, b") || window.__pwn2) fail("media: hostile title / picture must be neutralised");
+    if (e2.shadowRoot.querySelector("[data-call]")) fail("media: no button when the player supports none"); e2.remove();
+    const pic = { ...base, "media_player.mp_a": S("playing", { media_title: "T", entity_picture: "/api/media_player_proxy/x?token=1", supported_features: 1 }) };
+    const e3 = document.createElement("sf-media-card"); e3.setConfig({ entity: "media_player.mp_a" }); document.body.appendChild(e3); e3.hass = mkh(pic); await wait(40);
+    if (!e3.shadowRoot.querySelector('img[src^="/api/media_player_proxy/"]')) fail("media: a local artwork must be shown");
+    e3.setConfig({ entity: "media_player.mp_a", artwork: false }); await wait(40); if (e3.shadowRoot.querySelector("img")) fail("media: artwork: false hides the picture"); e3.remove();
+    for (const bad of [{ entity: 5 }, { entities: "media_player.mp_a" }, { entity: "media_player.none" }, { entities: [null, {}, "x"] }]) { try { const x = document.createElement("sf-media-card"); x.setConfig(bad); document.body.appendChild(x); x.hass = mkh(base); await wait(20); if (/undefined|NaN|\[object/.test(x.shadowRoot.textContent)) fail("media: suspicious text with " + JSON.stringify(bad)); x.remove(); } catch (err) { fail("media: throws with " + JSON.stringify(bad)); } }
+  }
+  // 5v. Weather card: one subscription per forecast type, no retry bursts on failure, unsubscribed on removal, cells drawn, hostile data.
+  { let subs = 0, unsubs = 0, fails = 0; const cbs = {};
+    const conn = { subscribeMessage: async (cb, m) => { subs++; cbs[m.forecast_type] = cb; return () => { unsubs++; }; } }, hw = { ...HASS(base, "en"), connection: conn };
+    const el = document.createElement("sf-weather-card"); el.setConfig({ weather: "weather.wx" }); document.body.appendChild(el); el.hass = hw; await wait(30); for (let i = 0; i < 30; i++) el.hass = hw; await wait(30);
+    if (subs !== 2) fail("weather: exactly one subscription per forecast type expected (got " + subs + ")");
+    const fc = (h) => Array.from({ length: 12 }, (_, i) => ({ datetime: new Date(Date.now() + (i + 1) * (h ? 3600000 : 86400000)).toISOString(), condition: i ? "rainy" : "<img src=x>", temperature: 10 + i, templow: 2, precipitation_probability: 60 }));
+    cbs.hourly({ forecast: fc(true) }); cbs.daily({ forecast: [...fc(false), null, { datetime: "nope" }, 5] }); await wait(40);
+    const strips = el.shadowRoot.querySelectorAll(".st"); if (strips.length !== 2 || !strips[0].children.length || !strips[1].children.length) fail("weather: the hourly and daily strips are expected");
+    if (el.shadowRoot.querySelector("img")) fail("weather: hostile forecast text must be escaped");
+    if (!/11[.,]2/.test(el.shadowRoot.textContent) || !/71 %/.test(el.shadowRoot.textContent)) fail("weather: current temperature and humidity expected");
+    if (!el.shadowRoot.querySelector(".ck .tm")) fail("weather: the clock is shown by default");
+    el.setConfig({ weather: "weather.wx", clock: false, forecast: "none" }); await wait(40); if (el.shadowRoot.querySelector(".ck") || el.shadowRoot.querySelector(".st")) fail("weather: clock: false / forecast: none hide those parts");
+    if (unsubs !== 2) fail("weather: changing the configuration closes the old subscriptions (got " + unsubs + ")");
+    el.setConfig({ weather: "weather.wx" }); el.hass = hw; await wait(30); el.remove(); await wait(20); if (unsubs !== 4) fail("weather: removing the card closes its subscriptions (got " + unsubs + ")");
+    const bad = { ...HASS(base, "en"), connection: { subscribeMessage: async () => { fails++; throw new Error("no forecast"); } } };
+    const e2 = document.createElement("sf-weather-card"); e2.setConfig({ weather: "weather.wx" }); document.body.appendChild(e2); e2.hass = bad; await wait(30); for (let i = 0; i < 40; i++) e2.hass = bad; await wait(40);
+    if (fails !== 2) fail("weather: a failing subscription must not be retried on every hass update (got " + fails + ")");
+    if (!/Forecast unavailable/.test(e2.shadowRoot.textContent)) fail("weather: says when the forecast is unavailable"); e2.remove();
+    for (const b of [{ weather: 5 }, { weather: "weather.none" }, { weather: "weather.wx", hours: "x", days: -3, forecast: "weird" }]) { try { const x = document.createElement("sf-weather-card"); x.setConfig(b); document.body.appendChild(x); x.hass = hw; await wait(20); if (/undefined|NaN|\[object/.test(x.shadowRoot.textContent)) fail("weather: suspicious text with " + JSON.stringify(b)); x.remove(); } catch (err) { fail("weather: throws with " + JSON.stringify(b)); } }
+  }
+  // 5w. Agenda card: events by day, running event, all-day, pinned chip, timers, failures without bursts, hostile titles.
+  { let api = 0; const now = Date.now(), D = 86400000, iso = (t) => new Date(t).toISOString(), day = (t) => { const d = new Date(t); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+    const ha = { ...HASS(base, "en"), callApi: async (m, path) => { api++; if (!/^calendars\/calendar\.ag_(family|bins)\?start=.+&end=.+/.test(path)) throw new Error("bad path " + path);
+      return /ag_bins/.test(path) ? [{ start: { date: day(now + D) }, end: { date: day(now + 2 * D) }, summary: "Yellow bin" }]
+        : [{ start: { dateTime: iso(now - 600000) }, end: { dateTime: iso(now + 600000) }, summary: "Running now" }, { start: { dateTime: iso(now + D) }, end: { dateTime: iso(now + D + 3600000) }, summary: "<img src=x onerror=window.__pwn3=1>" },
+          { start: { dateTime: iso(now - 2 * D) }, end: { dateTime: iso(now - D) }, summary: "Over" }, { start: { date: day(now + 3 * D) }, end: { date: day(now + 4 * D) }, summary: "Birthday" }, null, { start: {} }]; } };
+    const el = document.createElement("sf-agenda-card"); el.setConfig(FULL["sf-agenda-card"]); document.body.appendChild(el); el.hass = ha; await wait(50); for (let i = 0; i < 20; i++) el.hass = ha; await wait(50);
+    if (api !== 2) fail("agenda: one request per calendar, not on every hass update (got " + api + ")");
+    const t = el.shadowRoot.textContent;
+    if (!/Running now/.test(t) || !/Birthday/.test(t) || /Over/.test(t)) fail("agenda: running and coming events listed, finished ones not");
+    if (!el.shadowRoot.querySelector(".ev.now") || !/until/.test(el.shadowRoot.querySelector(".ev.now").textContent)) fail("agenda: an event in progress says until when");
+    if (!/All day/.test(t) || !/Tomorrow/.test(t) || !/Today/.test(t)) fail("agenda: day headings (Today, Tomorrow) and all-day events expected");
+    const chip = el.shadowRoot.querySelector(".chip"); if (!chip || !/Yellow bin/.test(chip.textContent) || !/Tomorrow/.test(chip.textContent)) fail("agenda: a pinned calendar shows its next event as a chip");
+    if ([...el.shadowRoot.querySelectorAll(".ev")].some((x) => /Yellow bin/.test(x.textContent))) fail("agenda: a pinned event is not repeated in the list");
+    if (el.shadowRoot.querySelector("img") || window.__pwn3) fail("agenda: hostile event titles must be escaped");
+    const tm = el.shadowRoot.querySelector(".tmr"); if (!tm || !/Oven/.test(tm.textContent) || !/^[34]:\d\d$/.test(tm.querySelector(".cd").textContent)) fail("agenda: a running timer shows its countdown (" + (tm && tm.querySelector(".cd").textContent) + ")");
+    el.remove();
+    let bad = 0; const hb = { ...HASS(base, "en"), callApi: async () => { bad++; throw new Error("down"); } };
+    const e2 = document.createElement("sf-agenda-card"); e2.setConfig({ calendars: ["calendar.ag_family"] }); document.body.appendChild(e2); e2.hass = hb; await wait(40); for (let i = 0; i < 30; i++) e2.hass = hb; await wait(40);
+    if (bad !== 1) fail("agenda: a failing calendar must not be retried in bursts (got " + bad + ")"); if (!/Nothing planned/.test(e2.shadowRoot.textContent)) fail("agenda: an empty agenda says so"); e2.remove();
+    for (const b of [{ calendars: 5 }, { calendars: [null, 5, { entity: 3 }], timers: "timer.none" }, { timers: ["timer.ag_oven"], days: "x", max: -1 }]) { try { const x = document.createElement("sf-agenda-card"); x.setConfig(b); document.body.appendChild(x); x.hass = ha; await wait(20); if (/undefined|NaN|\[object/.test(x.shadowRoot.textContent)) fail("agenda: suspicious text with " + JSON.stringify(b)); x.remove(); } catch (err) { fail("agenda: throws with " + JSON.stringify(b)); } }
+  }
+  // 5x. Report card: totals, comparison, solar = production − export, periods, devices, facts, image, failures without bursts.
+  { let ws = 0, last = null; const D = 86400000;
+    const stats = (m) => { ws++; last = m; const t0 = Date.parse(m.start_time), n = Math.round((Date.parse(m.end_time) - t0) / D), out = {};
+      for (const id of m.statistic_ids) out[id] = Array.from({ length: n }, (_, i) => ({ start: t0 + i * D, end: t0 + (i + 1) * D, change: id === "sensor.rp_grid" ? (i < 7 ? 20 : 10) : id === "sensor.rp_solar" ? 10 : id === "sensor.rp_exp" ? 4 : id === "sensor.rp_cost" ? (i < 7 ? 4 : 2) : id === "sensor.rp_car" ? 5 : 0 }));
+      return out; };
+    const hr = { ...HASS(base, "en"), callWS: async (m) => { if (m.type !== "recorder/statistics_during_period") throw new Error("unexpected " + m.type); return stats(m); } };
+    const el = document.createElement("sf-report-card"); el.setConfig({ grid: "sensor.rp_grid", solar: "sensor.rp_solar", export: "sensor.rp_exp", cost: "sensor.rp_cost", devices: [{ name: "Car", entity: "sensor.rp_car" }, { name: "<i>x</i>", entity: "sensor.rp_none" }] });
+    document.body.appendChild(el); el.hass = hr; await wait(60); for (let i = 0; i < 20; i++) el.hass = hr; await wait(60);
+    if (ws !== 1) fail("report: the statistics are requested once, not on every hass update (got " + ws + ")");
+    if (!last || last.period !== "day" || last.types.join() !== "change" || !last.units || last.units.energy !== "kWh") fail("report: daily change statistics in kWh expected");
+    const M = el._model();
+    if (!M || Math.round(M.cur.grid) !== 70 || Math.round(M.cur.solar) !== 42 || Math.round(M.cur.cons) !== 112 || Math.round(M.prev.grid) !== 140) fail("report: totals (grid 70, solar used 6 x 7 = 42, consumption 112; previous grid 140): " + JSON.stringify(M && [M.cur, M.prev]));
+    else { if (Math.round(M.cur.cost) !== 14 || Math.round(M.cur.auto) !== 38) fail("report: cost 14 and autonomy 38 % expected");
+      if (M.devs.length !== 1 || M.devs[0].name !== "Car" || Math.round(M.devs[0].v) !== 35 || Math.round(M.rest) !== 77) fail("report: device ranking and the rest: " + JSON.stringify([M.devs, M.rest]));
+      if (M.hl.length !== 3) fail("report: three facts expected (" + M.hl.length + ")"); }
+    const t = el.shadowRoot.textContent; if (!/112 kWh/.test(t) || !/−38 %/.test(t) || !/14[.,]00/.test(t) || !/−14[.,]00/.test(t)) fail("report: KPIs with their comparison (112 kWh, −38 %, 14.00, −14.00): " + t.replace(/\s+/g, " ").slice(0, 260));
+    if (el.shadowRoot.querySelectorAll(".bars .col").length !== 7) fail("report: one bar per day of the week");
+    const cv = el._draw(); if (!cv || cv.width !== 1080 || cv.height !== 1350 || cv.toDataURL("image/png").length < 5000) fail("report: the exported image must be drawn (1080 x 1350)");
+    el.shadowRoot.querySelector('[data-per="month"]').click(); await wait(80);
+    if (ws !== 2 || el.shadowRoot.querySelectorAll(".bars .col").length !== 30) fail("report: the month button loads and shows 30 days (requests " + ws + ")");
+    el.shadowRoot.querySelector('[data-nav="1"]').click(); await wait(80); if (ws !== 3 || !el._off) fail("report: the previous-period button loads the period before");
+    el.shadowRoot.querySelector('[data-per="year"]').click(); await wait(80); if (!last || last.period !== "month") fail("report: the year uses monthly statistics");
+    if (![...el.shadowRoot.querySelectorAll("[data-per],[data-nav],[data-export]")].every((x) => x.getAttribute("role") === "button")) fail("report: its buttons must be keyboard buttons");
+    el.remove();
+    let bad = 0; const hb = { ...HASS(base, "en"), callWS: async () => { bad++; throw new Error("no recorder"); } };
+    const e2 = document.createElement("sf-report-card"); e2.setConfig({ grid: "sensor.rp_grid" }); document.body.appendChild(e2); e2.hass = hb; await wait(40); for (let i = 0; i < 30; i++) e2.hass = hb; await wait(40);
+    if (bad !== 1) fail("report: a failing request must not be retried in bursts (got " + bad + ")"); if (!/No statistics/.test(e2.shadowRoot.textContent)) fail("report: says when there is no data"); if (e2._draw() !== null) fail("report: no image without data"); e2.remove();
+    const hh = { ...HASS(base, "en"), callWS: async () => ({ "sensor.rp_grid": [null, { start: "x", change: "y" }, { start: Date.now(), end: Date.now() + D, change: null }, { start: Date.now() - D, end: Date.now(), change: -5 }], "sensor.rp_solar": "nope" }) };
+    try { const e3 = document.createElement("sf-report-card"); e3.setConfig({ grid: "sensor.rp_grid", solar: "sensor.rp_solar", price: "abc", period: "decade", devices: "x" }); document.body.appendChild(e3); e3.hass = hh; await wait(60); if (/undefined|NaN|\[object/.test(e3.shadowRoot.textContent)) fail("report: suspicious text with hostile statistics"); e3.remove(); } catch (err) { fail("report: throws with hostile statistics: " + err.message); }
+  }
+  // 5y. Automatic dashboard (strategy): views from the areas and the Energy settings, only valid SF configurations, options, never throws.
+  { const Strat = customElements.get("ll-strategy-dashboard-sf-home"); if (!Strat || typeof Strat.generate !== "function") fail("strategy: ll-strategy-dashboard-sf-home must be registered with a static generate()");
+    else {
+      if (!(window.customStrategies || []).some((x) => x.type === "sf-home" && x.strategyType === "dashboard")) fail("strategy: listed in window.customStrategies");
+      const st = { ...base, "person.bob": S("home", { friendly_name: "Bob" }), "binary_sensor.leak": S("off", { device_class: "moisture" }), "binary_sensor.rm_win": S("off", { device_class: "window" }), "sensor.k_t": S(19, { device_class: "temperature" }), "light.k": S("on"), "light.garage": S("off") };
+      const e = (id, area, x = {}) => [id, { entity_id: id, area_id: area, ...x }];
+      const hs = { ...HASS(st, "en"), areas: { lr: { area_id: "lr", name: "Living room", temperature_entity_id: "sensor.rm_temp", humidity_entity_id: "sensor.rm_hum" }, k: { area_id: "k", name: "Kitchen" }, g: { area_id: "g", name: "Garage" }, empty: { area_id: "empty", name: "Nothing here" } }, devices: {},
+        entities: Object.fromEntries([e("sensor.rm_temp", "lr"), e("sensor.rm_hum", "lr"), e("light.rm_a", "lr"), e("climate.rm", "lr"), e("sensor.k_t", "k"), e("light.k", "k"), e("light.garage", "g"), e("light.lamp", "lr", { hidden: true })]),
+        callWS: async (m) => { if (m.type !== "energy/get_prefs") throw new Error("unexpected"); return { energy_sources: [{ type: "grid", flow_from: [{ stat_energy_from: "sensor.rp_grid", stat_cost: "sensor.rp_cost" }], flow_to: [{ stat_energy_to: "sensor.rp_exp" }] }, { type: "solar", stat_energy_from: "sensor.rp_solar" }], device_consumption: [{ stat_consumption: "sensor.rp_car", name: "Car" }, { stat_consumption: "bad id" }] }; } };
+      const collect = (root, pred) => { const out = []; const walk = (o) => { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === "object") { if (pred(o)) out.push(o); Object.values(o).forEach(walk); } }; walk(root); return out; };
+      const d = await Strat.generate({}, hs), paths = d.views.map((v) => v.path).join();
+      if (paths !== "home,rooms,climate,energy,security,system") fail("strategy: the six views expected, got " + paths);
+      const cards = collect(d, (o) => typeof o.type === "string" && /^custom:/.test(o.type));
+      for (const c of cards) { const tag = c.type.slice(7); if (!customElements.get(tag)) fail("strategy: unknown card " + c.type); else { const w = __SF.sfValidate(tag, c); if (w.length) fail("strategy: " + tag + " generated with warnings: " + JSON.stringify(w)); const miss = __SF.SF_REQ[tag] ? __SF.SF_REQ[tag](c) : []; if (miss.length) fail("strategy: " + tag + " generated incomplete"); } }
+      const rooms = cards.filter((c) => c.type === "custom:sf-room-card" && c.size === "compact").map((c) => c.area).join();
+      if (rooms !== "lr,k,g") fail("strategy: one compact tile per area that has something to show (lr, k, g), got " + rooms);
+      const rep = cards.find((c) => c.type === "custom:sf-report-card"); if (!rep || rep.grid !== "sensor.rp_grid" || rep.solar !== "sensor.rp_solar" || rep.export !== "sensor.rp_exp" || rep.cost !== "sensor.rp_cost" || rep.devices.length !== 1) fail("strategy: the report comes from the Energy dashboard settings: " + JSON.stringify(rep));
+      const cl = cards.find((c) => c.type === "custom:sf-climate-card"); if (!cl || cl.rooms.length !== 1 || cl.rooms[0].climate !== "climate.rm" || cl.rooms[0].temp !== "sensor.rm_temp") fail("strategy: the climate view lists the thermostats with their room sensors");
+      if (!cards.some((c) => c.type === "custom:sf-bridge-card" && c.people.some((p) => p.entity === "person.bob"))) fail("strategy: the banner knows the people");
+      if (!d.views.every((v) => v.type === "sections" && Array.isArray(v.sections) && v.sections.every((s) => s.type === "grid" && s.cards.length))) fail("strategy: every view is a sections view with non-empty sections");
+      // every generated card really renders
+      for (const c of cards) { try { const el = document.createElement(c.type.slice(7)); el.setConfig(c); document.body.appendChild(el); el.hass = hs; await wait(15); if (!el.shadowRoot || !el.shadowRoot.textContent.trim() && c.type !== "custom:sf-alert-card") fail("strategy: " + c.type + " renders nothing"); el.remove(); } catch (err) { fail("strategy: " + c.type + " throws: " + err.message); } }
+      if (!cards.filter((c) => ["custom:sf-bridge-card", "custom:sf-climate-card", "custom:sf-report-card"].includes(c.type)).every((c) => c.grid_options && c.grid_options.columns === "full")) fail("strategy: cards alone in a wide section take its full width");
+      const exd = await Strat.generate({ exclude: ["light.rm_a"] }, hs), exr = collect(exd, (x) => x.type === "custom:sf-room-card" && x.area === "lr"); if (!exr.length || !exr.every((c) => (c.exclude || []).includes("light.rm_a"))) fail("strategy: excluded entities are also excluded inside the room cards");
+      const fr = await Strat.generate({}, { ...hs, locale: { language: "fr" }, language: "fr" }); if (fr.views[1].title !== "Pièces") fail("strategy: view titles follow the language");
+      const pe = await Strat.generate({}, { ...hs, states: withIds({ ...st, "sensor.rp_grid_cost": U(12, "EUR") }), callWS: async () => ({ energy_sources: [{ type: "grid", flow_from: [{ stat_energy_from: "sensor.rp_grid", entity_energy_price: "sensor.price" }] }] }) });
+      const per = collect(pe, (x) => x.type === "custom:sf-report-card")[0]; if (!per || per.cost !== "sensor.rp_grid_cost" || per.price) fail("strategy: with a price entity, the cost counter Home Assistant keeps (<energy>_cost) is used: " + JSON.stringify(per));
+      const o = await Strat.generate({ views: ["rooms", "home", "nope"], exclude_areas: ["g"], look: "calm", accent: "amber", theme: "light", report: { grid: "sensor.rp_grid" }, extra_views: [{ title: "Mine", cards: [] }, null], home_cards: [{ type: "markdown", content: "x" }] }, hs);
+      if (o.views.map((v) => v.path || v.title).join() !== "rooms,home,Mine") fail("strategy: views chooses and orders the views, extra_views are appended: " + o.views.map((v) => v.path || v.title).join());
+      const oc = collect(o, (x) => typeof x.type === "string" && /^custom:sf-/.test(x.type));
+      if (oc.some((c) => c.area === "g")) fail("strategy: exclude_areas removes an area"); if (!oc.every((c) => c.look === "calm" && c.accent === "amber" && c.theme === "light")) fail("strategy: theme / look / accent are passed to every card");
+      if (!JSON.stringify(o).includes('"markdown"')) fail("strategy: home_cards are added to the home view");
+      const only = await Strat.generate({ areas: ["Kitchen", "lr", "ghost"] }, hs), oa = collect(only, (x) => x.type === "custom:sf-room-card" && x.size === "compact").map((x) => x.area);
+      if (oa.join() !== "k,lr") fail("strategy: areas picks areas by id or name, in that order: " + oa.join());
+      for (const bad of [[null, null], [undefined, {}], ["x", { states: {} }], [{ areas: 5, views: 7, energy: "x", report: [] }, { states: { "light.a": { state: "on", attributes: {} } }, callWS: async () => { throw new Error("no energy"); } }], [{}, { states: null, areas: null }]]) {
+        try { const r = await Strat.generate(bad[0], bad[1]); if (!r || !Array.isArray(r.views) || !r.views.length) fail("strategy: must always return at least one view"); } catch (err) { fail("strategy: generate() threw: " + err.message); } }
+    }
+  }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`translation problem: ${m}`);
   for (const e of window.__errors) fail(`JavaScript error: ${e}`);
