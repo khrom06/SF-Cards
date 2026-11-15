@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.20.2]
+### Added
+- **Ideas and feedback**: [Discussions](https://github.com/khrom06/SF-Cards/discussions) are open. Propose a card or an option and vote (👍) for the ideas you want most in [Ideas](https://github.com/khrom06/SF-Cards/discussions/categories/ideas), share your dashboard, ask for help, or tell us what is confusing or missing. Links from the README, the live demo and the "New issue" page; a short form for ideas.
+
 ## [1.20.1]
 ### Fixed
 - `sf-report-card`: a yearly total of 10 000 kWh or more was cut off in its tile ("10723 k…"); it is now shown in MWh ("10.7 MWh").

@@ -6,6 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Languages](https://img.shields.io/badge/languages-11-00e5ff)
 [![Live demo](https://img.shields.io/badge/live-demo-2bff88)](https://khrom06.github.io/SF-Cards/)
+[![Ideas and feedback](https://img.shields.io/badge/ideas%20%26%20feedback-share%20yours-ffb300)](https://github.com/khrom06/SF-Cards/discussions/categories/ideas)
 [![Add to HACS](https://img.shields.io/badge/HACS-add%20this%20repository-00e5ff)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 
 <p align="center">
@@ -13,6 +14,8 @@
 </p>
 
 > **▶ [Try every card live, with fake data](https://khrom06.github.io/SF-Cards/)** — no install, 11 languages, light / dark.
+>
+> **💬 [Share your ideas, wishes and criticism](https://github.com/khrom06/SF-Cards/discussions/categories/ideas)** — propose a card or an option, vote (👍) for the ideas you want most, or just tell us what is confusing or missing. What you post here decides what comes next.
 
 ### New in 1.20: a dashboard that builds itself, rooms, daily life and a calm look
 
@@ -69,6 +72,7 @@ Shown here on the square 480×480 NSPanel Pro; it is sized in `vmin`, so it also
 - [Optional theme](#optional-theme) · [Requirements](#requirements) · [Security](#security) · [Development](#development)
 - [About HACS and Marketplace](#about-hacs-and-marketplace)
 - [Limitations](#limitations)
+- [Ideas and feedback](#ideas-and-feedback)
 - [Credits](#credits) · [License](#license)
 
 ## Features
@@ -1124,6 +1128,17 @@ Sources: [Matter Alpha — "Home Assistant embraces HACS into core as the market
 - Screenshots use fictional demo data.
 - Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. Home Assistant itself is not part of the tests.
 - `sf-presence-card` and the Frigate‑related options are tied to a specific setup and are documented as advanced.
+
+## Ideas and feedback
+
+SF Cards is shaped by the people who use it. In [Discussions](https://github.com/khrom06/SF-Cards/discussions):
+
+- 💡 **[Ideas](https://github.com/khrom06/SF-Cards/discussions/categories/ideas)** — a new card, an option, a layout, a language. Add a 👍 to the ideas you want most: the most voted ones are looked at first.
+- 🖼️ **[Show and tell](https://github.com/khrom06/SF-Cards/discussions/categories/show-and-tell)** — share a screenshot of your dashboard.
+- ❓ **[Q&A](https://github.com/khrom06/SF-Cards/discussions/categories/q-a)** — help with a setup.
+- 🗣️ **[Remarks and criticism](https://github.com/khrom06/SF-Cards/discussions/1)** — what is confusing, ugly, slow or missing.
+
+Found a bug? Open an [issue](https://github.com/khrom06/SF-Cards/issues/new/choose) with your versions and the card's YAML.
 
 ## Credits
 

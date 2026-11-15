@@ -1,0 +1,56 @@
+title: "[Idea] "
+labels: [idea]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing! **One idea per post**, so others can vote on it with a 👍.
+        Search first: if your idea is already here, add your 👍 and your use case in a comment instead.
+        Please **never post personal data** (addresses, IP addresses, tokens, real entity names you would not share).
+  - type: textarea
+    id: need
+    attributes:
+      label: What would you like to do?
+      description: "Start with your need or the situation, not the solution. Example: “I want to see at a glance which windows are open before leaving.”"
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: A new card, an option, a layout, a language, a change in an existing card… A sketch or a screenshot helps a lot.
+    validations:
+      required: true
+  - type: dropdown
+    id: card
+    attributes:
+      label: Which card is it about?
+      options:
+        - A new card
+        - Automatic dashboard (sf-home)
+        - sf-room-card
+        - sf-energy-flow-card (reactor)
+        - sf-report-card
+        - sf-climate-card
+        - sf-vehicles-card (hangar)
+        - sf-home-banner-card (bridge)
+        - sf-launcher-card
+        - sf-ns-card (wall panel)
+        - sf-weather-card / sf-media-card / sf-agenda-card
+        - Another card
+        - Several cards / the look of all cards
+    validations:
+      required: true
+  - type: dropdown
+    id: importance
+    attributes:
+      label: How much would it change for you?
+      options:
+        - Nice to have
+        - I would use it every day
+        - It blocks me from using SF Cards
+  - type: textarea
+    id: setup
+    attributes:
+      label: Your setup (optional)
+      description: Phone, wall tablet, panel model, desktop… Home Assistant version. No personal data.

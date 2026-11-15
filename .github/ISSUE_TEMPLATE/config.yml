@@ -1,5 +1,14 @@
 blank_issues_enabled: true
 contact_links:
+  - name: 💡 Idea, wish or suggestion
+    url: https://github.com/khrom06/SF-Cards/discussions/categories/ideas
+    about: Propose a card or an option and vote for the ideas of others (👍). The most voted ones come first.
+  - name: ❓ Question or help with a setup
+    url: https://github.com/khrom06/SF-Cards/discussions/categories/q-a
+    about: YAML, configuration, a card that does not do what you expect
+  - name: 🗣️ Remarks and criticism
+    url: https://github.com/khrom06/SF-Cards/discussions/1
+    about: What is confusing, ugly, slow or missing — honest feedback is the most useful
   - name: Live demo
     url: https://khrom06.github.io/SF-Cards/
     about: Try every card with fake data before opening an issue

@@ -2,6 +2,9 @@ name: Feature request
 description: An idea for a card, an option or a theme
 labels: [enhancement]
 body:
+  - type: markdown
+    attributes:
+      value: "Tip: ideas posted in [Discussions → Ideas](https://github.com/khrom06/SF-Cards/discussions/categories/ideas) can be voted on by everyone (👍), which helps decide what comes next."
   - type: textarea
     id: idea
     attributes: { label: What would you like?, description: "Describe the use case first, not the solution" }
