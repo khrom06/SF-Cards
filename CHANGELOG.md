@@ -2,7 +2,7 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.21.1]
 ### Fixed
 - **Fewer requests to Home Assistant while you edit a card.** Re-applying a card's configuration (the visual editor does it on every change) no longer throws away the history it had loaded: the automations card, for example, made about 150 requests per keystroke in a house with 150 automations, now none.
 - **No work left behind when a card is removed.** The refresh timer of a card with a running timer, and the forecast subscription of the fresh-air and wall-panel cards, could stay alive if the card was removed at the wrong moment.
