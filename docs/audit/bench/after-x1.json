@@ -1,0 +1,387 @@
+{
+ "load_ms": 36.4,
+ "cards": {
+  "sf-room-card": {
+   "init_ms": 0.8,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.3,
+   "update_change_ms": 0.1,
+   "nodes": 52,
+   "html_kb": 15.16,
+   "listeners": 26
+  },
+  "sf-media-card": {
+   "init_ms": 0.8,
+   "update_same_ms": 0.2,
+   "update_same_p95": 0.4,
+   "update_change_ms": 0.1,
+   "nodes": 45,
+   "html_kb": 12.42,
+   "listeners": 18
+  },
+  "sf-weather-card": {
+   "init_ms": 0.7,
+   "update_same_ms": 0.2,
+   "update_same_p95": 0.6,
+   "update_change_ms": 0.2,
+   "nodes": 26,
+   "html_kb": 10.1,
+   "listeners": 2
+  },
+  "sf-agenda-card": {
+   "init_ms": 0.4,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.1,
+   "nodes": 16,
+   "html_kb": 9.98,
+   "listeners": 2
+  },
+  "sf-report-card": {
+   "init_ms": 0.5,
+   "update_same_ms": 0.5,
+   "update_same_p95": 0.7,
+   "update_change_ms": 0.5,
+   "nodes": 19,
+   "html_kb": 12.04,
+   "listeners": 10
+  },
+  "sf-assistant-card": {
+   "init_ms": 0.5,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.1,
+   "nodes": 29,
+   "html_kb": 10.24,
+   "listeners": 10
+  },
+  "sf-upkeep-card": {
+   "init_ms": 1.1,
+   "update_same_ms": 0.3,
+   "update_same_p95": 0.6,
+   "update_change_ms": 0.3,
+   "nodes": 192,
+   "html_kb": 18.37,
+   "listeners": 24
+  },
+  "sf-air-card": {
+   "init_ms": 0.6,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.3,
+   "update_change_ms": 0.1,
+   "nodes": 57,
+   "html_kb": 17.92,
+   "listeners": 4
+  },
+  "sf-automations-card": {
+   "init_ms": 0.5,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.1,
+   "nodes": 56,
+   "html_kb": 13.42,
+   "listeners": 6
+  },
+  "sf-cycles-card": {
+   "init_ms": 0.6,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.3,
+   "update_change_ms": 0.1,
+   "nodes": 59,
+   "html_kb": 13.78,
+   "listeners": 8
+  },
+  "sf-host-card": {
+   "init_ms": 0.8,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.4,
+   "update_change_ms": 0.1,
+   "nodes": 106,
+   "html_kb": 16.94,
+   "listeners": 34
+  },
+  "sf-health-card": {
+   "init_ms": 0.3,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.1,
+   "nodes": 19,
+   "html_kb": 9.39,
+   "listeners": 2
+  },
+  "sf-timeline-card": {
+   "init_ms": 0.3,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.1,
+   "nodes": 10,
+   "html_kb": 8.49,
+   "listeners": 0
+  },
+  "sf-trend-card": {
+   "init_ms": 0.5,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.1,
+   "nodes": 24,
+   "html_kb": 10.49,
+   "listeners": 6
+  },
+  "sf-alert-card": {
+   "init_ms": 0.3,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.1,
+   "update_change_ms": 0.1,
+   "nodes": 22,
+   "html_kb": 10.69,
+   "listeners": 6
+  },
+  "sf-hangar-card": {
+   "init_ms": 0.5,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.3,
+   "update_change_ms": 0.4,
+   "nodes": 70,
+   "html_kb": 16.1,
+   "listeners": 22
+  },
+  "sf-radar-card": {
+   "init_ms": 0.5,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.3,
+   "update_change_ms": 0.1,
+   "nodes": 43,
+   "html_kb": 11.15,
+   "listeners": 4
+  },
+  "sf-machines-card": {
+   "init_ms": 0.4,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.3,
+   "update_change_ms": 0.3,
+   "nodes": 32,
+   "html_kb": 10.5,
+   "listeners": 8
+  },
+  "sf-bridge-card": {
+   "init_ms": 0.6,
+   "update_same_ms": 0.2,
+   "update_same_p95": 0.3,
+   "update_change_ms": 0.1,
+   "nodes": 38,
+   "html_kb": 12.45,
+   "listeners": 10
+  },
+  "sf-reactor-card": {
+   "init_ms": 0.5,
+   "update_same_ms": 0.4,
+   "update_same_p95": 1,
+   "update_change_ms": 0.9,
+   "nodes": 68,
+   "html_kb": 15.3,
+   "listeners": 14
+  },
+  "sf-climate-card": {
+   "init_ms": 0.6,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.3,
+   "update_change_ms": 0.4,
+   "nodes": 60,
+   "html_kb": 16.78,
+   "listeners": 18
+  },
+  "sf-console-card": {
+   "init_ms": 0.5,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.3,
+   "update_change_ms": 0.3,
+   "nodes": 53,
+   "html_kb": 12.73,
+   "listeners": 28
+  },
+  "sf-camera-card": {
+   "init_ms": 0.6,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.3,
+   "update_change_ms": 0.1,
+   "nodes": 24,
+   "html_kb": 10.46,
+   "listeners": 2
+  },
+  "sf-setpoints-card": {
+   "init_ms": 0.4,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.1,
+   "nodes": 22,
+   "html_kb": 10.42,
+   "listeners": 6
+  },
+  "sf-ledger-card": {
+   "init_ms": 0.4,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.1,
+   "nodes": 34,
+   "html_kb": 9.95,
+   "listeners": 8
+  },
+  "sf-ns-card": {
+   "init_ms": 0.7,
+   "update_same_ms": 0.2,
+   "update_same_p95": 0.4,
+   "update_change_ms": 0.5,
+   "nodes": 102,
+   "html_kb": 24.03,
+   "listeners": 46
+  },
+  "sf-cells-card": {
+   "init_ms": 0.3,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.1,
+   "nodes": 16,
+   "html_kb": 8.99,
+   "listeners": 2
+  },
+  "sf-radiators-card": {
+   "init_ms": 0.9,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.5,
+   "update_change_ms": 0.1,
+   "nodes": 28,
+   "html_kb": 12.15,
+   "listeners": 14
+  },
+  "sf-battery-card": {
+   "init_ms": 0.4,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.2,
+   "nodes": 48,
+   "html_kb": 12.3,
+   "listeners": 18
+  },
+  "sf-launcher-card": {
+   "init_ms": 0.3,
+   "update_same_ms": 0.1,
+   "update_same_p95": 0.2,
+   "update_change_ms": 0.2,
+   "nodes": 16,
+   "html_kb": 9.48,
+   "listeners": 6
+  }
+ },
+ "dashboard": {
+  "cards": 30,
+  "first_render_ms": 28.3,
+  "update_median_ms": 5.2,
+  "update_p95_ms": 9.3,
+  "total_nodes": 1386,
+  "total_listeners_added": 14802,
+  "intervals_live": 10,
+  "intervals_after_removal": 0
+ },
+ "memory": {
+  "heap_before_kb": 4305,
+  "heap_after_40_cycles_kb": 4372,
+  "growth_kb": 66,
+  "intervals_live_after": 0
+ },
+ "ws": {
+  "requests_at_mount": 14,
+  "requests_after_100_updates": 0,
+  "identical_requests_repeated": 1,
+  "by_type": {
+   "recorder/statistics_during_period": 3,
+   "history/history_during_period": 4,
+   "trace/list": 1,
+   "logbook/get_events": 1,
+   "search/related": 5
+  },
+  "cards_requesting": 9
+ },
+ "dashboard_3000_entities": {
+  "update_median_ms": 6.7,
+  "update_p95_ms": 9.7,
+  "per_card_ms": {
+   "sf-room-card": 0,
+   "sf-media-card": 0,
+   "sf-weather-card": 0.1,
+   "sf-agenda-card": 0,
+   "sf-report-card": 0.5,
+   "sf-assistant-card": 0,
+   "sf-upkeep-card": 0.4,
+   "sf-air-card": 0.1,
+   "sf-automations-card": 0.4,
+   "sf-cycles-card": 0.1,
+   "sf-host-card": 0,
+   "sf-health-card": 0,
+   "sf-timeline-card": 0,
+   "sf-trend-card": 0,
+   "sf-alert-card": 0,
+   "sf-hangar-card": 0.1,
+   "sf-radar-card": 0,
+   "sf-machines-card": 0,
+   "sf-bridge-card": 0.2,
+   "sf-reactor-card": 0.5,
+   "sf-climate-card": 0.1,
+   "sf-console-card": 0,
+   "sf-camera-card": 0,
+   "sf-setpoints-card": 0,
+   "sf-ledger-card": 0,
+   "sf-ns-card": 0.2,
+   "sf-cells-card": 0.4,
+   "sf-radiators-card": 0,
+   "sf-battery-card": 0,
+   "sf-launcher-card": 0
+  }
+ },
+ "dupDetail": [
+  "search/related|\"\" x5 (sf-launcher-card,sf-launcher-card,sf-launcher-card,sf-launcher-card,sf-launcher-card)"
+ ],
+ "automations150": {
+  "requests_at_mount": 151,
+  "requests_after_5_config_edits": 5
+ },
+ "reapply": {
+  "sf-report-card": {
+   "at_mount": 1,
+   "after_5_same_config": 0
+  },
+  "sf-upkeep-card": {
+   "at_mount": 2,
+   "after_5_same_config": 0
+  },
+  "sf-automations-card": {
+   "at_mount": 6,
+   "after_5_same_config": 0
+  },
+  "sf-cycles-card": {
+   "at_mount": 1,
+   "after_5_same_config": 0
+  },
+  "sf-timeline-card": {
+   "at_mount": 1,
+   "after_5_same_config": 0
+  },
+  "sf-trend-card": {
+   "at_mount": 1,
+   "after_5_same_config": 0
+  },
+  "sf-machines-card": {
+   "at_mount": 1,
+   "after_5_same_config": 0
+  },
+  "sf-ns-card": {
+   "at_mount": 1,
+   "after_5_same_config": 0
+  }
+ },
+ "meta": {
+  "throttle": 1,
+  "chrome": "Chrome/157.0.8103.78",
+  "date": "2026-11-16",
+  "cpus": 4
+ }
+}
