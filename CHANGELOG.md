@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+### Added
+- **Companion project: [SF Copilot](https://github.com/khrom06/SF-Copilot).** A separate card from the SF family that reads Home Assistant's own history, finds the things you keep doing by hand (same light at the same time, same switch after the same door, same appliance turned off after the same delay) and proposes the automation with its evidence, a dry run and two-press creation. Local, no cloud, no AI model. It is not part of SF Cards (its own repository, installed separately); the README now points to it.
+
 ## [1.20.2]
 ### Added
 - **Ideas and feedback**: [Discussions](https://github.com/khrom06/SF-Cards/discussions) are open. Propose a card or an option and vote (👍) for the ideas you want most in [Ideas](https://github.com/khrom06/SF-Cards/discussions/categories/ideas), share your dashboard, ask for help, or tell us what is confusing or missing. Links from the README, the live demo and the "New issue" page; a short form for ideas.

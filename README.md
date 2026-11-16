@@ -1147,6 +1147,10 @@ Found a bug? Open an [issue](https://github.com/khrom06/SF-Cards/issues/new/choo
 - Fonts: **Orbitron** (© The Orbitron Project Authors) and **B612 Mono** (© The B612 Project Authors), both under the SIL Open Font License 1.1 — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 - Icons: Home Assistant's Material Design Icons.
 
+## Companion: SF Copilot
+
+[**SF Copilot**](https://github.com/khrom06/SF-Copilot) is a separate card of the SF family. It reads Home Assistant's history, finds what you keep doing by hand and proposes the matching automation, with a dry run first. Local only: no cloud, no AI model. It is installed on its own and does not change SF Cards.
+
 ## License
 
 [MIT](LICENSE) © khrom06. Embedded fonts are under the [SIL OFL 1.1](THIRD_PARTY_NOTICES.md).
