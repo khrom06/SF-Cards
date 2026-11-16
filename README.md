@@ -1126,7 +1126,8 @@ Text that comes from entities (names, states, units, picture URLs) is always esc
 ## Development
 
 ```bash
-./test/run.sh    # syntax + render of every card (11 languages, no-solar and empty scenarios, translations, editors, accessibility, themes, popups) in headless Chrome
+./test/run.sh    # build check, 660 render snapshots, lint, layout, and in headless Chrome: render, security, lifecycle, requests, robustness, accessibility
+node scripts/bench.mjs --throttle 4    # optional: benchmark (render cost, requests, memory) with a CPU slowed down like a tablet
 ```
 
 See the [changelog](CHANGELOG.md) for what changed in each version.
@@ -1142,9 +1143,9 @@ Sources: [Matter Alpha — "Home Assistant embraces HACS into core as the market
 ## Limitations
 
 - Developed and tested on **Home Assistant 2026.11** (Chrome and the iOS / Android companion apps). Older versions may work but have not been tried.
-- The code comments in `dist/sf-cards.js` are still in French (the UI itself is translated).
+- Some code comments in `src/` are still in French (the UI itself is translated).
 - Screenshots use fictional demo data.
-- Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. Home Assistant itself is not part of the tests.
+- Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. A real Home Assistant (container, latest stable image) is driven by the end-to-end workflow; other Home Assistant versions are not tested yet.
 - `sf-presence-card` and the Frigate‑related options are tied to a specific setup and are documented as advanced.
 
 ## Ideas and feedback
