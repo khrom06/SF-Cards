@@ -1,0 +1,89 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Benchmark page (driven by scripts/bench.mjs through the Chrome DevTools protocol, real time). Fake data only. Not part of run.sh. -->
+<body>
+<script>
+class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon);
+window.__SF_TEST = true;
+window.__t0 = performance.now();
+const rafQ = []; window.requestAnimationFrame = (f) => { rafQ.push(f); return rafQ.length; };   // frames are flushed by hand, so their cost is measured
+window.flush = () => { const q = rafQ.splice(0); for (const f of q) f(); return q.length; };
+let listeners = 0; const _ae = EventTarget.prototype.addEventListener; EventTarget.prototype.addEventListener = function (...a) { listeners++; return _ae.apply(this, a); };
+const live = { iv: 0 }; const _si = window.setInterval.bind(window), _ci = window.clearInterval.bind(window); const ids = new Set();
+window.setInterval = (f, m, ...a) => { const i = _si(f, m, ...a); ids.add(i); return i; }; window.clearInterval = (i) => { ids.delete(i); _ci(i); };
+</script>
+<script src="../dist/sf-cards.js"></script>
+<script>window.__t1 = performance.now();</script>
+<script src="fixtures.js"></script>
+<script>
+const med = (a) => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+const p95 = (a) => { const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(s.length * 0.95))]; };
+const r2 = (n) => Math.round(n * 100) / 100;
+const tags = () => Object.keys(FULL).filter((t) => customElements.get(t));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const calls = [];   // every WebSocket request: [card tag, type, entities]
+let cur = "";
+const PAD = {}; for (let i = 0; i < 3000; i++) PAD["sensor.pad_" + i] = { state: String(i % 97), attributes: { unit_of_measurement: "W", friendly_name: "Pad " + i } };
+let usePad = false;
+const mkHass = (extra, lang) => { const st = { ...(usePad ? PAD : {}), ...base, ...(extra || {}) }; const h = HASS(st, lang || "en");
+  h.callWS = (m) => { calls.push([cur, m.type, JSON.stringify(m.entity_ids || m.statistic_ids || m.entity_id || "")]); return Promise.resolve(m.type.includes("statistics") ? {} : m.type === "trace/list" ? [] : []); };
+  h.callApi = () => Promise.resolve([]); return h; };
+const nodes = (el) => el.shadowRoot ? el.shadowRoot.querySelectorAll("*").length : 0;
+const htmlLen = (el) => el.shadowRoot ? el.shadowRoot.innerHTML.length : 0;
+
+window.runBench = async () => {
+  const out = { load_ms: r2(window.__t1 - window.__t0), cards: {}, dashboard: {}, memory: {}, ws: {} };
+  // B1/B2 per card
+  for (const tag of tags()) {
+    cur = tag; const init = [], same = [], change = [], rewrite = []; let n = 0, h = 0, ls = 0;
+    for (let k = 0; k < 7; k++) {
+      const l0 = listeners, a = performance.now();
+      const el = document.createElement(tag); el.setConfig(FULL[tag]); document.body.appendChild(el); el.hass = mkHass(); flush();
+      init.push(performance.now() - a); if (k === 0) { n = nodes(el); h = htmlLen(el); ls = listeners - l0; }
+      await wait(0); flush();
+      // an update that changes nothing this card shows (HA sends a new `hass` for every state change in the house)
+      for (let j = 0; j < 20; j++) { const b = performance.now(); el.hass = mkHass({ "sensor.unrelated": { state: String(j), attributes: {} } }); flush(); same.push(performance.now() - b); }
+      // an update that changes a value the card shows
+      for (let j = 0; j < 10; j++) { const b = performance.now(); el.hass = mkHass({ "sensor.temp": { state: String(18 + j), attributes: { unit_of_measurement: "°C" } }, "sensor.grid": { state: String(500 + j * 37), attributes: { unit_of_measurement: "W" } } }); flush(); change.push(performance.now() - b); }
+      el.remove();
+    }
+    out.cards[tag] = { init_ms: r2(med(init)), update_same_ms: r2(med(same)), update_same_p95: r2(p95(same)), update_change_ms: r2(med(change)), nodes: n, html_kb: r2(h / 1024), listeners: ls };
+  }
+  // B3 whole dashboard: 30 cards, 300 updates caused by an unrelated entity
+  { const box = document.createElement("div"); document.body.appendChild(box); const els = [];
+    for (const tag of tags()) { cur = tag; const el = document.createElement(tag); el.setConfig(FULL[tag]); box.appendChild(el); els.push(el); }
+    const t = performance.now(); for (const el of els) el.hass = mkHass(); flush(); const first = performance.now() - t; await wait(50); flush();
+    const per = []; let nodesAll = 0; for (let j = 0; j < 300; j++) { const h = mkHass({ "sensor.unrelated": { state: String(j), attributes: {} } }); const b = performance.now(); for (const el of els) el.hass = h; flush(); per.push(performance.now() - b); }
+    for (const el of els) nodesAll += nodes(el);
+    out.dashboard = { cards: els.length, first_render_ms: r2(first), update_median_ms: r2(med(per)), update_p95_ms: r2(p95(per)), total_nodes: nodesAll, total_listeners_added: listeners, intervals_live: ids.size };
+    box.remove(); await wait(30); out.dashboard.intervals_after_removal = ids.size; }
+  // B3b the same dashboard in a house of 3 000 extra entities (cards that scan hass.states pay for it on every update)
+  { usePad = true; const box = document.createElement("div"); document.body.appendChild(box); const els = [];
+    for (const tag of tags()) { cur = tag; const el = document.createElement(tag); el.setConfig(FULL[tag]); box.appendChild(el); els.push(el); }
+    for (const el of els) el.hass = mkHass(); flush(); await wait(50); flush();
+    const per = [], cost = {}; for (let j = 0; j < 100; j++) { const h = mkHass({ "sensor.unrelated": { state: String(j), attributes: {} } }); const b = performance.now(); for (const el of els) { const c = performance.now(); el.hass = h; cost[el.localName] = (cost[el.localName] || 0) + 0; } flush(); per.push(performance.now() - b); }
+    out.dashboard_3000_entities = { update_median_ms: r2(med(per)), update_p95_ms: r2(p95(per)) };
+    // per card cost of one idle update in that house
+    const pc = {}; for (const el of els) { const t = []; for (let j = 0; j < 30; j++) { const h = mkHass({ "sensor.unrelated": { state: String(j), attributes: {} } }); const b = performance.now(); el.hass = h; flush(); t.push(performance.now() - b); } pc[el.localName] = r2(med(t)); }
+    out.dashboard_3000_entities.per_card_ms = pc; box.remove(); usePad = false; await wait(30); }
+  // B5 requests: what the dashboard asked HA for, and what was asked twice
+  { calls.length = 0; const els = []; for (const tag of tags()) { cur = tag; const el = document.createElement(tag); el.setConfig(FULL[tag]); document.body.appendChild(el); el.hass = mkHass(); els.push(el); } flush(); await wait(120); flush();
+    const atMount = calls.length; for (let j = 0; j < 100; j++) { const h = mkHass({ "sensor.unrelated": { state: String(j), attributes: {} } }); for (const el of els) el.hass = h; flush(); } await wait(50);
+    const after = calls.length; const key = (c) => c[1] + "|" + c[2]; const seen = {}; calls.forEach((c) => { seen[key(c)] = (seen[key(c)] || 0) + 1; });
+    const dupL = Object.entries(seen).filter(([, v]) => v > 1); const dup = dupL.length; out.dupDetail = dupL.map(([k, v]) => `${k.slice(0, 90)} x${v} (${calls.filter((c) => key(c) === k).map((c) => c[0]).join(",")})`);
+    const byType = {}; calls.forEach((c) => { byType[c[1]] = (byType[c[1]] || 0) + 1; });
+    out.ws = { requests_at_mount: atMount, requests_after_100_updates: after - atMount, identical_requests_repeated: dup, by_type: byType, cards_requesting: [...new Set(calls.map((c) => c[0]))].length };
+    els.forEach((e) => e.remove()); }
+  // B6 a house with 150 automations: what the automations card asks HA for at mount, then while its configuration is edited 5 times (the visual editor re-applies it on every change)
+  { usePad = false; for (let i = 0; i < 150; i++) base["automation.a" + i] = { state: "on", attributes: { friendly_name: "A" + i, last_triggered: null, id: "id" + i } };
+    calls.length = 0; cur = "sf-automations-card"; const el = document.createElement("sf-automations-card"); el.setConfig(FULL["sf-automations-card"]); document.body.appendChild(el); el.hass = mkHass(); flush(); await wait(400); flush();
+    const mount = calls.length; for (let i = 0; i < 5; i++) { el.setConfig({ ...FULL["sf-automations-card"], title: "T" + i }); flush(); await wait(400); flush(); }
+    out.automations150 = { requests_at_mount: mount, requests_after_5_config_edits: calls.length - mount }; el.remove(); for (let i = 0; i < 150; i++) delete base["automation.a" + i]; }
+  // B7 requests caused by re-applying the SAME configuration (what the visual editor does on every change), per card
+  { out.reapply = {}; for (const tag of tags()) { calls.length = 0; cur = tag; const el = document.createElement(tag); el.setConfig(FULL[tag]); document.body.appendChild(el); el.hass = mkHass(); flush(); await wait(250); flush();
+      const m = calls.length; for (let i = 0; i < 5; i++) { el.setConfig({ ...FULL[tag] }); flush(); await wait(150); flush(); } const x = calls.length - m; if (m || x) out.reapply[tag] = { at_mount: m, after_5_same_config: x }; el.remove(); } }
+  return out;
+};
+// B4 memory: mount / unmount the whole set N times (the runner takes the heap before and after, with a forced GC)
+window.cycle = async (n) => { for (let i = 0; i < n; i++) { const els = []; for (const tag of tags()) { cur = tag; const el = document.createElement(tag); el.setConfig(FULL[tag]); document.body.appendChild(el); el.hass = mkHass(); els.push(el); } flush(); await wait(5); flush(); els.forEach((e) => e.remove()); await wait(5); } return ids.size; };
+</script>

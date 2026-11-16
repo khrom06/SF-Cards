@@ -99,7 +99,7 @@ class SfBatteryCard extends SfBase {
         <span class="lv"><i style="width:${this.esc(lv ?? 0)}%;background:${this.esc(bc)};box-shadow:0 0 6px ${this.esc(bc)}"></i></span><span class="pc">${lv === null ? "—" : Math.round(lv) + " %"}</span></div>`;
     }).join("")}</div>` : "";
     const m = c.mode && this.st(c.mode);
-    const modes = m && (m.attributes.options || []).length ? `<div class="modes"><div class="lbl">${this.t("common.mode")}</div><div class="seg">${m.attributes.options.map((o) =>
+    const modes = m && this.arr(m.attributes.options).length ? `<div class="modes"><div class="lbl">${this.t("common.mode")}</div><div class="seg">${this.arr(m.attributes.options).map((o) =>
       `<span class="btn ${this.esc(m.state === o ? "on" : "")}" ${this.call(`${c.mode.split(".")[0]}.select_option`, { entity_id: c.mode, option: o })}>${this.esc(o)}</span>`).join("")}</div></div>` : "";
     return this.frame(this.esc(c.title || this.t("common.battery_2")), soc === null ? "" : `${Math.round(soc)} %`, `
       <div class="gauge"><div class="ring click" data-e="${this.esc(agg.firstId)}"><svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="${this.esc(R)}" fill="none" stroke="rgb(var(--sf-fg-rgb) / .08)" stroke-width="9"/>

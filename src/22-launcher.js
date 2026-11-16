@@ -195,7 +195,7 @@ class SfLauncherCard extends SfBase {
     let card;
     if (/^custom:[a-z][a-z0-9]*(-[a-z0-9]+)+$/.test(type) && customElements.get(type.slice(7))) {
       card = document.createElement(type.slice(7));
-      try { card.setConfig(cfg); } catch (e) { card.textContent = `Erreur : ${e.message}`; }
+      try { card.setConfig(cfg); } catch (e) { card.textContent = `${this.t("common.error_2")} : ${e.message}`; }
       card.hass = this._hass;
     } else {
       const ph = card = document.createElement("div");
@@ -207,7 +207,7 @@ class SfLauncherCard extends SfBase {
           ph.replaceWith(el);
           if (this._pop && this._pop.card === ph) this._pop.card = el;
         })
-        .catch((e) => { ph.textContent = `Erreur : ${e && e.message || e}`; });
+        .catch((e) => { ph.textContent = `${this.t("common.error_2")} : ${e && e.message || e}`; });
     }
     root.querySelector(".body").appendChild(card);
     const close = () => this._close(true);

@@ -40,7 +40,7 @@ class SfTimelineCard extends SfBase {
   _keyNow() { return `${this._hours()}|${this._ents().map((e) => e.entity).join(",")}`; }
   get _ld() { return this.__ld || (this.__ld = new SfLoader(this)); }
   get _data() { const d = this._ld.data; return d ? { key: d.key, error: d.error, ev: d.value || [] } : null; }
-  setConfig(config) { super.setConfig(config); this._ld.reset(); this._lastHtml = null; this._load(); }
+  setConfig(config) { super.setConfig(config); if (!this._cfgSame) this._ld.reset(); this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); }

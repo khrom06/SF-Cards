@@ -2,6 +2,10 @@ class SfBase extends HTMLElement {
   setConfig(config) {
     if (!config) throw new Error(`${this.localName} : config required`);
     this._config = sfNormConfig(sfCanon(this.localName), this.defaults ? { ...this.defaults(), ...config } : { ...config });
+    // The visual editor and the dashboard re-apply the configuration on every change, often unchanged: `_cfgSame` lets the cards that load data from
+    // Home Assistant keep what they already fetched instead of asking again.
+    let js = ""; try { js = JSON.stringify(this._config); } catch (e) { js = ""; }
+    this._cfgSame = !!js && js === this._cfgJson; this._cfgJson = js;
     if (!this.shadowRoot) this.attachShadow({ mode: "open" });
     this._dirty = true;
     this._schedule();
@@ -140,7 +144,9 @@ class SfBase extends HTMLElement {
   st(id) { return id && this._hass && this._hass.states ? this._hass.states[id] : undefined; }
   ok(id) { const s = this.st(id); return !!s && !["unknown", "unavailable"].includes(s.state); }
   num(id) { if (!this.ok(id)) return null; const n = parseFloat(this.st(id).state); return isNaN(n) ? null : n; }
-  unit(id) { const s = this.st(id); return (s && s.attributes.unit_of_measurement) || ""; }
+  unit(id) { const s = this.st(id), u = s && s.attributes.unit_of_measurement; return typeof u === "string" ? u : ""; }   // always a string, whatever an integration publishes
+  // A list attribute or option: always an array (an integration may publish a string, a number or nothing).
+  arr(v) { return Array.isArray(v) ? v : []; }
   // Number displayed according to the HA profile language (comma or point decimal), Latin digits, no thousands separator.
   nf(v, d = 0) {
     let n = Number(v); if (!isFinite(n)) return String(v);
@@ -268,7 +274,7 @@ class SfBase extends HTMLElement {
   timerInfo(id) {
     const t = id && this.st(id);
     if (!t || t.state !== "active") return { actif: false, reste: 0 };
-    if (!this._ti) this._ti = setInterval(() => this._schedule(), 20000);
+    if (!this._ti && this.isConnected) this._ti = setInterval(() => this._schedule(), 20000);   // not for a detached card (nothing would ever clear it); connectedCallback re-renders and starts it
     const fin = Date.parse(t.attributes.finishes_at);
     return { actif: true, reste: isNaN(fin) ? null : Math.max(1, Math.ceil((fin - Date.now()) / 60000)) };
   }

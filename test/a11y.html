@@ -1,0 +1,46 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Accessibility test (run by run.sh in headless Chrome): every interactive element of every card, in both themes, has an accessible name and can be
+     reached and used with the keyboard. Writes its verdict (JSON) into #result. -->
+<body>
+<script>
+class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon);
+window.requestAnimationFrame = (f) => setTimeout(f, 0);
+window.__SF_TEST = true;
+</script>
+<script src="../dist/sf-cards.js"></script>
+<script src="fixtures.js"></script>
+<script>
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const fails = [];
+(async () => {
+  const tags = Object.keys(FULL).filter((t) => customElements.get(t));
+  let checked = 0;
+  for (const theme of ["dark", "light"]) for (const lang of ["en", "ar"]) for (const tag of tags) {
+    const el = document.createElement(tag); el.setConfig({ ...FULL[tag], theme }); document.body.appendChild(el); el.hass = HASS(base, lang); await wait(40);
+    const root = el.shadowRoot; if (!root) { fails.push(`${tag}: no shadow root`); continue; }
+    if (lang === "ar" && el.dir !== "rtl") fails.push(`${tag}: Arabic does not set dir=rtl`);
+    for (const e of root.querySelectorAll("button, a, input, select, [role=button], [data-call], [data-e]")) {
+      if (e.localName === "style" || getComputedStyle(e).display === "none") continue;
+      const hasTarget = e.hasAttribute("data-call") || e.matches("button, a, input, select") || (e.getAttribute("data-e") && !/^(undefined|null)$/.test(e.getAttribute("data-e")));
+      if (!hasTarget) continue;
+      checked++;
+      const name = (e.getAttribute("aria-label") || e.getAttribute("title") || e.textContent || "").trim();
+      if (!name) fails.push(`${tag} [${theme}/${lang}]: <${e.localName} class="${e.className}"> has no accessible name`);
+      if (!e.matches("button, a, input, select") && (e.getAttribute("role") !== "button" || e.getAttribute("tabindex") !== "0")) fails.push(`${tag} [${theme}/${lang}]: <${e.localName} class="${e.className}"> is clickable but not a keyboard button (role/tabindex)`);
+    }
+    // the keyboard must activate it: Enter on a service button calls the service exactly once
+    el.remove();
+  }
+  if (checked < 200) fails.push(`only ${checked} interactive elements checked (test setup)`);
+  // Enter / Space on a focusable control behaves like a click, a held key does not repeat it
+  { const calls = []; const h = HASS(base, "en"); h.callService = (d, s) => { calls.push(d + "." + s); return Promise.resolve(); };
+    const el = document.createElement("sf-console-card"); el.setConfig(FULL["sf-console-card"]); document.body.appendChild(el); el.hass = h; await wait(60);
+    const b = el.shadowRoot.querySelector("[data-call]:not([data-confirm])"); if (!b) fails.push("console: no service button to test with");
+    else { b.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true })); await wait(10); if (calls.length !== 1) fails.push(`Enter on a service button called the service ${calls.length} time(s)`);
+      b.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true })); await wait(10); if (calls.length !== 2) fails.push("Space on a service button did not call the service");
+      b.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, repeat: true })); await wait(10); if (calls.length !== 2) fails.push("a held Enter repeated the action"); }
+    el.remove(); }
+  const pre = document.createElement("pre"); pre.id = "result"; pre.textContent = JSON.stringify({ ok: !fails.length, failures: fails.slice(0, 40) }); document.body.appendChild(pre);
+})();
+</script>

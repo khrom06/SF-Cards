@@ -16,7 +16,7 @@ class SfAgendaCard extends SfBase {
   defaults() { return { days: 7, max: 8 }; }
   static getStubConfig() { return {}; }
   get _ld() { return this.__ld || (this.__ld = new SfLoader(this, { ttl: 300000, retry: 120000 })); }
-  setConfig(config) { super.setConfig(config); this._ld.reset(); this._lastHtml = null; this._load(); }
+  setConfig(config) { super.setConfig(config); if (!this._cfgSame) this._ld.reset(); this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); if (!this._at) this._at = setInterval(() => this._tickTimers(), 1000); }

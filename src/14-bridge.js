@@ -107,7 +107,7 @@ class SfBridgeCard extends SfBase {
          <div class="lbl" style="margin-top:8px">${this.t("bridge.doors_closed_no_leaks_mains_ok")}</div>`;
 
     const w = this.st(c.weather);
-    const [wTxt0, wIco] = (w && SF_WEATHER[w.state]) || [w ? this.esc(w.state) : "—", "mdi:weather-cloudy-alert"];
+    const [wTxt0, wIco] = (w && SF_WEATHER[w.state]) || [w ? this.esc(this.ok(c.weather) ? w.state : this.t("common.no_data")) : "—", "mdi:weather-cloudy-alert"];
     const wTxt = w && SF_WEATHER[w.state] ? this.t(wTxt0) : wTxt0;
     const out = this.num(c.outdoor);
     const { hc, left } = this._isHC(now);

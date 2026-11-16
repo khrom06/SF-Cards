@@ -20,7 +20,7 @@ class SfAutomationsCard extends SfBase {
   static getStubConfig() { return {}; }
   get _ldT() { return this.__ldT || (this.__ldT = new SfLoader(this, { ttl: 120000, retry: 300000 })); }
   get _ldR() { return this.__ldR || (this.__ldR = new SfLoader(this, { ttl: 900000, retry: 900000 })); }
-  setConfig(config) { super.setConfig(config); this._ldT.reset(); this._ldR.reset(); this._lastHtml = null; this._load(); }
+  setConfig(config) { super.setConfig(config); if (!this._cfgSame) this._ldT.reset();   /* `_ldR` (one request per automation) is keyed by the list of automations and kept for 15 min: never reset by a configuration edit */ this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); if (!this._tick) this._tick = setInterval(() => { this._lastHtml = null; this._load(); this._schedule(); }, 60000); }

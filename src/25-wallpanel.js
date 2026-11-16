@@ -232,13 +232,16 @@ class SfNsCard extends SfBase {
   }
 
   async _subFc() {
-    if (this._fcUnsub || this._fcBusy || !this._hass || !this._hass.connection || !this._config || !this._config.weather) return;
+    if (this._fcUnsub || this._fcBusy || !this.isConnected || !this._hass || !this._hass.connection || !this._config || !this._config.weather) return;
     // Failure (weather entity without hourly forecast, unavailable…): HA calls `hass` several times per second, so we only retry once a minute.
     if (this._fcFail && Date.now() - this._fcFail < 60000) return;
     this._fcBusy = true;
+    const wx = this._config.weather;
     try {
-      this._fcUnsub = await this._hass.connection.subscribeMessage((ev) => { this._fc = (ev && ev.forecast) || []; this._schedule(); },
-        { type: "weather/subscribe_forecast", forecast_type: "hourly", entity_id: this._config.weather });
+      const un = await this._hass.connection.subscribeMessage((ev) => { this._fc = (ev && ev.forecast) || []; this._schedule(); },
+        { type: "weather/subscribe_forecast", forecast_type: "hourly", entity_id: wx });
+      // Left the page (or changed entity) while HA was answering: close this subscription now instead of keeping it open.
+      if (this.isConnected && this._config && this._config.weather === wx) this._fcUnsub = un; else { try { un(); } catch (e) { /* already closed */ } }
     } catch (e) { this._fc = null; this._fcFail = Date.now(); }
     this._fcBusy = false;
   }
@@ -413,8 +416,8 @@ class SfNsCard extends SfBase {
       if (car.charging && this.isOn(car.charging)) st += this.ic("mdi:flash").replace("<ha-icon", '<ha-icon class="ambc"');
       if (car.lock && this.st(car.lock)) st += this.st(car.lock).state === "locked" ? this.ic("mdi:lock").replace("<ha-icon", '<ha-icon class="okc"') : this.ic("mdi:lock-open-alert").replace("<ha-icon", '<ha-icon class="badc"');
       return `<div class="car" data-info="${this.esc(car.soc)}"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgb(var(--sf-fg-rgb) / .09)" stroke-width="9"/>
-        <circle cx="50" cy="50" r="${R}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"
-          transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 3px ${col})"/>
+        <circle cx="50" cy="50" r="${R}" fill="none" stroke="${this.esc(col)}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"
+          transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 3px ${this.esc(col)})"/>
         <text x="50" y="58" text-anchor="middle" font-family="Orbitron,sans-serif" font-weight="700" font-size="27" fill="var(--sf-strong)">${s === null ? "—" : Math.round(s)}<tspan font-size="12" fill="#9fc3d9">%</tspan></text></svg>
         <div class="nm" style="color:${this.esc(car.color || "var(--sf-cyan)")}">${this.esc(car.name)}</div><div class="rg">${rg === null ? "—" : Math.round(rg)} km${st}</div></div>`;
     }).join("");
@@ -438,14 +441,14 @@ class SfNsCard extends SfBase {
     const parts = sol > 30 ? [[h, "var(--sf-cyan)"], [v, "var(--sf-green)"], [x, "var(--sf-amber)"]] : [[1, "rgb(var(--sf-fg-rgb) / .12)"]];
     const tot = parts.reduce((t, q) => t + q[0], 0) || 1; let acc = 0;
     const arcs = parts.filter((q) => q[0] > 0).map(([val, col]) => { const len = Math.max(0, (val / tot) * C - gap), o = -acc; acc += (val / tot) * C;
-      return `<circle cx="50" cy="50" r="${R}" fill="none" stroke="${col}" stroke-width="8" stroke-dasharray="${len.toFixed(1)} ${(C - len).toFixed(1)}" stroke-dashoffset="${o.toFixed(1)}" transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 2px ${col})"/>`; }).join("");
+      return `<circle cx="50" cy="50" r="${R}" fill="none" stroke="${this.esc(col)}" stroke-width="8" stroke-dasharray="${len.toFixed(1)} ${(C - len).toFixed(1)}" stroke-dashoffset="${o.toFixed(1)}" transform="rotate(-90 50 50)" style="filter:drop-shadow(0 0 2px ${this.esc(col)})"/>`; }).join("");
     const ratio = sol > 30 && grid !== null ? Math.round(Math.min(100, ((sol - Math.max(0, -grid)) / sol) * 100)) : null;
     const imp = grid !== null && grid > 20, dec = this.st(e.decision), evc = this.isOn(e.ev_connected);
     const orb = this.panel(`<div class="orbWrap" data-info="${this.esc(e.solar)}"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgb(var(--sf-fg-rgb) / .06)" stroke-width="8"/>${arcs}</svg>
       <div class="orbC"><div class="lbl">${this.esc(this.t(sol > 30 ? "solaire" : "nuit"))}</div><div class="big">${this.pw(sol)}</div>${ratio !== null ? `<div class="lbl" style="margin-top:4px">${this.esc(this.t("wallpanel.self_use_n", { n: ratio }))}</div>` : ""}</div></div>`, "orbP");
     // --- three information tiles: each has an icon, a value, a proportional bar and a context line
     const E = e, scale = Math.max(sol, home + ev, Math.abs(grid || 0), 500);
-    const ico = (n, col) => this.ic(n).replace("<ha-icon", `<ha-icon style="color:${col}"`);
+    const ico = (n, col) => this.ic(n).replace("<ha-icon", `<ha-icon style="color:${this.esc(col)}"`);
     // house: the devices that draw the most (2 at most, > 30 W)
     const devs = (Array.isArray(E.devices) ? E.devices : []).filter((d) => d && typeof d === "object").map((d) => ({ ...d, w: this.watts(d.entity) })).filter((d) => d.w !== null && d.w > 30).sort((x, y) => y.w - x.w).slice(0, 2);
     const chipsHome = devs.length ? devs.map((d) => `<span class="chip" data-info="${this.esc(d.entity)}">${this.ic(d.icon || "mdi:flash")}${this.pw(d.w)}</span>`).join("") : `<span class="sub1">${this.esc(this.t("wallpanel.base_load"))}</span>`;
@@ -459,7 +462,7 @@ class SfNsCard extends SfBase {
     const costH = imp && price !== null ? (grid / 1000 * price) : null;
     const subGrid = `${price !== null ? `<span class="chip ${hc ? "hc" : ""}">${this.esc(this.t(hc ? "HC" : "HP"))} ${this.nf(price, 3)} ${this.esc(this.cur())}</span>` : ""}${costH !== null ? `<span class="chip">≈ ${this.nf(costH, 2)} ${this.esc(this.cur())}/h</span>` : ""}${!imp && grid !== null ? `<span class="chip">${this.ic("mdi:transmission-tower-export")}${this.esc(this.t("wallpanel.exporting"))}</span>` : ""}`;
     const tile = (lbl, icon, col, val, frac, sub, info) => `<div class="stat tap" data-info="${this.esc(info)}"><div class="srow">${ico(icon, col)}<span class="lbl">${lbl}</span><span class="v">${val}</span></div>
-      <div class="sbar"><i style="width:${Math.max(0, Math.min(100, frac * 100)).toFixed(0)}%;background:${col};box-shadow:0 0 6px ${col}"></i></div><div class="ssub">${sub}</div></div>`;
+      <div class="sbar"><i style="width:${Math.max(0, Math.min(100, frac * 100)).toFixed(0)}%;background:${this.esc(col)};box-shadow:0 0 6px ${this.esc(col)}"></i></div><div class="ssub">${sub}</div></div>`;
     const stats = `<div class="stats">${tile(this.t("wallpanel.home"), "mdi:home-lightning-bolt-outline", "var(--sf-cyan)", this.pw(home), home / scale, chipsHome, e.home)}
       ${tile(this.t("wallpanel.charger"), ev > 20 ? "mdi:ev-plug-type2" : "mdi:ev-station", "var(--sf-green)", this.pw(ev), ev / scale, subEv, e.ev)}
       ${tile(this.t(imp ? "réseau" : "export"), imp ? "mdi:transmission-tower-import" : "mdi:transmission-tower-export", imp ? "#ff7043" : "var(--sf-amber)", this.pw(grid), Math.abs(grid || 0) / scale, subGrid, e.grid)}</div>`;
@@ -483,7 +486,7 @@ class SfNsCard extends SfBase {
     const c = this._config; if (!c.cars.length) return "";
     return this.panel(`<div class="cars" style="gap:calc(var(--u)*3)">${c.cars.map((car) => { const s = this.num(car.soc), low = s !== null && s < (car.low || 0), col = low ? "var(--sf-red)" : (car.color || "var(--sf-cyan)");
       const lk = car.lock && this.st(car.lock) ? (this.st(car.lock).state === "locked" ? this.ic("mdi:lock").replace("<ha-icon", '<ha-icon class="okc"') : this.ic("mdi:lock-open-alert").replace("<ha-icon", '<ha-icon class="badc"')) : "";
-      return `<div class="mini" data-info="${this.esc(car.soc)}"><span class="nm" style="color:${col}">${this.esc(car.name)}</span><div class="bar"><i style="width:${s === null ? 0 : Math.max(2, Math.min(100, s))}%;background:${col};box-shadow:0 0 8px ${col}"></i></div><span class="v">${s === null ? "—" : Math.round(s)}<small>%</small></span>${lk}</div>`; }).join("")}</div>`);
+      return `<div class="mini" data-info="${this.esc(car.soc)}"><span class="nm" style="color:${this.esc(col)}">${this.esc(car.name)}</span><div class="bar"><i style="width:${s === null ? 0 : Math.max(2, Math.min(100, s))}%;background:${this.esc(col)};box-shadow:0 0 8px ${this.esc(col)}"></i></div><span class="v">${s === null ? "—" : Math.round(s)}<small>%</small></span>${lk}</div>`; }).join("")}</div>`);
   }
   sentinel() {
     const c = this._config, bad = this.alerts().filter((a) => !a.warn);

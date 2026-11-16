@@ -19,7 +19,7 @@ class SfReportCard extends SfBase {
   defaults() { return { period: "week", devices: [] }; }
   static getStubConfig() { return {}; }
   get _ld() { return this.__ld || (this.__ld = new SfLoader(this, { ttl: 900000, retry: 300000 })); }
-  setConfig(config) { super.setConfig(config); this._per = null; this._off = 0; this._ld.reset(); this._lastHtml = null; this._load(); }
+  setConfig(config) { super.setConfig(config); this._per = null; this._off = 0; if (!this._cfgSame) this._ld.reset(); this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); }

@@ -24,7 +24,7 @@ class SfRoomCard extends SfBase {
   defaults() { return { size: "auto" }; }
   static getStubConfig() { return {}; }
   get _ld() { return this.__ld || (this.__ld = new SfLoader(this, { ttl: 600000, retry: 300000 })); }
-  setConfig(config) { super.setConfig(config); this._ae = null; this._ld.reset(); this._lastHtml = null; }
+  setConfig(config) { super.setConfig(config); this._ae = null; if (!this._cfgSame) this._ld.reset(); this._lastHtml = null; }
   set hass(h) { this._hass = h; if (this._lp && this._lp._pop) { this._lp._hass = h; this._lp._pop.card.hass = h; } this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); }

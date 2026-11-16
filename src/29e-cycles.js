@@ -39,7 +39,7 @@ class SfCyclesCard extends SfBase {
   }
   layoutKey(w) { return this.balance(this._apps().length, 340, 12, w); }
   get _ld() { return this.__ld || (this.__ld = new SfLoader(this, { ttl: 900000, retry: 300000 })); }
-  setConfig(config) { super.setConfig(config); this._ld.reset(); this._live = {}; this._lastHtml = null; this._load(); }
+  setConfig(config) { super.setConfig(config); if (!this._cfgSame) { this._ld.reset(); this._live = {}; } this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._track(); this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); if (!this._tick) this._tick = setInterval(() => { this._lastHtml = null; this._schedule(); }, 30000); }

@@ -56,7 +56,7 @@ class SfTrendCard extends SfBase {
   get _ld() { return this.__ld || (this.__ld = new SfLoader(this)); }
   // the loaded data in the shape the renderer uses: { key, error, t0, t1, pts }
   get _data() { const d = this._ld.data; return d ? { key: d.key, error: d.error, ...d.value } : null; }
-  setConfig(config) { super.setConfig(config); this._h = null; this._ld.reset(); this._lastHtml = null; this._load(); }
+  setConfig(config) { super.setConfig(config); this._h = null; if (!this._cfgSame) this._ld.reset(); this._lastHtml = null; this._load(); }
   set hass(h) { this._hass = h; this._load(); this._schedule(); }
   get hass() { return this._hass; }
   connectedCallback() { super.connectedCallback(); this._load(); }

@@ -16,7 +16,7 @@ const SF_PRESETS = Object.assign(Object.create(null), { auto: "Programme", comfo
 class SfRadiatorsCard extends SfBase {
   defaults() { return { radiators: [], step: 0.5, max_kwh: 5, setpoint: true, preset_labels: {} }; }
   css() {
-    const ac = this._config.accent || SF_C.amber;
+    const rawAc = String(this._config.accent || "").trim(), ac = SF_COLOR_OK.test(rawAc) ? rawAc : SF_C.amber;   // goes into <style> text: same filter as the config normaliser, applied again at the sink
     return `
       .hud { --ac:${ac}; }
       .head, .hud .c { color:var(--ac); border-color:var(--ac); text-shadow:0 0 8px color-mix(in srgb, var(--ac) 60%, transparent); }
@@ -56,7 +56,7 @@ class SfRadiatorsCard extends SfBase {
     const heat = !dead && !off && a.hvac_action === "heating";
     // Presets: those of a `select` if provided (it often offers "auto" in addition), otherwise those of the climate.
     const sel = r.preset && this.st(r.preset), viaSel = !!(sel && sel.state !== "unavailable");
-    let presets = viaSel ? (sel.attributes.options || []) : (a.preset_modes || []);
+    let presets = viaSel ? this.arr(sel.attributes.options) : this.arr(a.preset_modes);
     if (r.presets) presets = r.presets.filter((p) => presets.includes(p));
     else if (viaSel) presets = presets.filter((p) => p !== "temperature");
     const cur = viaSel ? sel.state : a.preset_mode;

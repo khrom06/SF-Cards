@@ -1,0 +1,46 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Request test (run by run.sh in headless Chrome): the cards that read the history must not ask Home Assistant again when the SAME configuration is
+     re-applied (the visual editor does it on every change), must still ask again when the data they show changes, and an edit of the automations
+     card must not re-run its one-request-per-automation scan. Writes its verdict (JSON) into #result. -->
+<body>
+<script>
+class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon);
+window.requestAnimationFrame = (f) => setTimeout(f, 0);
+window.__SF_TEST = true;
+</script>
+<script src="../dist/sf-cards.js"></script>
+<script src="fixtures.js"></script>
+<script>
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const fails = [], need = (c, m) => { if (!c) fails.push(m); };
+let calls = [];
+const mkHass = (extra) => { const h = HASS({ ...base, ...(extra || {}) }, "en"); h.callWS = (m) => { calls.push(m); return Promise.resolve([]); }; return h; };
+const mount = async (tag, cfg, extra) => { const el = document.createElement(tag); el.setConfig(cfg); document.body.appendChild(el); el.hass = mkHass(extra); await wait(250); return el; };
+const edit = async (el, cfg) => { const n = calls.length; el.setConfig(cfg); await wait(250); return calls.length - n; };
+(async () => {
+  // 1. Same configuration re-applied: no new request, for every card that reads from Home Assistant.
+  for (const tag of Object.keys(FULL).filter((t) => customElements.get(t))) {
+    calls = []; const el = await mount(tag, FULL[tag]); const first = calls.length;
+    if (first) { let extra = 0; for (let i = 0; i < 4; i++) extra += await edit(el, JSON.parse(JSON.stringify(FULL[tag])));
+      need(extra === 0, `${tag}: ${extra} new request(s) when the same configuration was applied again (first load: ${first})`); }
+    el.remove();
+  }
+  // 2. A configuration that changes the data must still reload it (no stale data).
+  { calls = []; const el = await mount("sf-trend-card", FULL["sf-trend-card"]); const cfg = JSON.parse(JSON.stringify(FULL["sf-trend-card"]));
+    cfg.series[0].entity = "sensor.pac"; need(await edit(el, cfg) > 0, "trend: changing a series entity did not reload the history"); el.remove(); }
+  { calls = []; const el = await mount("sf-timeline-card", FULL["sf-timeline-card"]); const cfg = JSON.parse(JSON.stringify(FULL["sf-timeline-card"]));
+    cfg.entities = ["binary_sensor.leak"]; need(await edit(el, cfg) > 0, "timeline: changing the entities did not reload the log"); el.remove(); }
+  { calls = []; const el = await mount("sf-machines-card", FULL["sf-machines-card"]); const cfg = JSON.parse(JSON.stringify(FULL["sf-machines-card"]));
+    cfg.tiles[0].spark = 48; need(await edit(el, cfg) > 0, "machines: changing a sparkline length did not reload the history"); el.remove(); }
+  // 3. Automations card: 60 automations = 60 related-entity requests per scan. Editing the title must not trigger another scan; changing the
+  //    list of automations must.
+  { const auto = {}; for (let i = 0; i < 60; i++) auto["automation.t" + i] = { state: "on", attributes: { friendly_name: "T" + i } };
+    calls = []; const cfg = { ...FULL["sf-automations-card"] }; const el = await mount("sf-automations-card", cfg, auto); await wait(500);
+    const rel = () => calls.filter((c) => c.type === "search/related").length; const r0 = rel(); need(r0 >= 60, `automations: expected a scan of 60 automations, got ${r0}`);
+    for (let i = 0; i < 4; i++) { el.setConfig({ ...cfg, title: "Title " + i }); await wait(300); }
+    need(rel() === r0, `automations: editing the title ran the scan again (${rel() - r0} extra request(s))`);
+    el.setConfig({ ...cfg, include: ["automation.t1*"] }); await wait(500); need(rel() > r0, "automations: changing the included automations did not scan the new list"); el.remove(); }
+  const pre = document.createElement("pre"); pre.id = "result"; pre.textContent = JSON.stringify({ ok: !fails.length, failures: fails }); document.body.appendChild(pre);
+})();
+</script>

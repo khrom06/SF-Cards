@@ -51,7 +51,7 @@ class SfClimateCard extends SfBase {
   // Layout that follows the width the card is given: columns for the house modes and for the rooms (balanced rows), icon-only modes when
   // very narrow. Depends on the width and the configuration only, so it can never feed back into the size it reads.
   _geo(w) {
-    const c = this._config, m = this.st(c.mode), opts = m ? (m.attributes.options || []) : [];
+    const c = this._config, m = this.st(c.mode), opts = m ? this.arr(m.attributes.options) : [];
     const inner = (w || this.width) - 38;   // minus the frame padding and border
     const longest = opts.reduce((a, o) => Math.max(a, String(o).replace(/^[^\p{L}]+/u, "").length), 0);
     const io = inner > 0 && inner < 240 && opts.length > 0;
@@ -71,7 +71,7 @@ class SfClimateCard extends SfBase {
   _room(r) {
     const c = this._config, cl = this.st(r.climate);
     const mode = cl ? cl.state : "off";
-    const [mTxt0, hc, mIco] = SF_HVAC[mode] || [this.esc(mode), SF_C.cyan, "mdi:thermostat"];
+    const [mTxt0, hc, mIco] = SF_HVAC[mode] || [this.esc(cl && !this.ok(r.climate) ? this.t("common.no_data") : mode), SF_C.cyan, "mdi:thermostat"];   // "unavailable" / "unknown" are not shown as a mode
     const mTxt = SF_HVAC[mode] ? this.t(mTxt0) : mTxt0;
     const action = cl && cl.attributes.hvac_action;
     const active = ["heating", "cooling", "drying", "fan"].includes(action);
@@ -113,7 +113,7 @@ class SfClimateCard extends SfBase {
   render() {
     const c = this._config, m = this.st(c.mode);
     const ICO = [[/^(clim|cool|fr[ií]o|k[üu]hl)/i, "mdi:snowflake"], [/^(d[ée]shu|dehum|dry|des|entf)/i, "mdi:water-percent"], [/^(ventil|fan|l[üu]ft)/i, "mdi:fan"], [/^(chauff|heat|calef|calor|heiz)/i, "mdi:fire"], [/^(libre|free|manual|frei)/i, "mdi:hand-back-right"], [/^(absent|away|ausente|abwesend)/i, "mdi:home-export-outline"]];
-    const modes = m ? (m.attributes.options || []).map((o) => {
+    const modes = m ? this.arr(m.attributes.options).map((o) => {
       const txt = o.replace(/^[^\p{L}]+/u, "");
       const ic = (ICO.find(([k]) => k.test(txt)) || [0, "mdi:circle-small"])[1];
       return `<span class="btn ${this.esc(m.state === o ? "on" : "")}" title="${this.esc(txt)}" ${this.call("input_select.select_option", { entity_id: c.mode, option: o })}>${this.icon(ic, 15)}<span class="tx">${this.esc(txt)}</span></span>`;

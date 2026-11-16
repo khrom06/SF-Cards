@@ -2,6 +2,17 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+### Fixed
+- **Fewer requests to Home Assistant while you edit a card.** Re-applying a card's configuration (the visual editor does it on every change) no longer throws away the history it had loaded: the automations card, for example, made about 150 requests per keystroke in a house with 150 automations, now none.
+- **No work left behind when a card is removed.** The refresh timer of a card with a running timer, and the forecast subscription of the fresh-air and wall-panel cards, could stay alive if the card was removed at the wrong moment.
+- **Unexpected data no longer breaks a card.** A unit, an options list or a console group with the wrong type (an integration or a YAML typo) is ignored instead of stopping the card; an unavailable weather or climate entity shows "no data" instead of the raw word.
+- A camera showing an inline `data:` image keeps it intact; the hard-coded French "Erreur" in the popups is translated.
+### Changed
+- **Contrast.** A few text colours of the light theme (amber, cyan, heat, dry) and the red of the dark theme are about 3 % darker or lighter so that small text reaches the WCAG AA ratio (4.5:1). The look is otherwise unchanged.
+### Tests and project
+- New automated checks: hostile values in states and configuration, card life cycle, request counts, robustness to missing or odd data, accessibility (names, keyboard, Arabic direction), palette contrast and version consistency; a benchmark script (`scripts/bench.mjs`). `SECURITY.md`, Dependabot, pinned CI actions, contributor guide for adding a card.
+
 ## [1.21.0]
 ### Added
 - **Battery: where the power comes from.** `sf-battery-card` shows *"Charging from ☀ Solar · ⚡ Grid"* while charging (options `solar`, `grid`, or a measured `from_grid`) and *"Covers N % of the home"* while discharging (option `home`). Without a measured value the split is an estimate: the grid import covers the charge first, the rest is solar. Nothing is shown when none of these entities is set. The battery's flow in `sf-energy-flow-card` turns orange when it is mostly fed by the grid, and a "Battery charge from solar" figure joins its footer (option `battery_from_grid` for a measured value). All options are new and optional: existing configurations are unchanged. 11 languages, editor fields included.

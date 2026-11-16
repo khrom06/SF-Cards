@@ -184,7 +184,7 @@ class SfHangarCard extends SfBase {
     if (!entity || !m) return "";
     const h = new Date().getHours();
     const warn = c.warn_mode && connected && m.state === c.warn_mode && (h >= 17 || h < 6);
-    const opts = (m.attributes.options || []).map((o) =>
+    const opts = this.arr(m.attributes.options).map((o) =>
       `<span class="btn ${this.esc(m.state === o ? "on" : "")}" ${this.call(`${entity.split(".")[0]}.select_option`, { entity_id: entity, option: o })}>${this.esc(o)}</span>`).join("");
     return `<div class="modes"><div class="lbl">${this.t("hangar.charge_mode")}${who ? ` · ${this.esc(who)}` : ""}</div><div class="seg">${opts}</div>
       ${warn ? `<div class="warnbox">${this.esc(c.warn_text || "")}</div>` : ""}</div>`;

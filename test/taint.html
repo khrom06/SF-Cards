@@ -1,0 +1,106 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Taint test page, driven by scripts/taint.mjs on an INSTRUMENTED copy of the bundle (every ${...} of every template calls __tc first).
+     It feeds every card hostile values (states, attributes, every config string, entity ids, many entity states) and records, per interpolation site,
+     whether it ran and whether a raw hostile value reached it. Fake data only. -->
+<!-- Security test (run by run.sh in headless Chrome): hostile entity states / attributes, hostile configuration, and the two-press confirmation.
+     Writes its verdict (JSON) into #result. Fake data only. -->
+<body>
+<script>
+class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon);
+window.requestAnimationFrame = (f) => setTimeout(f, 0);
+window.__SF_TEST = true;
+window.__x = 0;   // incremented by any payload that manages to run
+</script>
+<script>
+window.__cov = new Set(); window.__raw = new Set(); window.__rawVal = {}; window.__esc = new Set();
+const RAWM = 'onerror="window.__x++"', ESCM = 'onerror=&quot;window.__x++&quot;';
+window.__tc = (id, v) => { window.__cov.add(id); try { const s = Array.isArray(v) ? v.join("") : typeof v === "string" ? v : ""; if (s && s.includes(ESCM)) window.__esc.add(id); if (s && s.includes(RAWM) && !window.__raw.has(id)) { window.__raw.add(id); window.__rawVal[id] = s.slice(0, 200); } } catch (e) {} return v; };
+</script>
+<script>
+window.__dumpCov = () => { if (document.getElementById("cov")) return; const p = document.createElement("pre"); p.id = "cov"; p.textContent = JSON.stringify({ cov: [...window.__cov], raw: [...window.__raw], esc: [...window.__esc], rawVal: window.__rawVal }); document.body.appendChild(p); };
+</script>
+<script src="{{BUNDLE}}"></script>
+<script src="{{FIXTURES}}"></script>
+<script>
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const fails = [];
+const need = (cond, msg) => { if (!cond) fails.push(msg); };
+const PAY = '"><img src=x onerror="window.__x++"><svg onload="window.__x++"> \'onmouseover=\'window.__x++\' javascript:void(0)';
+const CSSP = 'red}</style><img src=x onerror="window.__x++"><style>';
+const tags = () => Object.keys(FULL).filter((t) => customElements.get(t));
+// anything that is not inert markup: a script, an element with an inline event handler, a javascript:/data: URL in src/href
+const unsafe = (root) => [...root.querySelectorAll("*")].filter((e) => e.localName === "script" || [...e.attributes].some((a) => /^on/i.test(a.name))
+  || (["src", "href"].some((n) => /^\s*(javascript|vbscript):/i.test(e.getAttribute(n) || "")))).length;
+
+(async () => {
+  // 1. Hostile states and attributes (a cloud integration, a device name, a camera sensor can all carry text).
+  const hostile = {};
+  for (const [id, s] of Object.entries(base)) {
+    const attrs = {};
+    for (const [k, v] of Object.entries(s.attributes || {})) attrs[k] = typeof v === "string" && !["unit_of_measurement", "device_class"].includes(k) ? PAY : v;
+    Object.assign(attrs, { friendly_name: PAY, icon: PAY, entity_picture: "javascript:window.__x++" });
+    hostile[id] = { state: isNaN(parseFloat(s.state)) ? PAY : s.state, attributes: attrs };
+  }
+  for (const tag of tags()) {
+    const el = document.createElement(tag); el.setConfig(FULL[tag]); document.body.appendChild(el); el.hass = HASS(hostile, "en"); await wait(80);
+    need(el.shadowRoot && el.shadowRoot.innerHTML.length > 200, `${tag}: no render with hostile states`);
+    if (el.shadowRoot) need(unsafe(el.shadowRoot) === 0, `${tag}: active content injected from an entity state / attribute`);
+    el.remove();
+  }
+  // 2. Hostile configuration: colours / accents (CSS context), names (text), image URLs.
+  const colKeys = /^(color|colour|accent)$/i, urlKeys = /^(snapshot|image|picture|url|src|thumbnail)$/i, txtKeys = /^(name|title|label|text|subtitle|unit|tag|description|confirm)$/i;
+  const mut = (o, mode) => Array.isArray(o) ? o.map((x) => mut(x, mode)) : o && typeof o === "object"
+    ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === "string"
+      ? (mode === "css" && colKeys.test(k) ? CSSP : mode === "url" && urlKeys.test(k) ? "javascript:window.__x++" : mode === "txt" && txtKeys.test(k) ? PAY : v) : mut(v, mode)])) : o;
+  for (const mode of ["css", "url", "txt"]) for (const tag of tags()) {
+    const el = document.createElement(tag);
+    try { el.setConfig(mut(FULL[tag], mode)); document.body.appendChild(el); el.hass = HASS(base, "en"); await wait(60); } catch (e) { fails.push(`${tag}: throws on hostile ${mode} config: ${e.message}`); }
+    if (el.shadowRoot) {
+      need(unsafe(el.shadowRoot) === 0, `${tag}: active content injected from a ${mode} config value`);
+      need(el.shadowRoot.querySelectorAll("style").length <= 2, `${tag}: a ${mode} config value closed the <style> element`);
+    }
+    el.remove();
+  }
+  // radiators: `accent` goes straight into the <style> text, FULL has none: test it explicitly
+  { const el = document.createElement("sf-radiators-card"); el.setConfig({ ...FULL["sf-radiators-card"], accent: CSSP }); document.body.appendChild(el); el.hass = HASS(base, "en"); await wait(80);
+    need(el.shadowRoot.querySelectorAll("img, style").length === 1, "sf-radiators-card: accent broke out of the <style> element"); el.remove(); }
+  need(window.__x === 0, `a payload executed ${window.__x} time(s)`);
+  // 3. A prototype-pollution key in the config must not reach Object.prototype.
+  { const el = document.createElement("sf-health-card"); el.setConfig(JSON.parse('{"title":"T","__proto__":{"polluted":1},"checks":[{"entity":"sensor.temp","constructor":{"prototype":{"polluted":1}}}]}')); document.body.appendChild(el); el.hass = HASS(base, "en"); await wait(60);
+    need(({}).polluted === undefined, "prototype pollution through the card configuration"); el.remove(); }
+  // 4. Two-press confirmation: arm, survive a re-render, ignore a held key, fire once, never fire from the 3rd press.
+  { const calls = []; const mk = () => { const h = HASS(base, "en"); h.callService = (d, s) => { calls.push(`${d}.${s}`); return Promise.resolve(); }; return h; };
+    const el = document.createElement("sf-console-card");
+    el.setConfig({ title: "T", groups: [{ title: "G", items: [{ kind: "action", label: "Reboot", service: "homeassistant.restart", confirm: "Sure?" }] }] });
+    document.body.appendChild(el); el.hass = mk(); await wait(80);
+    const btn = () => el.shadowRoot.querySelector("[data-confirm]");
+    btn().click(); need(calls.length === 0, "confirm: the first press fired the service");
+    el.hass = mk(); await wait(60); need(btn().classList.contains("armed") && calls.length === 0, "confirm: a re-render lost the armed state or fired");
+    btn().dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, repeat: true })); need(calls.length === 0, "confirm: a held key confirmed the action");
+    btn().click(); need(calls.length === 1, "confirm: the second press did not fire exactly once");
+    btn().click(); need(calls.length === 1, "confirm: the third press fired again instead of re-arming");
+    // a service string coming from the configuration must have the `domain.service` shape, nothing else
+    for (const bad of ["evil;rm", "light.turn on", "a.b.c", "", 'x"onclick="y.z', "light.turn_on\n"]) need(el.call(bad, {}) === "", `service string accepted: ${JSON.stringify(bad)}`);
+    el.remove(); }
+
+  // 4. every string of every configuration hostile, entity ids carrying markup, states keyed by those ids
+  { const deep = (o, f) => Array.isArray(o) ? o.map((x) => deep(x, f)) : o && typeof o === "object" ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, deep(v, f)])) : typeof o === "string" ? f(o) : o;
+    const idRe = /^[a-z_]+\.[a-z0-9_]+$/; const map = (id) => id + PAY;
+    const st2 = {}; for (const [id, s] of Object.entries(base)) st2[map(id)] = { state: s.state, attributes: { ...s.attributes, friendly_name: PAY } };
+    for (const mode of ["allstrings", "ids", "ids+text"]) for (const tag of tags()) {
+      const cfg = mode === "allstrings" ? deep(FULL[tag], () => PAY) : mode === "ids" ? deep(FULL[tag], (s) => idRe.test(s) ? map(s) : s) : deep(FULL[tag], (s) => idRe.test(s) ? map(s) : PAY);
+      const el = document.createElement(tag); try { el.setConfig(cfg); document.body.appendChild(el); el.hass = HASS(mode === "allstrings" ? hostile : st2, "en"); await wait(70); } catch (e) {}
+      if (el.shadowRoot && unsafe(el.shadowRoot)) fails.push(`${tag} [${mode}]: active content`); el.remove(); } }
+
+  // 5. every entity in every "active" state, with hostile names and attributes: opens the branches that only run when something is on / open / playing / cleaning / alarming
+  for (const val of ["on", "open", "playing", "heat", "cool", "active", "cleaning", "charging", "home", "unlocked", "triggered", "error", "docked", "paused", "idle", "armed_away", "off", "closed", "heating", "28", "-5", "1e9"]) {
+    const w = {}; for (const [id, s] of Object.entries(base)) { const attrs = {}; for (const [k, v] of Object.entries(s.attributes || {})) attrs[k] = typeof v === "string" && !["unit_of_measurement", "device_class"].includes(k) ? PAY : v;
+      Object.assign(attrs, { friendly_name: PAY, hvac_action: val === "heat" ? "heating" : val, entity_picture: "/local/x.png?a=1&b=" + PAY, media_title: PAY, media_artist: PAY, source: PAY, finishes_at: new Date(Date.now() + 60000).toISOString(), battery_level: 50, temperature: 21, condition: PAY, detections: PAY });
+      w[id] = { state: isNaN(parseFloat(base[id].state)) || /^[a-z_]+\./.test(val) === false ? val : val, attributes: attrs }; }
+    for (const tag of tags()) { const el = document.createElement(tag); try { el.setConfig(FULL[tag]); document.body.appendChild(el); el.hass = HASS(w, "en"); await wait(50); } catch (e) {}
+      if (el.shadowRoot && unsafe(el.shadowRoot)) fails.push(`${tag} [state ${val}]: active content`); el.remove(); } }
+  window.__dumpCov();
+  const pre = document.createElement("pre"); pre.id = "result"; pre.textContent = JSON.stringify({ ok: !fails.length, failures: fails }); document.body.appendChild(pre);
+})();
+</script>

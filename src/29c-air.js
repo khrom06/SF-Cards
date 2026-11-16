@@ -40,8 +40,10 @@ class SfAirCard extends SfBase {
     if (this._fcFail && Date.now() - this._fcFail < 60000) return;
     this._fcBusy = true;
     try {
-      this._fcUnsub = await this._hass.connection.subscribeMessage((ev) => { this._fc = (ev && Array.isArray(ev.forecast) ? ev.forecast : []).slice(0, 48); this._schedule(); },
+      const un = await this._hass.connection.subscribeMessage((ev) => { this._fc = (ev && Array.isArray(ev.forecast) ? ev.forecast : []).slice(0, 48); this._schedule(); },
         { type: "weather/subscribe_forecast", forecast_type: "hourly", entity_id: wx });
+      // The card may have left the page, or been given another weather entity, while HA was answering: then close this subscription now.
+      if (this.isConnected && this._config && this._config.weather === wx) this._fcUnsub = un; else { try { un(); } catch (e) { /* already closed */ } }
     } catch (e) { this._fc = null; this._fcFail = Date.now(); }
     this._fcBusy = false;
   }

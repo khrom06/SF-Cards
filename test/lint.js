@@ -41,5 +41,30 @@ lines.forEach((l, i) => { if (/subscribe(Message|Events)\(/.test(l) && !/_fcFail
     });
   }
 }
+// 7. Contrast (WCAG 2.2 AA, 4.5:1 for text): every palette colour that is used for text must reach it on the three backgrounds of the card gradient,
+// in both themes. `grey` (disabled / inactive state, dark palette) is a known, documented exception: see docs/audit/07-accessibility-and-ux.md.
+{
+  const fs3 = require("fs"), path3 = require("path"), css = fs3.readFileSync(path3.join(__dirname, "..", "src", "05-styles.js"), "utf8");
+  const pal = (name) => { const m = css.match(new RegExp("const " + name + " = `([^`]*)`")); const o = {}; if (m) for (const [, k, v] of m[1].matchAll(/--sf-([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})\b/g)) o[k] = v; return o; };
+  const lum = (h) => { const c = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4))); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const text = ["text", "dim", "strong", "cyan", "amber", "red", "green", "grey", "orange", "heat", "cool", "dry", "fan", "auto", "pink", "yellow"];
+  for (const [theme, name, skip] of [["dark", "SF_VARS_DARK", ["grey"]], ["light", "SF_VARS_LIGHT", []]]) {
+    const P = pal(name); if (!P.bg0) { bad.push(`05-styles: palette ${name} not found (contrast rule cannot run)`); continue; }
+    for (const k of text) if (P[k] && !skip.includes(k)) { const worst = Math.min(...["bg0", "bg1", "bg2"].map((b) => cr(P[k], P[b]))); if (worst < 4.5) bad.push(`05-styles: --sf-${k} (${P[k]}) has contrast ${worst.toFixed(2)}:1 in the ${theme} theme (< 4.5:1 for text)`); }
+  }
+}
+// 8. Versions: the version announced by the code (bootstrap, console banner) is the one at the top of the changelog (the release script tags the same one).
+{
+  const fs4 = require("fs"), path4 = require("path"), root = path4.join(__dirname, "..");
+  const top = (fs4.readFileSync(path4.join(root, "CHANGELOG.md"), "utf8").match(/^## \[(\d+\.\d+\.\d+)\]/m) || [])[1];
+  if (!top) bad.push("CHANGELOG.md: no `## [x.y.z]` heading found");
+  else {
+    const seen = [];
+    for (const f of ["01-bootstrap.js", "45-editor-register.js"]) for (const m of fs4.readFileSync(path4.join(root, "src", f), "utf8").matchAll(/SF_CARDS_VERSION = "(\d+\.\d+\.\d+)"|\(v(\d+\.\d+\.\d+)\)|%c v(\d+\.\d+\.\d+) /g)) seen.push([f, m[1] || m[2] || m[3]]);
+    if (seen.length < 3) bad.push(`version strings: expected at least 3 in 01-bootstrap / 45-editor-register, found ${seen.length}`);
+    for (const [f, v] of seen) if (v !== top) bad.push(`src/${f}: version ${v} differs from the top of CHANGELOG.md (${top})`);
+  }
+}
 if (bad.length) { console.log("FAIL lint: " + bad.length + " problem(s)"); bad.forEach((b) => console.log(" - " + b)); process.exit(1); }
 console.log("OK: reliability rules respected");

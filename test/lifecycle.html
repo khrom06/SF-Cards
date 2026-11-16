@@ -1,0 +1,68 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Lifecycle test (run by run.sh in headless Chrome): a card removed from the page must stop working (timers, Home Assistant subscriptions),
+     whenever it is removed, and re-inserting it must never stack timers or subscriptions. Writes its verdict (JSON) into #result. -->
+<body>
+<script>
+class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon);
+window.requestAnimationFrame = (f) => setTimeout(f, 0);
+window.__SF_TEST = true;
+const liveIv = new Set(), _si = window.setInterval.bind(window), _ci = window.clearInterval.bind(window);
+window.setInterval = (f, ms, ...a) => { const id = _si(f, ms, ...a); liveIv.add(id); return id; };
+window.clearInterval = (id) => { liveIv.delete(id); _ci(id); };
+</script>
+<script src="../dist/sf-cards.js"></script>
+<script src="fixtures.js"></script>
+<script>
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const fails = [], need = (c, m) => { if (!c) fails.push(m); };
+const tags = () => Object.keys(FULL).filter((t) => customElements.get(t));
+let liveSubs = 0, subCalls = 0;
+// A Home Assistant connection whose subscribeMessage answers after `delay` ms, like a real WebSocket round trip.
+const hassWithConn = (states, delay) => { const h = HASS(states, "en");
+  h.connection = { subscribeMessage: (cb, msg) => { subCalls++; return new Promise((res) => setTimeout(() => { liveSubs++; let done = false; res(() => { if (!done) { done = true; liveSubs--; } }); }, delay)); } };
+  return h; };
+
+(async () => {
+  // 1. Timers: after removal, whenever it happens, no interval of the card is left; 5 re-insertions never stack.
+  for (const tag of tags()) {
+    const n0 = liveIv.size;
+    const a = document.createElement(tag); a.setConfig(FULL[tag]); a.hass = HASS(base, "en"); document.body.appendChild(a); await wait(60); a.remove(); await wait(60);
+    need(liveIv.size === n0, `${tag}: ${liveIv.size - n0} interval(s) left after removal`);
+    const b = document.createElement(tag); b.setConfig(FULL[tag]); document.body.appendChild(b); b.hass = HASS(base, "en"); b.remove(); await wait(60);
+    need(liveIv.size === n0, `${tag}: ${liveIv.size - n0} interval(s) started by a render queued before removal`);
+    const c = document.createElement(tag); c.setConfig(FULL[tag]); c.hass = HASS(base, "en");
+    for (let i = 0; i < 5; i++) { document.body.appendChild(c); await wait(25); c.remove(); await wait(25); }
+    need(liveIv.size === n0, `${tag}: ${liveIv.size - n0} interval(s) left after 5 insert / remove cycles`);
+  }
+  // 1b. The same with a running timer (timerInfo starts a refresh interval from inside the render).
+  { const st = { ...base, "switch.dry": { state: "on", attributes: {} }, "timer.dry": { state: "active", attributes: { finishes_at: new Date(Date.now() + 600000).toISOString() } } };
+    const cfg = { tiles: [{ kind: "toggle", name: "Dry", entity: "switch.dry", timer: "timer.dry", stop: "switch.dry" }] };
+    const n0 = liveIv.size;
+    const a = document.createElement("sf-machines-card"); a.setConfig(cfg); a.hass = HASS(st, "en"); document.body.appendChild(a); await wait(60);
+    need(liveIv.size === n0 + 1, "machines: a running timer should refresh the countdown (1 interval while attached)");
+    a.remove(); await wait(60); need(liveIv.size === n0, "machines: refresh interval left after removal");
+    const b = document.createElement("sf-machines-card"); b.setConfig(cfg); document.body.appendChild(b); b.hass = HASS(st, "en"); b.remove(); await wait(60);
+    need(liveIv.size === n0, "machines: render queued before removal started an interval on a detached card");
+    // a card rendered before being attached must still count down once it is attached
+    const c = document.createElement("sf-machines-card"); c.setConfig(cfg); c.hass = HASS(st, "en"); await wait(60); document.body.appendChild(c); await wait(60);
+    need(liveIv.size === n0 + 1, "machines: a card rendered detached then attached did not start its countdown"); c.remove(); await wait(30); }
+  // 2. Home Assistant subscriptions: removal while the subscription is still being set up must not leave it open.
+  for (const [tag, cfg] of [["sf-air-card", FULL["sf-air-card"]], ["sf-weather-card", FULL["sf-weather-card"]], ["sf-ns-card", FULL["sf-ns-card"]]]) {
+    liveSubs = 0; subCalls = 0;
+    const a = document.createElement(tag); a.setConfig(cfg); document.body.appendChild(a); a.hass = hassWithConn(base, 40); await wait(5);
+    a.remove(); await wait(150);
+    need(subCalls > 0, `${tag}: no forecast subscription was attempted (test setup)`);
+    need(liveSubs === 0, `${tag}: ${liveSubs} subscription(s) still open after the card was removed during the subscription`);
+    liveSubs = 0; subCalls = 0;
+    const b = document.createElement(tag); b.setConfig(cfg); b.hass = hassWithConn(base, 5);
+    for (let i = 0; i < 4; i++) { document.body.appendChild(b); await wait(40); b.remove(); await wait(40); }
+    need(liveSubs === 0, `${tag}: ${liveSubs} subscription(s) open after 4 insert / remove cycles`);
+    liveSubs = 0;
+    const c = document.createElement(tag); c.setConfig(cfg); document.body.appendChild(c); c.hass = hassWithConn(base, 5); await wait(60);
+    need(liveSubs <= (tag === "sf-weather-card" ? 2 : 1), `${tag}: ${liveSubs} subscriptions open for one attached card`);   // the weather card opens one per forecast type (hourly + daily)
+    c.remove(); await wait(40); need(liveSubs === 0, `${tag}: subscription left after a normal removal`);
+  }
+  const pre = document.createElement("pre"); pre.id = "result"; pre.textContent = JSON.stringify({ ok: !fails.length, failures: fails }); document.body.appendChild(pre);
+})();
+</script>

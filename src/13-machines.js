@@ -17,7 +17,7 @@ class SfMachinesCard extends SfBase {
   get hass() { return this._hass; }
   get _ld() { return this.__ld || (this.__ld = new SfLoader(this)); }
   get _sp() { const d = this._ld.data; return d ? { key: d.key, error: d.error, pts: d.value || {} } : null; }
-  setConfig(config) { super.setConfig(config); this._ld.reset(); this._loadSpark(); }
+  setConfig(config) { super.setConfig(config); if (!this._cfgSame) this._ld.reset(); this._loadSpark(); }
   // Mini-curve of a tile (`spark: true` = 24 h, or a number of hours, 1 to 168): history of the entities loaded together (one request per distinct duration,
   // 3 at most), refreshed at most every 5 minutes; after a failure, at most one retry per minute (hass is called several times per second).
   _sparkTiles() {

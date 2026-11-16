@@ -21,7 +21,7 @@ class SfCameraCard extends SfBase {
       const s = this.st(img.dataset.cam);
       const base = s && sfSafeUrl(s.attributes.entity_picture);
       if (!base) return;
-      const url = `${base}${base.includes("?") ? "&" : "?"}_t=${Date.now()}`;
+      const url = base.startsWith("data:") ? base : `${base}${base.includes("?") ? "&" : "?"}_t=${Date.now()}`;   // the cache-buster would corrupt an inline image
       const pre = new Image();
       pre.onload = () => { img.src = url; img.classList.add("ok"); };
       pre.src = url;

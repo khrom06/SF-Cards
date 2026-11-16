@@ -1,0 +1,86 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- Robustness test (run by run.sh in headless Chrome): no card may throw, freeze or leave an unhandled rejection when Home Assistant gives it
+     something unexpected: missing / unavailable / unknown / non-numeric entities, attributes of the wrong type, failing or malformed WebSocket
+     answers, a minimal `hass`, wrong-typed configuration, language / theme changes. Writes its verdict (JSON) into #result. -->
+<body>
+<script>
+class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon);
+window.requestAnimationFrame = (f) => setTimeout(f, 0);
+window.__SF_TEST = true;
+window.__errs = [];
+window.addEventListener("error", (e) => window.__errs.push(`${e.message} @${(e.filename || "").split("/").pop()}:${e.lineno}`));
+window.addEventListener("unhandledrejection", (e) => window.__errs.push(`unhandled rejection: ${e.reason && e.reason.message || e.reason}`));
+</script>
+<script src="../dist/sf-cards.js"></script>
+<script src="fixtures.js"></script>
+<script>
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const fails = [], tags = () => Object.keys(FULL).filter((t) => customElements.get(t));
+const each = (o, f) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, f(v, k)]));
+// worlds: what Home Assistant can hand a card
+const worlds = {
+  "no entity at all": {},
+  "every entity unavailable": each(base, (s) => ({ state: "unavailable", attributes: s.attributes })),
+  "every entity unknown": each(base, (s) => ({ state: "unknown", attributes: s.attributes })),
+  "non-numeric states": each(base, (s) => ({ state: "abc", attributes: s.attributes })),
+  "empty and odd states": each(base, (s, k) => ({ state: k.length % 2 ? "" : "-0", attributes: {} })),
+  "null attributes": each(base, (s) => ({ state: s.state, attributes: { friendly_name: null, unit_of_measurement: null, icon: null, entity_picture: null, device_class: null, brightness: null, temperature: null, forecast: null, options: null, preset_modes: null, hvac_action: null, finishes_at: null, last_triggered: null, current_position: null, media_title: null } })),
+  "wrong-typed attributes": each(base, (s) => ({ state: s.state, attributes: { friendly_name: 42, unit_of_measurement: {}, icon: [], options: "x", preset_modes: 7, forecast: "none", temperature: "warm", brightness: "max", current_position: "open", finishes_at: "soon", last_triggered: 5, media_duration: "long", media_position: null, hvac_modes: {} } })),
+};
+const mkHass = (states, mode) => { const h = HASS(states, "en");
+  const answer = { reject: () => Promise.reject(new Error("boom")), never: () => new Promise(() => {}), empty: () => Promise.resolve(null), junk: () => Promise.resolve({ x: [1, null, "a"], entity: 7, forecast: "x" }),
+    arrayjunk: () => Promise.resolve([null, 1, "x", {}, { entity_id: 5, state: {}, last_changed: "x", item_id: [] }, [null], [{}]]), numberr: () => Promise.resolve(12), ok: () => Promise.resolve([]) }[mode || "ok"];
+  h.callWS = answer; h.callApi = answer; h.connection = { subscribeMessage: mode === "reject" ? () => Promise.reject(new Error("no forecast")) : () => Promise.resolve(() => {}) };
+  return h; };
+const RAW = /\b(unavailable|unknown)\b/;   // the raw Home Assistant state words are lower case; the cards' own texts are capitalised or translated
+async function run(label, tag, cfg, hass, then, rawCheck) {
+  const before = window.__errs.length; let el;
+  try { el = document.createElement(tag); el.setConfig(cfg); document.body.appendChild(el); el.hass = hass; await wait(60); if (then) await then(el); await wait(40); }
+  catch (e) { fails.push(`${tag} [${label}]: threw ${e.message}`); }
+  const errs = window.__errs.splice(before); if (errs.length) fails.push(`${tag} [${label}]: ${[...new Set(errs)].slice(0, 2).join(" | ")}`);
+  if (el) { if (!el.shadowRoot || !el.shadowRoot.innerHTML.length) fails.push(`${tag} [${label}]: rendered nothing`);
+    else if (rawCheck) { const m = RAW.exec(el.shadowRoot.textContent); if (m) fails.push(`${tag} [${label}]: the raw state "${m[0]}" is shown as a value`); }
+    el.remove(); }
+}
+(async () => {
+  for (const [name, st] of Object.entries(worlds)) for (const tag of tags()) await run(name, tag, FULL[tag], mkHass(st), null, name === "every entity unavailable" || name === "every entity unknown");
+  for (const mode of ["reject", "never", "empty", "junk", "arrayjunk", "numberr"]) for (const tag of tags()) await run("WebSocket answers: " + mode, tag, FULL[tag], mkHass(base, mode));
+  // minimal hass: what a card sees very early or in a preview
+  for (const tag of tags()) await run("minimal hass", tag, FULL[tag], { states: {} });
+  for (const tag of tags()) await run("hass without states", tag, FULL[tag], {});
+  // configuration of the wrong shape (the card may ask for completion, it must not break)
+  const wrongs = { "empty": {}, "only a title": { title: "x" }, "strings for lists": Object.fromEntries(Object.keys(FULL["sf-console-card"]).map((k) => [k, "sensor.temp"])), "numbers everywhere": { title: 5, entity: 5, entities: 5, series: 5, items: 5, tiles: 5, rooms: 5, cars: 5, devices: 5, groups: 5, appliances: 5, checks: 5, min: "a", max: "b", hours: "x", days: "y" }, "null values": { title: null, entity: null, entities: null, series: null, items: null, tiles: null, rooms: null, groups: null, weather: null }, "nested garbage": { entities: [null, 1, "", {}, []], series: [null, {}, { entity: 5 }], tiles: [null, 1, {}], groups: [{ items: "x" }, { items: [null] }], items: [null, {}, "a"] } };
+  for (const [name, cfg] of Object.entries(wrongs)) for (const tag of tags()) await run("config " + name, tag, cfg, mkHass(base));
+  // life cycle events: language and theme changes, a new hass object with entities removed then restored
+  for (const tag of tags()) await run("language / theme / entities change", tag, FULL[tag], mkHass(base), async (el) => {
+    for (const lang of ["ar", "zh-Hans", "pt_BR", "xx-invalid", "fr"]) { const h = mkHass(base); h.locale = { language: lang }; h.language = lang; h.themes = { theme: "t" + lang, darkMode: lang === "ar" }; el.hass = h; await wait(15); }
+    el.hass = mkHass({}); await wait(15); el.hass = mkHass(base); await wait(15); el.setConfig({ ...FULL[tag], theme: "light" }); await wait(15); });
+  // Normalisation of the configuration (the one place every card relies on)
+  { const N = window.__SF.sfNormConfig; const need = (c, m) => { if (!c) fails.push("normalise: " + m); };
+    const r = N("sf-machines-card", { tiles: [null, "", { label: "a" }, 5, undefined], exclude: "sensor.x", lights_off: [null, "", "light.a", undefined], color: "red; background:url(//x)", accent: "#abc", span: 9 });
+    need(Array.isArray(r.tiles) && r.tiles.length === 1 && r.tiles[0].label === "a", "list entries that are null / empty / not objects must be dropped");
+    need(Array.isArray(r.exclude) && r.exclude[0] === "sensor.x", "a single value where a list is expected must become a one-item list");
+    need(JSON.stringify(r.lights_off) === '["light.a"]', "empty / null entries of a list of ids must be dropped");
+    need(!("color" in r), "an unsafe colour must be removed"); need(r.accent === "#abc", "a safe colour must be kept"); need(!("span" in r), "an out-of-range span must be removed");
+    const k = N("sf-climate-card", { min: 30, max: 10 }); need(k.min === 15 && k.max === 30, "an impossible climate range must fall back to 15–30");
+    const q = N("sf-health-card", JSON.parse('{"__proto__":{"p":1},"checks":[]}')); need(({}).p === undefined && !Object.prototype.hasOwnProperty.call(q, "p"), "__proto__ must be ignored"); }
+  // A hidden tab must not keep downloading camera pictures
+  { let loads = 0; const RealImage = window.Image; window.Image = function () { loads++; return new RealImage(); };
+    const el = document.createElement("sf-camera-card"); el.setConfig(FULL["sf-camera-card"]); document.body.appendChild(el); el.hass = mkHass({ ...base, "camera.front": { state: "idle", attributes: { entity_picture: "/api/camera_proxy/camera.front?token=x" } } }); await wait(80);
+    const visible = (loads = 0, el._refresh(), loads);
+    Object.defineProperty(document, "hidden", { configurable: true, get: () => true }); loads = 0; el._refresh(); const hidden = loads;
+    delete document.hidden; window.Image = RealImage; el.remove();
+    if (visible > 0 && hidden !== 0) fails.push(`camera: ${hidden} picture(s) requested while the tab is hidden`);
+    if (visible === 0) fails.push("camera: test setup, no picture was requested while visible"); }
+  // A camera whose picture is an inline image must not get a cache-buster appended (it would corrupt it)
+  { const seen = []; const RI = window.Image; window.Image = function () { const i = new RI(); Object.defineProperty(i, "src", { set(v) { seen.push(v); }, get() { return ""; } }); return i; };
+    const DATA = "data:image/png;base64,iVBORw0KGgo="; const el = document.createElement("sf-camera-card"); el.setConfig(FULL["sf-camera-card"]); document.body.appendChild(el);
+    el.hass = mkHass({ ...base, "camera.front": { state: "idle", attributes: { entity_picture: DATA } } }); await wait(80); seen.length = 0; el._refresh(); window.Image = RI;
+    if (!seen.length) fails.push("camera: test setup, no inline picture requested"); else if (seen[0] !== DATA) fails.push("camera: an inline image was modified: " + seen[0].slice(0, 60)); el.remove(); }
+  // The radiators accent is written into <style>: even if a hostile value reaches the card without going through the normaliser it must not break out
+  { const el = document.createElement("sf-radiators-card"); el.setConfig(FULL["sf-radiators-card"]); el._config.accent = 'red}</style><img src=x onerror="window.__x=1">'; document.body.appendChild(el); el.hass = mkHass(base); await wait(80);
+    if (el.shadowRoot.querySelectorAll("img").length) fails.push("radiators: the accent value broke out of the <style> element"); el.remove(); }
+  const pre = document.createElement("pre"); pre.id = "result"; pre.textContent = JSON.stringify({ ok: !fails.length, failures: fails }); document.body.appendChild(pre);
+})();
+</script>

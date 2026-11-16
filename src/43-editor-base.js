@@ -116,7 +116,7 @@ class SfEditorBase extends HTMLElement {
       ev.stopPropagation();
       const nt = ev.detail.value && ev.detail.value.type;
       if (nt === tag) return;
-      if (nt) item[key] = { ...JSON.parse(JSON.stringify(SF_SPECS[nt].stub)), type: `custom:${nt}` };
+      if (nt && SF_SPECS[nt]) item[key] = { ...JSON.parse(JSON.stringify(SF_SPECS[nt].stub)), type: `custom:${nt}` };
       onChange(); this._build();
     });
     box.appendChild(sel);
@@ -135,6 +135,7 @@ class SfEditorBase extends HTMLElement {
   }
   _list(parent, ls, labels, onChange, rebuild, path) {
     if (!Array.isArray(parent[ls.key])) parent[ls.key] = [];
+    else if (parent[ls.key].some((x) => !x || typeof x !== "object")) parent[ls.key] = parent[ls.key].filter((x) => x && typeof x === "object");   // a YAML typo (null, number) must not blank the editor
     const arr = parent[ls.key], box = document.createElement("div");
     const h = document.createElement("h3"); h.textContent = this._t(ls.title); box.appendChild(h);
     arr.forEach((item, i) => {

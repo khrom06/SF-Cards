@@ -23,7 +23,7 @@ class SfLedgerCard extends SfBase {
   }
   render() {
     const c = this._config, p = this.st(c.period);
-    const seg = p ? (p.attributes.options || []).map((o) => `<span class="btn ${this.esc(p.state === o ? "on" : "")}" ${this.call("input_select.select_option", { entity_id: c.period, option: o })}>${this.esc(o)}</span>`).join("") : "";
+    const seg = p ? this.arr(p.attributes.options).map((o) => `<span class="btn ${this.esc(p.state === o ? "on" : "")}" ${this.call("input_select.select_option", { entity_id: c.period, option: o })}>${this.esc(o)}</span>`).join("") : "";
     const max = Math.max(1, ...c.devices.map((d) => this.num(d.total) || 0));
     const devs = c.devices.map((d) => {
       const tot = this.num(d.total), e = this.num(d.edf) || 0, s = this.num(d.solar) || 0, cost = this.num(d.cost);

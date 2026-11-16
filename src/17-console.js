@@ -101,7 +101,7 @@ class SfConsoleCard extends SfBase {
           <span class="btn" ${v === null ? "" : go(1)}>+</span></div></div>`;
       }
       case "select": {
-        const opts = (s && s.attributes.options) || [];
+        const opts = this.arr(s && s.attributes.options);
         return `<div class="it wide"><div class="nm">${this.esc(x.label)}</div><div class="seg">${opts.map((o) =>
           `<span class="btn ${this.esc(s.state === o ? "on" : "")}" ${this.call(`${x.entity.split(".")[0]}.select_option`, { entity_id: x.entity, option: o })}>${this.esc((x.labels && Object.prototype.hasOwnProperty.call(x.labels, o) && x.labels[o]) || o)}</span>`).join("")}</div></div>`;
       }
@@ -111,7 +111,7 @@ class SfConsoleCard extends SfBase {
   render() {
     const c = this._config;
     const body = c.groups.map((g) => `<div class="grp" style="${this.esc(g.span ? `grid-column:span ${g.span}` : "")}"><h4>${g.icon ? this.icon(g.icon, 14) : ""}${this.esc(g.title)}</h4>
-      <div class="items">${(g.items || []).map((x) => this._item(x)).join("")}</div></div>`).join("");
+      <div class="items">${this.arr(g.items).filter((x) => x && typeof x === "object").map((x) => this._item(x)).join("")}</div></div>`).join("");
     return this.frame(this.esc(c.title || this.t("console.controls")), c.subtitle ? this.esc(c.subtitle) : "", `<div class="groups">${body}</div>`);
   }
   getCardSize() { return 6; }
