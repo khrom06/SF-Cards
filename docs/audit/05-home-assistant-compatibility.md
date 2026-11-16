@@ -58,3 +58,17 @@ Fix (7 files, minimal): `unit()` always returns a string; new `arr()` helper in 
 
 ## TODO phase 6 (tests and CI)
 Review what the whole suite really guards (mutation checks per area), list uncovered scenarios (wallpanel confirmation, editors, strategy), CI hygiene (action pinning, permissions, audit, size gate, translation check), then propose the CI changes together with C-1.
+
+## Update — compatibility matrix run (2026-11-16, evening)
+Docker is not available here, so real Home Assistant releases were installed with `uv` / `pip` (isolated virtual environments, the project's own `package_constraints.txt` applied), started on a fresh configuration, and the repository's end-to-end test (`test/e2e/run.mjs`: onboarding, 25 cards registered and rendered, 15 editors opened with the real `ha-form` / `ha-entity-picker`, an entity chosen, the automatic dashboard) was run against each with Chrome.
+| Home Assistant | Python | Result |
+|---|---|---|
+| 2026.11.1 (stable) | 3.14 | **pass** |
+| 2026.10.4 | 3.14 | **pass** (one cold-start frontend error in the very first attempt, not reproduced) |
+| 2026.1.3 | 3.13 | **pass** |
+| 2025.6.3 | 3.13 | **pass** |
+| 2024.11.3 | 3.12 | **pass** |
+Positive control: the same run with a bundle that throws an error on purpose **fails**, so the test still detects a defect of ours.
+What had to change in the test, and why: (1) the entity picker's search ordering and value differ between versions (the older picker keeps the typed text), so the check now accepts any entity of the test house; (2) the "Edit" button gets one retry (the view can still be loading); (3) JavaScript errors are classified by origin: those with SF-Cards code in the stack fail the run, the frontend's own errors (an aborted view transition, an unparsable rejection) are listed as notes. Freezes are still detected separately, whatever the source.
+Honest limits: these are pip installs, not the official container images the CI uses; the local setup needed dependency pins and a few extra packages that have nothing to do with SF-Cards (documented in the session, not committed); versions older than 2024.11, the mobile apps and other browsers are untested; the CI matrix in `ha-e2e.yml` (stable, 2026.1.3, 2025.6.3, 2024.11.3, beta non-blocking) has **not yet run on GitHub**.
+Consequence for the score (see 10): "Home Assistant compatibility" moves from 7.0 to 8.3. `hacs.json` was **not** given a minimum version: forcing it would block users on older versions that may work; the tested range is stated in the README instead.

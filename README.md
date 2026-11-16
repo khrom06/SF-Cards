@@ -1142,7 +1142,7 @@ Sources: [Matter Alpha — "Home Assistant embraces HACS into core as the market
 
 ## Limitations
 
-- Developed and tested on **Home Assistant 2026.11** (Chrome and the iOS / Android companion apps). Older versions may work but have not been tried.
+- Developed on **Home Assistant 2026.11** (Chrome and the iOS / Android companion apps). The end-to-end test (real Home Assistant, all cards rendered, every editor opened, automatic dashboard) passes on **2024.11, 2025.6, 2026.1, 2026.10 and 2026.11**; versions older than 2024.11 have not been tried.
 - Some code comments in `src/` are still in French (the UI itself is translated).
 - Screenshots use fictional demo data.
 - Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. A real Home Assistant (container, latest stable image) is driven by the end-to-end workflow; other Home Assistant versions are not tested yet.

@@ -11,8 +11,8 @@ on:
   workflow_dispatch:
     inputs:
       ha_version:
-        description: "Image Home Assistant (ex. 2026.10, stable, beta)"
-        default: "stable"
+        description: "Home Assistant image tag (ex. 2026.10.4, stable, beta). Empty = the whole matrix below."
+        default: ""
       sf_ref:
         description: "SF-Cards version to test (tag or commit, e.g. v1.10.0). Empty = dist/sf-cards.js of the current commit. Used to check that the test detects an old bug."
         default: ""
@@ -23,8 +23,16 @@ concurrency:
   cancel-in-progress: true
 jobs:
   e2e:
+    name: e2e (Home Assistant ${{ matrix.ha }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Oldest tested release, two in between, the latest stable, and the beta (informative only: it may break for reasons that are not ours).
+    # The same test passed locally on 2024.11.3, 2025.6.3, 2026.1.3, 2026.10.4 and 2026.11.1 (pip installs of Home Assistant, 2026-11-16).
+    continue-on-error: ${{ matrix.ha == 'beta' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ha: ${{ fromJSON(inputs.ha_version && format('["{0}"]', inputs.ha_version) || '["stable","2026.1.3","2025.6.3","2024.11.3","beta"]') }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with: { fetch-depth: 0 }
@@ -57,7 +65,7 @@ jobs:
                   state: "19.0"
           YAML
       - name: Start Home Assistant
-        run: docker run -d --name ha -p 8123:8123 -v "$PWD/ha-config:/config" "ghcr.io/home-assistant/home-assistant:${{ inputs.ha_version || 'stable' }}"
+        run: docker run -d --name ha -p 8123:8123 -v "$PWD/ha-config:/config" "ghcr.io/home-assistant/home-assistant:${{ matrix.ha }}"
       - name: Install Playwright
         run: |
           npm init -y >/dev/null
