@@ -7,7 +7,7 @@
 ![Languages](https://img.shields.io/badge/languages-11-00e5ff)
 [![Live demo](https://img.shields.io/badge/live-demo-2bff88)](https://khrom06.github.io/SF-Cards/)
 [![Ideas and feedback](https://img.shields.io/badge/ideas%20%26%20feedback-share%20yours-ffb300)](https://github.com/khrom06/SF-Cards/discussions/categories/ideas)
-[![Add to HACS](https://img.shields.io/badge/HACS-add%20this%20repository-00e5ff)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
+[![Add to HACS](https://img.shields.io/badge/HACS-open%20in%20HACS-00e5ff)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 
 <p align="center">
   <img src="assets/anim/reactor.webp" alt="Energy flow card, animated" width="780">
