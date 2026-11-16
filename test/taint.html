@@ -28,11 +28,14 @@ const fails = [];
 const need = (cond, msg) => { if (!cond) fails.push(msg); };
 const PAY = '"><img src=x onerror="window.__x++"><svg onload="window.__x++"> \'onmouseover=\'window.__x++\' javascript:void(0)';
 const CSSP = 'red}</style><img src=x onerror="window.__x++"><style>';
+// Other shapes of hostile text: already-encoded entities, a literal unicode escape, an attribute break-out without a tag, a style / script break-out, a template-literal / expression syntax, a javascript: scheme with an encoded colon
+const VARIANTS = ['&lt;img src=x onerror=&quot;window.__x++&quot;&gt;', '\\u003cimg src=x onerror=window.__x++\\u003e', '" autofocus onfocus="window.__x++" x="', '</style><scr' + 'ipt>window.__x++</scr' + 'ipt>', '${window.__x++}`;window.__x++;`', 'javascript&colon;window.__x++', "'><svg/onload=window.__x++>"];
 const tags = () => Object.keys(FULL).filter((t) => customElements.get(t));
 // anything that is not inert markup: a script, an element with an inline event handler, a javascript:/data: URL in src/href
 const unsafe = (root) => [...root.querySelectorAll("*")].filter((e) => e.localName === "script" || [...e.attributes].some((a) => /^on/i.test(a.name))
   || (["src", "href"].some((n) => /^\s*(javascript|vbscript):/i.test(e.getAttribute(n) || "")))).length;
 
+const deepS = (o, f) => Array.isArray(o) ? o.map((x) => deepS(x, f)) : o && typeof o === "object" ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, deepS(v, f)])) : typeof o === "string" ? f(o) : o;
 (async () => {
   // 1. Hostile states and attributes (a cloud integration, a device name, a camera sensor can all carry text).
   const hostile = {};
@@ -93,6 +96,12 @@ const unsafe = (root) => [...root.querySelectorAll("*")].filter((e) => e.localNa
       const el = document.createElement(tag); try { el.setConfig(cfg); document.body.appendChild(el); el.hass = HASS(mode === "allstrings" ? hostile : st2, "en"); await wait(70); } catch (e) {}
       if (el.shadowRoot && unsafe(el.shadowRoot)) fails.push(`${tag} [${mode}]: active content`); el.remove(); } }
 
+  // 4b. the same worlds with other shapes of hostile text (encoded, break-outs of an attribute / <style> / <script>, expression syntax)
+  for (const P of VARIANTS) {
+    const hv = {}; for (const [id, s] of Object.entries(base)) { const attrs = {}; for (const [k, v] of Object.entries(s.attributes || {})) attrs[k] = typeof v === "string" && !["unit_of_measurement", "device_class"].includes(k) ? P : v; Object.assign(attrs, { friendly_name: P, icon: P, entity_picture: P });
+      hv[id] = { state: isNaN(parseFloat(s.state)) ? P : s.state, attributes: attrs }; }
+    for (const tag of tags()) { const el = document.createElement(tag); try { el.setConfig(deepS(FULL[tag], () => P)); document.body.appendChild(el); el.hass = HASS(hv, "en"); await wait(50); } catch (e) {}
+      if (el.shadowRoot && unsafe(el.shadowRoot)) fails.push(`${tag} [variant ${P.slice(0, 18)}]: active content`); el.remove(); } }
   // 5. every entity in every "active" state, with hostile names and attributes: opens the branches that only run when something is on / open / playing / cleaning / alarming
   for (const val of ["on", "open", "playing", "heat", "cool", "active", "cleaning", "charging", "home", "unlocked", "triggered", "error", "docked", "paused", "idle", "armed_away", "off", "closed", "heating", "28", "-5", "1e9"]) {
     const w = {}; for (const [id, s] of Object.entries(base)) { const attrs = {}; for (const [k, v] of Object.entries(s.attributes || {})) attrs[k] = typeof v === "string" && !["unit_of_measurement", "device_class"].includes(k) ? PAY : v;

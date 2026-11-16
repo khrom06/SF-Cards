@@ -22,6 +22,8 @@ page() {   # page <file> <label>
     if (r.ok) { console.log("OK: all " + process.argv[1] + " pass"); process.exit(0); }
     console.log("FAIL: " + r.failures.length + " problem(s) in the " + process.argv[1]); r.failures.forEach((f) => console.log(" - " + f)); process.exit(1);' "$2" || exit 1
 }
+node scripts/taint.mjs || exit 1   # every ${...} of every template: hostile values must never reach the HTML unescaped; unreached sites must be on the reviewed list
+node test/tools.mjs || exit 1   # the benchmark and taint tools must fail visibly
 page render.html "render tests"
 page security.html "security tests (hostile states and config, confirmation)"
 page lifecycle.html "lifecycle tests (timers and subscriptions after removal)"

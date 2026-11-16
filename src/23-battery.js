@@ -21,11 +21,12 @@ function sfBatAgg(el, c) {
 function sfBatSource(charge, solar, grid, fromGrid) {
   if (!(charge > 0)) return null;
   let g;
-  if (fromGrid !== null && fromGrid !== undefined) g = Math.min(charge, Math.max(0, fromGrid));
+  const est = fromGrid === null || fromGrid === undefined;   // measured only when a "from grid" sensor is configured; every other path rests on an assumption
+  if (!est) g = Math.min(charge, Math.max(0, fromGrid));
   else if (grid !== null && grid !== undefined) g = Math.min(charge, Math.max(0, grid));
   else if (solar !== null && solar !== undefined) g = charge - Math.min(charge, Math.max(0, solar));
   else return null;
-  return { s: charge - g, g };
+  return { s: charge - g, g, est };
 }
 
 /* ============================================================== BATTERIE */
@@ -87,7 +88,7 @@ class SfBatteryCard extends SfBase {
     const src = bw !== null && bw <= -20 ? sfBatSource(-bw, w(c.solar), w(c.grid), w(c.from_grid)) : null, home = w(c.home);
     const parts = src ? [src.s >= 20 && `<span style="white-space:nowrap;color:${SF_C.amber}">${this.icon("mdi:solar-power-variant", 12)} ${this.kw(src.s)} ${this.t("common.solar")}</span>`,
       src.g >= 20 && `<span style="white-space:nowrap;color:var(--sf-orange)">${this.icon("mdi:transmission-tower", 12)} ${this.kw(src.g)} ${this.t("common.grid")}</span>`].filter(Boolean) : [];
-    const origin = parts.length ? `<br>${this.t("battery.charging_from")} ${parts.join(" · ")}` : bw !== null && bw >= 20 && home !== null && home > 0 ? `<br>${this.t("battery.covers_home", { p: Math.round(Math.min(100, (bw / home) * 100)) })}` : "";
+    const origin = parts.length ? `<br><span${src.est ? ` title="${this.esc(this.t("battery.estimated_tip"))}"` : ""}>${src.est ? "≈ " : ""}${this.t("battery.charging_from")}</span> ${parts.join(" · ")}` : bw !== null && bw >= 20 && home !== null && home > 0 ? `<br>${this.t("battery.covers_home", { p: Math.round(Math.min(100, (bw / home) * 100)) })}` : "";
     const stat = (id, label, unit, digits) => { if (!id) return ""; const n = this.num(id); return `<div class="click" data-e="${this.esc(id)}"><div class="lbl">${this.t(label)}</div><div class="v">${n === null ? "—" : this.nf(n, digits) + unit}</div></div>`; };
     const stats = [stat(c.charged_today, "Chargé aujourd'hui", " kWh", 1), stat(c.discharged_today, "Déchargé aujourd'hui", " kWh", 1),
       stat(c.temperature, "Température", " °C", 0), stat(c.health, "Santé", " %", 0), stat(c.cycles, "Cycles", "", 0)].filter(Boolean).join("");

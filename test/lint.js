@@ -66,5 +66,25 @@ lines.forEach((l, i) => { if (/subscribe(Message|Events)\(/.test(l) && !/_fcFail
     for (const [f, v] of seen) if (v !== top) bad.push(`src/${f}: version ${v} differs from the top of CHANGELOG.md (${top})`);
   }
 }
+// 9. The card contract: a card is not finished until it has what every other card has. The registry (src/30-registry.js) is the list of cards; for each one:
+// a full fixture (test/fixtures.js `FULL`, which puts it in every generic test: render, security, editors, lifecycle, robustness, accessibility, taint),
+// an editor specification, a "required configuration" rule (or an entry in the list of cards that work with no configuration below), and a mention in the
+// README and in the live demo (under its themed name when it has one). Adding a card without one of these fails here, not in review.
+{
+  const fs5 = require("fs"), path5 = require("path"), rd = (f) => fs5.readFileSync(path5.join(__dirname, "..", f), "utf8");
+  const reg = rd("src/30-registry.js"), rules = rd("src/04-config-rules.js"), fx = rd("test/fixtures.js"), specs = rd("src/41-editor-specs.js"), readme = rd("README.md"), demo = rd("docs/index.html");
+  const tags = [...reg.matchAll(/\["(sf-[a-z0-9-]+-card)", Sf/g)].map((m) => m[1]);
+  const alias = {}; for (const m of (rules.match(/const SF_ALIAS = \{([^}]*)\}/) || ["", ""])[1].matchAll(/"([a-z0-9-]+)": "([a-z0-9-]+)"/g)) alias[m[2]] = m[1];
+  const noConfigNeeded = ["sf-bridge-card", "sf-cells-card", "sf-automations-card"];   // they show something useful with an empty configuration
+  if (tags.length < 30) bad.push(`registry: expected at least 30 cards, found ${tags.length}`);
+  for (const t of tags) {
+    const names = [t, alias[t]].filter(Boolean);
+    if (!new RegExp(`"${t}"\\s*:`).test(fx)) bad.push(`${t}: no full fixture in test/fixtures.js (FULL)`);
+    if (!new RegExp(`"${t}"\\s*:\\s*\\{`).test(specs)) bad.push(`${t}: no editor specification in src/41-editor-specs.js`);
+    if (!noConfigNeeded.includes(t) && !new RegExp(`"${t}"\\s*:\\s*\\(`).test(rules)) bad.push(`${t}: no required-configuration rule in src/04-config-rules.js (or add it to the no-configuration list in test/lint.js, with a reason)`);
+    if (!names.some((n) => readme.includes(n))) bad.push(`${t}: not mentioned in README.md`);
+    if (!names.some((n) => demo.includes(n))) bad.push(`${t}: not shown in the live demo docs/index.html`);
+  }
+}
 if (bad.length) { console.log("FAIL lint: " + bad.length + " problem(s)"); bad.forEach((b) => console.log(" - " + b)); process.exit(1); }
 console.log("OK: reliability rules respected");

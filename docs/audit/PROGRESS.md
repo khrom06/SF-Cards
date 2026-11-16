@@ -21,3 +21,5 @@ Phase 7 added: `test/a11y.html`, lint rule 7 (palette contrast), palette tweak i
 All 10 phases done on 2026-11-16. Weighted score 7.4 -> 8.6 (see 10-final-assessment.md).
 State: committed locally (several commits, NOT pushed). Suite green (`./test/run.sh`, ~1 min 10 s).
 Next exact action (owner): push, observe the CI (hardened workflows + HA matrix) on GitHub, and release v1.21.1 with the owner's go (version strings in src/01-bootstrap.js, src/45-editor-register.js and the CHANGELOG `[Unreleased]` heading must be bumped together; lint rule 8 checks it). Owner actions: enable GitHub private vulnerability reporting; decide X-2, S-3, C-1/C-2.
+
+Follow-up (second reviewer, 2026-11-16 night): see `11-followup-review.md` (1 criticism wrong, 4 acted on). On branch `audit/followup`, to be merged through a PR.

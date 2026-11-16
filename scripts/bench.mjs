@@ -47,4 +47,4 @@ try {
   console.log(`house of 3000 extra entities: update median ${res.dashboard_3000_entities.update_median_ms} ms (p95 ${res.dashboard_3000_entities.update_p95_ms}); heaviest: ${pc.slice(0, 4).map(([k, v]) => `${k} ${v}ms`).join(", ")}`);
   if (!outFile) console.log(txt);
 } finally { try { ws && ws.close(); } catch {} ch.kill("SIGKILL"); await sleep(400); try { fs.rmSync(prof, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); } catch {} }
-process.exit(0);
+process.exit(0);   // reached only when every step above succeeded: an exception in the try block leaves the program (exit code 1) after the finally block
