@@ -10,6 +10,12 @@ Thanks for your interest! Issues and pull requests are welcome.
 - **Screenshots:** 480×480 for the wall-panel card, fake data only; see the demo page (`docs/index.html`) for a ready-made mock Home Assistant.
 - **Demo page:** `node scripts/build.mjs` also refreshes `docs/sf-cards.js`.
 
+## The card contract (what "finished" means)
+
+A card is not finished until it has what every other card has; `test/lint.js` (rule 9) fails otherwise: a full fixture in `test/fixtures.js` (`FULL`: this alone puts it in every generic test — render, security, editors, lifecycle, requests, robustness, accessibility, taint), an editor specification, a required-configuration rule (or a documented reason why it needs none), and a place in the README and the live demo. Behaviour the generic tests check for every card: no exception and a visible message on missing / unavailable / odd data, escaped text, no timer or subscription left after removal, no repeated request on a re-applied configuration, a name and keyboard access for every clickable element, light and dark theme, 11 languages, right-to-left. Data that is not measured must say so (see below).
+
+**Measured, calculated, estimated.** A value read from a sensor is shown as is. A value computed from sensors by a rule that is always true (a sum, a difference) is shown as is. A value that rests on an assumption (for instance how a battery charge splits between solar and grid when the split is not measured) must be marked with `≈` and an explanatory tooltip, and the README must say what the assumption is.
+
 ## Adding a card
 
 A new card touches these places (grep the name of a recent one, e.g. `sf-report-card`, to see each):

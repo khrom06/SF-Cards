@@ -2,6 +2,14 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+### Changed
+- **Battery: an estimate now looks like one.** When the solar / grid split of the charge is not measured (no `from_grid` / `battery_from_grid`), the battery card and the energy card show it with **≈** and an explanatory tooltip in the 11 languages; with a measured value the ≈ is gone. The README spells out the difference between measured, calculated and estimated values.
+- README: the Home Assistant section now separates the supported minimum (2024.11), the versions tested end to end and what is not verified.
+### Tests and project
+- `scripts/taint.mjs` now runs with the test suite: it also tries encoded and break-out payloads, and a template interpolation that no hostile scenario reaches must be on a reviewed list (`test/taint-reviewed.json`) or the check fails. A new check (`test/tools.mjs`) makes sure the benchmark and taint tools fail visibly with a non-zero exit code.
+- A "card contract" lint rule: every card needs a full fixture (which puts it in every generic test), an editor specification, a required-configuration rule, and a place in the README and the demo.
+
 ## [1.21.1]
 ### Fixed
 - **Fewer requests to Home Assistant while you edit a card.** Re-applying a card's configuration (the visual editor does it on every change) no longer throws away the history it had loaded: the automations card, for example, made about 150 requests per keystroke in a house with 150 automations, now none.

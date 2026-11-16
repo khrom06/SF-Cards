@@ -1,0 +1,3395 @@
+{
+ "note": "Interpolation sites that no hostile scenario of test/taint.html reaches. Each one was read by a person (see docs/audit/02-security-audit.md and 11-followup.md) and found to carry no user text, or only text escaped by this.esc() / a number / a constant. benignSuite = run by the ordinary render suite with benign data. Regenerate with `node scripts/taint.mjs --update-baseline` ONLY after reading every new entry.",
+ "unreached": [
+  {
+   "key": "01-bootstrap.js|window.SF_CARDS_VERSION#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "06-config-normalise.js|src.slice(0, 60)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "07-base.js|this.localName#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "07-base.js|SF_C.amber#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "07-base.js|this.esc(this.t(m))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "07-base.js|miss.map((m) => `• ${this.esc(this.t(m))}`).join(\"<br>\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "07-base.js|e.dataset.call#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "07-base.js|e.dataset.d || \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "10-alert.js|this.esc(c.snapshot)#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "10-alert.js|this.esc(snapUrl)#1",
+   "ctx": "url-attr",
+   "benignSuite": false
+  },
+  {
+   "key": "10-alert.js|this.esc(title)#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "10-alert.js|this.t(\"alert.open\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "10-alert.js|this.t(\"alert.simulate_a_doorbell\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.esc(on ? \"on\" : \"\")#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.esc(this.t(on ? \"Arrêter la charge\" : \"Démarrer la charge\"))#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|ch.switch.split(\".\")[0]#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|raw ? \"off\" : \"on\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|dead ? \"\" : this.call(`${ch.switch.split(\".\")[0]}.turn_${raw ? \"off\" : \"on\"}`, { entity_id: ch.switch }, on ? this.t(\"common.stop\") : \"\")#1",
+   "ctx": "tag",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.icon(on ? \"mdi:stop\" : \"mdi:play\", 16)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.t(on ? \"Arrêter\" : \"Démarrer\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|dom#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.esc(this.t(\"hangar.decrease_current\"))#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|go(-1)#1",
+   "ctx": "tag",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.esc(this.t(\"hangar.increase_current\"))#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|go(1)#1",
+   "ctx": "tag",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|out.join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.t(\"hangar.charger\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "11-hangar.js|k + 1#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "11-hangar.js|this.esc(cars.length)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|carsHtml#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|cars.length ? `<div class=\"cars\" style=\"grid-template-columns:repeat(${this.esc(cars.length)},minmax(0,1fr))\">${carsHtml}</div>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|bornes.join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.esc(ch.decision)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.t(\"hangar.controller\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.lang === \"fr\" ? \" \" : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|SF_C.cyan#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.fmt(ch.decision)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.esc(sts[k].charging ? SF_C.green : sts[k].connected ? SF_C.amber : SF_C.dim)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.esc(label(ch, k))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|sts[k].charging ? this.t(\"hangar.charging\") : sts[k].connected ? this.t(\"common.waiting\") : this.t(\"common.idle\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|decOf(ch)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "11-hangar.js|ch.decision ? ` · ${decOf(ch)}` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.esc(who)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "11-hangar.js|this.esc(c.warn_text || \"\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "12-radar.js|this.esc(p.face)#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "12-radar.js|this.esc(col)#5",
+   "ctx": "style-attr",
+   "benignSuite": false
+  },
+  {
+   "key": "12-radar.js|this.esc(p.name)#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "12-radar.js|this.esc(cam)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "12-radar.js|this.ago(p.face)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "12-radar.js|seen ? `${this.esc(cam)} · ${this.ago(p.face)}` : this.t(\"radar.never_seen\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "13-machines.js|x.id#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|x.h#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|id#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|h#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|t.entity#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|h#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|k ? \"L\" : \"M\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|X(tm)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|Y(val)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|path#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|X(d.p[d.p.length - 1][0])#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|X(d.p[0][0])#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|this.esc(col)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|path#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|this.esc(col)#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|h#3",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "13-machines.js|String(m).padStart(2, \"0\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "13-machines.js|m#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "13-machines.js|tm.reste#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "13-machines.js|pct#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|this.esc(col)#7",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "13-machines.js|this.esc(col)#8",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "14-bridge.js|this.t(\"bridge.x_in_hhm\", { x: this.t(hc ? \"HP\" : \"HC\"), h: Math.floor(left / 60), m: String(left % 60).padStart(2, \"0\") })#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|i#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|x1#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|Y(y1)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|x1#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|my#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|x2#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|my#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|x2#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|Y(y2)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|this.esc(this.t(\"battery.estimated_tip\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "15-reactor.js|this.t(\"reactor.n_more\", { n: extra })#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "16-climate.js|this.esc(tm.actif || this.isOn(x.entity) ? \"on\" : \"\")#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "16-climate.js|act#1",
+   "ctx": "tag",
+   "benignSuite": false
+  },
+  {
+   "key": "16-climate.js|this.icon(x.icon || \"mdi:toggle-switch\", 15)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "16-climate.js|this.esc(x.label)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "16-climate.js|tm.reste#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "16-climate.js|tm.actif && tm.reste ? ` · ${tm.reste} min` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "16-climate.js|extras#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(x.sub)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(st === \"cleaning\" ? \"on\" : \"\")#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|SF_C.green#1",
+   "ctx": "style-attr",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(x.entity)#3",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|ic(\"mdi:robot-vacuum\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(x.label || \"Aspirateur\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(st === \"error\" ? `color:${SF_C.red}` : \"\")#1",
+   "ctx": "style-attr",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|txt#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|Math.round(bat)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|bat !== null ? ` · ${Math.round(bat)} %` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.call(\"vacuum.pause\", { entity_id: x.entity })#1",
+   "ctx": "tag",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.icon(\"mdi:pause\", 16)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.call(\"vacuum.start\", { entity_id: x.entity })#1",
+   "ctx": "tag",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.icon(\"mdi:play\", 16)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|st === \"cleaning\" ? `<span class=\"btn\" ${this.call(\"vacuum.pause\", { entity_id: x.entity })}>${this.icon(\"mdi:pause\", 16)}</span>` : `<span class=\"btn\" ${this.call(\"vacuum.start\", { entity_id: x.entity })}>${this.icon(\"mdi:play\", 16)}</span>`#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.call(\"vacuum.return_to_base\", { entity_id: x.entity })#1",
+   "ctx": "tag",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.icon(\"mdi:home-import-outline\", 16)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.call(\"button.press\", { entity_id: b.entity })#1",
+   "ctx": "tag",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.icon(b.icon || \"mdi:map-marker-path\", 14)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(b.label)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|x.shortcuts.filter((b) => this.st(b.entity) && this.st(b.entity).state !== \"unavailable\").map((b) => `<span class=\"btn\" ${this.call(\"button.press\", { entity_id: b.entity })}>${this.icon(b.icon || \"mdi:map-marker-path\", 14)}${this.esc(b.label)}</span>`).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|(x.shortcuts || []).length ? `<div class=\"row\" style=\"margin-top:6px\">${x.shortcuts.filter((b) => this.st(b.entity) && this.st(b.entity).state !== \"unavailable\").map((b) => `<span class=\"btn\" ${this.call(\"button.press\", { entity_id: b.entity })}>${this.icon(b.icon || \"mdi:map-marker-path\", 14)}${this.esc(b.label)}</span>`).join(\"\")}</div>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|dir > 0 ? \"increment\" : \"decrement\"#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(dead ? \"dead\" : \"\")#5",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(x.entity)#5",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|ic(\"mdi:tune-vertical\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(x.label)#6",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|v === null ? \"\" : go(-1)#1",
+   "ctx": "tag",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(x.entity)#6",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|v === null ? \"—\" : this.nf(v, x.digits ?? (step < 1 ? 1 : 0))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|this.esc(x.unit ?? this.unit(x.entity))#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "17-console.js|v === null ? \"\" : go(1)#1",
+   "ctx": "tag",
+   "benignSuite": false
+  },
+  {
+   "key": "18-camera.js|this.esc(pc > 0 ? \"hot\" : \"\")#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "18-camera.js|this.t(\"camera.n_person_s\", { n: pc })#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "18-camera.js|this.esc(rv === \"ALERT\" ? \"red\" : \"hot\")#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "18-camera.js|rv === \"ALERT\" ? this.t(\"camera.frigate_alert\") : this.t(\"camera.detection\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "19-setpoints.js|this.esc(colr)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.icon(row.icon || \"mdi:home\", 16, SF_C.dim)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(row.name)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(colr)#2",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(col.label || \"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(colr)#3",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(l.min)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(l.max)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(l.step)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(row.name)#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|k#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(this.t(lab))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|scopes.map(([k, lab]) => `<button type=\"button\" class=\"btn\" data-ed-scope=\"${k}\">${this.esc(this.t(lab))}</button>`).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|scopes.length > 1 ? `<div class=\"seg\" role=\"group\">${scopes.map(([k, lab]) => `<button type=\"button\" class=\"btn\" data-ed-scope=\"${k}\">${this.esc(this.t(lab))}</button>`).join(\"\")}</div>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(this.t(\"setpoints.apply\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(this.t(\"setpoints.cancel\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.esc(this.t(\"setpoints.details\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "19-setpoints.js|this.nf(e.v, 1)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "20-ledger.js|this.esc(p.state === o ? \"on\" : \"\")#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "20-ledger.js|this.call(\"input_select.select_option\", { entity_id: c.period, option: o })#1",
+   "ctx": "tag",
+   "benignSuite": false
+  },
+  {
+   "key": "20-ledger.js|this.esc(o)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|m ? this.esc(m.state.replace(/^[^\\p{L}]+/u, \"\")) : \"\"#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|act ? this.t(\"launcher.n_room_s_heating_or_cooling\", { n: act }) : this.t(\"common.idle\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|this.esc(x.name)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|n(x.soc) === null ? \"—\" : Math.round(n(x.soc)) + \" %\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|cars#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|this.t(\"launcher.mode_m\", { m: this.esc(m.state) })#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|m ? `<br>${this.t(\"launcher.mode_m\", { m: this.esc(m.state) })}` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|on#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|lights.length#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|this.t(\"launcher.lights_on\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|this.t(\"launcher.shutters_s\", { s: (Object.assign(Object.create(null), { open: this.t(\"common.open\"), closed: this.t(\"common.closed\") }))[cs.state] || this.esc(cs.state) })#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|cs ? `<br>${this.t(\"launcher.shutters_s\", { s: (Object.assign(Object.create(null), { open: this.t(\"common.open\"), closed: this.t(\"common.closed\") }))[cs.state] || this.esc(cs.state) })}` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|this.t(\"launcher.home_consumption\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|this.t(\"launcher.solar_w\", { w: this.kw(solar) })#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|c.solar ? `<br>${this.t(\"launcher.solar_w\", { w: this.kw(solar) })}` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|this.nf(v, first.digits ?? 1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|this.esc(first.unit ?? this.unit(first.entity))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|first ? this.esc(first.label) : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|this.t(\"launcher.n_not_responding\", { n: bad })#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|bad ? ` · ${this.t(\"launcher.n_not_responding\", { n: bad })}` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|SF_POP_CSS#1",
+   "ctx": "style-text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|this.esc(t.name || \"\")#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|this.esc(this.t(\"launcher.close\"))#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|this.t(\"common.error_2\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|e.message#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|this.t(\"common.error_2\")#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|e && e.message || e#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "22-launcher.js|location.pathname#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|location.search#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|encodeURIComponent(t.hash)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|location.pathname#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "22-launcher.js|location.search#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.icon(\"mdi:transmission-tower\", 12)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.kw(src.g)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.t(\"common.grid\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.esc(this.t(\"battery.estimated_tip\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.icon(b.power > 0 ? \"mdi:arrow-down-bold\" : \"mdi:arrow-up-bold\", 12)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.kw(Math.abs(b.power))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.esc(b.id)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.t(\"common.battery_2\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "23-battery.js|i + 1#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "23-battery.js|b.name ? this.esc(b.name) : `${this.t(\"common.battery_2\")} ${i + 1}`#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.esc(b.power === null || Math.abs(b.power) < 20 ? SF_C.dim : b.power > 0 ? SF_C.amber : SF_C.green)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|pw#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.esc(lv ?? 0)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.esc(bc)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|this.esc(bc)#2",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|lv === null ? \"—\" : Math.round(lv) + \" %\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "23-battery.js|agg.items.map((b, i) => { const lv = b.soc === null ? null : Math.max(0, Math.min(100, b.soc)), bc = lv === null ? SF_C.grey : lv <= 15 ? SF_C.red : lv <= 30 ? SF_C.amber : SF_C.green; const pw = b.power === null ? \"—\" : Math.abs(b.power) < 20 ? this.t(\"common.idle_2\") : `${this.icon(b.power > 0 ? \"mdi:arrow-down-bold\" : \"mdi:arrow-up-bold\", 12)} ${this.kw(Math.abs(b.power))}`; return `<div class=\"b click\" data-e=\"${this.esc(b.id)}\"><span class=\"n\">${b.name ? this.esc(b.name) : `${this.t(\"common.battery_2\")} ${i + 1}`}</span><span class=\"p\" style=\"color:${this.esc(b.power === null || Math.abs(b.power) < 20 ? SF_C.dim : b.power > 0 ? SF_C.amber : SF_C.green)}\">${pw}</span> <span class=\"lv\"><i style=\"width:${this.esc(lv ?? 0)}%;background:${this.esc(bc)};box-shadow:0 0 6px ${this.esc(bc)}\"></i></span><span class=\"pc\">${lv === null ? \"—\" : Math.round(lv) + \" %\"}</span></div>`; }).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "24-radiators.js|this.esc(r.connection)#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "24-radiators.js|this.esc(this.t(\"radiators.connection_lost\"))#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "24-radiators.js|this.icon(\"mdi:wifi-alert\", 16, SF_C.amber)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "24-radiators.js|this.nf(now, 1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "24-radiators.js|setT(-1)#1",
+   "ctx": "tag",
+   "benignSuite": true
+  },
+  {
+   "key": "24-radiators.js|this.esc(r.climate)#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "24-radiators.js|this.t(\"radiators.setpoint\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "24-radiators.js|this.nf(tgt, 1)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "24-radiators.js|setT(1)#1",
+   "ctx": "tag",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.nf(d.cost, 2)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.cur())#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(\"mdi:white-balance-sunny\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|Math.round(d.share * 100)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|d.delta > 0.05 ? \"up\" : d.delta < -0.05 ? \"hc\" : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.t(\"wallpanel.p_vs_yesterday\", { p: (d.delta > 0 ? \"+\" : \"\") + Math.round(d.delta * 100) }))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.t(\"wallpanel.today\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|f(d.c)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|chips#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this._config.energy.day.import)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(el.dataset.confirm)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|wet(f) ? \"wet\" : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|h#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|hh#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|j % 4 === 0 ? `<span>${hh}h</span>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(wx[0])#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|a.temperature !== undefined ? this.f1(parseFloat(a.temperature)) : \"—\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.t(wx[1]))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|dry ? \"dry\" : \"rain\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(head)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|head ? `<br><b class=\"${dry ? \"dry\" : \"rain\"}\">${this.esc(head)}</b>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|bars#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|bars ? `<div class=\"rain\">${bars}</div>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(c.weather)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(car.soc)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|R#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|R#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(col)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|C.toFixed(1)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|off.toFixed(1)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(col)#2",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|s === null ? \"—\" : Math.round(s)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(car.color || \"var(--sf-cyan)\")#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(car.name)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|rg === null ? \"—\" : Math.round(rg)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|st#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|cars#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(s.entity)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(s.icon)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(s.name)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this._config.shortcuts.map((s) => `<div class=\"btn tap\" data-act=\"toggle\" data-e=\"${this.esc(s.entity)}\">${this.ic(s.icon)}<span>${this.esc(s.name)}</span></div>`).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.t(\"wallpanel.base_load\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(\"mdi:white-balance-sunny\")#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "25-wallpanel.js|evPct#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.t(evc ? \"branchée, en attente\" : \"libre\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(\"mdi:transmission-tower-export\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.t(\"wallpanel.exporting\"))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.t(\"wallpanel.no_tile_configured\"))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "25-wallpanel.js|this._tileCols()#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|on ? \"on\" : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(x.color || \"var(--sf-cyan)\")#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(eid)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(x.icon)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(x.name)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(txt)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|list.slice(0, 6).map((x) => { const eid = String(x.entity || \"\"), on = this.isOn(eid) && !eid.startsWith(\"scene.\"), cv = eid.startsWith(\"cover.\"), s = this.st(eid); const CV = { open: \"ouverts\", closed: \"fermés\", opening: \"ouverture…\", closing: \"fermeture…\" }; const txt = this.t(cv ? this.own(CV, s && s.state) || \"\" : eid.startsWith(\"scene.\") ? \"scène\" : on ? \"allumé\" : \"éteint\"); return `<div class=\"tile tap ${on ? \"on\" : \"\"}\" style=\"--tc:${this.esc(x.color || \"var(--sf-cyan)\")}\" data-act=\"toggle\" data-e=\"${this.esc(eid)}\">${this.ic(x.icon)}<div class=\"nm\">${this.esc(x.name)}</div><div class=\"st\">${this.esc(txt)}</div></div>`; }).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(car.soc)#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(col)#8",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(car.name)#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|s === null ? 0 : Math.max(2, Math.min(100, s))#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(col)#9",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(col)#10",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|s === null ? \"—\" : Math.round(s)#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|lk#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|c.cars.map((car) => { const s = this.num(car.soc), low = s !== null && s < (car.low || 0), col = low ? \"var(--sf-red)\" : (car.color || \"var(--sf-cyan)\"); const lk = car.lock && this.st(car.lock) ? (this.st(car.lock).state === \"locked\" ? this.ic(\"mdi:lock\").replace(\"<ha-icon\", '<ha-icon class=\"okc\"') : this.ic(\"mdi:lock-open-alert\").replace(\"<ha-icon\", '<ha-icon class=\"badc\"')) : \"\"; return `<div class=\"mini\" data-info=\"${this.esc(car.soc)}\"><span class=\"nm\" style=\"color:${this.esc(col)}\">${this.esc(car.name)}</span><div class=\"bar\"><i style=\"width:${s === null ? 0 : Math.max(2, Math.min(100, s))}%;background:${this.esc(col)};box-shadow:0 0 8px ${this.esc(col)}\"></i></div><span class=\"v\">${s === null ? \"—\" : Math.round(s)}<small>%</small></span>${lk}</div>`; }).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(x.entity)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(x.icon)#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(x.name)#3",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(V.entity)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(\"mdi:home-import-outline\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.t(\"wallpanel.return_to_base\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(V.entity)#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(\"mdi:stop\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.t(\"wallpanel.stop\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(\"mdi:robot-vacuum\")#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc((V && V.name) || this.t(\"wallpanel.vacuum\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|v ? this.esc(this.own(FR, v.state) ? this.t(this.own(FR, v.state)) : v.state) : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|Math.round(bat)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|bat !== null && bat !== undefined ? ` · ${Math.round(bat)} %` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(\"mdi:close\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|sh#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|ctl#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|SF_CSS#1",
+   "ctx": "style-text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|SF_C.amber#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(this.t(m))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|miss.map((m) => `• ${this.esc(this.t(m))}`).join(\"<br>\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|s.rows#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this._range()#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this._series().map((s) => s.entity + (this._attr(s) ? \"@\" + this._attr(s) : \"\")).join(\",\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|k ? \"L\" : \"M\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|X(t).toFixed(1)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|Y(v).toFixed(1)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|path#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|X(pts[pts.length - 1][0]).toFixed(1)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|H#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|X(pts[0][0]).toFixed(1)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|H#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.esc(col)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|area#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|path#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.esc(col)#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this._attr(ser[i]) ? ' stroke-dasharray=\"7 5\" opacity=\".85\"' : \"\"#1",
+   "ctx": "tag",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|W#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|(H * f).toFixed(1)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|(H * f).toFixed(1)#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|X(Date.now()).toFixed(1)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|X(Date.now()).toFixed(1)#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|H#3",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|cls#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.esc(colr)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|colr ? `style=\"color:${this.esc(colr)}\"` : \"\"#1",
+   "ctx": "tag",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.esc(this.nf(S.hi - S.pad, dgOf(ids)))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|uOf(ids) ? \" \" + this.esc(uOf(ids)) : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|cls#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.esc(colr)#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|colr ? `style=\"color:${this.esc(colr)}\"` : \"\"#2",
+   "ctx": "tag",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.esc(this.nf(S.lo + S.pad, dgOf(ids)))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|uOf(ids) ? \" \" + this.esc(uOf(ids)) : \"\"#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this._plots.length - 1#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|W#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|H#4",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.esc(idx.map((i) => ser[i].name || (this.st(ser[i].entity) || { attributes: {} }).attributes.friendly_name || ser[i].entity).join(\", \"))#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|grid#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|lines#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|lab(sc.L, two ? L : idx, \"l\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|two ? lab(sc.R, R, \"r\", cols[R[0]]) : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|html#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.esc(this._fmtT(d.t0, long))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.esc(this._fmtT((d.t0 + d.t1) / 2, long))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.esc(this._fmtT(d.t1, long))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.t(\"trend.min\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.nf(Math.min(...vs), dg)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.t(\"trend.max\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.nf(Math.max(...vs), dg)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|P.idx.length > 1 ? (ser[i].name || ser[i].entity) + \" : \" : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|this.nf(best[1], dg)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "26-trend.js|f * 100#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this._hours()#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this._ents().map((e) => e.entity).join(\",\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this.esc(lbl)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this.esc(e.id)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this.esc(col)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this.esc(tm)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this.icon(w.ico, 16, col)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this.esc(nm)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this.esc(nm)#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this.esc(this.t(w.txt))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|this.esc(e.n)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "27-timeline.js|e.n > 1 ? `<span class=\"n\">× ${this.esc(e.n)}</span>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "27-timeline.js|html#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "28-health.js|this.nf(n, 1)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "28-health.js|u#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "28-health.js|this.nf(n, 1)#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "28-health.js|u#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "28-health.js|this.esc(u.g)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "28-health.js|this.esc(this.t(\"health.n_issues\", { n: u.xs.length }))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "28-health.js|this.esc(x.k.entity)#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "28-health.js|this.esc(name(x))#3",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "28-health.js|good.map((x) => `<span class=\"okc\" data-e=\"${this.esc(x.k.entity)}\">${this.esc(name(x))}</span>`).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29-assistant.js|this.esc(this._ago(s))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29a-host.js|this.nf(k / 1024, k >= 10240 ? 0 : 1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|r#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|i ? \"L\" : \"M\"#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|p[0].toFixed(1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|p[1].toFixed(1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|this.esc(d)#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|W#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|H#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|H#2",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|color#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|this.esc(d)#2",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29a-host.js|color#2",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29b-upkeep.js|this._days()#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29b-upkeep.js|ids.join(\",\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29b-upkeep.js|this.nf(-rate, -rate < 1 ? 1 : 0)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29b-upkeep.js|this.nf(-rate, -rate < 10 ? 1 : 0)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29b-upkeep.js|this.nf(d / 365, 1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29b-upkeep.js|this.t(\"upkeep.y\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|this.nf(-d, 1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|this.nf(m.Ti - m.To, 1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|this.nf(m.To - m.Ti, 1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|this.nf(m.To - m.Ti, 1)#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|f === b.best ? \"best\" : !b.ok(f) ? \"no\" : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|this.esc(`${this._hm(f.t)} · ${this.nf(f.temp, 0)} °C`)#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|(20 + ((f.temp - lo) / span) * 80).toFixed(0)#1",
+   "ctx": "style-attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|k % 3 === 0 ? this.esc(this._hm(f.t).slice(0, 2)) : \"\"#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(\"air.next_hours\"))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(\"air.best\", { t: this._hm(b.best.t), v: `${this.nf(b.best.temp, 0)} °C` }))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|SF_C.red#1",
+   "ctx": "style-attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(\"air.no_slot\"))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|b.best ? `<b>${this.esc(this.t(\"air.best\", { t: this._hm(b.best.t), v: `${this.nf(b.best.temp, 0)} °C` }))}</b>` : `<b style=\"color:${SF_C.red}\">${this.esc(this.t(\"air.no_slot\"))}</b>`#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|b.hrs.length#1",
+   "ctx": "style-attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|bars#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|b.hrs.length#2",
+   "ctx": "style-attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|xs#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|this.nf(m.pmi, 0)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(\"air.to_air\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|act.length ? tone : \"var(--sf-strong)\"#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|act.length#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|list.length#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(nm(x))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|act.length ? act.map((x) => `<b>${this.esc(nm(x))}</b>`).join(\" · \") : this.esc(this.t(\"air.rooms_none\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|narrow ? \"narrow\" : \"\"#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|left#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|tone#3",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this._window(lead.d.v, lead.m)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|outSide#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|tone#4",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(`air.v_${lead.d.v}`))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(this._sub(lead.d)))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.nf(m.co2, 0)#3",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.nf(m.pmi, 0)#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.nf(m.Ti, 1)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|m.Ti === null ? \"—\" : `<b>${this.nf(m.Ti, 1)}</b> °C`#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.nf(m.RHi, 0)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.nf(d.AHi, 1)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|[m.RHi !== null ? `${this.nf(m.RHi, 0)} %` : \"\", d.AHi !== null ? `${this.nf(d.AHi, 1)} g/m³` : \"\"].filter(Boolean).join(\" · \")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|extra#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|extra ? `<small>${extra}</small>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(\"air.moisture\"))#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|((d.AHi / mx) * 100).toFixed(1)#2",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|((AHo / mx) * 100).toFixed(1)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|AHo !== null ? `<div class=\"bo\" style=\"left:${((AHo / mx) * 100).toFixed(1)}%\"></div>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|i === 0 && act.length ? \"lead\" : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|os.k#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|os ? `st-${os.k}` : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|os ? os.tone : this._tone(d.v)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(x.r.temperature || x.r.humidity || \"\")#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(nm(x))#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(areas)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|areas ? `<i class=\"ar\">${this.esc(areas)}</i>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(why || this.t(this._sub(d)))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|val#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|bar#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|os ? `<i class=\"ow\"></i>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(os ? `air.r_${os.k}` : `air.r_${d.v}`))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(\"air.rooms\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(\"air.moisture\"))#3",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|SF_C.cyan#3",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(\"air.inside\"))#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|SF_C.amber#7",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this.esc(this.t(\"air.outside\"))#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|top#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|vd#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this._chips(shared)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|narrow ? \"narrow\" : \"\"#3",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|hd#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|rows#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|this._forecast(cool)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29d-automations.js|String(g).replace(/[.+^${}()|[\\]\\\\]/g, \"\\\\$&\").replace(/\\*/g, \".*\").replace(/\\?/g, \".\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|this.esc(this.t(\"auto.none\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29d-automations.js|X#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|X#2",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|tall ? 4 : 12#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|col(x)#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|this.esc(this.t(\"auto.last_24h\"))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|this.esc(this.t(\"auto.n_runs\", { n: runs.filter((x) => x.exec === \"finished\").length }))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|W#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|SF_C.cyan#3",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|SF_C.cyan#4",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|W#2",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|strokes#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|this.esc(this.t(\"auto.more\", { n: issues.length - max }))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29d-automations.js|this.esc(this.t(\"auto.all_ok\"))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|this._days()#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|ids.join(\",\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|Math.floor(m / 60)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|String(m % 60).padStart(2, \"0\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|x#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|y#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|x#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|y#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|d#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|this.esc(col)#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|d#2",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|this.esc(col)#2",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|this.nf(S.last.kwh, 2)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|this.nf(S.last.kwh * pr.v, 2)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|pr.cur#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29e-cycles.js|this.icon(\"mdi:check-bold\", 14)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29f-room.js|id#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|hrs#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|d#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29f-room.js|this.t(\"room.clear\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29f-room.js|this.ago(id)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29f-room.js|c.label#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.nf(c.target, 1)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|c.target === null ? \"\" : ` · ${this.nf(c.target, 1)}°`#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|s.state#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.unit(id)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29f-room.js|this.unit(id) ? ` ${this.unit(id)}` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.nf(T.v, 1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29f-room.js|this.esc(T.unit)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29f-room.js|m.temperature#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this._hours()#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|X(p[0])#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|Y(p[1])#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|big#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(this.t(\"room.curve\", { h: this._hours(), a: this.nf(lo[1], 1), b: this.nf(hi[1], 1) }))#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|Y(tg)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|Y(tg)#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|tg === null ? \"\" : `<line class=\"tg\" x1=\"0\" x2=\"270\" y1=\"${Y(tg)}\" y2=\"${Y(tg)}\"/>`#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|line#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|line#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(this.t(\"room.min_at\", { v: this.nf(lo[1], 1), t: this._hm(lo[0]) }))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(this.t(\"room.target\", { v: this.nf(tg, 1) }))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|tg === null ? \"\" : `<span class=\"tgt\">${this.esc(this.t(\"room.target\", { v: this.nf(tg, 1) }))}</span>`#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(this.t(\"room.max_at\", { v: this.nf(hi[1], 1), t: this._hm(hi[0]) }))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(x.entity)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|x.icon ? this.icon(String(x.icon), 16) : \"\"#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(x.name || this._fname(x.entity, m.name))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(s.color)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(s.text)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.nf(h, 0)#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.nf(T.v, 1)#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(T.unit)#3",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(this.kw(pw))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29f-room.js|big#3",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(line)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|sum.hot ? \"hot\" : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|this.esc(sum.text)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|cls#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|k.join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|controls#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29f-room.js|rows#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29g-media.js|h#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29g-media.js|String(m).padStart(2, \"0\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29g-media.js|((q.p / q.d) * 100).toFixed(1)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29h-weather.js|type#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|id#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|this._deg(daily[0].temperature)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|this._deg(daily[0].templow)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|sunny(x.condition)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|this.esc(w.label)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|this.esc(top)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|this.icon(w.icon, 20)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|this._deg(x.temperature)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|this._deg(x.templow)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|this.nf(r, 0)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|isFinite(r) && r >= 10 ? `${this.nf(r, 0)} %` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|low ? `<span class=\"lo\">${this._deg(x.templow)}</span>` : `<span class=\"r\">${isFinite(r) && r >= 10 ? `${this.nf(r, 0)} %` : \"\"}</span>`#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|hourly.length#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|hourly.map((x) => cell(x, this._fmt(new Date(x.datetime), { hour: \"2-digit\" }), false)).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|daily.length#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|daily.map((x) => cell(x, this._fmt(new Date(x.datetime), { weekday: \"short\" }), true)).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|this.esc(this.t(\"weather.no_forecast\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|cals.map((x) => x.entity).join(\",\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|days#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|d0#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|encodeURIComponent(new Date(d0).toISOString())#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|encodeURIComponent(new Date(d0 + days * 86400000).toISOString())#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|cal.entity#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|q#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|h#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29i-agenda.js|String(m).padStart(2, \"0\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29i-agenda.js|n <= 1 ? \"soon\" : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this.esc(color(i))#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this.icon(String(cal.icon || \"mdi:calendar-star\"), 16)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this.esc(ev.title || cal.name || \"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this.esc(this._rel(Math.max(ev.s, now)))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|d === this._day0() ? \"today\" : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this.esc(this._rel(d))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this.esc(this._fmt(d, { day: \"numeric\", month: \"short\" }))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|d - this._day0() >= 2 * 86400000 && d - this._day0() < 7 * 86400000 ? ` · ${this.esc(this._fmt(d, { day: \"numeric\", month: \"short\" }))}` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this._fmt(e.s, hm)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this._fmt(e.e, hm)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|e.e > e.s && this._day0(e.e) === this._day0(e.s) ? ` – ${this._fmt(e.e, hm)}` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|on ? \"now\" : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this.esc(color(e.i))#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this.esc(tm)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|this.esc(e.title || (cals[e.i] && cals[e.i].name) || \"—\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29i-agenda.js|chips#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|ids.join(\",\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|R.per#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|R.t[0]#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|f.format(new Date(t[0]))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29j-report.js|f.format(new Date(v.t[2 * n] - 1))#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29j-report.js|this.nf(v / 1000, 1)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.nf(v, 0)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|Math.abs(x) < 0.5 * Math.pow(10, -d) ? \"\" : x > 0 ? \"+\" : \"−\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.nf(Math.abs(x), d)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|sg(dC)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|sg(dS)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.nf(M.cur.auto, 0)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.nf(M.cur.cost, 2)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|M.money#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|sg(dM, 2)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|M.money#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this._period()#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|i === M.iMax ? \"mx\" : \"\"#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(`${M.labels[i]} · ${this.nf(x, 1)} kWh`)#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.nf(x, 0)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|dense ? \"\" : `<span class=\"n\">${this.nf(x, 0)}</span>`#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|Math.round((x / max) * 140)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|x > 0 ? ((M.solar[i] / x) * 100).toFixed(1) : 0#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|i === M.iMax ? \"mx\" : \"\"#2",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|dense && i % 5 !== 0 && i !== M.n - 1 ? \"\" : this.esc(l)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(x.name)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|((x.v / top) * 100).toFixed(1)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.nf(x.v, 0)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(this.t(\"report.rest\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|((M.rest / top) * 100).toFixed(1)#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.nf(M.rest, 0)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|seg#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.width && this.width < 600 ? Math.min(2, k.length) : k.length#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(l)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(v)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|tone#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(d)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|k.map(([l, v, d, tone]) => `<div class=\"kpi\"><span class=\"lbl\">${this.esc(l)}</span><span class=\"val\">${this.esc(v)}</span><span class=\"dl ${tone}\">${this.esc(d)}</span></div>`).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(this.t(per === \"year\" ? \"report.per_month\" : \"report.per_day\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(this.t(\"report.solar\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|M.hasSolar ? `<span><i class=\"s\"></i>${this.esc(this.t(\"report.solar\"))}</span>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(this.t(\"report.grid\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|dense ? 2 : 8#1",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|bars#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|dense ? 2 : 8#2",
+   "ctx": "style-attr",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|xl#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(this.t(\"report.who\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|who#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|who ? `<div class=\"lbl\" style=\"margin-bottom:6px\">${this.esc(this.t(\"report.who\"))}</div>${who}` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(this.t(\"report.hl_title\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(x)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|M.hl.map((x) => `<span>${this.esc(x)}</span>`).join(\"\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|M.hl.length ? `<div class=\"hl\"><span class=\"lbl\">${this.esc(this.t(\"report.hl_title\"))}</span>${M.hl.map((x) => `<span>${this.esc(x)}</span>`).join(\"\")}</div>` : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.icon(\"mdi:image-outline\", 16)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this.esc(this.t(\"report.export\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|n#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|px#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|wt#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|px#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|s#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29j-report.js|s#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29j-report.js|this.nf(r.v, 0)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|line#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|cur#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|w#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|w#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29j-report.js|cur#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|w#3",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29j-report.js|this._period()#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "29j-report.js|new Date().toISOString().slice(0, 10)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "31-strategy.js|tag#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "31-strategy.js|from.stat_energy_from#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "31-strategy.js|from.stat_energy_from#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "31-strategy.js|String((e && e.message) || e).replace(/[<>]/g, \"\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "41-editor-specs.js|w.start#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "41-editor-specs.js|w.end#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "43-editor-base.js|this._t(\"editor.missing_required_fields\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|miss.map((m) => this._t(m)).join(\" · \")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|x.path#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|x.msg#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|SF_ED_CSS#1",
+   "ctx": "style-text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|nt#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "43-editor-base.js|tag#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|path#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|i#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|this._t(ls.item)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|i + 1#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|p#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|nl.key#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|this._t(ls.add)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "43-editor-base.js|path#2",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "43-editor-base.js|arr.length - 1#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "44-editor-required.js|SF_RED#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "44-editor-required.js|SF_RED#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "46-validate.js|typeof v#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "46-validate.js|n#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "46-validate.js|sel.number.min ?? \"−∞\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "46-validate.js|sel.number.max ?? \"+∞\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "46-validate.js|k#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "46-validate.js|near#1",
+   "ctx": "text",
+   "benignSuite": true
+  }
+ ]
+}

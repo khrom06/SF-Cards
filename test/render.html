@@ -150,12 +150,19 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (!/1\.00\s*kW\s*Solar|1000\s*W\s*Solar|1\s*kW\s*Solar/.test(t)) fail(`battery source: the whole charge is solar when from_grid is 0, got '${t}'`);
     t = await bc({ grid: "sensor.sg" }, mk({ p: -1000, g: -500 }));
     if (/\d\s*W\s*Grid/.test(t) || !/Solar/.test(t)) fail(`battery source: while the house exports, the charge is all solar, got '${t}'`);
+    // Measured, calculated, estimated: a split that rests on an assumption is marked "≈" with a tooltip; a measured one is not
+    { const raw = async (cfg, st) => { const e = mount("sf-battery-card", { soc: "sensor.bs", power: "sensor.bp", ...cfg }, "en", st); await wait(40); const h = e.shadowRoot.innerHTML; e.remove(); return h; };
+      let h = await raw({ solar: "sensor.ss", grid: "sensor.sg" }, mk({ p: -1000, g: 300, s: 900 }));
+      if (!/≈ Charging from/.test(h.replace(/<[^>]+>/g, "")) || !/title="Estimate:/.test(h)) fail("battery source: an estimated split must be marked ≈ and carry the 'Estimate:' tooltip");
+      h = await raw({ solar: "sensor.ss", grid: "sensor.sg", from_grid: "sensor.fg" }, mk({ p: -1000, g: 300, s: 900, fg: 0 }));
+      if (/≈/.test(h.replace(/<[^>]+>/g, "")) || /title="Estimate:/.test(h)) fail("battery source: a measured from_grid must not be marked as an estimate");
+      for (const lang of ["fr", "de", "ar", "zh"]) { const e = mount("sf-battery-card", { soc: "sensor.bs", power: "sensor.bp", solar: "sensor.ss", grid: "sensor.sg" }, lang, mk({ p: -1000, g: 300, s: 900 })); await wait(40); if (!/title="[^"]{20,}"/.test(e.shadowRoot.innerHTML)) fail(`battery source: no translated 'estimate' tooltip in ${lang}`); e.remove(); } }
     t = await bc({}, mk({ p: -1000 })); if (/Charging from/.test(t)) fail(`battery source: nothing may be claimed without solar / grid / from_grid, got '${t}'`);
     t = await bc({ home: "sensor.hm" }, mk({ p: 600, h: 1200 })); if (!/Covers 50 % of the home/.test(t)) fail(`battery: discharging 600 W into a 1200 W house must say 'Covers 50 % of the home', got '${t}'`);
     t = await bc({}, mk({ p: 600, h: 1200 })); if (/Covers/.test(t)) fail("battery: no 'Covers' line without the home entity");
     t = await bc({ home: "sensor.hm" }, mk({ p: 3000, h: 1200 })); if (!/Covers 100 % of the home/.test(t)) fail(`battery: the covered share is capped at 100 %, got '${t}'`);
     const rr = async (cfg, st) => { const e = mount("sf-reactor-card", { grid: "sensor.sg", solar: "sensor.ss", battery_soc: "sensor.bs", battery_power: "sensor.bp", devices: [], ...cfg }, "en", st); await wait(40); const x = text(e); e.remove(); return x; };
-    t = await rr({}, mk({ p: -1000, g: 300, s: 900 })); if (!/Battery charge from solar\s*70\s*%/.test(t)) fail(`energy card: 'Battery charge from solar 70 %' expected, got '${t}'`);
+    t = await rr({}, mk({ p: -1000, g: 300, s: 900 })); if (!/Battery charge from solar\s*≈\s*70\s*%/.test(t)) fail(`energy card: 'Battery charge from solar ≈ 70 %' expected (an estimate is marked with ≈), got '${t}'`);
     t = await rr({}, mk({ p: 500, g: 0, s: 900 })); if (/Battery charge from solar/.test(t)) fail("energy card: no charge-source figure while the battery discharges");
     t = await rr({ battery_from_grid: "sensor.fg" }, mk({ p: -1000, g: 300, s: 900, fg: 800 })); if (!/Battery charge from solar\s*20\s*%/.test(t)) fail(`energy card: measured battery_from_grid 800 W of 1000 W -> 20 % solar, got '${t}'`); }
   // 5f. Energy card: solar is always ABOVE the core (same x, higher), on phone as on wide screen.

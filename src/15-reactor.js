@@ -162,7 +162,7 @@ class SfReactorCard extends SfBase {
     // Footer: only the indicators whose entities are configured.
     const foot = [
       (hasSolar || hasBat) && `<div><div class="lbl">${this.t(hasSolar ? "Autonomie solaire" : "Autonomie")}</div><div class="v" style="color:${this.esc(cc)}">${autonomy === null ? "—" : Math.round(autonomy) + " %"}</div></div>`,
-      bsrc && `<div><div class="lbl">${this.t("reactor.battery_charge_solar")}</div><div class="v" style="color:${this.esc(bsrc.s >= bsrc.g ? SF_C.green : "var(--sf-orange)")}">${Math.round((bsrc.s / (bsrc.s + bsrc.g)) * 100)} %</div></div>`,
+      bsrc && `<div${bsrc.est ? ` title="${this.esc(this.t("battery.estimated_tip"))}"` : ""}><div class="lbl">${this.t("reactor.battery_charge_solar")}</div><div class="v" style="color:${this.esc(bsrc.s >= bsrc.g ? SF_C.green : "var(--sf-orange)")}">${bsrc.est ? "≈ " : ""}${Math.round((bsrc.s / (bsrc.s + bsrc.g)) * 100)} %</div></div>`,
       c.fossil && `<div class="click" data-e="${this.esc(c.fossil)}"><div class="lbl">${this.t("reactor.fossil_grid_share")}</div><div class="v">${fossil === null ? "—" : this.nf(fossil, 0) + " %"}</div></div>`,
       c.price && `<div class="click" data-e="${this.esc(c.price)}"><div class="lbl">${this.t("reactor.live_cost")}</div><div class="v">${price === null || grid === null ? "—" : this.nf((Math.max(grid, 0) / 1000) * price, 2) + " €/h"}</div></div>`,
     ].filter(Boolean);

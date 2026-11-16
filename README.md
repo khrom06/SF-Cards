@@ -866,6 +866,8 @@ home: sensor.house_power         # W, to show how much of the house the battery 
 
 While charging, the card shows *"Charging from ☀ 0.7 kW Solar · ⚡ 0.3 kW Grid"*; while discharging with `home` set, *"Covers 50 % of the home"*. Without `from_grid` the split is an **estimate**: the grid import covers the charge first (a battery does not charge from the grid while the house exports), the rest is solar — if only `solar` is given, the solar production covers it first. Nothing is shown when none of these entities is set. The energy card does the same with `battery_from_grid`: the flow to the battery turns orange when it is mostly fed by the grid, and a "Battery charge from solar" figure appears in its footer.
 
+**Measured, calculated, estimated.** A value read from a sensor is shown as is. A value computed from sensors by a rule that always holds (a sum, a difference, a share of two readings, such as *"Covers 50 % of the home"*) is also shown as is. A value that rests on an assumption is marked **≈** and carries a tooltip that says so: here, the solar / grid split of the charge when `from_grid` (or `battery_from_grid` on the energy card) is not set. With a measured `from_grid` the ≈ disappears.
+
 The single-battery fields (`soc`, `power`, `capacity_kwh`) keep working. The card also works as a launcher popup, with `summary: battery`.
 
 The **energy card** shows the battery as one node: `battery_power` / `battery_soc` for one battery, or the same `batteries:` list for several (overall level, summed power) — a node per battery would make the diagram unreadable.
@@ -1115,7 +1117,10 @@ Decimals follow the language of your Home Assistant profile (`20,5 °C` in Frenc
 
 ## Requirements
 
-- **Home Assistant**: any recent version. The *Fill from a device* editor feature needs the entity registry in the frontend (about 2023.3 and newer); everything else only needs the standard card API.
+- **Home Assistant** — three different things:
+  - **Supported (declared minimum): 2024.11 and later.** This is the oldest release the automated end-to-end test is run against; a bug on 2024.11 or later is a bug to report.
+  - **Tested end to end** (a real Home Assistant, all cards rendered, every editor opened, the automatic dashboard): 2024.11, 2025.6, 2026.1, 2026.10 and 2026.11. The continuous integration runs the latest stable, 2026.1, 2025.6 and 2024.11 on every change, and the beta for information only.
+  - **Not verified:** anything older than 2024.11 (it may work, nothing checks it; the *Fill from a device* editor feature needs the entity registry in the frontend, about 2023.3 and newer), and the iOS / Android companion apps beyond the web view they use (they follow the browser line below).
 - **Browser**: Chrome / Edge 111+, Safari 16.2+, Firefox 113+ (the cards use `color-mix`; the Home Assistant mobile apps follow their system web view).
 - No extra resources: the cards and their fonts are one file; they only load what your Home Assistant provides (for instance camera pictures).
 
@@ -1142,7 +1147,7 @@ Sources: [Matter Alpha — "Home Assistant embraces HACS into core as the market
 
 ## Limitations
 
-- Developed on **Home Assistant 2026.11** (Chrome and the iOS / Android companion apps). The end-to-end test (real Home Assistant, all cards rendered, every editor opened, automatic dashboard) passes on **2024.11, 2025.6, 2026.1, 2026.10 and 2026.11**; versions older than 2024.11 have not been tried.
+- Home Assistant versions: see [Requirements](#requirements) for what is supported, tested and not verified. Developed on 2026.11 with Chrome and the iOS / Android companion apps.
 - Some code comments in `src/` are still in French (the UI itself is translated).
 - Screenshots use fictional demo data.
 - Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. A real Home Assistant (container, latest stable image) is driven by the end-to-end workflow; other Home Assistant versions are not tested yet.
