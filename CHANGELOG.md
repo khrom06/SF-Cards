@@ -2,8 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.21.0]
 ### Added
+- **Battery: where the power comes from.** `sf-battery-card` shows *"Charging from ☀ Solar · ⚡ Grid"* while charging (options `solar`, `grid`, or a measured `from_grid`) and *"Covers N % of the home"* while discharging (option `home`). Without a measured value the split is an estimate: the grid import covers the charge first, the rest is solar. Nothing is shown when none of these entities is set. The battery's flow in `sf-energy-flow-card` turns orange when it is mostly fed by the grid, and a "Battery charge from solar" figure joins its footer (option `battery_from_grid` for a measured value). All options are new and optional: existing configurations are unchanged. 11 languages, editor fields included.
+  Tested with simulated values only (no real battery was available to the author): reports are welcome in [Discussions](https://github.com/khrom06/SF-Cards/discussions).
 - **Companion project: [SF Copilot](https://github.com/khrom06/SF-Copilot).** A separate card from the SF family that reads Home Assistant's own history, finds the things you keep doing by hand (same light at the same time, same switch after the same door, same appliance turned off after the same delay) and proposes the automation with its evidence, a dry run and two-press creation. Local, no cloud, no AI model. It is not part of SF Cards (its own repository, installed separately); the README now points to it.
 
 ## [1.20.2]

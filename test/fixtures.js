@@ -74,7 +74,7 @@ const FULL = {
   "sf-machines-card": { title: "Equipment", tiles: [{ label: "A", entity: "sensor.temp", kind: "value", warn: 30, spark: 24 }, { label: "B", entity: "switch.plug", kind: "toggle" }, { label: "C", entity: "binary_sensor.net", kind: "binary" }, { label: "D", entity: "weather.home", kind: "text" }] },
   "sf-bridge-card": { weather: "weather.home", outdoor: "sensor.out", price: "sensor.price", hc_price: "sensor.price", mode: "input_select.mode", solar_left: "sensor.solar_left",
     internet: "binary_sensor.net", leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], people: [{ name: "Alice", entity: "person.alice" }] },
-  "sf-reactor-card": { solar: "sensor.solar", grid: "sensor.grid", fossil: "sensor.fossil", price: "sensor.price", battery_soc: "sensor.bat_soc", battery_power: "sensor.bat_p",
+  "sf-reactor-card": { solar: "sensor.solar", grid: "sensor.grid", fossil: "sensor.fossil", price: "sensor.price", battery_soc: "sensor.bat_soc", battery_power: "sensor.bat_p", battery_from_grid: "sensor.bat_p",
     devices: [{ name: "EV", entity: "sensor.ev", icon: "mdi:car" }, { name: "Heat pump", entity: "sensor.pac", icon: "mdi:heat-pump" }] },
   "sf-climate-card": { mode: "input_select.mode", rooms: [{ name: "Living", climate: "climate.room", temp: "sensor.temp", hum: "sensor.hum", target: "input_number.target", regul: "input_boolean.auto", window: "binary_sensor.window" }] },
   "sf-console-card": { title: "Controls", groups: [{ title: "Home", items: [{ kind: "dimmer", entity: "light.lamp", label: "Lamp" }, { kind: "toggle", entity: "switch.plug", label: "Plug" },
@@ -97,7 +97,7 @@ const FULL = {
       day: { import: "sensor.kwh_imp", export: "sensor.kwh_exp", solar: "sensor.kwh_sol", hp: 0.2, hc: 0.1, hc_hours: [[0, 6]] } } },
   "sf-cells-card": {},
   "sf-radiators-card": { radiators: [{ name: "Room", climate: "climate.room", preset: "select.room_preset", kwh: "sensor.kwh" }], setpoint: false },
-  "sf-battery-card": { soc: "sensor.bat_soc", power: "sensor.bat_p", capacity_kwh: 10, charged_today: "sensor.kwh", discharged_today: "sensor.kwh", temperature: "sensor.temp", health: "sensor.hum", cycles: "sensor.kwh", mode: "input_select.mode" },
+  "sf-battery-card": { soc: "sensor.bat_soc", power: "sensor.bat_p", solar: "sensor.solar", grid: "sensor.grid", from_grid: "sensor.bat_p", home: "sensor.solar", capacity_kwh: 10, charged_today: "sensor.kwh", discharged_today: "sensor.kwh", temperature: "sensor.temp", health: "sensor.hum", cycles: "sensor.kwh", mode: "input_select.mode" },
   "sf-launcher-card": { tiles: [{ name: "Climate", summary: "room", card: { type: "custom:sf-climate-card", rooms: [{ name: "L", climate: "climate.room", temp: "sensor.temp", target: "input_number.target" }] } },
     { name: "Battery", summary: "battery", card: { type: "custom:sf-battery-card", soc: "sensor.bat_soc", power: "sensor.bat_p" } }] },
 };

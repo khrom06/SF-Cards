@@ -7,6 +7,7 @@
  * solar: sensor.x (optional)    grid: sensor.x (positive = drawing from the grid)
  * battery_power: sensor.x (W, positive = discharging)   battery_soc: sensor.x (%)   battery_invert: false   # optional battery
  * batteries: [{ soc, power, capacity_kwh }]   # or several batteries (a single node: weighted level, summed power)
+ * battery_from_grid: sensor.x (W)   # optional, measured power taken from the grid to charge the battery (otherwise estimated from grid / solar)
  * devices: [{ name, entity, icon, color }]
  * hide_idle: true   idle_w: 20   # hides devices below 20 W (the layout only counts the visible ones)
  * max_devices: 8                 # beyond that, only the most power-hungry are shown ("+N others")
@@ -78,6 +79,8 @@ class SfReactorCard extends SfBase {
     const hasBat = bat.n > 0, bsoc = bat.soc, bw = bat.power;
     const home = grid === null ? null : solar + grid + (bw || 0);
     const exporting = grid !== null && grid < -20;
+    // Where the battery's charge comes from (measured `battery_from_grid`, or estimated from the grid import / solar production).
+    const bsrc = hasBat && bw !== null && bw <= -20 ? sfBatSource(-bw, hasSolar ? solar : null, grid, c.battery_from_grid ? this.watts(c.battery_from_grid) : null) : null;
     const autonomy = (hasSolar || hasBat) && home && home > 0 ? Math.min(100, ((hasSolar ? Math.min(solar, home) : 0) + Math.max(bw || 0, 0)) / home * 100) : null;
     const cc = exporting || (autonomy !== null && autonomy > 90) ? SF_C.green : grid !== null && grid > 3000 ? SF_C.amber : SF_C.cyan;
 
@@ -100,7 +103,7 @@ class SfReactorCard extends SfBase {
     if (hasBat) {
       const lvl = bsoc === null ? "mdi:battery" : bsoc >= 95 ? "mdi:battery" : `mdi:battery-${Math.max(10, Math.round(bsoc / 10) * 10)}`;
       devs = [{ __bat: true, name: bsoc === null ? this.t("common.battery_2") : `${this.t("common.battery_2")} ${Math.round(bsoc)} %`, icon: lvl, entity: bat.firstId,
-        color: SF_C.green, w: bw === null ? null : Math.abs(bw), rev: bw !== null && bw > 0 }, ...devs];
+        color: bsrc && bsrc.g > bsrc.s ? "var(--sf-orange)" : SF_C.green, w: bw === null ? null : Math.abs(bw), rev: bw !== null && bw > 0 }, ...devs];
     }
     // On the very first render the element does not have its width yet (its styles are not applied): we draw with 600 px then
     // redraw once, otherwise a phone would first see the "wide screen" layout.
@@ -159,6 +162,7 @@ class SfReactorCard extends SfBase {
     // Footer: only the indicators whose entities are configured.
     const foot = [
       (hasSolar || hasBat) && `<div><div class="lbl">${this.t(hasSolar ? "Autonomie solaire" : "Autonomie")}</div><div class="v" style="color:${this.esc(cc)}">${autonomy === null ? "—" : Math.round(autonomy) + " %"}</div></div>`,
+      bsrc && `<div><div class="lbl">${this.t("reactor.battery_charge_solar")}</div><div class="v" style="color:${this.esc(bsrc.s >= bsrc.g ? SF_C.green : "var(--sf-orange)")}">${Math.round((bsrc.s / (bsrc.s + bsrc.g)) * 100)} %</div></div>`,
       c.fossil && `<div class="click" data-e="${this.esc(c.fossil)}"><div class="lbl">${this.t("reactor.fossil_grid_share")}</div><div class="v">${fossil === null ? "—" : this.nf(fossil, 0) + " %"}</div></div>`,
       c.price && `<div class="click" data-e="${this.esc(c.price)}"><div class="lbl">${this.t("reactor.live_cost")}</div><div class="v">${price === null || grid === null ? "—" : this.nf((Math.max(grid, 0) / 1000) * price, 2) + " €/h"}</div></div>`,
     ].filter(Boolean);

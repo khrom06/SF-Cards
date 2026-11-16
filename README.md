@@ -17,7 +17,13 @@
 >
 > **💬 [Share your ideas, wishes and criticism](https://github.com/khrom06/SF-Cards/discussions/categories/ideas)** — propose a card or an option, vote (👍) for the ideas you want most, or just tell us what is confusing or missing. What you post here decides what comes next.
 
-### New in 1.20: a dashboard that builds itself, rooms, daily life and a calm look
+> **🪄 New companion: [SF Copilot](https://github.com/khrom06/SF-Copilot)** — finds what you keep doing by hand and proposes the automation, with a dry run first. Local, no cloud, no AI. [Install it with HACS](https://github.com/khrom06/SF-Copilot#installation) · animated preview inside.
+
+### New in 1.21: where the battery's power comes from, and how much of the house it covers
+
+The battery card and the energy card now tell **whether a charging battery is fed by the sun or by the grid**, and **how much of the house a discharging battery covers** — see [sf-battery-card](#sf-battery-card).
+
+### 1.20: a dashboard that builds itself, rooms, daily life and a calm look
 
 <p align="center">
   <img src="assets/anim/room.webp" alt="Room card: presence detected, lights turning on one by one, shutters opening" width="330"> <img src="assets/anim/report.webp" alt="Energy report card: this week, the week before, the month and the year" width="460">
@@ -353,6 +359,7 @@ solar: sensor.solar_power
 grid: sensor.grid_power            # positive = import, negative = export
 battery_power: sensor.battery_power  # optional, W — positive = discharging (battery_invert: true to flip)
 battery_soc: sensor.battery_level    # optional, %
+battery_from_grid: sensor.battery_grid_power  # optional, W taken from the grid to charge the battery (otherwise estimated)
 # several batteries: batteries: [{ soc: sensor.a_level, power: sensor.a_power, capacity_kwh: 10 }, { … }]
 fossil: sensor.grid_fossil_percent # optional
 price: sensor.electricity_price_now
@@ -847,6 +854,17 @@ batteries:
   # invert: true on a battery flips its power sign (positive = discharging by default)
 charged_today: sensor.total_battery_charged_today      # optional totals, as above
 ```
+
+**Where does the charge come from?** Add the entities you have, all optional:
+
+```yaml
+solar: sensor.solar_power        # W
+grid: sensor.grid_power          # W, positive = import
+from_grid: sensor.battery_grid_charge_power   # W, measured by your inverter (exact; skips the estimate)
+home: sensor.house_power         # W, to show how much of the house the battery covers
+```
+
+While charging, the card shows *"Charging from ☀ 0.7 kW Solar · ⚡ 0.3 kW Grid"*; while discharging with `home` set, *"Covers 50 % of the home"*. Without `from_grid` the split is an **estimate**: the grid import covers the charge first (a battery does not charge from the grid while the house exports), the rest is solar — if only `solar` is given, the solar production covers it first. Nothing is shown when none of these entities is set. The energy card does the same with `battery_from_grid`: the flow to the battery turns orange when it is mostly fed by the grid, and a "Battery charge from solar" figure appears in its footer.
 
 The single-battery fields (`soc`, `power`, `capacity_kwh`) keep working. The card also works as a launcher popup, with `summary: battery`.
 

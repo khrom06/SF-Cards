@@ -15,6 +15,19 @@ function sfBatAgg(el, c) {
     cap: items.length && items.every((i) => i.cap > 0) ? items.reduce((a, i) => a + i.cap, 0) : 0, firstId: items.length ? items[0].id : "" };
 }
 
+/* Where does a charging battery get its power? `charge` in W (> 0). With `from_grid` (a measured value) the split is exact; otherwise it is estimated:
+ * the grid import covers the charge first (a battery does not charge from the grid while the house exports), the rest is solar. With only
+ * a solar sensor: the solar production covers the charge first, the rest comes from the grid. Without any of them: unknown (null). */
+function sfBatSource(charge, solar, grid, fromGrid) {
+  if (!(charge > 0)) return null;
+  let g;
+  if (fromGrid !== null && fromGrid !== undefined) g = Math.min(charge, Math.max(0, fromGrid));
+  else if (grid !== null && grid !== undefined) g = Math.min(charge, Math.max(0, grid));
+  else if (solar !== null && solar !== undefined) g = charge - Math.min(charge, Math.max(0, solar));
+  else return null;
+  return { s: charge - g, g };
+}
+
 /* ============================================================== BATTERIE */
 /*
  * Home battery: level, flow direction and power, estimated autonomy, daily energy, mode.
@@ -25,6 +38,8 @@ function sfBatAgg(el, c) {
  * batteries: [{ name, soc, power, capacity_kwh }]   # several batteries: weighted level, summed power, per-battery detail
  * capacity_kwh: 10      charged_today: sensor.x (kWh)   discharged_today: sensor.x (kWh)
  * mode: select.x | input_select.x     temperature: sensor.x     health: sensor.x (%)     cycles: sensor.x
+ * solar: sensor.x (W)   grid: sensor.x (W, positive = import)   from_grid: sensor.x (W, measured)   → "charging from solar / grid"
+ * home: sensor.x (W)   → while discharging, the share of the house the battery covers
  */
 class SfBatteryCard extends SfBase {
   defaults() { return { invert: false }; }
@@ -67,6 +82,12 @@ class SfBatteryCard extends SfBase {
       const kwhLeft = bw > 0 ? (cap * pct) / 100 : (cap * (100 - pct)) / 100, h = kwhLeft / (Math.abs(bw) / 1000);
       if (isFinite(h) && h < 100) eta = this.t(bw > 0 ? "vide dans {h}h{m}" : "pleine dans {h}h{m}", { h: Math.floor(Math.round(h * 60) / 60), m: String(Math.round(h * 60) % 60).padStart(2, "0") });
     }
+    // Source of the charge (solar / grid) and share of the house covered while discharging: only with the entities that make them known.
+    const w = (id) => (id ? this.watts(id) : null);
+    const src = bw !== null && bw <= -20 ? sfBatSource(-bw, w(c.solar), w(c.grid), w(c.from_grid)) : null, home = w(c.home);
+    const parts = src ? [src.s >= 20 && `<span style="white-space:nowrap;color:${SF_C.amber}">${this.icon("mdi:solar-power-variant", 12)} ${this.kw(src.s)} ${this.t("common.solar")}</span>`,
+      src.g >= 20 && `<span style="white-space:nowrap;color:var(--sf-orange)">${this.icon("mdi:transmission-tower", 12)} ${this.kw(src.g)} ${this.t("common.grid")}</span>`].filter(Boolean) : [];
+    const origin = parts.length ? `<br>${this.t("battery.charging_from")} ${parts.join(" · ")}` : bw !== null && bw >= 20 && home !== null && home > 0 ? `<br>${this.t("battery.covers_home", { p: Math.round(Math.min(100, (bw / home) * 100)) })}` : "";
     const stat = (id, label, unit, digits) => { if (!id) return ""; const n = this.num(id); return `<div class="click" data-e="${this.esc(id)}"><div class="lbl">${this.t(label)}</div><div class="v">${n === null ? "—" : this.nf(n, digits) + unit}</div></div>`; };
     const stats = [stat(c.charged_today, "Chargé aujourd'hui", " kWh", 1), stat(c.discharged_today, "Déchargé aujourd'hui", " kWh", 1),
       stat(c.temperature, "Température", " °C", 0), stat(c.health, "Santé", " %", 0), stat(c.cycles, "Cycles", "", 0)].filter(Boolean).join("");
@@ -85,7 +106,7 @@ class SfBatteryCard extends SfBase {
           <circle cx="66" cy="66" r="${this.esc(R)}" fill="none" stroke="${this.esc(col)}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${this.esc((C * pct) / 100)} ${this.esc(C)}" style="filter:drop-shadow(0 0 5px ${this.esc(col)})"/></svg>
           <div class="t"><b>${soc === null ? "—" : Math.round(soc)}<span style="font-size:14px">%</span></b><small>${this.t("battery.level")}</small></div></div>
         <div><div class="st" style="color:${this.esc(idle ? SF_C.dim : bw > 0 ? SF_C.amber : SF_C.green)}">${this.icon(idle ? "mdi:battery-heart-variant" : bw > 0 ? "mdi:battery-arrow-down" : "mdi:battery-arrow-up", 20)} ${state}</div>
-          <div class="sub">${bw === null ? "" : this.kw(Math.abs(bw))}${eta ? `<br>${eta}` : ""}</div></div></div>
+          <div class="sub">${bw === null ? "" : this.kw(Math.abs(bw))}${eta ? `<br>${eta}` : ""}${origin}</div></div></div>
       ${bats}${stats ? `<div class="stats">${stats}</div>` : ""}${modes}`);
   }
   getCardSize() { return 4; }

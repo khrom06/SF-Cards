@@ -139,6 +139,25 @@ __SF.SF_HOOK.tr = (lang, key) => {
     r.remove();
     const l = mount("sf-launcher-card", { tiles: [{ name: "Bat", summary: "battery", card: { type: "custom:sf-battery-card", batteries: two } }] }, "en", st); await wait(40);
     if (!/60 %/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("batteries: the launcher tile should show 60 %"); l.remove(); }
+  // 5e2. Where a charging battery gets its power (solar / grid) and how much of the house a discharging one covers. Estimated from the grid import
+  //      (it covers the charge first) or measured (`from_grid`); nothing is said when nothing is known.
+  { const mk = (extra) => ({ ...base, "sensor.bs": U(50, "%"), "sensor.bp": U(extra.p, "W"), "sensor.sg": U(extra.g ?? 0, "W"), "sensor.ss": U(extra.s ?? 0, "W"), "sensor.fg": U(extra.fg ?? 0, "W"), "sensor.hm": U(extra.h ?? 0, "W") });
+    const bc = async (cfg, st) => { const e = mount("sf-battery-card", { soc: "sensor.bs", power: "sensor.bp", ...cfg }, "en", st); await wait(40); const t = text(e); e.remove(); return t; };
+    let t = await bc({ solar: "sensor.ss", grid: "sensor.sg" }, mk({ p: -1000, g: 300, s: 900 }));
+    if (!/Charging from/.test(t) || !/300\s*W\s*Grid/.test(t) || !/700\s*W\s*Solar/.test(t)) fail(`battery source: 300 W grid + 700 W solar expected while charging at 1000 W with 300 W imported, got '${t}'`);
+    t = await bc({ solar: "sensor.ss", grid: "sensor.sg", from_grid: "sensor.fg" }, mk({ p: -1000, g: 300, s: 900, fg: 0 }));
+    if (/Grid/.test(t.replace(/Charging from.*$/, (m) => m)) && /\d\s*W\s*Grid/.test(t)) fail(`battery source: a measured from_grid of 0 must win over the estimate, got '${t}'`);
+    if (!/1\.00\s*kW\s*Solar|1000\s*W\s*Solar|1\s*kW\s*Solar/.test(t)) fail(`battery source: the whole charge is solar when from_grid is 0, got '${t}'`);
+    t = await bc({ grid: "sensor.sg" }, mk({ p: -1000, g: -500 }));
+    if (/\d\s*W\s*Grid/.test(t) || !/Solar/.test(t)) fail(`battery source: while the house exports, the charge is all solar, got '${t}'`);
+    t = await bc({}, mk({ p: -1000 })); if (/Charging from/.test(t)) fail(`battery source: nothing may be claimed without solar / grid / from_grid, got '${t}'`);
+    t = await bc({ home: "sensor.hm" }, mk({ p: 600, h: 1200 })); if (!/Covers 50 % of the home/.test(t)) fail(`battery: discharging 600 W into a 1200 W house must say 'Covers 50 % of the home', got '${t}'`);
+    t = await bc({}, mk({ p: 600, h: 1200 })); if (/Covers/.test(t)) fail("battery: no 'Covers' line without the home entity");
+    t = await bc({ home: "sensor.hm" }, mk({ p: 3000, h: 1200 })); if (!/Covers 100 % of the home/.test(t)) fail(`battery: the covered share is capped at 100 %, got '${t}'`);
+    const rr = async (cfg, st) => { const e = mount("sf-reactor-card", { grid: "sensor.sg", solar: "sensor.ss", battery_soc: "sensor.bs", battery_power: "sensor.bp", devices: [], ...cfg }, "en", st); await wait(40); const x = text(e); e.remove(); return x; };
+    t = await rr({}, mk({ p: -1000, g: 300, s: 900 })); if (!/Battery charge from solar\s*70\s*%/.test(t)) fail(`energy card: 'Battery charge from solar 70 %' expected, got '${t}'`);
+    t = await rr({}, mk({ p: 500, g: 0, s: 900 })); if (/Battery charge from solar/.test(t)) fail("energy card: no charge-source figure while the battery discharges");
+    t = await rr({ battery_from_grid: "sensor.fg" }, mk({ p: -1000, g: 300, s: 900, fg: 800 })); if (!/Battery charge from solar\s*20\s*%/.test(t)) fail(`energy card: measured battery_from_grid 800 W of 1000 W -> 20 % solar, got '${t}'`); }
   // 5f. Energy card: solar is always ABOVE the core (same x, higher), on phone as on wide screen.
   for (const width of [380, 760]) {
     const box = document.createElement("div"); box.style.width = width + "px"; document.body.appendChild(box);
