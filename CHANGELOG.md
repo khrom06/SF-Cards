@@ -2,7 +2,7 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.21.2]
 ### Changed
 - **Battery: an estimate now looks like one.** When the solar / grid split of the charge is not measured (no `from_grid` / `battery_from_grid`), the battery card and the energy card show it with **≈** and an explanatory tooltip in the 11 languages; with a measured value the ≈ is gone. The README spells out the difference between measured, calculated and estimated values.
 - README: the Home Assistant section now separates the supported minimum (2024.11), the versions tested end to end and what is not verified.
