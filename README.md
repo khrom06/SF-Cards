@@ -1150,7 +1150,7 @@ Sources: [Matter Alpha — "Home Assistant embraces HACS into core as the market
 - Home Assistant versions: see [Requirements](#requirements) for what is supported, tested and not verified. Developed on 2026.11 with Chrome and the iOS / Android companion apps.
 - Some code comments in `src/` are still in French (the UI itself is translated).
 - Screenshots use fictional demo data.
-- Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. A real Home Assistant (container, latest stable image) is driven by the end-to-end workflow; other Home Assistant versions are not tested yet.
+- Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. A real Home Assistant is driven by the end-to-end workflow on the versions listed under [Requirements](#requirements).
 - `sf-presence-card` and the Frigate‑related options are tied to a specific setup and are documented as advanced.
 
 ## Ideas and feedback
