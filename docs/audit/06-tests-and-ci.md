@@ -2,6 +2,8 @@
 
 Baseline `5212cf9` + earlier phases. Everything below measured; nothing pushed, so the CI changes are **untested on GitHub**.
 
+> **Update 2026-11-17:** the workflows have since run on GitHub (validate and the HA matrix: stable, 2026.1.3, 2025.6.3, 2024.11.3 green, beta non-blocking). The text below is the state at the time of the phase.
+
 ## Result in one line
 The pre-existing suite is strong on **rendering** (660 snapshots, layout, lint) and weak on **behaviour**; 4 of 12 deliberate bugs went unnoticed. Phases 2–6 added 4 behavioural test pages; the 4 gaps are closed and one real UX defect was found on the way.
 
