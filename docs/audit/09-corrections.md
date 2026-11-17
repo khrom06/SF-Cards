@@ -32,6 +32,8 @@ All changes are **local and uncommitted** (31 files tracked + 12 new; 862 insert
 | C-1 HA version matrix, min version in `hacs.json` | needs a runnable environment; shipping untested workflow code is worse than not shipping |
 
 ## Remaining risks after corrections
+
+> **Update 2026-11-17:** risks 1 and 2 are closed (HA matrix of five versions, workflows run green on GitHub). Risks 3 and 4 remain.
 1. Only Home Assistant 2026.11 is exercised (e2e on `stable`, the owner's instance).
 2. The workflow edits have never run on GitHub.
 3. No real tablet, screen reader or non-Chrome browser was used.
