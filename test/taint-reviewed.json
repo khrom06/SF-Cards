@@ -1107,21 +1107,6 @@
    "benignSuite": true
   },
   {
-   "key": "25-wallpanel.js|this.ic(wx[0])#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|a.temperature !== undefined ? this.f1(parseFloat(a.temperature)) : \"—\"#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(this.t(wx[1]))#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
    "key": "25-wallpanel.js|dry ? \"dry\" : \"rain\"#1",
    "ctx": "attr",
    "benignSuite": true
@@ -1132,229 +1117,14 @@
    "benignSuite": true
   },
   {
-   "key": "25-wallpanel.js|head ? `<br><b class=\"${dry ? \"dry\" : \"rain\"}\">${this.esc(head)}</b>` : \"\"#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
    "key": "25-wallpanel.js|bars#1",
    "ctx": "text",
    "benignSuite": true
   },
   {
-   "key": "25-wallpanel.js|bars ? `<div class=\"rain\">${bars}</div>` : \"\"#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(c.weather)#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(car.soc)#1",
-   "ctx": "attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|R#1",
-   "ctx": "attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|R#2",
-   "ctx": "attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(col)#1",
-   "ctx": "attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|C.toFixed(1)#1",
-   "ctx": "attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|off.toFixed(1)#1",
-   "ctx": "attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(col)#2",
-   "ctx": "style-attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|s === null ? \"—\" : Math.round(s)#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(car.color || \"var(--sf-cyan)\")#1",
-   "ctx": "style-attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(car.name)#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|rg === null ? \"—\" : Math.round(rg)#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|st#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|cars#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(s.entity)#1",
-   "ctx": "attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.ic(s.icon)#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(s.name)#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this._config.shortcuts.map((s) => `<div class=\"btn tap\" data-act=\"toggle\" data-e=\"${this.esc(s.entity)}\">${this.ic(s.icon)}<span>${this.esc(s.name)}</span></div>`).join(\"\")#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(this.t(\"wallpanel.base_load\"))#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.ic(\"mdi:white-balance-sunny\")#2",
-   "ctx": "text",
-   "benignSuite": false
-  },
-  {
-   "key": "25-wallpanel.js|evPct#1",
-   "ctx": "text",
-   "benignSuite": false
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(this.t(evc ? \"branchée, en attente\" : \"libre\"))#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.ic(\"mdi:transmission-tower-export\")#1",
-   "ctx": "text",
-   "benignSuite": false
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(this.t(\"wallpanel.exporting\"))#1",
-   "ctx": "text",
-   "benignSuite": false
-  },
-  {
    "key": "25-wallpanel.js|this.esc(this.t(\"wallpanel.no_tile_configured\"))#1",
    "ctx": "text",
    "benignSuite": false
-  },
-  {
-   "key": "25-wallpanel.js|this._tileCols()#1",
-   "ctx": "style-attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|on ? \"on\" : \"\"#1",
-   "ctx": "attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(x.color || \"var(--sf-cyan)\")#1",
-   "ctx": "style-attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(eid)#1",
-   "ctx": "attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.ic(x.icon)#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(x.name)#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(txt)#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|list.slice(0, 6).map((x) => { const eid = String(x.entity || \"\"), on = this.isOn(eid) && !eid.startsWith(\"scene.\"), cv = eid.startsWith(\"cover.\"), s = this.st(eid); const CV = { open: \"ouverts\", closed: \"fermés\", opening: \"ouverture…\", closing: \"fermeture…\" }; const txt = this.t(cv ? this.own(CV, s && s.state) || \"\" : eid.startsWith(\"scene.\") ? \"scène\" : on ? \"allumé\" : \"éteint\"); return `<div class=\"tile tap ${on ? \"on\" : \"\"}\" style=\"--tc:${this.esc(x.color || \"var(--sf-cyan)\")}\" data-act=\"toggle\" data-e=\"${this.esc(eid)}\">${this.ic(x.icon)}<div class=\"nm\">${this.esc(x.name)}</div><div class=\"st\">${this.esc(txt)}</div></div>`; }).join(\"\")#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(car.soc)#2",
-   "ctx": "attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(col)#8",
-   "ctx": "style-attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(car.name)#2",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|s === null ? 0 : Math.max(2, Math.min(100, s))#1",
-   "ctx": "style-attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(col)#9",
-   "ctx": "style-attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|this.esc(col)#10",
-   "ctx": "style-attr",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|s === null ? \"—\" : Math.round(s)#2",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|lk#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|c.cars.map((car) => { const s = this.num(car.soc), low = s !== null && s < (car.low || 0), col = low ? \"var(--sf-red)\" : (car.color || \"var(--sf-cyan)\"); const lk = car.lock && this.st(car.lock) ? (this.st(car.lock).state === \"locked\" ? this.ic(\"mdi:lock\").replace(\"<ha-icon\", '<ha-icon class=\"okc\"') : this.ic(\"mdi:lock-open-alert\").replace(\"<ha-icon\", '<ha-icon class=\"badc\"')) : \"\"; return `<div class=\"mini\" data-info=\"${this.esc(car.soc)}\"><span class=\"nm\" style=\"color:${this.esc(col)}\">${this.esc(car.name)}</span><div class=\"bar\"><i style=\"width:${s === null ? 0 : Math.max(2, Math.min(100, s))}%;background:${this.esc(col)};box-shadow:0 0 8px ${this.esc(col)}\"></i></div><span class=\"v\">${s === null ? \"—\" : Math.round(s)}<small>%</small></span>${lk}</div>`; }).join(\"\")#1",
-   "ctx": "text",
-   "benignSuite": true
   },
   {
    "key": "25-wallpanel.js|this.esc(x.entity)#1",
@@ -1458,11 +1228,6 @@
   },
   {
    "key": "25-wallpanel.js|miss.map((m) => `• ${this.esc(this.t(m))}`).join(\"<br>\")#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "25-wallpanel.js|s.rows#1",
    "ctx": "text",
    "benignSuite": true
   },

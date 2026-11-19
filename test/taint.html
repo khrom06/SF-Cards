@@ -11,6 +11,9 @@ class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon)
 window.requestAnimationFrame = (f) => setTimeout(f, 0);
 window.__SF_TEST = true;
 window.__x = 0;   // incremented by any payload that manages to run
+// Cards that adapt to their width call `layoutKey(width)` only when a ResizeObserver reports a width. The real observer fires (or not) depending on
+// timing, so the sites of those templates were reached in some runs and not in others (a flaky verdict). This one reports 400 px once, always.
+window.ResizeObserver = class { constructor(cb) { this.cb = cb; } observe() { setTimeout(() => this.cb([{ contentRect: { width: 400 } }]), 10); } unobserve() {} disconnect() {} };
 </script>
 <script>
 window.__cov = new Set(); window.__raw = new Set(); window.__rawVal = {}; window.__esc = new Set();
@@ -103,34 +106,40 @@ const deepS = (o, f) => Array.isArray(o) ? o.map((x) => deepS(x, f)) : o && type
     for (const tag of tags()) { const el = document.createElement(tag); try { el.setConfig(deepS(FULL[tag], () => P)); document.body.appendChild(el); el.hass = HASS(hv, "en"); await wait(50); } catch (e) {}
       if (el.shadowRoot && unsafe(el.shadowRoot)) fails.push(`${tag} [variant ${P.slice(0, 18)}]: active content`); el.remove(); } }
   // 5. every entity in every "active" state, with hostile names and attributes: opens the branches that only run when something is on / open / playing / cleaning / alarming
-  for (const val of ["on", "open", "playing", "heat", "cool", "active", "cleaning", "charging", "home", "unlocked", "triggered", "error", "docked", "paused", "idle", "armed_away", "off", "closed", "heating", "28", "-5", "1e9"]) {
+  const ACTIVE = ["on", "open", "playing", "heat", "cool", "active", "cleaning", "charging", "home", "unlocked", "triggered", "error", "docked", "paused", "idle", "armed_away", "off", "closed", "heating", "28", "-5", "1e9"];
+  const activeWorld = (val) => {
     const w = {}; for (const [id, s] of Object.entries(base)) { const attrs = {}; for (const [k, v] of Object.entries(s.attributes || {})) attrs[k] = typeof v === "string" && !["unit_of_measurement", "device_class"].includes(k) ? PAY : v;
       Object.assign(attrs, { friendly_name: PAY, hvac_action: val === "heat" ? "heating" : val, entity_picture: "/local/x.png?a=1&b=" + PAY, media_title: PAY, media_artist: PAY, source: PAY, finishes_at: new Date(Date.now() + 60000).toISOString(), battery_level: 50, temperature: 21, condition: PAY, detections: PAY });
-      w[id] = { state: isNaN(parseFloat(base[id].state)) || /^[a-z_]+\./.test(val) === false ? val : val, attributes: attrs }; }
+      w[id] = { state: val, attributes: attrs }; }
+    return w;
+  };
+  for (const val of ACTIVE) {
+    const w = activeWorld(val);
     for (const tag of tags()) { const el = document.createElement(tag); try { el.setConfig(FULL[tag]); document.body.appendChild(el); el.hass = HASS(w, "en"); await wait(50); } catch (e) {}
       if (el.shadowRoot && unsafe(el.shadowRoot)) fails.push(`${tag} [state ${val}]: active content`); el.remove(); } }
-  // 6. The wall panel picks its screen (Nuit / Matin / Jour / Soir) from the clock, so the sites each screen owns were only reached at the hour the test
-  // happened to run: the check passed in the morning and failed in the evening. The clock is pinned per screen here, so the coverage is the same at any hour.
-  { const NS = customElements.get("sf-ns-card"), realNow = NS.prototype.now;
-    const deepN = (o, f) => Array.isArray(o) ? o.map((x) => deepN(x, f)) : o && typeof o === "object" ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, deepN(v, f)])) : typeof o === "string" ? f(o) : o;
+  // 6. The wall panel picks its screen (Nuit / Matin / Jour / Soir) from the mode entity, else from the clock, so the sites each screen owns were only
+  // reached when the test happened to run in the right hour (green in the morning, red in the evening). Each screen is now forced twice: through the mode
+  // entity (what FULL configures), and through the clock alone (mode_entity removed, `now()` pinned). Every world of sections 1-5 is replayed on it.
+  { const NS = customElements.get("sf-ns-card"), realNow = NS.prototype.now, SCREEN = { Nuit: 3, Matin: 7, Jour: 12, Soir: 20 };
+    const withMode = (states, screen) => ({ ...states, "input_select.ns_mode": { state: screen, attributes: {} } });
+    const cfgNoMode = (cfg) => { const c = { ...cfg }; delete c.mode_entity; return c; };
+    const F = FULL["sf-ns-card"];
     try {
-      for (const [hour, screen] of [[3, "Nuit"], [7, "Matin"], [12, "Jour"], [20, "Soir"]]) {
+      for (const [screen, hour] of Object.entries(SCREEN)) {
         NS.prototype.now = () => new Date(2026, 0, 15, hour, 30, 0);
-        const worlds = [[FULL["sf-ns-card"], hostile], [deepN(FULL["sf-ns-card"], () => PAY), hostile], [mut(FULL["sf-ns-card"], "txt"), base], [mut(FULL["sf-ns-card"], "url"), base], [mut(FULL["sf-ns-card"], "css"), base]];
-        for (const val of ["on", "open", "unlocked", "triggered", "playing", "heat", "home", "off"]) {
-          const w = {}; for (const [id, s] of Object.entries(base)) w[id] = { state: val, attributes: { ...(s.attributes || {}), friendly_name: PAY, hvac_action: val === "heat" ? "heating" : val } };
-          worlds.push([FULL["sf-ns-card"], w]);
-        }
-        for (const [cfg, states] of worlds) {
-          const el = document.createElement("sf-ns-card");
-          try { el.setConfig(cfg); document.body.appendChild(el); el.hass = HASS(states, "en"); await wait(60); } catch (e) { fails.push(`sf-ns-card [${screen}]: throws: ${e.message}`); }
-          need(el.shadowRoot && el.shadowRoot.innerHTML.length > 200, `sf-ns-card [${screen}]: no render`);
-          if (el.shadowRoot) need(unsafe(el.shadowRoot) === 0, `sf-ns-card [${screen}]: active content`);
+        const worlds = [["hostile states", F, hostile], ["every string hostile", deepS(F, () => PAY), hostile], ["hostile text config", mut(F, "txt"), base], ["hostile url config", mut(F, "url"), base], ["hostile css config", mut(F, "css"), base],
+          ["benign", F, base], ["clock only", cfgNoMode(F), base], ["clock only, hostile states", cfgNoMode(F), hostile]];
+        for (const val of ACTIVE) worlds.push([`state ${val}`, F, activeWorld(val)]);
+        for (const [what, cfg, st] of worlds) {
+          const el = document.createElement("sf-ns-card"), forced = !cfg.mode_entity ? st : withMode(st, screen);
+          try { el.setConfig(cfg); document.body.appendChild(el); el.hass = HASS(forced, "en"); await wait(60); if (el._tick) el._tick(); } catch (e) { fails.push(`sf-ns-card [${screen} / ${what}]: throws: ${e.message}`); }
+          need(el.shadowRoot && el.shadowRoot.querySelector(".ns." + screen.toLowerCase()), `sf-ns-card [${screen} / ${what}]: the ${screen} screen was not rendered`);
+          if (el.shadowRoot) need(unsafe(el.shadowRoot) === 0, `sf-ns-card [${screen} / ${what}]: active content`);
           el.remove();
         }
       }
     } finally { NS.prototype.now = realNow; } }
-  need(window.__x === 0, `a payload executed ${window.__x} time(s) (after the wall panel screens)`);
+  need(window.__x === 0, `a payload executed ${window.__x} time(s) (after sections 3 to 6)`);
   window.__dumpCov();
   const pre = document.createElement("pre"); pre.id = "result"; pre.textContent = JSON.stringify({ ok: !fails.length, failures: fails }); document.body.appendChild(pre);
 })();
