@@ -109,6 +109,28 @@ const deepS = (o, f) => Array.isArray(o) ? o.map((x) => deepS(x, f)) : o && type
       w[id] = { state: isNaN(parseFloat(base[id].state)) || /^[a-z_]+\./.test(val) === false ? val : val, attributes: attrs }; }
     for (const tag of tags()) { const el = document.createElement(tag); try { el.setConfig(FULL[tag]); document.body.appendChild(el); el.hass = HASS(w, "en"); await wait(50); } catch (e) {}
       if (el.shadowRoot && unsafe(el.shadowRoot)) fails.push(`${tag} [state ${val}]: active content`); el.remove(); } }
+  // 6. The wall panel picks its screen (Nuit / Matin / Jour / Soir) from the clock, so the sites each screen owns were only reached at the hour the test
+  // happened to run: the check passed in the morning and failed in the evening. The clock is pinned per screen here, so the coverage is the same at any hour.
+  { const NS = customElements.get("sf-ns-card"), realNow = NS.prototype.now;
+    const deepN = (o, f) => Array.isArray(o) ? o.map((x) => deepN(x, f)) : o && typeof o === "object" ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, deepN(v, f)])) : typeof o === "string" ? f(o) : o;
+    try {
+      for (const [hour, screen] of [[3, "Nuit"], [7, "Matin"], [12, "Jour"], [20, "Soir"]]) {
+        NS.prototype.now = () => new Date(2026, 0, 15, hour, 30, 0);
+        const worlds = [[FULL["sf-ns-card"], hostile], [deepN(FULL["sf-ns-card"], () => PAY), hostile], [mut(FULL["sf-ns-card"], "txt"), base], [mut(FULL["sf-ns-card"], "url"), base], [mut(FULL["sf-ns-card"], "css"), base]];
+        for (const val of ["on", "open", "unlocked", "triggered", "playing", "heat", "home", "off"]) {
+          const w = {}; for (const [id, s] of Object.entries(base)) w[id] = { state: val, attributes: { ...(s.attributes || {}), friendly_name: PAY, hvac_action: val === "heat" ? "heating" : val } };
+          worlds.push([FULL["sf-ns-card"], w]);
+        }
+        for (const [cfg, states] of worlds) {
+          const el = document.createElement("sf-ns-card");
+          try { el.setConfig(cfg); document.body.appendChild(el); el.hass = HASS(states, "en"); await wait(60); } catch (e) { fails.push(`sf-ns-card [${screen}]: throws: ${e.message}`); }
+          need(el.shadowRoot && el.shadowRoot.innerHTML.length > 200, `sf-ns-card [${screen}]: no render`);
+          if (el.shadowRoot) need(unsafe(el.shadowRoot) === 0, `sf-ns-card [${screen}]: active content`);
+          el.remove();
+        }
+      }
+    } finally { NS.prototype.now = realNow; } }
+  need(window.__x === 0, `a payload executed ${window.__x} time(s) (after the wall panel screens)`);
   window.__dumpCov();
   const pre = document.createElement("pre"); pre.id = "result"; pre.textContent = JSON.stringify({ ok: !fails.length, failures: fails }); document.body.appendChild(pre);
 })();
