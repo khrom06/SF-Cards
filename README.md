@@ -432,27 +432,6 @@ Other options: card `subtitle`; group `span` (1–4 columns); item `color`, `dig
 
 <img src="assets/anim/launcher.webp" alt="Launcher card" width="420">
 
-#### On a phone
-
-<img src="assets/phone.webp" alt="A phone dashboard: a banner and six summary tiles, and the Climate card open in a bottom sheet" width="560"> <img src="assets/anim/phone.webp" alt="Tapping a tile: the card rises from the bottom, then the close button brings the tiles back" width="250">
-
-A phone dashboard is a banner and a launcher card: the page stays short, each tile gives the number you glance at, and one tap opens the full card in a sheet that rises from the bottom (close it with the ✕, a tap outside, or the phone's Back button). Both pictures use fake data on a 402 × 874 screen (iPhone 17 Pro size).
-
-```yaml
-type: vertical-stack
-cards:
-  - type: custom:sf-home-banner-card
-    weather: weather.home
-  - type: custom:sf-launcher-card
-    columns: 2
-    tiles:
-      - { name: Climate, summary: climate, hash: climate, card: { type: custom:sf-climate-card, rooms: [ … ] } }
-      - { name: Energy, summary: energy, hash: energy, card: { type: custom:sf-energy-flow-card, grid: sensor.grid_power, solar: sensor.solar_power } }
-      - { name: Vehicles, summary: vehicles, hash: vehicles, card: { type: custom:sf-vehicles-card, cars: [ … ] } }
-```
-
-The [automatic dashboard](#automatic-dashboard) does not build this phone page for you: it generates the same views on every screen, and only its **Home** view uses popups (one compact tile per room). For a phone-first page, add a view like the one above, for example through `extra_views`.
-
 Each tile shows a live summary and opens a card in a popup — an SF card, a standard Home Assistant card (`vertical-stack`, `history-graph`…) or any other custom card:
 
 ```yaml
@@ -476,6 +455,27 @@ tiles:
 `summary: health` shows the verdict of a health card's checks on the tile ("All good" / "2 anomalies" + the first names; red and pulsing when a critical check fails): put the `sf-health-card` config in the tile's `card`.
 
 With `mode_entity` (any `input_select` / `select` / `sensor`, e.g. Morning / Day / Evening / Night) the tiles whose `modes` list the current state move to the front and get a brighter outline; the order changes back when the mode changes. Without `mode_entity`, or when the entity is unavailable or matches no tile, nothing changes.
+
+#### On a phone
+
+<img src="assets/phone.webp" alt="A phone dashboard: a banner and six summary tiles, and the Climate card open in a bottom sheet" width="560"> <img src="assets/anim/phone.webp" alt="Tapping a tile: the card rises from the bottom, then slides back down" width="270">
+
+A phone dashboard is a banner and a launcher card: the page stays short, each tile gives the number you glance at, and one tap opens the full card in a sheet that rises from the bottom. Close it with the ✕, a tap outside, or the phone's Back button (when the tile has a `hash`). Both pictures use fake data on a 402 × 874 screen (iPhone 17 Pro size); the banner and the tiles are simplified in the recipe below, replace the `…` placeholders with your own entities.
+
+```yaml
+type: vertical-stack
+cards:
+  - type: custom:sf-home-banner-card
+    weather: weather.home
+  - type: custom:sf-launcher-card
+    columns: 2
+    tiles:
+      - { name: Climate, summary: climate, hash: climate, card: { type: custom:sf-climate-card, rooms: [ … ] } }
+      - { name: Energy, summary: energy, hash: energy, card: { type: custom:sf-energy-flow-card, grid: sensor.grid_power, solar: sensor.solar_power } }
+      - { name: Vehicles, summary: vehicles, hash: vehicles, card: { type: custom:sf-vehicles-card, cars: [ … ] } }
+```
+
+The [automatic dashboard](#automatic-dashboard) does not build this phone page for you: it generates the same views on every screen, and only its **Home** view uses popups (one compact tile per room). For a phone-first page, put the card above in a view of your own, for example `extra_views: [{ title: Phone, path: phone, cards: [ <the vertical-stack above> ] }]`.
 
 ### sf-alert-card
 
