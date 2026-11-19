@@ -85,7 +85,7 @@ Shown here on the square 480×480 NSPanel Pro; it is sized in `vmin`, so it also
 
 - **30 cards, one look** (neon, or `look: calm`) — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
-- **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work).
+- **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work) — [see it on a phone](#on-a-phone).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone, a wall tablet or a wide desktop dashboard; idle devices can be hidden automatically and the number of displayed devices is capped.
 - **Eleven languages** — English, French, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese and Arabic (right-to-left), picked automatically from each user's Home Assistant profile (English for any other language).
 - **Light or dark** — dark neon by default; `theme: light` or `auto` (follows the Home Assistant theme) per card, or once for all cards with a CSS variable.
@@ -431,6 +431,27 @@ Other options: card `subtitle`; group `span` (1–4 columns); item `color`, `dig
 ### sf-launcher-card
 
 <img src="assets/anim/launcher.webp" alt="Launcher card" width="420">
+
+#### On a phone
+
+<img src="assets/phone.webp" alt="A phone dashboard: a banner and six summary tiles, and the Climate card open in a bottom sheet" width="560"> <img src="assets/anim/phone.webp" alt="Tapping a tile: the card rises from the bottom, then the close button brings the tiles back" width="250">
+
+A phone dashboard is a banner and a launcher card: the page stays short, each tile gives the number you glance at, and one tap opens the full card in a sheet that rises from the bottom (close it with the ✕, a tap outside, or the phone's Back button). Both pictures use fake data on a 402 × 874 screen (iPhone 17 Pro size).
+
+```yaml
+type: vertical-stack
+cards:
+  - type: custom:sf-home-banner-card
+    weather: weather.home
+  - type: custom:sf-launcher-card
+    columns: 2
+    tiles:
+      - { name: Climate, summary: climate, hash: climate, card: { type: custom:sf-climate-card, rooms: [ … ] } }
+      - { name: Energy, summary: energy, hash: energy, card: { type: custom:sf-energy-flow-card, grid: sensor.grid_power, solar: sensor.solar_power } }
+      - { name: Vehicles, summary: vehicles, hash: vehicles, card: { type: custom:sf-vehicles-card, cars: [ … ] } }
+```
+
+The [automatic dashboard](#automatic-dashboard) does not build this phone page for you: it generates the same views on every screen, and only its **Home** view uses popups (one compact tile per room). For a phone-first page, add a view like the one above, for example through `extra_views`.
 
 Each tile shows a live summary and opens a card in a popup — an SF card, a standard Home Assistant card (`vertical-stack`, `history-graph`…) or any other custom card:
 
