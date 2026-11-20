@@ -215,7 +215,7 @@ class SfNsCard extends SfBase {
   f1(n) { return n === null || n === undefined || !isFinite(n) ? "—" : this.nf(n, 1); }
   // Icon + label of a weather entity. "unavailable" / "unknown" are Home Assistant's words, not a weather: show "no data" instead of the raw state.
   wxOf(w) {
-    const st = String(w.state);
+    const st = w.state == null ? "" : String(w.state);
     if (st === "unavailable" || st === "unknown") return ["mdi:weather-cloudy-alert", "common.no_data"];
     return this.own(SF_NS_WX, st) || ["mdi:weather-cloudy", st];
   }
@@ -472,7 +472,7 @@ class SfNsCard extends SfBase {
     const stats = `<div class="stats">${tile(this.t("wallpanel.home"), "mdi:home-lightning-bolt-outline", "var(--sf-cyan)", this.pw(home), home / scale, chipsHome, e.home)}
       ${tile(this.t("wallpanel.charger"), ev > 20 ? "mdi:ev-plug-type2" : "mdi:ev-station", "var(--sf-green)", this.pw(ev), ev / scale, subEv, e.ev)}
       ${tile(this.t(imp ? "réseau" : "export"), imp ? "mdi:transmission-tower-import" : "mdi:transmission-tower-export", imp ? "#ff7043" : "var(--sf-amber)", this.pw(grid), Math.abs(grid || 0) / scale, subGrid, e.grid)}</div>`;
-    const decP = e.ev ? this.panel(`<div class="dec">${this.ic(evc ? "mdi:ev-plug-type2" : "mdi:ev-station")}<span>${dec && dec.state !== "unknown" ? this.esc(dec.state) : this.esc(this.t(evc ? "branchée" : "libre"))}</span>
+    const decP = e.ev ? this.panel(`<div class="dec">${this.ic(evc ? "mdi:ev-plug-type2" : "mdi:ev-station")}<span>${dec && dec.state !== "unknown" && dec.state !== "unavailable" ? this.esc(dec.state) : this.esc(this.t(evc ? "branchée" : "libre"))}</span>
       <span class="r">${this.num(e.ev_day) !== null ? this.f1(this.num(e.ev_day)) + " kWh" : ""}</span></div>`) : "<div></div>";
     return [orb, stats, decP];
   }
