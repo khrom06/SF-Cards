@@ -45,6 +45,14 @@ async function run(label, tag, cfg, hass, then, rawCheck) {
 }
 (async () => {
   for (const [name, st] of Object.entries(worlds)) for (const tag of tags()) await run(name, tag, FULL[tag], mkHass(st), null, name === "every entity unavailable" || name === "every entity unknown");
+  // The wall panel picks its screen from the clock: replay the "unavailable" / "unknown" worlds on each of the four screens, whatever time the test runs at.
+  { const NS = customElements.get("sf-ns-card"), realNow = NS && NS.prototype.now;
+    if (NS) try { for (const name of ["every entity unavailable", "every entity unknown"]) for (const [screen, hour] of Object.entries({ Nuit: 3, Matin: 7, Jour: 12, Soir: 20 })) {
+      NS.prototype.now = () => new Date(2026, 0, 15, hour, 30, 0);
+      const cfg = { ...FULL["sf-ns-card"] }; delete cfg.mode_entity; cfg.energy = { ...cfg.energy, decision: "sensor.dec" };   // the Jour screen shows the decision text
+      const states = { ...worlds[name], "sensor.dec": { state: name.includes("unknown") ? "unknown" : "unavailable", attributes: {} } };
+      await run(name + " (" + screen + " screen)", "sf-ns-card", cfg, mkHass(states), null, true);
+    } } finally { NS.prototype.now = realNow; } }
   for (const mode of ["reject", "never", "empty", "junk", "arrayjunk", "numberr"]) for (const tag of tags()) await run("WebSocket answers: " + mode, tag, FULL[tag], mkHass(base, mode));
   // minimal hass: what a card sees very early or in a preview
   for (const tag of tags()) await run("minimal hass", tag, FULL[tag], { states: {} });

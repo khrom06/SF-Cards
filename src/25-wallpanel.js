@@ -213,6 +213,12 @@ class SfNsCard extends SfBase {
   ic(name) { return `<ha-icon icon="${this.esc(name || "mdi:circle-small")}"></ha-icon>`; }
   pw(w) { return w === null || w === undefined || !isFinite(w) ? "—" : Math.abs(w) >= 1000 ? `${this.nf(Math.abs(w) / 1000, 1)}<small> kW</small>` : `${Math.round(Math.abs(w))}<small> W</small>`; }
   f1(n) { return n === null || n === undefined || !isFinite(n) ? "—" : this.nf(n, 1); }
+  // Icon + label of a weather entity. "unavailable" / "unknown" are Home Assistant's words, not a weather: show "no data" instead of the raw state.
+  wxOf(w) {
+    const st = w.state == null ? "" : String(w.state);
+    if (st === "unavailable" || st === "unknown") return ["mdi:weather-cloudy-alert", "common.no_data"];
+    return this.own(SF_NS_WX, st) || ["mdi:weather-cloudy", st];
+  }
   own(o, k) { return o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : undefined; }
   now() { return new Date(); }
   cur() { const E = this._config.energy || {}, u = String(E.currency || (this.st(E.price) && this.st(E.price).attributes.unit_of_measurement) || "").split("/")[0].trim(); return u && u.length <= 4 ? u : "€"; }
@@ -356,7 +362,7 @@ class SfNsCard extends SfBase {
   }
   hero(mode) {
     const d = this.now(), p = (n) => String(n).padStart(2, "0"), c = this._config;
-    const w = this.st(c.weather), wx = w ? this.own(SF_NS_WX, w.state) || ["mdi:weather-cloudy", w.state] : null;
+    const w = this.st(c.weather), wx = w ? this.wxOf(w) : null;
     const t = this.num(c.outdoor) ?? (w && w.attributes.temperature !== undefined ? parseFloat(w.attributes.temperature) : null);
     const frac = (d.getHours() * 60 + d.getMinutes()) / 1440;
     const seg = [[0, 6, "Nuit"], [6, 9, "Matin"], [9, 18, "Jour"], [18, 22, "Soir"], [22, 24, "Nuit"]];
@@ -390,7 +396,7 @@ class SfNsCard extends SfBase {
 
   weatherBlock() {
     const c = this._config, w = this.st(c.weather); if (!w) return "";
-    const wx = this.own(SF_NS_WX, w.state) || ["mdi:weather-cloudy", w.state], a = w.attributes || {};
+    const wx = this.wxOf(w), a = w.attributes || {};
     const nowT = this.now().getTime(), fc = Array.isArray(this._fc) ? this._fc.filter((f) => f && isFinite(new Date(f.datetime).getTime()) && new Date(f.datetime).getTime() + 3600000 > nowT).slice(0, 12) : [];
     const fin = (n) => (isFinite(Number(n)) ? Number(n) : 0);
     const pv = (f) => f.precipitation_probability !== undefined && f.precipitation_probability !== null ? fin(f.precipitation_probability) : (fin(f.precipitation) > 0 ? Math.min(100, 40 + fin(f.precipitation) * 30) : 0);
@@ -466,7 +472,7 @@ class SfNsCard extends SfBase {
     const stats = `<div class="stats">${tile(this.t("wallpanel.home"), "mdi:home-lightning-bolt-outline", "var(--sf-cyan)", this.pw(home), home / scale, chipsHome, e.home)}
       ${tile(this.t("wallpanel.charger"), ev > 20 ? "mdi:ev-plug-type2" : "mdi:ev-station", "var(--sf-green)", this.pw(ev), ev / scale, subEv, e.ev)}
       ${tile(this.t(imp ? "réseau" : "export"), imp ? "mdi:transmission-tower-import" : "mdi:transmission-tower-export", imp ? "#ff7043" : "var(--sf-amber)", this.pw(grid), Math.abs(grid || 0) / scale, subGrid, e.grid)}</div>`;
-    const decP = e.ev ? this.panel(`<div class="dec">${this.ic(evc ? "mdi:ev-plug-type2" : "mdi:ev-station")}<span>${dec && dec.state !== "unknown" ? this.esc(dec.state) : this.esc(this.t(evc ? "branchée" : "libre"))}</span>
+    const decP = e.ev ? this.panel(`<div class="dec">${this.ic(evc ? "mdi:ev-plug-type2" : "mdi:ev-station")}<span>${dec && dec.state !== "unknown" && dec.state !== "unavailable" ? this.esc(dec.state) : this.esc(this.t(evc ? "branchée" : "libre"))}</span>
       <span class="r">${this.num(e.ev_day) !== null ? this.f1(this.num(e.ev_day)) + " kWh" : ""}</span></div>`) : "<div></div>";
     return [orb, stats, decP];
   }
