@@ -7,12 +7,12 @@ const SF_ALIAS = { "sf-energy-flow-card": "sf-reactor-card", "sf-vehicles-card":
   "sf-controls-card": "sf-console-card", "sf-presence-card": "sf-radar-card" };
 const SF_ALIAS_REV = Object.fromEntries(Object.entries(SF_ALIAS).map(([a, c]) => [c, a]));
 const sfCanon = (tag) => SF_ALIAS[tag] || tag;
-// Cards announced for removal: the card keeps working as configured, the console and the editor say so. `from` = first release that warns,
-// `earliest` = no removal before this date. Message in English only: it is a developer-facing notice, like the configuration warnings.
+// Cards announced for removal: the card keeps working as configured, the console and the editor say so. `earliest` = no removal before this date. Message in English only: it is a developer-facing notice, like the configuration warnings.
 const SF_DEPRECATED = { "sf-radar-card": { earliest: "2026-11-27" } };
 function sfDeprecation(tag) {
   const d = SF_DEPRECATED[sfCanon(tag)]; if (!d) return "";
-  return `${tag} is deprecated and will be removed in a future release (not before ${d.earliest}). It keeps working until then. If you use it, please say so at https://github.com/khrom06/SF-Cards/issues so that it can be kept.`;
+  const al = SF_ALIAS_REV[sfCanon(tag)], also = al && al !== tag ? ` (Also known as ${al}.)` : "";   // the editor of an alias is the one of the canonical card
+  return `${tag} is deprecated and will be removed in a future release (not before ${d.earliest}). It keeps working until it is removed. If you use it, please say so at https://github.com/khrom06/SF-Cards/issues so that it can be kept.${also}`;
 }
 const sfHas = (v) => Array.isArray(v) ? v.length > 0 : !!v;
 const sfBatUsable = (c) => !!(c.soc || c.power || c.entity || (c.batteries || []).some((b) => b && (b.soc || b.power || b.entity)));

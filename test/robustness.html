@@ -81,6 +81,7 @@ async function run(label, tag, cfg, hass, then, rawCheck) {
     await wait(60);
     const bannerOf = (e) => { const w = e.shadowRoot && e.shadowRoot.querySelector(".warnings"); return w && !w.hidden ? w.textContent : ""; };
     if (!/deprecated/.test(bannerOf(ed))) fails.push("radar deprecation: no notice in the visual editor");
+    else if (!bannerOf(ed).includes("Also known as sf-presence-card")) fails.push("radar deprecation: the editor notice does not mention the alias (users of the alias get the editor of the canonical card)");
     if (/deprecated/.test(bannerOf(ed2))) fails.push("deprecation notice in the editor of a card that is not deprecated");
     ed.remove(); ed2.remove(); }
   // Normalisation of the configuration (the one place every card relies on)

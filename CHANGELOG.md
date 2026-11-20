@@ -4,9 +4,9 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 
 ## [Unreleased]
 ### Deprecated
-- **`sf-radar-card` (alias `sf-presence-card`) will be removed**, not before 2026-11-27. It keeps working as configured; a console warning (once per page) and a notice in its visual editor announce it, and the card picker says so. `sf-setpoints-card` stays.
+- **`sf-radar-card` (alias `sf-presence-card`) will be removed**, not before 2026-11-27. It keeps working as configured; a console warning (once per card type and page) and a notice in its visual editor announce it, and the card picker says so. `sf-setpoints-card` stays.
 ### Fixed
-- Wall panel: an unavailable or unknown weather entity (and the Jour screen's energy decision) shows "no data" instead of the raw Home Assistant word.
+- Wall panel: an unavailable or unknown weather entity shows "no data", and the Jour screen's energy decision shows the plugged-in / free label, instead of the raw Home Assistant word.
 ### Tests and project
 - The taint check and the robustness test no longer depend on the time of day (the wall panel screen is forced, the clock pinned).
 
