@@ -504,23 +504,14 @@ __SF.SF_HOOK.tr = (lang, key) => {
     const c = mount("sf-camera-card", { cameras: [], refresh: 0 }, "en"); await wait(20);
     if (c._every() !== 5) fail(`camera: refresh 0 must fall back to 5 s, got ${c._every()}`);
     c.setConfig({ cameras: [], refresh: 2 }); if (c._every() !== 2) fail("camera: setConfig must re-read refresh"); c.remove(); }
-  { // -- Console toggle: fairy-light effect (visual only), selected by a helper or fixed; never on while the tile is off or unavailable
-    const cfg = (it) => ({ groups: [{ items: [{ kind: "toggle", entity: "switch.plug", label: "Garland", ...it }] }] });
-    const tile = async (it, st) => { const e = mount("sf-console-card", cfg(it), "en", { ...base, ...st }); await wait(30); const t = e.shadowRoot.querySelector(".it"); const r = t ? t.classList.contains("xmas") : null; e.remove(); return r; };
-    const helper = { effect_entity: "input_select.mode" };
-    if (await tile(helper, { "input_select.mode": S("Christmas") }) !== true) fail("console effect: helper = Christmas must animate the tile");
-    if (await tile(helper, { "input_select.mode": S("Standard") }) !== false) fail("console effect: helper = Standard must not animate");
-    if (await tile(helper, {}) !== false) fail("console effect: a missing helper must not animate nor break the tile");
-    if (await tile({ effect: "christmas" }, {}) !== true) fail("console effect: effect: christmas must animate");
-    if (await tile({ effect: "christmas" }, { "switch.plug": S("off") }) !== false) fail("console effect: no animation while the tile is off");
-    if (await tile({ effect: "christmas" }, { "switch.plug": S("unavailable") }) !== false) fail("console effect: no animation while the entity is unavailable");
-    if (await tile({}, {}) !== false) fail("console effect: no effect option, no animation");
-    if (await tile(helper, { "input_select.mode": S("CHRISTMAS") }) !== true) fail("console effect: the helper state is matched case-insensitively");
-    if (await tile({ effect: "Christmas" }, {}) !== true) fail("console effect: effect is matched case-insensitively");
-    if (await tile(helper, { "input_select.mode": S("unavailable") }) !== false) fail("console effect: an unavailable helper must not animate");
-    for (const bad of [{ effect_entity: { a: 1 } }, { effect_entity: 5 }, { effect_entity: ["x"] }, { effect: 3 }]) if (await tile(bad, {}) !== false) fail("console effect: a badly typed option must neither animate nor break the tile: " + JSON.stringify(bad));
-    { const html = async (it) => { const e = mount("sf-console-card", cfg(it), "en"); await wait(30); const h = e.shadowRoot.querySelector(".items").innerHTML; e.remove(); return h; };
-      if (await html({}) !== await html({ effect_entity: "input_select.mode" })) fail("console effect: the markup must be identical when the effect is not active"); }
+  { // -- Console "christmas" item: a toggle that gets fairy lights while on (visual only); never while off or unavailable
+    const tile = async (it, st) => { const e = mount("sf-console-card", { groups: [{ items: [{ kind: "christmas", entity: "switch.plug", label: "Garland", ...it }] }] }, "en", { ...base, ...st }); await wait(30); const t = e.shadowRoot.querySelector(".it"); const r = t ? t.classList.contains("xmas") : null; e.remove(); return r; };
+    if (await tile({}, {}) !== true) fail("console christmas: an item that is on must carry the fairy lights");
+    if (await tile({}, { "switch.plug": S("off") }) !== false) fail("console christmas: no animation while off");
+    if (await tile({}, { "switch.plug": S("unavailable") }) !== false) fail("console christmas: no animation while unavailable");
+    if (await tile({}, { "switch.plug": undefined }) !== false) fail("console christmas: a missing entity must not animate nor break the tile");
+    { const e = mount("sf-console-card", { groups: [{ items: [{ kind: "toggle", entity: "switch.plug", label: "Plug", effect: "christmas", effect_entity: "input_select.mode" }] }] }, "en"); await wait(30);
+      if (e.shadowRoot.querySelector(".it.xmas")) fail("console christmas: a plain toggle must never animate (the 1.22.0 effect options are gone)"); e.remove(); }
   }
   { // -- Badly typed configurations: never an exception
     const bad = [["sf-alert-card", { leaks: "binary_sensor.leak", doors: null }], ["sf-bridge-card", { weather: "weather.home", people: "x", doors: "binary_sensor.door" }],

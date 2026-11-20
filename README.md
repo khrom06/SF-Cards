@@ -415,7 +415,7 @@ groups:
     items:
       - { kind: dimmer, entity: light.living_room, label: Living room }   # toggle + brightness ±10 %
       - { kind: toggle, entity: switch.desk_lamp, label: Desk, icon: "mdi:desk-lamp" }
-      - { kind: toggle, entity: switch.tree, label: Lights, effect_entity: input_select.tree_mode }   # blinks like fairy lights while on and the helper is "Christmas" (or effect: christmas); visual only
+      - { kind: christmas, entity: switch.tree, label: Lights }   # a toggle that blinks like fairy lights while it is on (visual only)
       - { kind: action, label: Cosy, icon: "mdi:weather-night", service: scene.turn_on, data: { entity_id: scene.cosy } }
   - title: Home
     items:
@@ -425,7 +425,7 @@ groups:
       - { kind: sensor, entity: sensor.pm25, label: PM2.5, unit: "µg/m³" }
 ```
 
-Item kinds: `toggle`, `dimmer`, `action`, `sensor`, `cover`, `vacuum`, `stepper`, `select`.
+Item kinds: `toggle`, `christmas`, `dimmer`, `action`, `sensor`, `cover`, `vacuum`, `stepper`, `select`.
 
 Other options: card `subtitle`; group `span` (1–4 columns); item `color`, `digits`, `unit`; for `action`: `sub` and `confirm: "text"` (asks for a second tap); for `select`: `labels: { option: Label }`.
 
