@@ -1,16 +1,16 @@
-const SF_KINDS = [["toggle", "Interrupteur / lumière"], ["dimmer", "Lampe avec variation"], ["action", "Bouton d'action (service)"],
+const SF_KINDS = [["toggle", "Interrupteur / lumière"], ["christmas", "Guirlande de Noël (animation)"], ["dimmer", "Lampe avec variation"], ["action", "Bouton d'action (service)"],
   ["sensor", "Valeur à afficher"], ["cover", "Volets"], ["vacuum", "Aspirateur"], ["stepper", "Réglage + / −"], ["select", "Choix dans une liste"]];
 
 function sfConsoleItem(it) {
   const k = it.kind || "toggle";
-  const dom = { toggle: ["light", "switch", "fan", "input_boolean", "automation"], dimmer: "light", cover: "cover", vacuum: "vacuum",
+  const dom = { toggle: ["light", "switch", "fan", "input_boolean", "automation"], christmas: ["light", "switch", "fan", "input_boolean"], dimmer: "light", cover: "cover", vacuum: "vacuum",
     stepper: ["input_number", "number"], select: ["input_select", "select"] }[k];
   const s = [sfS("kind", SF_KINDS), sfT("label")];
   if (k === "action") s.push(sfG(sfI("icon"), sfT("color")), sfT("sub"), sfT("service"), sfT("confirm"), sfO("data"));
   else {
     s.push(sfE("entity", dom));
-    if (["toggle", "sensor", "stepper"].includes(k)) s.push(sfI("icon"));
-    if (k === "toggle" || k === "dimmer") s.push(sfT("color"));
+    if (["toggle", "christmas", "sensor", "stepper"].includes(k)) s.push(sfI("icon"));
+    if (k === "toggle" || k === "christmas" || k === "dimmer") s.push(sfT("color"));
     if (k === "sensor" || k === "stepper") s.push(sfG(sfT("unit"), sfN("digits", 0, 4)));
     if (k === "vacuum") s.push(sfE("battery", "sensor"), sfO("shortcuts"));
   }

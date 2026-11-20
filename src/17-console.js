@@ -8,8 +8,7 @@
  *   - title: Lights
  *     items:
  *       - { kind: toggle, entity: light.x, label: Salon, icon: mdi:lightbulb }
- *       - { kind: toggle, entity: switch.garland, label: Garland, effect_entity: input_select.garland_mode }   # fairy-light animation while on and the helper is "christmas"
- *                                                  # (or effect: christmas to always animate). Purely visual: nothing is sent to the device.
+ *       - { kind: christmas, entity: switch.tree, label: Lights }       # a toggle whose tile blinks like a string of fairy lights while it is on (visual only)
  *       - { kind: action, label: Dimmed, icon: mdi:..., service: scene.turn_on, data: {...}, confirm: "Sure?" }
  *       - { kind: cover, entity: cover.x, label: Volets }
  *       - { kind: vacuum, entity: vacuum.x, battery: sensor.x, label: Robot }
@@ -53,12 +52,12 @@ class SfConsoleCard extends SfBase {
     const s = this.st(x.entity), dead = x.entity && !this.ok(x.entity);
     const ic = (n) => this.icon(x.icon || n, 20);
     switch (x.kind) {
-      case "toggle": {
+      case "toggle": case "christmas": {
         const on = this.isOn(x.entity);
-        // Visual effect only: fairy lights around the tile while it is on and the effect is selected (fixed, or by the state of a helper).
-        const fx = typeof x.effect_entity === "string" ? this.st(x.effect_entity) : null, xmas = on && !dead && (String(x.effect).toLowerCase() === "christmas" || (!!fx && String(fx.state).toLowerCase() === "christmas"));
+        // "christmas": the same toggle, with fairy lights blinking around the tile while it is on (visual only, nothing extra is sent to the device).
+        const xmas = x.kind === "christmas" && on && !dead;
         return `<div class="it ${this.esc((on ? "on" : "") + (xmas ? " xmas" : ""))} ${this.esc(dead ? "dead" : "")}" style="${this.esc(x.color ? `--ac:${x.color}` : "")}" ${this.toggleCall(x.entity)}>
-          ${ic("mdi:toggle-switch")}<span class="nm">${this.esc(x.label)}</span><span class="sv">${dead ? this.t("common.no_data") : on ? this.t("console.on") : this.t("console.off")}</span></div>`;
+          ${ic(x.kind === "christmas" ? "mdi:string-lights" : "mdi:toggle-switch")}<span class="nm">${this.esc(x.label)}</span><span class="sv">${dead ? this.t("common.no_data") : on ? this.t("console.on") : this.t("console.off")}</span></div>`;
       }
       case "action":
         return `<div class="it ${this.esc(dead ? "dead" : "")}" style="${this.esc(x.color ? `--ac:${x.color}` : "")}" ${this.call(x.service, x.data, x.confirm)}>

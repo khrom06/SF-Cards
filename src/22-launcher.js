@@ -127,7 +127,7 @@ class SfLauncherCard extends SfBase {
       }
       case "commands": {
         const items = (c.groups || []).flatMap((g) => g.items || []);
-        const lights = items.filter((x) => x.kind === "toggle" && /^(light|switch)\./.test(x.entity || ""));
+        const lights = items.filter((x) => (x.kind === "toggle" || x.kind === "christmas") && /^(light|switch)\./.test(x.entity || ""));
         const on = lights.filter((x) => this.isOn(x.entity)).length;
         const cov = items.find((x) => x.kind === "cover"), cs = cov && this.st(cov.entity);
         return { main: `${on} / ${lights.length}`, sub: `${this.t("launcher.lights_on")}${cs ? `<br>${this.t("launcher.shutters_s", { s: (Object.assign(Object.create(null), { open: this.t("common.open"), closed: this.t("common.closed") }))[cs.state] || this.esc(cs.state) })}` : ""}`, hot: false };
