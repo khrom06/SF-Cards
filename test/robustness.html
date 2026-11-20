@@ -9,6 +9,7 @@ class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon)
 window.requestAnimationFrame = (f) => setTimeout(f, 0);
 window.__SF_TEST = true;
 window.__errs = [];
+window.__warns = []; { const w0 = console.warn; console.warn = function (...a) { window.__warns.push(a.join(" ")); return w0.apply(this, a); }; }   // keep the console warnings: the deprecation notices are checked below
 window.addEventListener("error", (e) => window.__errs.push(`${e.message} @${(e.filename || "").split("/").pop()}:${e.lineno}`));
 window.addEventListener("unhandledrejection", (e) => window.__errs.push(`unhandled rejection: ${e.reason && e.reason.message || e.reason}`));
 </script>
@@ -64,6 +65,25 @@ async function run(label, tag, cfg, hass, then, rawCheck) {
   for (const tag of tags()) await run("language / theme / entities change", tag, FULL[tag], mkHass(base), async (el) => {
     for (const lang of ["ar", "zh-Hans", "pt_BR", "xx-invalid", "fr"]) { const h = mkHass(base); h.locale = { language: lang }; h.language = lang; h.themes = { theme: "t" + lang, darkMode: lang === "ar" }; el.hass = h; await wait(15); }
     el.hass = mkHass({}); await wait(15); el.hass = mkHass(base); await wait(15); el.setConfig({ ...FULL[tag], theme: "light" }); await wait(15); });
+  // Deprecation notice: the radar card (and its alias) keep working but announce their removal, once per tag in the console and in the editor; no other card does.
+  { const dep = (tag) => window.__warns.filter((m) => m.includes(tag + " is deprecated"));
+    const el = document.createElement("sf-presence-card"); el.setConfig({ people: [{ name: "A", person: "person.a" }] }); document.body.appendChild(el); el.hass = mkHass(base); await wait(60);
+    const el2 = document.createElement("sf-presence-card"); el2.setConfig({ rooms: [{ label: "R", entity: "binary_sensor.r" }] }); document.body.appendChild(el2); await wait(30);
+    if (!el.shadowRoot || !el.shadowRoot.innerHTML.length) fails.push("deprecated radar card no longer renders");
+    if (dep("sf-radar-card").length !== 1) fails.push(`radar deprecation: expected one console notice for sf-radar-card, got ${dep("sf-radar-card").length}`);
+    if (dep("sf-presence-card").length !== 1) fails.push(`radar deprecation: expected one console notice for the alias sf-presence-card, got ${dep("sf-presence-card").length}`);
+    if (!window.__warns.some((m) => m.includes("not before 2026-11-27"))) fails.push("radar deprecation: the notice does not give the earliest removal date");
+    const others = window.__warns.filter((m) => m.includes("is deprecated") && !m.includes("sf-radar-card") && !m.includes("sf-presence-card"));
+    if (others.length) fails.push("deprecation notice for a card that is not deprecated: " + others[0].slice(0, 80));
+    el.remove(); el2.remove();
+    const ed = document.createElement("sf-radar-card-editor"), ed2 = document.createElement("sf-climate-card-editor");
+    for (const e of [ed, ed2]) { e.hass = mkHass(base); e.setConfig(e === ed ? FULL["sf-radar-card"] : FULL["sf-climate-card"]); document.body.appendChild(e); }
+    await wait(60);
+    const bannerOf = (e) => { const w = e.shadowRoot && e.shadowRoot.querySelector(".warnings"); return w && !w.hidden ? w.textContent : ""; };
+    if (!/deprecated/.test(bannerOf(ed))) fails.push("radar deprecation: no notice in the visual editor");
+    else if (!bannerOf(ed).includes("Also known as sf-presence-card")) fails.push("radar deprecation: the editor notice does not mention the alias (users of the alias get the editor of the canonical card)");
+    if (/deprecated/.test(bannerOf(ed2))) fails.push("deprecation notice in the editor of a card that is not deprecated");
+    ed.remove(); ed2.remove(); }
   // Normalisation of the configuration (the one place every card relies on)
   { const N = window.__SF.sfNormConfig; const need = (c, m) => { if (!c) fails.push("normalise: " + m); };
     const r = N("sf-machines-card", { tiles: [null, "", { label: "a" }, 5, undefined], exclude: "sensor.x", lights_off: [null, "", "light.a", undefined], color: "red; background:url(//x)", accent: "#abc", span: 9 });

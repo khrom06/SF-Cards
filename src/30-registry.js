@@ -1,7 +1,7 @@
 const SF_DEFS = [
   ["sf-alert-card", SfAlertCard, "SF · Alert", "Full-frame red alert: leaks, doorbell, alarm, power cut."],
   ["sf-hangar-card", SfHangarCard, "SF · Vehicles", "EV(s) and shared charger with charge-mode selector."],
-  ["sf-radar-card", SfRadarCard, "SF · Presence radar", "Presence from three never-merged sources."],
+  ["sf-radar-card", SfRadarCard, "SF · Presence radar", "Deprecated, to be removed. Presence from three never-merged sources."],
   ["sf-machines-card", SfMachinesCard, "SF · Equipment", "Status tiles: values with thresholds, toggles with timers."],
   ["sf-bridge-card", SfBridgeCard, "SF · Welcome banner", "Clock, weather, tariff, anomalies, presence."],
   ["sf-reactor-card", SfReactorCard, "SF · Energy", "Energy flow around an animated core."],
