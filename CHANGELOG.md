@@ -3,6 +3,8 @@
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
+
+## [1.21.3] - 2026-11-20
 ### Deprecated
 - **`sf-radar-card` (alias `sf-presence-card`) will be removed**, not before 2026-11-27. It keeps working as configured; a console warning (once per card type and page) and a notice in its visual editor announce it, and the card picker says so. `sf-setpoints-card` stays.
 ### Fixed
