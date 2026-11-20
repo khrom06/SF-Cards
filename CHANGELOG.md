@@ -3,6 +3,8 @@
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
+
+## [1.23.0] - 2026-11-20
 ### Changed
 - **Controls card: the fairy-light effect is now its own item kind, `kind: christmas`** (a toggle whose tile blinks like fairy lights while it is on; nothing extra is sent to the device). It replaces the `effect` / `effect_entity` options of 1.22.0, which are removed: they were released the same day, and a helper-driven mode was harder to set up than a dedicated item.
 
