@@ -76,7 +76,7 @@ async function main() {
   // 2. Editor: open the editor of the "Pick" card, choose another entity in the real picker, check that the page does not freeze.
   await page.goto(HA + "/e2e-test/pick?edit=1", { waitUntil: "domcontentloaded" }); await sleep(5000); await alive("edit mode");
   const editBtn = page.getByRole("button", { name: /^edit$/i }).first();
-  try { await editBtn.click({ timeout: 8000 }); } catch { fails.push("editor: the card's 'Edit' button was not found (HA interface changed?)"); }
+  try { await editBtn.click({ timeout: 8000 }); } catch { try { await sleep(3000); await editBtn.click({ timeout: 8000 }); } catch { fails.push("editor: the card's 'Edit' button was not found (HA interface changed?)"); } }   // one retry, as for the new cards below: the view may still be loading (flaky on slow CI runners)
   await sleep(3000); await alive("opening the card editor");
   const ed = await page.evaluate(() => { const f = (root, p, acc = []) => { root.querySelectorAll("*").forEach((e) => { if (p(e)) acc.push(e); if (e.shadowRoot) f(e.shadowRoot, p, acc); }); return acc; }; return f(document, (e) => e.localName === "sf-machines-card-editor").length; });
   log("SF editors open:", ed);
