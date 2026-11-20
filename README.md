@@ -427,6 +427,10 @@ groups:
 
 Item kinds: `toggle`, `christmas`, `dimmer`, `action`, `sensor`, `cover`, `vacuum`, `stepper`, `select`.
 
+The `christmas` kind (left) next to a plain `toggle` that is on (middle) and one that is off (right):
+
+<img src="assets/anim/fairy-lights.gif" alt="Controls card: an animated fairy-lights button next to a plain toggle that is on and one that is off" width="420">
+
 Other options: card `subtitle`; group `span` (1–4 columns); item `color`, `digits`, `unit`; for `action`: `sub` and `confirm: "text"` (asks for a second tap); for `select`: `labels: { option: Label }`.
 
 ### sf-launcher-card
