@@ -401,11 +401,11 @@
         box-shadow: 0 0 14px -4px var(--ac, ${m.amber}); }
       .it.on ha-icon { color:var(--ac, ${m.amber}); filter: drop-shadow(0 0 4px var(--ac, ${m.amber})); }
       .it.xmas { overflow:hidden; animation: xmasGlow 4.8s linear infinite; }
-      .it.xmas::before, .it.xmas::after { content:""; position:absolute; left:0; right:0; height:12px; pointer-events:none; background-repeat:repeat-x; background-size:48px 12px; }
+      .it.xmas::before, .it.xmas::after { content:""; position:absolute; left:0; right:0; height:8px; pointer-events:none; background-repeat:repeat-x; background-size:48px 8px; }
       .it.xmas::before { top:1px; animation: xmasA 1.6s ease-in-out infinite;
-        background-image: radial-gradient(circle at 6px 6px, var(--sf-red) 0 3px, transparent 4px), radial-gradient(circle at 30px 6px, var(--sf-cyan) 0 3px, transparent 4px); }
+        background-image: radial-gradient(circle at 6px 4px, var(--sf-red) 0 2.5px, transparent 3.5px), radial-gradient(circle at 30px 4px, var(--sf-cyan) 0 2.5px, transparent 3.5px); }
       .it.xmas::after { bottom:1px; animation: xmasB 1.6s ease-in-out infinite;
-        background-image: radial-gradient(circle at 18px 6px, var(--sf-green) 0 3px, transparent 4px), radial-gradient(circle at 42px 6px, var(--sf-amber) 0 3px, transparent 4px); }
+        background-image: radial-gradient(circle at 18px 4px, var(--sf-green) 0 2.5px, transparent 3.5px), radial-gradient(circle at 42px 4px, var(--sf-amber) 0 2.5px, transparent 3.5px); }
       @keyframes xmasA { 0%,100% { opacity:1; } 50% { opacity:.2; } }
       @keyframes xmasB { 0%,100% { opacity:.2; } 50% { opacity:1; } }
       @keyframes xmasGlow { 0%,100% { box-shadow:0 0 14px -2px var(--sf-red); } 25% { box-shadow:0 0 14px -2px var(--sf-amber); } 50% { box-shadow:0 0 14px -2px var(--sf-green); } 75% { box-shadow:0 0 14px -2px var(--sf-cyan); } }
@@ -414,7 +414,7 @@
       .wide { grid-column: 1 / -1; min-height:0; }
       .row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
       .row .grow { flex:1; min-width:90px; }
-      .big { font-family:Orbitron,sans-serif; font-size:18px; color:var(--sf-strong); }`}_item(e){const t=this.st(e.entity),i=e.entity&&!this.ok(e.entity),a=n=>this.icon(e.icon||n,20);switch(e.kind){case"toggle":{const n=this.isOn(e.entity),s=this.st(e.effect_entity),r=n&&!i&&(e.effect==="christmas"||!!s&&String(s.state).toLowerCase()==="christmas");return`<div class="it ${this.esc((n?"on":"")+(r?" xmas":""))} ${this.esc(i?"dead":"")}" style="${this.esc(e.color?`--ac:${e.color}`:"")}" ${this.toggleCall(e.entity)}>
+      .big { font-family:Orbitron,sans-serif; font-size:18px; color:var(--sf-strong); }`}_item(e){const t=this.st(e.entity),i=e.entity&&!this.ok(e.entity),a=n=>this.icon(e.icon||n,20);switch(e.kind){case"toggle":{const n=this.isOn(e.entity),s=typeof e.effect_entity=="string"?this.st(e.effect_entity):null,r=n&&!i&&(String(e.effect).toLowerCase()==="christmas"||!!s&&String(s.state).toLowerCase()==="christmas");return`<div class="it ${this.esc((n?"on":"")+(r?" xmas":""))} ${this.esc(i?"dead":"")}" style="${this.esc(e.color?`--ac:${e.color}`:"")}" ${this.toggleCall(e.entity)}>
           ${a("mdi:toggle-switch")}<span class="nm">${this.esc(e.label)}</span><span class="sv">${i?this.t("common.no_data"):n?this.t("console.on"):this.t("console.off")}</span></div>`}case"action":return`<div class="it ${this.esc(i?"dead":"")}" style="${this.esc(e.color?`--ac:${e.color}`:"")}" ${this.call(e.service,e.data,e.confirm)}>
           ${a("mdi:play")}<span class="nm">${this.esc(e.label)}</span>${e.sub?`<span class="sv">${this.esc(e.sub)}</span>`:""}</div>`;case"sensor":{const n=this.num(e.entity);return`<div class="it click ${this.esc(i?"dead":"")}" data-e="${this.esc(e.entity)}">${a("mdi:gauge")}<span class="nm">${this.esc(e.label)}</span>
           <span class="big" style="font-size:14px">${n===null?t&&this.ok(e.entity)?this.esc(t.state):"\u2014":this.nf(n,e.digits??0)}<span class="sv"> ${this.esc(e.unit??this.unit(e.entity))}</span></span></div>`}case"cover":{const n=t&&t.attributes.current_position,s=t?Object.assign(Object.create(null),{open:this.t("common.open"),closed:this.t("common.closed"),opening:this.t("console.opening"),closing:this.t("console.closing")})[t.state]||this.esc(t.state):"\u2014";return`<div class="it wide"><div class="row"><span class="click" data-e="${this.esc(e.entity)}">${a("mdi:window-shutter")}</span>

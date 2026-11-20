@@ -515,6 +515,12 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (await tile({ effect: "christmas" }, { "switch.plug": S("off") }) !== false) fail("console effect: no animation while the tile is off");
     if (await tile({ effect: "christmas" }, { "switch.plug": S("unavailable") }) !== false) fail("console effect: no animation while the entity is unavailable");
     if (await tile({}, {}) !== false) fail("console effect: no effect option, no animation");
+    if (await tile(helper, { "input_select.mode": S("CHRISTMAS") }) !== true) fail("console effect: the helper state is matched case-insensitively");
+    if (await tile({ effect: "Christmas" }, {}) !== true) fail("console effect: effect is matched case-insensitively");
+    if (await tile(helper, { "input_select.mode": S("unavailable") }) !== false) fail("console effect: an unavailable helper must not animate");
+    for (const bad of [{ effect_entity: { a: 1 } }, { effect_entity: 5 }, { effect_entity: ["x"] }, { effect: 3 }]) if (await tile(bad, {}) !== false) fail("console effect: a badly typed option must neither animate nor break the tile: " + JSON.stringify(bad));
+    { const html = async (it) => { const e = mount("sf-console-card", cfg(it), "en"); await wait(30); const h = e.shadowRoot.querySelector(".items").innerHTML; e.remove(); return h; };
+      if (await html({}) !== await html({ effect_entity: "input_select.mode" })) fail("console effect: the markup must be identical when the effect is not active"); }
   }
   { // -- Badly typed configurations: never an exception
     const bad = [["sf-alert-card", { leaks: "binary_sensor.leak", doors: null }], ["sf-bridge-card", { weather: "weather.home", people: "x", doors: "binary_sensor.door" }],
