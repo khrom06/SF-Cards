@@ -3,6 +3,8 @@
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
+### Added
+- **Controls card: fairy-light effect on a toggle tile.** `effect: christmas` (always) or `effect_entity: input_select.x` (when its state is "Christmas") makes the tile of an item that is on blink like a string of lights, instead of staying a fixed colour. Visual only: nothing is sent to the device; it follows the theme colours and `prefers-reduced-motion`.
 
 ## [1.21.3] - 2026-11-20
 ### Deprecated

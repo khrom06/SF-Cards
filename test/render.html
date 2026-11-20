@@ -504,6 +504,18 @@ __SF.SF_HOOK.tr = (lang, key) => {
     const c = mount("sf-camera-card", { cameras: [], refresh: 0 }, "en"); await wait(20);
     if (c._every() !== 5) fail(`camera: refresh 0 must fall back to 5 s, got ${c._every()}`);
     c.setConfig({ cameras: [], refresh: 2 }); if (c._every() !== 2) fail("camera: setConfig must re-read refresh"); c.remove(); }
+  { // -- Console toggle: fairy-light effect (visual only), selected by a helper or fixed; never on while the tile is off or unavailable
+    const cfg = (it) => ({ groups: [{ items: [{ kind: "toggle", entity: "switch.plug", label: "Garland", ...it }] }] });
+    const tile = async (it, st) => { const e = mount("sf-console-card", cfg(it), "en", { ...base, ...st }); await wait(30); const t = e.shadowRoot.querySelector(".it"); const r = t ? t.classList.contains("xmas") : null; e.remove(); return r; };
+    const helper = { effect_entity: "input_select.mode" };
+    if (await tile(helper, { "input_select.mode": S("Christmas") }) !== true) fail("console effect: helper = Christmas must animate the tile");
+    if (await tile(helper, { "input_select.mode": S("Standard") }) !== false) fail("console effect: helper = Standard must not animate");
+    if (await tile(helper, {}) !== false) fail("console effect: a missing helper must not animate nor break the tile");
+    if (await tile({ effect: "christmas" }, {}) !== true) fail("console effect: effect: christmas must animate");
+    if (await tile({ effect: "christmas" }, { "switch.plug": S("off") }) !== false) fail("console effect: no animation while the tile is off");
+    if (await tile({ effect: "christmas" }, { "switch.plug": S("unavailable") }) !== false) fail("console effect: no animation while the entity is unavailable");
+    if (await tile({}, {}) !== false) fail("console effect: no effect option, no animation");
+  }
   { // -- Badly typed configurations: never an exception
     const bad = [["sf-alert-card", { leaks: "binary_sensor.leak", doors: null }], ["sf-bridge-card", { weather: "weather.home", people: "x", doors: "binary_sensor.door" }],
       ["sf-hangar-card", { cars: "x", chargers: [null, { power: "sensor.ev", charging_states: "Charging" }], charger: "oops" }], ["sf-reactor-card", { grid: "sensor.grid", devices: "sensor.ev" }],

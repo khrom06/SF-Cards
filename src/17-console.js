@@ -8,6 +8,8 @@
  *   - title: Lights
  *     items:
  *       - { kind: toggle, entity: light.x, label: Salon, icon: mdi:lightbulb }
+ *       - { kind: toggle, entity: switch.garland, label: Garland, effect_entity: input_select.garland_mode }   # fairy-light animation while on and the helper is "christmas"
+ *                                                  # (or effect: christmas to always animate). Purely visual: nothing is sent to the device.
  *       - { kind: action, label: Dimmed, icon: mdi:..., service: scene.turn_on, data: {...}, confirm: "Sure?" }
  *       - { kind: cover, entity: cover.x, label: Volets }
  *       - { kind: vacuum, entity: vacuum.x, battery: sensor.x, label: Robot }
@@ -31,6 +33,15 @@ class SfConsoleCard extends SfBase {
       .it.on { border-color:var(--ac, ${SF_C.amber}); background: linear-gradient(160deg, color-mix(in srgb, var(--ac, ${SF_C.amber}) 22%, transparent), transparent);
         box-shadow: 0 0 14px -4px var(--ac, ${SF_C.amber}); }
       .it.on ha-icon { color:var(--ac, ${SF_C.amber}); filter: drop-shadow(0 0 4px var(--ac, ${SF_C.amber})); }
+      .it.xmas { overflow:hidden; animation: xmasGlow 4.8s linear infinite; }
+      .it.xmas::before, .it.xmas::after { content:""; position:absolute; left:0; right:0; height:12px; pointer-events:none; background-repeat:repeat-x; background-size:48px 12px; }
+      .it.xmas::before { top:1px; animation: xmasA 1.6s ease-in-out infinite;
+        background-image: radial-gradient(circle at 6px 6px, var(--sf-red) 0 3px, transparent 4px), radial-gradient(circle at 30px 6px, var(--sf-cyan) 0 3px, transparent 4px); }
+      .it.xmas::after { bottom:1px; animation: xmasB 1.6s ease-in-out infinite;
+        background-image: radial-gradient(circle at 18px 6px, var(--sf-green) 0 3px, transparent 4px), radial-gradient(circle at 42px 6px, var(--sf-amber) 0 3px, transparent 4px); }
+      @keyframes xmasA { 0%,100% { opacity:1; } 50% { opacity:.2; } }
+      @keyframes xmasB { 0%,100% { opacity:.2; } 50% { opacity:1; } }
+      @keyframes xmasGlow { 0%,100% { box-shadow:0 0 14px -2px var(--sf-red); } 25% { box-shadow:0 0 14px -2px var(--sf-amber); } 50% { box-shadow:0 0 14px -2px var(--sf-green); } 75% { box-shadow:0 0 14px -2px var(--sf-cyan); } }
       .it.dead { opacity:.35; }
       :host([theme="light"]) .it.dead { opacity:.6; }
       .wide { grid-column: 1 / -1; min-height:0; }
@@ -44,7 +55,9 @@ class SfConsoleCard extends SfBase {
     switch (x.kind) {
       case "toggle": {
         const on = this.isOn(x.entity);
-        return `<div class="it ${this.esc(on ? "on" : "")} ${this.esc(dead ? "dead" : "")}" style="${this.esc(x.color ? `--ac:${x.color}` : "")}" ${this.toggleCall(x.entity)}>
+        // Visual effect only: fairy lights around the tile while it is on and the effect is selected (fixed, or by the state of a helper).
+        const fx = this.st(x.effect_entity), xmas = on && !dead && (x.effect === "christmas" || (!!fx && String(fx.state).toLowerCase() === "christmas"));
+        return `<div class="it ${this.esc((on ? "on" : "") + (xmas ? " xmas" : ""))} ${this.esc(dead ? "dead" : "")}" style="${this.esc(x.color ? `--ac:${x.color}` : "")}" ${this.toggleCall(x.entity)}>
           ${ic("mdi:toggle-switch")}<span class="nm">${this.esc(x.label)}</span><span class="sv">${dead ? this.t("common.no_data") : on ? this.t("console.on") : this.t("console.off")}</span></div>`;
       }
       case "action":

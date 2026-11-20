@@ -415,6 +415,7 @@ groups:
     items:
       - { kind: dimmer, entity: light.living_room, label: Living room }   # toggle + brightness ±10 %
       - { kind: toggle, entity: switch.desk_lamp, label: Desk, icon: "mdi:desk-lamp" }
+      - { kind: toggle, entity: switch.tree, label: Lights, effect_entity: input_select.tree_mode }   # blinks like fairy lights while on and the helper is "Christmas" (or effect: christmas); visual only
       - { kind: action, label: Cosy, icon: "mdi:weather-night", service: scene.turn_on, data: { entity_id: scene.cosy } }
   - title: Home
     items:
