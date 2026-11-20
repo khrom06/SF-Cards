@@ -962,6 +962,8 @@ devices:
 
 ### sf-presence-card
 
+> **Deprecated.** This card (also `sf-radar-card`) will be removed in a future release, not before 2026-11-27. It keeps working until then, and the console and the editor say so. If you use it, please [tell us](https://github.com/khrom06/SF-Cards/issues) so that it can be kept; for per-room setpoints, `sf-setpoints-card` stays.
+
 <img src="assets/anim/radar.webp" alt="Presence card" width="520">
 
 Advanced and opinionated: three rings, three sources that are **never merged** (home/away from `person.*`, last camera that recognised a face, anonymous room occupancy).

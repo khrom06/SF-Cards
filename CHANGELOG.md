@@ -2,6 +2,14 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+### Deprecated
+- **`sf-radar-card` (alias `sf-presence-card`) will be removed**, not before 2026-11-27. It keeps working as configured; a console warning (once per page) and a notice in its visual editor announce it, and the card picker says so. `sf-setpoints-card` stays.
+### Fixed
+- Wall panel: an unavailable or unknown weather entity (and the Jour screen's energy decision) shows "no data" instead of the raw Home Assistant word.
+### Tests and project
+- The taint check and the robustness test no longer depend on the time of day (the wall panel screen is forced, the clock pinned).
+
 ## [1.21.2]
 ### Changed
 - **Battery: an estimate now looks like one.** When the solar / grid split of the charge is not measured (no `from_grid` / `battery_from_grid`), the battery card and the energy card show it with **≈** and an explanatory tooltip in the 11 languages; with a measured value the ≈ is gone. The README spells out the difference between measured, calculated and estimated values.

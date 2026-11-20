@@ -75,6 +75,12 @@ function sfWarnConfig(tag, cfg) {
     console.warn(`SF Cards (${tag}): configuration warning(s) — the card still works as configured\n` + w.map((x) => ` - ${x.path}: ${x.msg}`).join("\n"));
   } catch (e) { /* never break a card for a warning */ }
 }
+function sfWarnDeprecated(tag) {
+  try {
+    const m = sfDeprecation(tag); if (!m || SF_WARNED.has("dep|" + tag)) return; SF_WARNED.add("dep|" + tag);
+    console.warn("SF Cards: " + m);
+  } catch (e) { /* never break a card for a warning */ }
+}
 function sfValidate(tag, cfg) {
   const spec = SF_SPECS[tag], out = [];
   if (!spec || !cfg || typeof cfg !== "object" || Array.isArray(cfg)) return out;

@@ -39,8 +39,10 @@ class SfEditorBase extends HTMLElement {
     const warns = sfValidate(sfCanon(this.localName.replace(/-editor$/, "")), this._config || {});
     let w = root.querySelector(".warnings");
     if (!w) { w = document.createElement("div"); w.className = "warnings"; const wr = root.querySelector("div"); if (wr) wr.prepend(w); }
-    w.hidden = !warns.length;
-    w.textContent = warns.length ? warns.slice(0, 6).map((x) => `${x.path}: ${x.msg}`).join(" · ") : "";
+    const dep = sfDeprecation(this.localName.replace(/-editor$/, ""));
+    const lines = (dep ? [dep] : []).concat(warns.slice(0, 6).map((x) => `${x.path}: ${x.msg}`));
+    w.hidden = !lines.length;
+    w.textContent = lines.join(" · ");
   }
   _emit() {
     this._banner();
