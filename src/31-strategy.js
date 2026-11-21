@@ -19,7 +19,7 @@
  * Floors (Home Assistant "floors") order the rooms, and title them in the rooms view, when they are defined (and `areas` is not used).
  */
 const SF_HOME_MAXITEMS = 150, SF_HOME_COVER_LIST = ["shutter", "blind", "curtain", "shade", "awning", "window"], SF_HOME_COVER_BULK = ["shutter", "blind", "curtain", "shade", "awning"];
-const SF_HOME_COVER_RISKY = /garage|portail|portillon|barri[eè]re|(^|[^a-z])(gate|door)([^a-z]|$)/i;
+const SF_HOME_COVER_RISKY = /garage|portail|portillon|portal|barri(?:er|[eè]re)|gates?(?!way)|(?:^|[^a-z]|front|back|side|main|garden|entry|entrance|house)doors?|porte(?![-_ ]?f[eê]n)/i;   // not "outdoor", "indoor" nor a French "porte-fenêtre" blind
 // A garage door or a gate is a security matter. The covers view lists the covers whose device class is a shutter, blind, curtain, shade, awning or window, and the covers with no device class
 // (Shelly, ESPHome, MQTT…) unless their id or name looks like a garage, gate or door. The bulk buttons only ever act on the classes SF_HOME_COVER_BULK (a window is listed, never opened in bulk),
 // and Open all / Close all only name the covers that support that service (a cover that only tilts would make Home Assistant refuse the whole call).
@@ -92,7 +92,7 @@ async function sfHomeBuild(c, hass) {
   // --- Lights / Covers (optional views, not in the default list): every light or shutter by room, and a bulk action. Garage doors and gates are left out on purpose.
   const byRoom = (kind) => {   // { groups: the rooms with their devices (at most SF_HOME_MAXITEMS devices shown), bulk: every device of the selected rooms that a bulk button may act on, shown or not }
     const groups = [], bulk = []; let n = 0;
-    const add = (title, list) => { list = list || []; list.forEach((i) => { if (i.bulk) bulk.push(i); }); const items = list.slice(0, Math.max(0, SF_HOME_MAXITEMS - n)); if (items.length) { n += items.length; groups.push({ title, list: items }); } };
+    const add = (title, list) => { list = list || []; list.forEach((i) => { if (i.bulk && !bulk.some((b) => b.id === i.id)) bulk.push(i); }); const items = list.slice(0, Math.max(0, SF_HOME_MAXITEMS - n)); if (items.length) { n += items.length; groups.push({ title, list: items }); } };
     for (const a of areas) add(a.fl ? `${a.fl.name} · ${a.name}` : a.name, LC[kind][a.id]);
     if (!want.length) add(tr("home.no_area"), Object.keys(LC[kind]).filter((k) => k === "" || !Object.prototype.hasOwnProperty.call(reg, k)).flatMap((k) => LC[kind][k]));   // no area, or an area that no longer exists
     return { groups, bulk };
