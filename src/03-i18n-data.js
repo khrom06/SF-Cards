@@ -975,7 +975,8 @@ const SF_T = {
   "home.shutters": ["Volets","Shutters","Persianas","Rollläden","Rolluiken","Tapparelle","Estores","Rolety","Жалюзи","卷帘","الستائر"],
   "home.open_all": ["Tout ouvrir","Open all","Abrir todo","Alle öffnen","Alles openen","Apri tutto","Abrir tudo","Otwórz wszystkie","Открыть все","全部打开","فتح الكل"],
   "home.close_all": ["Tout fermer","Close all","Cerrar todo","Alle schließen","Alles sluiten","Chiudi tutto","Fechar tudo","Zamknij wszystkie","Закрыть все","全部关闭","إغلاق الكل"],
-  "home.no_area": ["Sans pièce","No area","Sin zona","Ohne Raum","Zonder kamer","Senza stanza","Sem divisão","Bez pokoju","Без комнаты","未分区","بدون غرفة"],
+  "home.no_area": ["Sans pièce","No area","Sin área","Ohne Bereich","Zonder ruimte","Senza stanza","Sem divisão","Bez pokoju","Без комнаты","无区域","بدون غرفة"],
+  "home.other_rooms": ["Autres pièces","Other rooms","Otras estancias","Weitere Räume","Overige kamers","Altre stanze","Outras divisões","Pozostałe pokoje","Другие комнаты","其他房间","غرف أخرى"],
   "home.daily": ["Au quotidien","Day to day","Día a día","Im Alltag","Dagelijks","Ogni giorno","Dia a dia","Na co dzień","Каждый день","日常","يوميًا"],
 };
 const SF_LANGS = { fr: 0, en: 1, es: 2, de: 3, nl: 4, it: 5, pt: 6, pl: 7, ru: 8, zh: 9, ar: 10 };
