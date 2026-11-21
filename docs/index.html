@@ -223,8 +223,30 @@ const nsLoad = () => { nsif.src = "ns.html?mode=" + nsMode + "&lang=" + sel.valu
 ["Matin", "Jour", "Soir", "Nuit"].forEach((m) => { const b = document.createElement("button"); b.textContent = { Matin: "Morning", Jour: "Day", Soir: "Evening", Nuit: "Night" }[m];
   b.onclick = () => { nsMode = m; [...document.querySelectorAll("#modes button")].forEach((x) => x.classList.toggle("on", x === b)); nsLoad(); }; if (m === nsMode) b.classList.add("on"); document.getElementById("modes").appendChild(b); });
 sel.addEventListener("change", nsLoad); nsLoad();
+// Automatic dashboard, lights and covers views (optional views of `custom:sf-home`): a small house with two floors. The buttons work: press "All off" or "Close all" twice (the first press asks to confirm).
+const AL = (n, on, modes) => S(on, { friendly_name: n, supported_color_modes: modes, brightness: 180 }), AC = (n, st, cls, pos) => S(st, { friendly_name: n, device_class: cls, current_position: pos, supported_features: 15 });
+const A = { "light.lr_ceiling": AL("Ceiling", "on", ["brightness"]), "light.lr_lamp": AL("Floor lamp", "on", ["color_temp"]), "light.lr_strip": AL("TV strip", "off", ["onoff"]), "light.kt_main": AL("Kitchen light", "off", ["brightness"]), "light.kt_counter": AL("Counter", "on", ["onoff"]),
+  "light.bd_ceiling": AL("Ceiling", "off", ["brightness"]), "light.bd_bed": AL("Bedside lamp", "on", ["color_temp"]), "light.gd_main": AL("Garage light", "off", ["onoff"]),
+  "cover.lr_shutter": AC("Living room shutter", "open", "shutter", 100), "cover.lr_blind": AC("Patio blind", "open", "blind", 60), "cover.kt_shutter": AC("Kitchen shutter", "closed", "shutter", 0), "cover.bd_shutter": AC("Bedroom shutter", "closed", "shutter", 0), "cover.garage_door": AC("Garage door (never listed)", "closed", "garage", 0) };
+const autoEls = {};
+const autoHass = () => { const h = HASS2(A, sel.value);
+  h.floors = { f0: { floor_id: "f0", name: "Ground floor", level: 0 }, f1: { floor_id: "f1", name: "First floor", level: 1 } };
+  h.areas = { lr: { area_id: "lr", name: "Living room", floor_id: "f0" }, kt: { area_id: "kt", name: "Kitchen", floor_id: "f0" }, bd: { area_id: "bd", name: "Bedroom", floor_id: "f1" }, gd: { area_id: "gd", name: "Garage" } };
+  h.devices = {}; h.entities = Object.fromEntries(Object.keys(A).map((id) => [id, { entity_id: id, area_id: id.includes("lr_") ? "lr" : id.includes("kt_") ? "kt" : id.includes("bd_") ? "bd" : "gd" }]));
+  h.callService = (d, sv, data) => { for (const id of [].concat((data || {}).entity_id || [])) if (A[id]) { const at = { ...A[id].attributes };
+      if (d === "light") A[id] = S(sv === "turn_off" ? "off" : sv === "turn_on" ? "on" : A[id].state === "on" ? "off" : "on", at);
+      else if (d === "cover" && (sv === "close_cover" || sv === "open_cover")) { at.current_position = sv === "close_cover" ? 0 : 100; A[id] = S(sv === "close_cover" ? "closed" : "open", at); } }
+    Object.values(autoEls).forEach((el) => { el.hass = autoHass(); }); return Promise.resolve(); };
+  return h; };
+const autoSec = document.createElement("section"); autoSec.className = "wide";
+autoSec.innerHTML = `<h2>automatic dashboard · lights and covers views</h2><div id="autoview" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:14px"></div><p class="note">Two optional views of <code>strategy: custom:sf-home</code> (add <code>lights</code> and <code>covers</code> to <code>views</code>): every light and shutter by floor and room, built from your areas and floors. <b>Press "All off" or "Close all" twice</b> (the first press asks to confirm). Garage doors and gates are never listed, and never moved by the bulk buttons.</p>`;
+nsSec.after(autoSec);
+const autoRender = async () => { const Strat = customElements.get("ll-strategy-dashboard-sf-home"); if (!Strat) return;
+  for (const which of ["lights", "covers"]) { try { const d = await Strat.generate({ views: [which], theme: theme === "light" ? "light" : "" }, autoHass()), c = d.views[0] && d.views[0].sections[0].cards[0]; if (!c) continue;
+    const { type, grid_options, ...cfg } = c; let el = autoEls[which]; if (!el) { el = autoEls[which] = document.createElement("sf-controls-card"); document.getElementById("autoview").appendChild(el); }
+    el.setConfig(cfg); el.hass = autoHass(); } catch (e) { /* the demo must never break */ } } };
 const apply = () => { document.documentElement.dir = sel.value === "ar" ? "rtl" : "ltr"; tick();
-  els.forEach(([el, cfg]) => { try { el.setConfig({ ...cfg, theme: theme === "light" ? "light" : undefined }); } catch (e) {} el.hass = HASS2(base, sel.value); }); };
+  els.forEach(([el, cfg]) => { try { el.setConfig({ ...cfg, theme: theme === "light" ? "light" : undefined }); } catch (e) {} el.hass = HASS2(base, sel.value); }); autoRender(); };
 sel.onchange = apply; document.getElementById("theme").onclick = () => { theme = theme === "dark" ? "light" : "dark"; document.body.style.background = theme === "light" ? "#e9f0f6" : ""; apply(); };
 apply(); setInterval(() => { tick(); els.forEach(([el]) => { el.hass = HASS2(base, sel.value); }); }, 2500);
 </script>
