@@ -59,7 +59,11 @@ async function main() {
   // The demo integration loads after the onboarding: wait until its entities exist before giving them an area.
   for (let i = 0; i < 60; i++) { const g = await W.call({ type: "get_states" }); if (g.success && g.result.some((x) => x.entity_id === "light.bed_light") && g.result.some((x) => x.entity_id === "cover.garage_door")) break; await sleep(2000); }
   for (const [ent, area] of [["light.bed_light", "bedroom"], ["light.kitchen_lights", "kitchen"], ["light.ceiling_lights", "living"], ["cover.kitchen_window", "kitchen"], ["cover.living_room_window", "living"], ["cover.garage_door", "garage"], ["climate.hvac", "living"], ["climate.heatpump", "bedroom"]])
-    if (ar[area]) { const u = await W.call({ type: "config/entity_registry/update", entity_id: ent, area_id: ar[area] }); if (!u.success) fails.push("e2e setup: could not put " + ent + " in an area (" + JSON.stringify(u.error || u).slice(0, 120) + ")"); }
+    if (ar[area]) {   // recent Home Assistant refuses an area on an entity that has no name of its own: the area then goes on its device
+      let u = await W.call({ type: "config/entity_registry/update", entity_id: ent, area_id: ar[area] });
+      if (!u.success) { const g = await W.call({ type: "config/entity_registry/get", entity_id: ent }), dev = g.success && g.result && g.result.device_id;
+        u = dev ? await W.call({ type: "config/device_registry/update", device_id: dev, area_id: ar[area] }) : u; }
+      if (!u.success) fails.push("e2e setup: could not put " + ent + " in an area (" + JSON.stringify(u.error || u).slice(0, 120) + ")"); }
   r = await W.call({ type: "lovelace/dashboards/create", url_path: "e2e-all", title: "all", mode: "storage", require_admin: false, show_in_sidebar: false }); if (!r.success) throw new Error("dashboard all: " + JSON.stringify(r));
   r = await W.call({ type: "lovelace/config/save", url_path: "e2e-all", config: { strategy: { type: "custom:sf-home", views: ["home", "rooms", "lights", "covers", "climate", "energy", "security", "system"] } } }); if (!r.success) throw new Error("config all: " + JSON.stringify(r));
   W.close(); log("dashboard created (" + tags.length + " cards)");
@@ -110,7 +114,8 @@ async function main() {
     try {
       await page.goto(HA + "/e2e-test/ed-" + tag + "?edit=1", { waitUntil: "domcontentloaded" }); await sleep(4000); await alive("edit mode " + tag);
       const editBtn2 = page.getByRole("button", { name: /^edit$/i }).first();
-      try { await editBtn2.click({ timeout: 8000 }); } catch { try { await sleep(3000); await editBtn2.click({ timeout: 8000 }); } catch { fails.push(`${tag}: 'Edit' button not found`); continue; } }   // one retry: the view may still be loading
+      let clicked = false; for (let k = 0; k < 3 && !clicked; k++) { try { await editBtn2.click({ timeout: 8000 }); clicked = true; } catch { await sleep(3000); } }   // up to three tries: the view may still be loading (slower since the demo integration is on)
+      if (!clicked) { fails.push(`${tag}: 'Edit' button not found`); continue; }
       await sleep(3000); await alive("opening the editor " + tag);
       const n = await page.evaluate((t) => { const f = (root, p, acc = []) => { root.querySelectorAll("*").forEach((e) => { if (p(e)) acc.push(e); if (e.shadowRoot) f(e.shadowRoot, p, acc); }); return acc; }; return f(document, (e) => e.localName === t + "-editor").length; }, tag);
       if (!n) { fails.push(`${tag}: editor missing from the dialog`); continue; }
