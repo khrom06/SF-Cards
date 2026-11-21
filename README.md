@@ -187,11 +187,11 @@ Two more views are **available on request** (they are not in the default list, s
 | View | What it shows | Built from |
 |---|---|---|
 | **Lights** | Every light by room (a dimmer for the dimmable ones, a switch for the others) and an "All off" button that asks for confirmation | `light` entities (light groups are left out, they would double their members) |
-| **Covers** | Every shutter, blind and curtain by room, "Open all" and a confirmed "Close all" | `cover` entities; **garage doors, gates and doors are never listed** (they are a security matter) |
+| **Covers** | Every shutter, blind and curtain by room, with "Open all" and "Close all" (both ask for confirmation) | `cover` entities whose device class is shutter, blind, curtain, shade, awning or window. **Garage doors, gates and doors are left out** (a security matter): by device class, and, for a cover with no device class, by an id or name that says garage, gate, door… A cover you want but that is left out can be added by hand in a Controls card |
 
 <img src="assets/auto-lights.png" alt="The Lights view: an All off button, then every light by floor and room, dimmers for the dimmable ones" width="440"> <img src="assets/auto-covers.png" alt="The Covers view: Open all and Close all, then every shutter by floor and room (the garage door is not listed)" width="440">
 
-If your Home Assistant has **floors**, the rooms are ordered by floor (lowest level first), the Rooms view gets one title per floor and the Lights and Covers groups are named "Floor · Room". Rooms you list in `areas` keep the order you chose. The Lights and Covers views list at most 150 devices.
+If your Home Assistant has **floors**, the rooms are ordered by floor (lowest level first), the Rooms view gets one title per floor and the Lights and Covers groups are named "Floor · Room". Rooms you list in `areas` keep the order you chose. The Lights and Covers views list at most 150 devices; the "All off", "Open all" and "Close all" buttons act on every device of the rooms shown. A device whose area was deleted is listed under "No area".
 
 A view with nothing to show is left out. Hidden, diagnostic and configuration entities are ignored. Everything is optional:
 

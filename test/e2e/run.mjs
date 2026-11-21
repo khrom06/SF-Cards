@@ -56,8 +56,10 @@ async function main() {
   const fl0 = await W.call({ type: "config/floor_registry/create", name: "Ground floor", level: 0 }), fl1 = await W.call({ type: "config/floor_registry/create", name: "First floor", level: 1 });
   const mk = async (name, fl) => { const x = await W.call({ type: "config/area_registry/create", name, ...(fl && fl.success ? { floor_id: fl.result.floor_id } : {}) }); return x.success ? x.result.area_id : null; };
   const ar = { kitchen: await mk("Kitchen", fl0), living: await mk("Living room", fl0), bedroom: await mk("Bedroom", fl1), garage: await mk("Garage", null) };
+  // The demo integration loads after the onboarding: wait until its entities exist before giving them an area.
+  for (let i = 0; i < 60; i++) { const g = await W.call({ type: "get_states" }); if (g.success && g.result.some((x) => x.entity_id === "light.bed_light") && g.result.some((x) => x.entity_id === "cover.garage_door")) break; await sleep(2000); }
   for (const [ent, area] of [["light.bed_light", "bedroom"], ["light.kitchen_lights", "kitchen"], ["light.ceiling_lights", "living"], ["cover.kitchen_window", "kitchen"], ["cover.living_room_window", "living"], ["cover.garage_door", "garage"], ["climate.hvac", "living"], ["climate.heatpump", "bedroom"]])
-    if (ar[area]) await W.call({ type: "config/entity_registry/update", entity_id: ent, area_id: ar[area] });
+    if (ar[area]) { const u = await W.call({ type: "config/entity_registry/update", entity_id: ent, area_id: ar[area] }); if (!u.success) fails.push("e2e setup: could not put " + ent + " in an area (" + JSON.stringify(u.error || u).slice(0, 120) + ")"); }
   r = await W.call({ type: "lovelace/dashboards/create", url_path: "e2e-all", title: "all", mode: "storage", require_admin: false, show_in_sidebar: false }); if (!r.success) throw new Error("dashboard all: " + JSON.stringify(r));
   r = await W.call({ type: "lovelace/config/save", url_path: "e2e-all", config: { strategy: { type: "custom:sf-home", views: ["home", "rooms", "lights", "covers", "climate", "energy", "security", "system"] } } }); if (!r.success) throw new Error("config all: " + JSON.stringify(r));
   W.close(); log("dashboard created (" + tags.length + " cards)");
