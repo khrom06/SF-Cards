@@ -3012,6 +3012,16 @@
    "benignSuite": true
   },
   {
+   "key": "31-strategy.js|a.fl.name#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "31-strategy.js|a.name#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
    "key": "31-strategy.js|from.stat_energy_from#1",
    "ctx": "text",
    "benignSuite": true

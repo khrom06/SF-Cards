@@ -52,6 +52,20 @@ async function main() {
   // Automatic dashboard (v1.20): a dashboard whose whole configuration is the SF strategy.
   r = await W.call({ type: "lovelace/dashboards/create", url_path: "e2e-auto", title: "auto", mode: "storage", require_admin: false, show_in_sidebar: false }); if (!r.success) throw new Error("dashboard auto: " + JSON.stringify(r));
   r = await W.call({ type: "lovelace/config/save", url_path: "e2e-auto", config: { strategy: { type: "custom:sf-home" } } }); if (!r.success) throw new Error("config auto: " + JSON.stringify(r));
+  // A second house (v1.24): the Home Assistant `demo` integration brings real lights, covers and thermostats; we give them floors and areas, and ask the strategy for all the views.
+  const fl0 = await W.call({ type: "config/floor_registry/create", name: "Ground floor", level: 0 }), fl1 = await W.call({ type: "config/floor_registry/create", name: "First floor", level: 1 });
+  const mk = async (name, fl) => { const x = await W.call({ type: "config/area_registry/create", name, ...(fl && fl.success ? { floor_id: fl.result.floor_id } : {}) }); return x.success ? x.result.area_id : null; };
+  const ar = { kitchen: await mk("Kitchen", fl0), living: await mk("Living room", fl0), bedroom: await mk("Bedroom", fl1), garage: await mk("Garage", null) };
+  // The demo integration loads after the onboarding: wait until its entities exist before giving them an area.
+  for (let i = 0; i < 60; i++) { const g = await W.call({ type: "get_states" }); if (g.success && g.result.some((x) => x.entity_id === "light.bed_light") && g.result.some((x) => x.entity_id === "cover.garage_door")) break; await sleep(2000); }
+  for (const [ent, area] of [["light.bed_light", "bedroom"], ["light.kitchen_lights", "kitchen"], ["light.ceiling_lights", "living"], ["cover.kitchen_window", "kitchen"], ["cover.living_room_window", "living"], ["cover.garage_door", "garage"], ["climate.hvac", "living"], ["climate.heatpump", "bedroom"]])
+    if (ar[area]) {   // recent Home Assistant refuses an area on an entity that has no name of its own: the area then goes on its device
+      let u = await W.call({ type: "config/entity_registry/update", entity_id: ent, area_id: ar[area] });
+      if (!u.success) { const g = await W.call({ type: "config/entity_registry/get", entity_id: ent }), dev = g.success && g.result && g.result.device_id;
+        u = dev ? await W.call({ type: "config/device_registry/update", device_id: dev, area_id: ar[area] }) : u; }
+      if (!u.success) fails.push("e2e setup: could not put " + ent + " in an area (" + JSON.stringify(u.error || u).slice(0, 120) + ")"); }
+  r = await W.call({ type: "lovelace/dashboards/create", url_path: "e2e-all", title: "all", mode: "storage", require_admin: false, show_in_sidebar: false }); if (!r.success) throw new Error("dashboard all: " + JSON.stringify(r));
+  r = await W.call({ type: "lovelace/config/save", url_path: "e2e-all", config: { strategy: { type: "custom:sf-home", views: ["home", "rooms", "lights", "covers", "climate", "energy", "security", "system"] } } }); if (!r.success) throw new Error("config all: " + JSON.stringify(r));
   W.close(); log("dashboard created (" + tags.length + " cards)");
 
   const browser = await chromium.launch(), ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
@@ -100,7 +114,8 @@ async function main() {
     try {
       await page.goto(HA + "/e2e-test/ed-" + tag + "?edit=1", { waitUntil: "domcontentloaded" }); await sleep(4000); await alive("edit mode " + tag);
       const editBtn2 = page.getByRole("button", { name: /^edit$/i }).first();
-      try { await editBtn2.click({ timeout: 8000 }); } catch { try { await sleep(3000); await editBtn2.click({ timeout: 8000 }); } catch { fails.push(`${tag}: 'Edit' button not found`); continue; } }   // one retry: the view may still be loading
+      let clicked = false; for (let k = 0; k < 3 && !clicked; k++) { try { await editBtn2.click({ timeout: 8000 }); clicked = true; } catch { await sleep(3000); } }   // up to three tries: the view may still be loading (slower since the demo integration is on)
+      if (!clicked) { fails.push(`${tag}: 'Edit' button not found`); continue; }
       await sleep(3000); await alive("opening the editor " + tag);
       const n = await page.evaluate((t) => { const f = (root, p, acc = []) => { root.querySelectorAll("*").forEach((e) => { if (p(e)) acc.push(e); if (e.shadowRoot) f(e.shadowRoot, p, acc); }); return acc; }; return f(document, (e) => e.localName === t + "-editor").length; }, tag);
       if (!n) { fails.push(`${tag}: editor missing from the dialog`); continue; }
@@ -120,6 +135,21 @@ async function main() {
     if (!auto.includes("sf-bridge-card")) fails.push("automatic dashboard: the home view did not render the banner (strategy not loaded?)");
     await page.goto(HA + "/e2e-auto/system", { waitUntil: "domcontentloaded" }); await sleep(5000); await alive("automatic dashboard, system view");
   } catch (e) { if (e.message === "freeze") throw e; fails.push("automatic dashboard: " + String(e.message).split("\n")[0]); }
+  // 4b. The same strategy on the demo house, every view (lights and covers included, floors on the rooms view): renders, shows the right devices, nothing freezes.
+  try {
+    const deepText = (sel) => page.evaluate((q) => { const out = []; const f = (root) => root.querySelectorAll("*").forEach((e) => { if (e.matches && e.matches(q)) out.push(e.shadowRoot ? e.shadowRoot.textContent : e.textContent); if (e.shadowRoot) f(e.shadowRoot); }); f(document); return out.join(" ").replace(/\s+/g, " "); }, sel);
+    for (const v of ["home", "rooms", "lights", "covers", "climate", "energy", "security", "system"]) { await page.goto(HA + "/e2e-all/" + v, { waitUntil: "domcontentloaded" }); await sleep(6000); await alive("automatic dashboard (demo house), view " + v); }
+    await page.goto(HA + "/e2e-all/lights", { waitUntil: "domcontentloaded" }); await sleep(6000);
+    const lt = await deepText("sf-controls-card"); log("lights view:", lt.slice(0, 160));
+    if (!/Bed Light/i.test(lt) || !/Kitchen Lights/i.test(lt)) fails.push("lights view: the demo lights are not listed: " + lt.slice(0, 120));
+    if (ar.bedroom && !/First floor . Bedroom/i.test(lt)) fails.push("lights view: groups are not titled with their floor: " + lt.slice(0, 160));
+    await page.goto(HA + "/e2e-all/covers", { waitUntil: "domcontentloaded" }); await sleep(6000);
+    const ct = await deepText("sf-controls-card"); log("covers view:", ct.slice(0, 160));
+    if (!/Kitchen Window/i.test(ct)) fails.push("covers view: the demo shutters are not listed: " + ct.slice(0, 120));
+    if (/Garage Door/i.test(ct)) fails.push("covers view: a garage door must never be in the covers view (bulk 'close all')");
+    await page.goto(HA + "/e2e-all/rooms", { waitUntil: "domcontentloaded" }); await sleep(6000);
+    const rt = await deepText("hui-heading-card"); if (ar.bedroom && !(/Ground floor/.test(rt) && /First floor/.test(rt))) fails.push("rooms view: one title per floor expected, got: " + rt.slice(0, 120));
+  } catch (e) { if (e.message === "freeze") throw e; fails.push("automatic dashboard (demo house): " + String(e.message).split("\n")[0]); }
   if (errs.length) fails.push(...[...new Set(errs)].slice(0, 8).map((e) => "erreur JS : " + e));
   await browser.close();
 }

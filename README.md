@@ -182,6 +182,19 @@ Home Assistant then asks SF Cards for the dashboard every time it is opened, so 
 | **Security** | Cameras and the log of doors, windows, locks and alarm | `camera`, opening sensors, `lock`, `alarm_control_panel` |
 | **System** | Sensor batteries and the health of your automations | found automatically |
 
+Two more views are **available on request** (they are not in the default list, so an existing dashboard does not change): add them to `views`.
+
+| View | What it shows | Built from |
+|---|---|---|
+| **Lights** | Every light by room (a dimmer for the dimmable ones, a switch for the others) and an "All off" button that asks for confirmation | `light` entities (light groups are left out, they would double their members) |
+| **Covers** | Every shutter, blind, curtain, shade, awning and window by room, with "Open all" and "Close all" (both ask for confirmation) | `cover` entities. A cover with no device class is listed unless its id or name says garage, gate or door (and a garage door, gate or door class is never listed). **The bulk buttons only act on shutters, blinds, curtains, shades and awnings that support the service**: never on a window, never on a cover with no device class, never on a garage door or a gate |
+
+<img src="assets/anim/auto-lights.gif" alt="The Lights view: press All off, the tile asks to confirm, press again and every light goes off" width="440"> <img src="assets/anim/auto-covers.gif" alt="The Covers view: press Close all, confirm, and every shutter closes (the garage door is not listed)" width="440">
+
+Press a bulk button once and it asks for confirmation; press it again to run it. You can try both views in the [live demo](https://khrom06.github.io/SF-Cards/) (section "automatic dashboard").
+
+If your Home Assistant has **floors** (and you do not use `areas`), the rooms are ordered by floor (lowest level first, then the order Home Assistant gives), the Rooms view gets a full-width title per floor ("Other rooms" for rooms without a floor) and the Lights and Covers groups are named "Floor · Room". Rooms you list in `areas` keep the order you chose, without floor titles. The Lights and Covers views list at most 150 devices; the "All off", "Open all" and "Close all" buttons act on every eligible device of the selected rooms, including any beyond the 150 listed. Without `areas`, a device with no area (or whose area was deleted) is listed under "No area"; with `areas`, only the rooms you chose are used.
+
 A view with nothing to show is left out. Hidden, diagnostic and configuration entities are ignored. Everything is optional:
 
 ```yaml
@@ -190,7 +203,7 @@ strategy:
   areas: [living_room, kitchen, bedroom]     # only these areas, in this order (ids or names)
   exclude_areas: [garage]                    # …or everything except these
   exclude: [light.all_lights]                # entities to leave out everywhere
-  views: [home, rooms, climate, energy]      # which views, in which order
+  views: [home, rooms, lights, covers, climate, energy]   # which views, in which order (lights and covers are opt-in)
   weather: weather.home                      # default: the first weather entity
   theme: auto                                # dark | light | auto — passed to every card
   look: calm                                 # see "Look and accent"
