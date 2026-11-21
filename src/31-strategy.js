@@ -10,17 +10,20 @@
  *     # everything below is optional
  *     areas: [living_room, kitchen]        # only these areas, in this order (default: every area with something to show)
  *     exclude_areas: [garage]               exclude: [light.all_lights]      # areas / entities to leave out
- *     views: [home, rooms, climate, energy, security, system]                # which views, in which order
+ *     views: [home, rooms, climate, energy, security, system]                # which views, in which order; "lights" and "covers" can be added (not in the default list)
  *     weather: weather.home                 # default: the first weather entity
  *     theme: dark | light | auto            look: calm            accent: amber
  *     energy: { grid: sensor.grid_power, solar: sensor.solar_power }        # live powers (W) for the energy flow card
  *     report: { grid: sensor.grid_kwh, solar: sensor.solar_kwh, export: sensor.export_kwh, cost: sensor.cost }   # default: the Energy dashboard settings
  *     home_cards: [ … ]                     extra_views: [ … ]              # your own cards on the home view / your own views after the generated ones
+ * Floors (Home Assistant "floors") order the rooms, and title them in the rooms view, when they are defined.
  */
+const SF_HOME_MAXITEMS = 150, SF_HOME_COVER_SKIP = ["garage", "gate", "door"];   // a garage door or a gate is a security matter: never in the covers view nor in "close all"
 function sfHomeList(v) { return (Array.isArray(v) ? v : v ? [v] : []).filter((x) => typeof x === "string" && x); }
 async function sfHomeBuild(c, hass) {
   const tr = (k) => sfTr(sfLang(hass), k), states = (hass && hass.states) || {}, ents = (hass && hass.entities) || {}, devs = (hass && hass.devices) || {};
   const ex = new Set(sfHomeList(c.exclude)), exA = new Set(sfHomeList(c.exclude_areas)), per = {}, G = { weather: "", people: [], cameras: [], calendars: [], media: [], leaks: [], openings: [], locks: [], alarm: "" };
+  const LC = { light: Object.create(null), cover: Object.create(null) };   // lights and covers by area ("" = no area), for the "lights" and "covers" views
   for (const id of Object.keys(states).sort()) {
     const reg = ents[id]; if (!SF_EID.test(id) || ex.has(id) || (reg && (reg.hidden || reg.entity_category))) continue;
     const s = states[id], d = id.split(".")[0], dc = s && s.attributes && s.attributes.device_class, dev = reg && reg.device_id ? devs[reg.device_id] : null, area = (reg && reg.area_id) || (dev && dev.area_id) || "";
@@ -33,6 +36,8 @@ async function sfHomeBuild(c, hass) {
     else if (d === "alarm_control_panel") { if (!G.alarm) G.alarm = id; }
     else if (d === "binary_sensor" && dc === "moisture") G.leaks.push(id);
     else if (d === "binary_sensor" && SF_ROOM_OPEN.includes(dc)) G.openings.push(id);
+    const ad = s && s.attributes || {}, kind = d === "light" && !Array.isArray(ad.entity_id) ? "light" : d === "cover" && !SF_HOME_COVER_SKIP.includes(dc) ? "cover" : "";   // a light group (it lists entity_id) would double its members
+    if (kind && !exA.has(area)) (LC[kind][area] || (LC[kind][area] = [])).push({ id, dim: kind === "light" && Array.isArray(ad.supported_color_modes) && ad.supported_color_modes.some((m) => m !== "onoff" && m !== "unknown") });
     if (!area || exA.has(area)) continue;
     const A = per[area] || (per[area] = { n: 0, climate: "", temp: "", hum: "", hums: [] }), tv = d === "sensor" && dc === "temperature" ? parseFloat(s.state) : NaN;
     if (["light", "cover", "climate", "media_player"].includes(d) || (d === "sensor" && dc === "temperature")) A.n++;
@@ -46,8 +51,11 @@ async function sfHomeBuild(c, hass) {
     .map((a) => {
       const P = per[a.area_id] || {}, temp = (SF_EID.test(String(a.temperature_entity_id || "")) && a.temperature_entity_id) || P.temp || "", td = temp && ents[temp] ? ents[temp].device_id : "";
       const hum = (SF_EID.test(String(a.humidity_entity_id || "")) && a.humidity_entity_id) || (P.hums || []).find((x) => td && ents[x] && ents[x].device_id === td) || (P.hums || [])[0] || "";   // the hygrometer of the thermometer's device first
-      return { id: a.area_id, name: String(a.name || a.area_id), climate: P.climate || "", temp, hum };
+      const fl = (hass && hass.floors && hass.floors[a.floor_id]) || null;
+      return { id: a.area_id, name: String(a.name || a.area_id), climate: P.climate || "", temp, hum, fl: fl && typeof fl === "object" ? { id: String(a.floor_id), name: String(fl.name || a.floor_id), level: typeof fl.level === "number" ? fl.level : 999, icon: typeof fl.icon === "string" && /^[a-z0-9-]+:[a-z0-9-]+$/i.test(fl.icon) ? fl.icon : "mdi:layers-outline" } : null };
     });
+  // Floors order the rooms (lowest level first, rooms without a floor last) unless the user chose the order with `areas`; the sort is stable.
+  if (!want.length && areas.some((a) => a.fl)) areas.sort((x, y) => (x.fl ? x.fl.level : 1e6) - (y.fl ? y.fl.level : 1e6) || (x.fl && y.fl ? x.fl.name.localeCompare(y.fl.name) : 0));
   const common = {}; for (const k of ["theme", "look", "accent"]) if (typeof c[k] === "string" && c[k]) common[k] = c[k];
   const sf = (tag, cfg, grid) => ({ type: `custom:${tag}`, ...common, ...cfg, ...(grid ? { grid_options: grid } : {}) });
   const head = (text, icon) => ({ type: "heading", heading: text, heading_style: "title", icon });
@@ -67,7 +75,27 @@ async function sfHomeBuild(c, hass) {
     V.home = { title: tr("home.home"), path: "home", icon: "mdi:home-variant", sections: s };
   }
   // --- Rooms: each room in full.
-  if (areas.length) V.rooms = { title: tr("home.rooms"), path: "rooms", icon: "mdi:floor-plan", sections: areas.map((a) => sec([sf("sf-room-card", { area: a.id, ...roomEx })])) };
+  if (areas.length) V.rooms = { title: tr("home.rooms"), path: "rooms", icon: "mdi:floor-plan", sections: areas.map((a, i) => sec([a.fl && (!i || !areas[i - 1].fl || areas[i - 1].fl.id !== a.fl.id) ? head(a.fl.name, a.fl.icon) : null, sf("sf-room-card", { area: a.id, ...roomEx })])) };   // a floor title above the first room of each floor
+  // --- Lights / Covers (optional views, not in the default list): every light or shutter by room, and a bulk action. Garage doors and gates are left out on purpose.
+  const byRoom = (kind) => {
+    const out = []; let n = 0;
+    const add = (title, list) => { const items = (list || []).slice(0, Math.max(0, SF_HOME_MAXITEMS - n)); if (items.length) { n += items.length; out.push({ title, list: items }); } };
+    for (const a of areas) add(a.fl ? `${a.fl.name} · ${a.name}` : a.name, LC[kind][a.id]);
+    if (!want.length) add(tr("home.no_area"), LC[kind][""]);
+    return out;
+  };
+  {
+    const g = byRoom("light"), ids = g.flatMap((x) => x.list.map((i) => i.id));
+    if (ids.length) V.lights = { title: tr("home.lights"), path: "lights", icon: "mdi:lightbulb-group", sections: [sec([sf("sf-controls-card", { title: tr("home.lights"), groups: [
+      { title: tr("home.lights"), icon: "mdi:lightbulb-group", items: [{ kind: "action", label: tr("room.all_off_btn"), icon: "mdi:lightbulb-group-off", service: "light.turn_off", data: { entity_id: ids }, confirm: tr("editor.confirm") }] },
+      ...g.map((x) => ({ title: x.title, icon: "mdi:floor-plan", items: x.list.map((i) => ({ kind: i.dim ? "dimmer" : "toggle", entity: i.id, label: name(i.id) })) }))] }, full)], 4)] };
+  }
+  {
+    const g = byRoom("cover"), ids = g.flatMap((x) => x.list.map((i) => i.id));
+    if (ids.length) V.covers = { title: tr("home.shutters"), path: "covers", icon: "mdi:window-shutter", sections: [sec([sf("sf-controls-card", { title: tr("home.shutters"), groups: [
+      { title: tr("home.shutters"), icon: "mdi:window-shutter", items: [{ kind: "action", label: tr("home.open_all"), icon: "mdi:arrow-up", service: "cover.open_cover", data: { entity_id: ids } }, { kind: "action", label: tr("home.close_all"), icon: "mdi:arrow-down", service: "cover.close_cover", data: { entity_id: ids }, confirm: tr("editor.confirm") }] },
+      ...g.map((x) => ({ title: x.title, icon: "mdi:floor-plan", items: x.list.map((i) => ({ kind: "cover", entity: i.id, label: name(i.id) })) }))] }, full)], 4)] };
+  }
   // --- Climate: thermostats, and the "should I open the windows?" verdict when rooms have temperature + humidity.
   {
     const th = areas.filter((a) => a.climate), air = areas.filter((a) => a.temp && a.hum).slice(0, 8), s = [];

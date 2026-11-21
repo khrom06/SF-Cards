@@ -3,6 +3,11 @@
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
+### Added
+- **Automatic dashboard: two optional views, `lights` and `covers`.** Add them to `views` (they are not in the default list, so existing dashboards do not change). Lights: every light by room (dimmer or switch) and a confirmed "All off". Covers: every shutter, blind and curtain by room, "Open all" and a confirmed "Close all". Garage doors, gates and doors are never listed in the covers view, and light groups are left out of the lights view. At most 150 devices per view. Titles in the 11 languages.
+- **Automatic dashboard: floors.** When Home Assistant has floors, rooms are ordered by floor, the Rooms view gets a title per floor and the new views name their groups "Floor · Room". The `areas` option keeps the order you chose.
+### Tests and project
+- The automatic dashboard is now tested on a second, different house: unit tests with floors, light groups, a garage door, a gate, devices without area, hostile floors and 400 lights, and the end-to-end test on a real Home Assistant uses the `demo` integration with floors and areas, and opens every view.
 
 ## [1.23.0] - 2026-11-20
 ### Changed

@@ -182,6 +182,17 @@ Home Assistant then asks SF Cards for the dashboard every time it is opened, so 
 | **Security** | Cameras and the log of doors, windows, locks and alarm | `camera`, opening sensors, `lock`, `alarm_control_panel` |
 | **System** | Sensor batteries and the health of your automations | found automatically |
 
+Two more views are **available on request** (they are not in the default list, so an existing dashboard does not change): add them to `views`.
+
+| View | What it shows | Built from |
+|---|---|---|
+| **Lights** | Every light by room (a dimmer for the dimmable ones, a switch for the others) and an "All off" button that asks for confirmation | `light` entities (light groups are left out, they would double their members) |
+| **Covers** | Every shutter, blind and curtain by room, "Open all" and a confirmed "Close all" | `cover` entities; **garage doors, gates and doors are never listed** (they are a security matter) |
+
+<img src="assets/auto-lights.png" alt="The Lights view: an All off button, then every light by floor and room, dimmers for the dimmable ones" width="440"> <img src="assets/auto-covers.png" alt="The Covers view: Open all and Close all, then every shutter by floor and room (the garage door is not listed)" width="440">
+
+If your Home Assistant has **floors**, the rooms are ordered by floor (lowest level first), the Rooms view gets one title per floor and the Lights and Covers groups are named "Floor · Room". Rooms you list in `areas` keep the order you chose. The Lights and Covers views list at most 150 devices.
+
 A view with nothing to show is left out. Hidden, diagnostic and configuration entities are ignored. Everything is optional:
 
 ```yaml
@@ -190,7 +201,7 @@ strategy:
   areas: [living_room, kitchen, bedroom]     # only these areas, in this order (ids or names)
   exclude_areas: [garage]                    # …or everything except these
   exclude: [light.all_lights]                # entities to leave out everywhere
-  views: [home, rooms, climate, energy]      # which views, in which order
+  views: [home, rooms, lights, covers, climate, energy]   # which views, in which order (lights and covers are opt-in)
   weather: weather.home                      # default: the first weather entity
   theme: auto                                # dark | light | auto — passed to every card
   look: calm                                 # see "Look and accent"

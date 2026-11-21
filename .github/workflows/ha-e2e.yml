@@ -51,6 +51,7 @@ jobs:
           fi
           cat > ha-config/configuration.yaml <<'YAML'
           default_config:
+          demo:
           template:
             - sensor:
                 - name: "E2E Temp A"
