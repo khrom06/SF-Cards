@@ -139,6 +139,16 @@ __SF.SF_HOOK.tr = (lang, key) => {
     r.remove();
     const l = mount("sf-launcher-card", { tiles: [{ name: "Bat", summary: "battery", card: { type: "custom:sf-battery-card", batteries: two } }] }, "en", st); await wait(40);
     if (!/60 %/.test((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent)) fail("batteries: the launcher tile should show 60 %"); l.remove(); }
+  { // cameras tile: proper singular/plural, no "(s)" that wraps badly on a phone
+    const cams = () => ({ type: "custom:sf-camera-card", cameras: [1, 2, 3].map((i) => ({ entity: "camera.c" + i, name: "C" + i, motion: "binary_sensor.m" + i })) });
+    const stm = (on) => ({ "binary_sensor.m1": { state: on >= 1 ? "on" : "off", attributes: {} }, "binary_sensor.m2": { state: on >= 2 ? "on" : "off", attributes: {} }, "binary_sensor.m3": { state: "off", attributes: {} } });
+    for (const [on, re] of [[1, /^1 motion$/], [2, /^2 motions$/]]) {
+      const l = mount("sf-launcher-card", { tiles: [{ name: "Cam", summary: "cameras", card: cams() }] }, "en", stm(on)); await wait(40);
+      const t = ((l.shadowRoot.querySelector(".tile .main") || { textContent: "" }).textContent || "").trim();
+      if (!re.test(t) || /\(s\)/.test(t)) fail(`launcher cameras: ${on} motion should read ${re}, got '${t}'`);
+      l.remove();
+    }
+  }
   // 5e2. Where a charging battery gets its power (solar / grid) and how much of the house a discharging one covers. Estimated from the grid import
   //      (it covers the charge first) or measured (`from_grid`); nothing is said when nothing is known.
   { const mk = (extra) => ({ ...base, "sensor.bs": U(50, "%"), "sensor.bp": U(extra.p, "W"), "sensor.sg": U(extra.g ?? 0, "W"), "sensor.ss": U(extra.s ?? 0, "W"), "sensor.fg": U(extra.fg ?? 0, "W"), "sensor.hm": U(extra.h ?? 0, "W") });

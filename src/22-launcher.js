@@ -135,7 +135,7 @@ class SfLauncherCard extends SfBase {
       case "cameras": {
         const cams = c.cameras || [];
         const mv = cams.filter((k) => this.isOn(k.motion)).length;
-        return { main: mv ? this.t("launcher.n_motion_s", { n: mv }) : this.t("launcher.calm"), sub: this.t("launcher.n_cameras_tap_images", { n: cams.length }), hot: mv > 0 };
+        return { main: mv ? this.t(mv > 1 ? "launcher.n_motions" : "launcher.n_motion", { n: mv }) : this.t("launcher.calm"), sub: this.t("launcher.n_cameras_tap_images", { n: cams.length }), hot: mv > 0 };
       }
       case "energy": {
         const solar = Math.max(0, this.watts(c.solar) ?? 0), grid = this.watts(c.grid);

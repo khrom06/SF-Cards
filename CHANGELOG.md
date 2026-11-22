@@ -4,6 +4,10 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 
 ## [Unreleased]
 
+## [1.24.1] - 2026-11-22
+### Fixed
+- **Launcher cameras tile: "1 motion(s)" no longer breaks across two lines on a phone.** The tile now reads "1 motion" or "3 motions" (proper singular and plural in French, English, Spanish, German, Dutch, Italian and Portuguese; Polish and Russian use a count form that needs no plural, Chinese has none, and Arabic keeps its singular form).
+
 ## [1.24.0] - 2026-11-21
 ### Added
 - **Automatic dashboard: two optional views, `lights` and `covers`.** Add them to `views` (they are not in the default list, so existing dashboards do not change). Lights: every light by room (dimmer or switch) and a confirmed "All off". Covers: every shutter, blind, curtain, shade, awning and window by room, with "Open all" and "Close all", both confirmed. A cover with a garage, gate or door device class, or with no class and such a word in its id or name, is not listed. **The bulk buttons only act on shutters, blinds, curtains, shades and awnings that support the service**: never on a window, never on a cover with no device class. Light groups are left out of the lights view. At most 150 devices are listed per view; the bulk buttons act on every eligible device of the selected rooms, including any beyond the 150. Titles in the 11 languages.
