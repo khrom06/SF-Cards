@@ -6,7 +6,7 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 
 ## [1.24.1] - 2026-11-22
 ### Fixed
-- **Launcher cameras tile: "1 motion(s)" no longer breaks across two lines on a phone.** The tile now reads "1 motion" or "3 motions" (proper singular and plural in French, English, Spanish, German, Dutch, Italian and Portuguese; Polish, Russian, Chinese and Arabic keep a count form that needs no plural).
+- **Launcher cameras tile: "1 motion(s)" no longer breaks across two lines on a phone.** The tile now reads "1 motion" or "3 motions" (proper singular and plural in French, English, Spanish, German, Dutch, Italian and Portuguese; Polish and Russian use a count form that needs no plural, Chinese has none, and Arabic keeps its singular form).
 
 ## [1.24.0] - 2026-11-21
 ### Added
