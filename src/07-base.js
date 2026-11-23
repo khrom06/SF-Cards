@@ -138,18 +138,22 @@ class SfBase extends HTMLElement {
   // Long press (about half a second without moving), right click or the keyboard's context-menu key: open the entity's page, as Home Assistant's
   // own tiles do. The click that ends a long press must not also trigger the tile's normal action.
   _wireHold(el) {
+    // Per-tile state (a re-render or another tile must not touch it); only the timer is card-wide so that disconnectedCallback can cancel it.
     const id = el.dataset.hold, stop = () => { clearTimeout(this._holdTimer); this._holdTimer = null; };
-    const open = () => { if (Date.now() - (this._held || 0) < 800) return; this._held = Date.now(); this._moreInfo(id); };
-    let x0 = 0, y0 = 0;
+    let pressed = false, swallow = 0, held = 0, x0 = 0, y0 = 0;
+    const open = () => { if (Date.now() - held < 800) return; held = Date.now(); this._moreInfo(id); };
     el.addEventListener("pointerdown", (ev) => {
       if (ev.button > 0) return;   // primary button, finger or pen only
-      stop(); this._swallow = 0; x0 = ev.clientX; y0 = ev.clientY;
-      this._holdTimer = setTimeout(() => { this._holdTimer = null; this._swallow = Date.now(); open(); }, 500);
+      stop(); swallow = 0; pressed = false; x0 = ev.clientX; y0 = ev.clientY;
+      this._holdTimer = setTimeout(() => { this._holdTimer = null; pressed = true; open(); }, 500);
     });
     el.addEventListener("pointermove", (ev) => { if (this._holdTimer && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 10) stop(); });
-    ["pointerup", "pointercancel", "pointerleave"].forEach((t) => el.addEventListener(t, stop));
+    // The click that ends a long press arrives right after the release, however long the finger stayed down: arm the swallow at the release, not when the press fires.
+    el.addEventListener("pointerup", () => { stop(); if (pressed) swallow = Date.now(); pressed = false; });
+    el.addEventListener("pointercancel", () => { stop(); pressed = false; });
+    el.addEventListener("pointerleave", stop);   // after the page opened (often under the pointer) a leave must not forget the long press
     el.addEventListener("click", (ev) => {   // only the click that ends this long press: a later keyboard Enter / Space must still toggle
-      const fresh = this._swallow && Date.now() - this._swallow < 700; this._swallow = 0;
+      const fresh = swallow && Date.now() - swallow < 700; swallow = 0;
       if (fresh) { ev.stopImmediatePropagation(); ev.preventDefault(); } }, true);
     el.addEventListener("contextmenu", (ev) => { ev.preventDefault(); open(); });
   }

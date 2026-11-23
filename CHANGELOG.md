@@ -3,8 +3,10 @@
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
+
+## [1.25.0] - 2026-11-23
 ### Added
-- **Controls card: a long press can open the entity's page.** Add `hold_action: more-info` to a `toggle` or `christmas` item (also in the visual editor): a long press, a right click or the keyboard's context-menu key then opens the entity's own page (for a light: brightness, colour…), while a normal tap still toggles it and the click that ends a long press does not. Nothing changes for existing items.
+- **Controls card: a long press can open the entity's page.** Add `hold_action: more-info` to a `toggle` or `christmas` item (also in the visual editor): a long press, a right click or the keyboard's context-menu key then opens the entity's own page (for a light: brightness, colour…), while a normal tap still toggles it and the click that ends a long press does not. Nothing changes for existing items. Animated preview in the README.
 
 ## [1.24.1] - 2026-11-22
 ### Fixed
