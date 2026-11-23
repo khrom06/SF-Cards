@@ -36,7 +36,9 @@ class SfBase extends HTMLElement {
         el.addEventListener("click", (ev) => { ev.stopPropagation(); this._moreInfo(el.dataset.e); }));
       this.shadowRoot.querySelectorAll("[data-call]").forEach((el) =>
         el.addEventListener("click", (ev) => { ev.stopPropagation(); this._onCall(el); }));
-      this.shadowRoot.querySelectorAll("[data-hold]").forEach((el) => this._wireHold(el));
+      this.shadowRoot.querySelectorAll("[data-nav]").forEach((el) =>
+        el.addEventListener("click", (ev) => { ev.stopPropagation(); this._navigate(el.dataset.nav); }));
+      this.shadowRoot.querySelectorAll("[data-hold], [data-hold-nav]").forEach((el) => this._wireHold(el));
       if (this.afterRender) this.afterRender();
       this._a11y(this.shadowRoot); sfSvgVars(this.shadowRoot);
       if (this._armed && Date.now() < this._armed.until) {   // the HTML was rewritten: re-arm the same button
@@ -47,10 +49,10 @@ class SfBase extends HTMLElement {
   }
   // Every clickable element becomes a real button for the keyboard and screen readers: role, focus, accessible name, Enter / Space.
   _a11y(root) {
-    root.querySelectorAll("[data-call], [data-e], .tile").forEach((el) => {
+    root.querySelectorAll("[data-call], [data-e], [data-nav], .tile").forEach((el) => {
       if (el.matches("button, a, input")) return;
       const de = el.getAttribute("data-e");
-      if (!el.hasAttribute("data-call") && !el.hasAttribute("data-i") && (!de || de === "undefined" || de === "null")) return;   // nothing to open: not a button
+      if (!el.hasAttribute("data-call") && !el.hasAttribute("data-i") && !el.hasAttribute("data-nav") && (!de || de === "undefined" || de === "null")) return;   // nothing to open: not a button
       el.setAttribute("role", "button"); el.setAttribute("tabindex", "0");
       if (!el.getAttribute("aria-label")) {
         // Block text separated by spaces (otherwise "Alarmdisarmed", "62%LEVEL" in a screen reader).
@@ -131,17 +133,35 @@ class SfBase extends HTMLElement {
   }
   kw(w) { return w === null || w === undefined || !isFinite(w) ? "—" : Math.abs(w) >= 999.5 ? `${this.nf(w / 1000, 2)} kW` : `${Math.round(w)} W`; }
   icon(name, size = 20, color) { return `<ha-icon icon="${this.esc(name)}" style="--mdc-icon-size:${this.esc(size)}px${this.esc(color ? `;color:${color}` : "")}"></ha-icon>`; }
-  // Attribute of an item that opens the entity's page on a long press (`hold_action: more-info`).
+  // A dashboard path that is safe to open: same site only ("/lovelace/0"), never "//host", a scheme, a backslash or a space.
+  navPath(x) {
+    const p = x && x.navigation_path;
+    return typeof p === "string" && p.length <= 200 && /^\/(?!\/)[A-Za-z0-9\-._~\/?=&%#:+@!$,;]*$/.test(p) ? p : "";
+  }
+  // Attribute of an item for a normal tap, when `tap_action` replaces the default one: the entity's page, or a dashboard page (`navigation_path`).
+  tapAttr(x, dflt) {
+    const a = x && x.tap_action;
+    if (a === "more-info" && x.entity) return `data-e="${this.esc(x.entity)}"`;
+    if (a === "navigate" && this.navPath(x)) return `data-nav="${this.esc(this.navPath(x))}"`;
+    return dflt;
+  }
+  // Attribute of an item that reacts to a long press: `hold_action: more-info` opens the entity's page, `navigate` opens `navigation_path`.
   holdAttr(x) {
-    return x && x.hold_action === "more-info" && x.entity ? `data-hold="${this.esc(x.entity)}"` : "";
+    const a = x && x.hold_action;
+    if (a === "more-info" && x.entity) return `data-hold="${this.esc(x.entity)}"`;
+    if (a === "navigate" && this.navPath(x)) return `data-hold-nav="${this.esc(this.navPath(x))}"`;
+    return "";
+  }
+  _navigate(path) {
+    try { history.pushState(null, "", path); window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace: false } })); } catch (e) { /* no history: ignore */ }
   }
   // Long press (about half a second without moving), right click or the keyboard's context-menu key: open the entity's page, as Home Assistant's
   // own tiles do. The click that ends a long press must not also trigger the tile's normal action.
   _wireHold(el) {
     // Per-tile state (a re-render or another tile must not touch it); only the timer is card-wide so that disconnectedCallback can cancel it.
-    const id = el.dataset.hold, stop = () => { clearTimeout(this._holdTimer); this._holdTimer = null; };
+    const id = el.dataset.hold, nav = el.dataset.holdNav, stop = () => { clearTimeout(this._holdTimer); this._holdTimer = null; };
     let pressed = false, swallow = 0, held = 0, x0 = 0, y0 = 0;
-    const open = () => { if (Date.now() - held < 800) return; held = Date.now(); this._moreInfo(id); };
+    const open = () => { if (Date.now() - held < 800) return; held = Date.now(); if (nav) this._navigate(nav); else this._moreInfo(id); };
     el.addEventListener("pointerdown", (ev) => {
       if (ev.button > 0) return;   // primary button, finger or pen only
       stop(); swallow = 0; pressed = false; x0 = ev.clientX; y0 = ev.clientY;

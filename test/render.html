@@ -553,11 +553,39 @@ __SF.SF_HOOK.tr = (lang, key) => {
     r = await run({}, async (t, pe) => { pe("pointerdown"); await wait(650); pe("pointerup"); });
     if (r.has || r.infos.length) fail("console hold: without hold_action a long press must do nothing special");
     r = await run({ hold_action: "navigate" }, async () => {});
-    if (r.has) fail("console hold: only more-info is supported, anything else must be ignored");
+    if (r.has) fail("console hold: navigate without a navigation_path must be ignored");
     { const infos = [], e = mount("sf-console-card", { groups: [{ items: [{ kind: "toggle", entity: "light.lamp", label: "Lamp", ...hold }] }] }, "en", { ...base, "light.lamp": S("on") }); await wait(40);
       e.addEventListener("hass-more-info", (ev) => infos.push(ev.detail.entityId));
       e.shadowRoot.querySelector(".it").dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 })); e.remove(); await wait(650);
       if (infos.length) fail("console hold: a card removed during a press must not open the page afterwards"); }
+    // -- extended: hold on a dimmer's bulb, hold / tap "navigate" (+ navigation_path), tap "more-info"; hostile paths are ignored
+    const run2 = async (item, sel, act) => {
+      const calls = [], infos = [], pushed = [], st = { ...base, "light.lamp": S("on") }, oldPush = history.pushState;
+      history.pushState = (a, b, u) => { pushed.push(u); };
+      try {
+        const e = mount("sf-console-card", { groups: [{ items: [{ kind: "toggle", entity: "light.lamp", label: "Lamp", ...item }] }] }, "en", st);
+        e.hass = { ...HASS(st, "en"), callService: (d, sv, data) => { calls.push([d, sv, data]); return Promise.resolve(); } };
+        e.addEventListener("hass-more-info", (ev) => infos.push(ev.detail.entityId)); await wait(40);
+        const t = e.shadowRoot.querySelector(sel), pe = (type) => t.dispatchEvent(new PointerEvent(type, { bubbles: true, composed: true, button: 0, clientX: 10, clientY: 10 }));
+        await act(t, pe); await wait(30);
+        const html = e.shadowRoot.innerHTML; e.remove(); return { calls, infos, pushed, html };
+      } finally { history.pushState = oldPush; }
+    };
+    const longp = async (t, pe) => { pe("pointerdown"); await wait(650); pe("pointerup"); t.click(); };
+    let q = await run2({ kind: "dimmer", hold_action: "more-info" }, "[data-hold]", longp);
+    if (q.infos.length !== 1 || q.calls.length) fail("console hold: a long press on a dimmer's bulb must open the page and not toggle (got " + JSON.stringify([q.infos, q.calls]) + ")");
+    q = await run2({ kind: "dimmer", hold_action: "more-info" }, "[data-hold]", async (t) => { t.click(); });
+    if (q.infos.length || q.calls.length !== 1) fail("console hold: a tap on a dimmer's bulb must still toggle");
+    q = await run2({ hold_action: "navigate", navigation_path: "/lovelace/2" }, ".it", longp);
+    if (q.pushed.length !== 1 || q.pushed[0] !== "/lovelace/2" || q.calls.length || q.infos.length) fail("console hold: hold_action navigate must open the path once (got " + JSON.stringify(q) + ")");
+    q = await run2({ tap_action: "navigate", navigation_path: "/lovelace/2" }, ".it", async (t) => { t.click(); });
+    if (q.pushed.length !== 1 || q.calls.length) fail("console tap: tap_action navigate must open the path and not toggle (got " + JSON.stringify(q) + ")");
+    q = await run2({ tap_action: "more-info" }, ".it", async (t) => { t.click(); });
+    if (q.infos.length !== 1 || q.calls.length) fail("console tap: tap_action more-info must open the entity's page and not toggle");
+    for (const bad of ["javascript:alert(1)", "//evil.example/x", "https://evil.example/", "/ok\\evil", "/a b", "lovelace/0", "/" + "a".repeat(250), 42, { x: 1 }]) {
+      q = await run2({ tap_action: "navigate", hold_action: "navigate", navigation_path: bad }, ".it", async (t) => { t.click(); });
+      if (q.pushed.length || q.calls.length !== 1 || /data-(hold-)?nav="/.test(q.html)) fail("console navigate: a hostile or malformed path must be ignored, the tile toggles as usual (" + JSON.stringify(bad) + ")");
+    }
   }
   }
   { // -- Badly typed configurations: never an exception

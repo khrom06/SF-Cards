@@ -440,10 +440,18 @@ groups:
 
 Item kinds: `toggle`, `christmas`, `dimmer`, `action`, `sensor`, `cover`, `vacuum`, `stepper`, `select`.
 
-On a `toggle` or `christmas` item, `hold_action: more-info` makes a long press (about half a second), a right click or the keyboard's context-menu key open the entity's own page (brightness, colour, history…), as Home Assistant's own tiles do. A normal tap still toggles it, and the click that ends a long press does not. Without the option nothing changes.
+Press options, like Home Assistant's own tiles:
+
+- `hold_action: more-info` (on `toggle`, `christmas` and `dimmer`): a long press (about half a second), a right click or the keyboard's context-menu key opens the entity's own page (brightness, colour, history…). A normal tap still does what it did, and the click that ends a long press does not. On a `dimmer` the long press goes on the bulb icon; the name still opens the page and the − / + buttons keep working.
+- `hold_action: navigate` with `navigation_path: /lovelace/0`: the long press opens that dashboard page instead.
+- `tap_action: more-info` or `navigate` (on `toggle` and `christmas`): a normal tap opens the entity's page, or the dashboard page, instead of switching it.
+- `navigation_path` must start with a single `/` (same site only, no address, no `//`); anything else is ignored and the tile behaves as usual.
+
+Without these options nothing changes.
 
 ```yaml
       - { kind: toggle, entity: light.living_room, label: Living room, hold_action: more-info }
+      - { kind: dimmer, entity: light.hall, label: Hall, hold_action: navigate, navigation_path: /lovelace/lights }
 ```
 
 A tap switches the light; a long press opens its page without switching it:

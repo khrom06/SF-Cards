@@ -77,7 +77,7 @@ const FULL = {
   "sf-reactor-card": { solar: "sensor.solar", grid: "sensor.grid", fossil: "sensor.fossil", price: "sensor.price", battery_soc: "sensor.bat_soc", battery_power: "sensor.bat_p", battery_from_grid: "sensor.bat_p",
     devices: [{ name: "EV", entity: "sensor.ev", icon: "mdi:car" }, { name: "Heat pump", entity: "sensor.pac", icon: "mdi:heat-pump" }] },
   "sf-climate-card": { mode: "input_select.mode", rooms: [{ name: "Living", climate: "climate.room", temp: "sensor.temp", hum: "sensor.hum", target: "input_number.target", regul: "input_boolean.auto", window: "binary_sensor.window" }] },
-  "sf-console-card": { title: "Controls", groups: [{ title: "Home", items: [{ kind: "dimmer", entity: "light.lamp", label: "Lamp" }, { kind: "toggle", entity: "switch.plug", label: "Plug", hold_action: "more-info" },
+  "sf-console-card": { title: "Controls", groups: [{ title: "Home", items: [{ kind: "dimmer", entity: "light.lamp", label: "Lamp" }, { kind: "toggle", entity: "switch.plug", label: "Plug", hold_action: "more-info", tap_action: "more-info" }, { kind: "toggle", entity: "switch.plug", label: "Page", tap_action: "navigate", hold_action: "navigate", navigation_path: "/lovelace/1" },
     { kind: "cover", entity: "cover.shutter", label: "Shutter" }, { kind: "select", entity: "input_select.mode", label: "Mode" }, { kind: "sensor", entity: "sensor.temp", label: "Temp" },
     { kind: "action", label: "Go", service: "script.turn_on", data: { entity_id: "script.go" } }] }] },
   "sf-camera-card": { cameras: [{ entity: "camera.front", name: "Front" }] },

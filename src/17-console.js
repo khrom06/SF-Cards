@@ -7,7 +7,7 @@
  * groups:
  *   - title: Lights
  *     items:
- *       - { kind: toggle, entity: light.x, label: "Living room", icon: mdi:lightbulb, hold_action: more-info }   # hold_action: a long press opens the entity's page
+ *       - { kind: toggle, entity: light.x, label: "Living room", icon: mdi:lightbulb, hold_action: more-info }   # hold_action: more-info (entity's page) or navigate (+ navigation_path: /lovelace/0); tap_action: more-info | navigate; dimmer: hold_action only
  *       - { kind: christmas, entity: switch.tree, label: Lights }       # a toggle whose tile blinks like a string of fairy lights while it is on (visual only)
  *       - { kind: action, label: Dimmed, icon: mdi:..., service: scene.turn_on, data: {...}, confirm: "Sure?" }
  *       - { kind: cover, entity: cover.x, label: Volets }
@@ -27,7 +27,7 @@ class SfConsoleCard extends SfBase {
       .items { display:grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap:8px; }
       .it { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:10px;
         border-radius:10px; border:1px solid rgb(var(--sf-cyan-rgb) / .16); background:rgb(var(--sf-cyan-rgb) / .035); min-height:62px; }
-      .it[data-hold] { -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }   /* a long press must not start a text selection */
+      .it[data-hold], .it [data-hold], .it[data-hold-nav], .it [data-hold-nav] { -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }   /* a long press must not start a text selection */
       .it .nm { font-size:11px; color:${SF_C.text}; line-height:1.2; }
       .it .sv { font-size:10px; color:${SF_C.dim}; }
       .it.on { border-color:var(--ac, ${SF_C.amber}); background: linear-gradient(160deg, color-mix(in srgb, var(--ac, ${SF_C.amber}) 22%, transparent), transparent);
@@ -57,7 +57,7 @@ class SfConsoleCard extends SfBase {
         const on = this.isOn(x.entity);
         // "christmas": the same toggle, with fairy lights blinking around the tile while it is on (visual only, nothing extra is sent to the device).
         const xmas = x.kind === "christmas" && on && !dead;
-        return `<div class="it ${this.esc((on ? "on" : "") + (xmas ? " xmas" : ""))} ${this.esc(dead ? "dead" : "")}" style="${this.esc(x.color ? `--ac:${x.color}` : "")}" ${this.toggleCall(x.entity)} ${this.holdAttr(x)}>
+        return `<div class="it ${this.esc((on ? "on" : "") + (xmas ? " xmas" : ""))} ${this.esc(dead ? "dead" : "")}" style="${this.esc(x.color ? `--ac:${x.color}` : "")}" ${this.tapAttr(x, this.toggleCall(x.entity))} ${this.holdAttr(x)}>
           ${ic(x.kind === "christmas" ? "mdi:string-lights" : "mdi:toggle-switch")}<span class="nm">${this.esc(x.label)}</span><span class="sv">${dead ? this.t("common.no_data") : on ? this.t("console.on") : this.t("console.off")}</span></div>`;
       }
       case "action":
@@ -96,7 +96,7 @@ class SfConsoleCard extends SfBase {
         const pct = on && typeof b === "number" ? Math.round(b / 2.55) : null;
         const step = (d) => this.call("light.turn_on", { entity_id: x.entity, brightness_step_pct: d });
         return `<div class="it wide ${this.esc(on ? "on" : "")} ${this.esc(dead ? "dead" : "")}" style="${this.esc(x.color ? `--ac:${x.color}` : "")}"><div class="row">
-          <span ${this.toggleCall(x.entity)}>${ic("mdi:lightbulb")}</span>
+          <span ${this.toggleCall(x.entity)} ${this.holdAttr(x)}>${ic("mdi:lightbulb")}</span>
           <div class="grow click" data-e="${this.esc(x.entity)}"><div class="nm">${this.esc(x.label)}</div><div class="sv">${dead ? this.t("common.no_data") : on ? (pct === null ? this.t("console.on") : pct + " %") : this.t("console.off")}</div></div>
           <span class="btn" ${dead ? "" : step(-10)}>−</span><span class="btn" ${dead ? "" : step(10)}>+</span></div></div>`;
       }
