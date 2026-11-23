@@ -11,6 +11,7 @@ function sfConsoleItem(it) {
     s.push(sfE("entity", dom));
     if (["toggle", "christmas", "sensor", "stepper"].includes(k)) s.push(sfI("icon"));
     if (k === "toggle" || k === "christmas" || k === "dimmer") s.push(sfT("color"));
+    if (k === "toggle" || k === "christmas") s.push(sfS("hold_action", [["", "Aucune action"], ["more-info", "Ouvrir la fiche de l'entité"]]));
     if (k === "sensor" || k === "stepper") s.push(sfG(sfT("unit"), sfN("digits", 0, 4)));
     if (k === "vacuum") s.push(sfE("battery", "sensor"), sfO("shortcuts"));
   }

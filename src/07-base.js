@@ -36,6 +36,7 @@ class SfBase extends HTMLElement {
         el.addEventListener("click", (ev) => { ev.stopPropagation(); this._moreInfo(el.dataset.e); }));
       this.shadowRoot.querySelectorAll("[data-call]").forEach((el) =>
         el.addEventListener("click", (ev) => { ev.stopPropagation(); this._onCall(el); }));
+      this.shadowRoot.querySelectorAll("[data-hold]").forEach((el) => this._wireHold(el));
       if (this.afterRender) this.afterRender();
       this._a11y(this.shadowRoot); sfSvgVars(this.shadowRoot);
       if (this._armed && Date.now() < this._armed.until) {   // the HTML was rewritten: re-arm the same button
@@ -130,6 +131,28 @@ class SfBase extends HTMLElement {
   }
   kw(w) { return w === null || w === undefined || !isFinite(w) ? "—" : Math.abs(w) >= 999.5 ? `${this.nf(w / 1000, 2)} kW` : `${Math.round(w)} W`; }
   icon(name, size = 20, color) { return `<ha-icon icon="${this.esc(name)}" style="--mdc-icon-size:${this.esc(size)}px${this.esc(color ? `;color:${color}` : "")}"></ha-icon>`; }
+  // Attribute of an item that opens the entity's page on a long press (`hold_action: more-info`).
+  holdAttr(x) {
+    return x && x.hold_action === "more-info" && x.entity ? `data-hold="${this.esc(x.entity)}"` : "";
+  }
+  // Long press (about half a second without moving), right click or the keyboard's context-menu key: open the entity's page, as Home Assistant's
+  // own tiles do. The click that ends a long press must not also trigger the tile's normal action.
+  _wireHold(el) {
+    const id = el.dataset.hold, stop = () => { clearTimeout(this._holdTimer); this._holdTimer = null; };
+    const open = () => { if (Date.now() - (this._held || 0) < 800) return; this._held = Date.now(); this._moreInfo(id); };
+    let x0 = 0, y0 = 0;
+    el.addEventListener("pointerdown", (ev) => {
+      if (ev.button > 0) return;   // primary button, finger or pen only
+      stop(); this._swallow = 0; x0 = ev.clientX; y0 = ev.clientY;
+      this._holdTimer = setTimeout(() => { this._holdTimer = null; this._swallow = Date.now(); open(); }, 500);
+    });
+    el.addEventListener("pointermove", (ev) => { if (this._holdTimer && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 10) stop(); });
+    ["pointerup", "pointercancel", "pointerleave"].forEach((t) => el.addEventListener(t, stop));
+    el.addEventListener("click", (ev) => {   // only the click that ends this long press: a later keyboard Enter / Space must still toggle
+      const fresh = this._swallow && Date.now() - this._swallow < 700; this._swallow = 0;
+      if (fresh) { ev.stopImmediatePropagation(); ev.preventDefault(); } }, true);
+    el.addEventListener("contextmenu", (ev) => { ev.preventDefault(); open(); });
+  }
   _moreInfo(entityId) {
     if (!entityId || entityId === "undefined" || entityId === "null") return;
     const ev = new Event("hass-more-info", { bubbles: true, composed: true });
@@ -282,6 +305,7 @@ class SfBase extends HTMLElement {
   disconnectedCallback() {
     if (this._ti) { clearInterval(this._ti); this._ti = null; }
     if (this._sfRo) { this._sfRo.disconnect(); this._sfRo = null; }
+    if (this._holdTimer) { clearTimeout(this._holdTimer); this._holdTimer = null; }
   }
   getCardSize() { return 4; }
   // Sections view: HA's own defaults (full width of one section column, height from the content) plus a minimum width so the card cannot

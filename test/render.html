@@ -524,6 +524,37 @@ __SF.SF_HOOK.tr = (lang, key) => {
       if (!/1 \/ 1/.test(text(e))) fail("console christmas: the launcher's lights-on count must include christmas items (got: " + text(e).replace(/\s+/g, " ").slice(0, 120) + ")"); e.remove(); }
     { const e = mount("sf-console-card", { groups: [{ items: [{ kind: "toggle", entity: "switch.plug", label: "Plug", effect: "christmas", effect_entity: "input_select.mode" }] }] }, "en"); await wait(30);
       if (e.shadowRoot.querySelector(".it.xmas")) fail("console christmas: a plain toggle must never animate (the 1.22.0 effect options are gone)"); e.remove(); }
+  { // -- Console long press (hold_action: more-info): opens the entity's page; a tap still toggles; the click ending a long press does nothing
+    const run = async (it, act) => {
+      const calls = [], infos = [], st = { ...base, "light.lamp": S("on") };
+      const e = mount("sf-console-card", { groups: [{ items: [{ kind: "toggle", entity: "light.lamp", label: "Lamp", ...it }] }] }, "en", st);
+      e.hass = { ...HASS(st, "en"), callService: (d, sv, data) => { calls.push([d, sv, data]); return Promise.resolve(); } };
+      e.addEventListener("hass-more-info", (ev) => infos.push(ev.detail.entityId)); await wait(40);
+      const t = e.shadowRoot.querySelector(".it"), pe = (type, o = {}) => t.dispatchEvent(new PointerEvent(type, { bubbles: true, composed: true, button: 0, clientX: 10, clientY: 10, ...o }));
+      await act(t, pe); await wait(30);
+      const has = t.hasAttribute("data-hold"); e.remove(); return { calls, infos, has };
+    };
+    const hold = { hold_action: "more-info" };
+    let r = await run(hold, async (t, pe) => { pe("pointerdown"); await wait(650); pe("pointerup"); t.click(); });
+    if (r.infos.length !== 1 || r.infos[0] !== "light.lamp") fail("console hold: a long press must open the entity's page exactly once (got " + JSON.stringify(r.infos) + ")");
+    if (r.calls.length) fail("console hold: the click that ends a long press must not toggle the entity");
+    r = await run(hold, async (t, pe) => { pe("pointerdown"); await wait(150); pe("pointerup"); t.click(); });
+    if (r.infos.length || r.calls.length !== 1 || r.calls[0][1] !== "toggle") fail("console hold: a short tap must toggle and not open the page");
+    r = await run(hold, async (t, pe) => { pe("pointerdown"); pe("pointermove", { clientX: 40 }); await wait(650); pe("pointerup"); });
+    if (r.infos.length) fail("console hold: moving the finger away must cancel the long press");
+    r = await run(hold, async (t, pe) => { t.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, composed: true, cancelable: true })); });
+    if (r.infos.length !== 1) fail("console hold: right click / context-menu key must open the page");
+    r = await run(hold, async (t, pe) => { pe("pointerdown"); await wait(650); pe("pointerup"); await wait(900); t.click(); });   // no click after the long press (Android, dialog opened under the pointer): a later keyboard Enter / Space must still toggle
+    if (r.infos.length !== 1 || r.calls.length !== 1) fail("console hold: a click long after a long press must toggle (got " + JSON.stringify(r) + ")");
+    r = await run({}, async (t, pe) => { pe("pointerdown"); await wait(650); pe("pointerup"); });
+    if (r.has || r.infos.length) fail("console hold: without hold_action a long press must do nothing special");
+    r = await run({ hold_action: "navigate" }, async () => {});
+    if (r.has) fail("console hold: only more-info is supported, anything else must be ignored");
+    { const infos = [], e = mount("sf-console-card", { groups: [{ items: [{ kind: "toggle", entity: "light.lamp", label: "Lamp", ...hold }] }] }, "en", { ...base, "light.lamp": S("on") }); await wait(40);
+      e.addEventListener("hass-more-info", (ev) => infos.push(ev.detail.entityId));
+      e.shadowRoot.querySelector(".it").dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 })); e.remove(); await wait(650);
+      if (infos.length) fail("console hold: a card removed during a press must not open the page afterwards"); }
+  }
   }
   { // -- Badly typed configurations: never an exception
     const bad = [["sf-alert-card", { leaks: "binary_sensor.leak", doors: null }], ["sf-bridge-card", { weather: "weather.home", people: "x", doors: "binary_sensor.door" }],
