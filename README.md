@@ -446,6 +446,10 @@ On a `toggle` or `christmas` item, `hold_action: more-info` makes a long press (
       - { kind: toggle, entity: light.living_room, label: Living room, hold_action: more-info }
 ```
 
+A tap switches the light; a long press opens its page without switching it:
+
+<img src="assets/anim/hold-action.gif" alt="Controls card: a tap switches the Living room light, a long press opens its page with brightness and colour and leaves the light as it was" width="440">
+
 The `christmas` kind (left) next to a plain `toggle` that is on (middle) and one that is off (right):
 
 <img src="assets/anim/fairy-lights.gif" alt="Controls card: an animated fairy-lights button next to a plain toggle that is on and one that is off" width="420">

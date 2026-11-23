@@ -544,6 +544,10 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (r.infos.length) fail("console hold: moving the finger away must cancel the long press");
     r = await run(hold, async (t, pe) => { t.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, composed: true, cancelable: true })); });
     if (r.infos.length !== 1) fail("console hold: right click / context-menu key must open the page");
+    r = await run(hold, async (t, pe) => { pe("pointerdown"); await wait(1500); pe("pointerup"); t.click(); });   // a long hold, released well after the page opened: the ending click must still do nothing
+    if (r.infos.length !== 1 || r.calls.length) fail("console hold: releasing after a very long hold must not toggle the entity (got " + JSON.stringify(r) + ")");
+    r = await run(hold, async (t, pe) => { pe("pointerdown"); await wait(650); pe("pointerleave"); pe("pointerup"); t.click(); });   // the opened page can appear under the pointer: the leave must not forget the long press
+    if (r.infos.length !== 1 || r.calls.length) fail("console hold: a pointer leave after the page opened must not let the ending click toggle (got " + JSON.stringify(r) + ")");
     r = await run(hold, async (t, pe) => { pe("pointerdown"); await wait(650); pe("pointerup"); await wait(900); t.click(); });   // no click after the long press (Android, dialog opened under the pointer): a later keyboard Enter / Space must still toggle
     if (r.infos.length !== 1 || r.calls.length !== 1) fail("console hold: a click long after a long press must toggle (got " + JSON.stringify(r) + ")");
     r = await run({}, async (t, pe) => { pe("pointerdown"); await wait(650); pe("pointerup"); });
