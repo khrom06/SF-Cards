@@ -440,6 +440,12 @@ groups:
 
 Item kinds: `toggle`, `christmas`, `dimmer`, `action`, `sensor`, `cover`, `vacuum`, `stepper`, `select`.
 
+On a `toggle` or `christmas` item, `hold_action: more-info` makes a long press (about half a second), a right click or the keyboard's context-menu key open the entity's own page (brightness, colour, history…), as Home Assistant's own tiles do. A normal tap still toggles it, and the click that ends a long press does not. Without the option nothing changes.
+
+```yaml
+      - { kind: toggle, entity: light.living_room, label: Living room, hold_action: more-info }
+```
+
 The `christmas` kind (left) next to a plain `toggle` that is on (middle) and one that is off (right):
 
 <img src="assets/anim/fairy-lights.gif" alt="Controls card: an animated fairy-lights button next to a plain toggle that is on and one that is off" width="420">
