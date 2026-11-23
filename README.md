@@ -454,7 +454,11 @@ Without these options nothing changes.
       - { kind: dimmer, entity: light.hall, label: Hall, hold_action: navigate, navigation_path: /lovelace/lights }
 ```
 
-A tap switches the light; a long press opens its page without switching it:
+On a `dimmer`, the long press goes on the bulb icon, so the name and the − / + buttons keep working:
+
+<img src="assets/anim/hold-dimmer.gif" alt="Controls card with two dimmers: a tap on the bulb switches the Living room light, a long press on the bulb opens its page and leaves the light as it was" width="440">
+
+On a `toggle`, a tap switches the light; a long press opens its page without switching it:
 
 <img src="assets/anim/hold-action.gif" alt="Controls card: a tap switches the Living room light, a long press opens its page with brightness and colour and leaves the light as it was" width="440">
 
