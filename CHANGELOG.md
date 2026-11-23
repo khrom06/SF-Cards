@@ -3,6 +3,8 @@
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
+### Added
+- **Controls card: more press options, like Home Assistant's own tiles.** `hold_action` now also works on a `dimmer` (long press on the bulb icon: the name and the − / + buttons are unchanged) and accepts `navigate` with a `navigation_path` such as `/lovelace/0`. New `tap_action: more-info` or `navigate` on `toggle` and `christmas` items makes a normal tap open the entity's page or a dashboard page instead of switching it. A `navigation_path` must be a path on the same site (a single leading `/`, no address, no `//`); anything else is ignored and the tile behaves as before. Available in the visual editor, in the 11 languages. Nothing changes for existing items.
 
 ## [1.25.0] - 2026-11-23
 ### Added
