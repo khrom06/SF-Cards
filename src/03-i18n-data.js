@@ -993,3 +993,6 @@ const SF_T = {
 const SF_LANGS = { fr: 0, en: 1, es: 2, de: 3, nl: 4, it: 5, pt: 6, pl: 7, ru: 8, zh: 9, ar: 10 };
 const SF_FR2ID = Object.create(null);   // French text -> id (legacy keys)
 for (const id in SF_T) if (!(SF_T[id][0] in SF_FR2ID)) SF_FR2ID[SF_T[id][0]] = id;
+// The languages whose texts are inside this file. The source lists all of them; the build (scripts/build.mjs) keeps French and English
+// in sf-cards.js and writes each other language to its own file, loaded only by the people who use it (src/03a-i18n-load.js).
+const SF_I18N_EMBEDDED = Object.keys(SF_LANGS);

@@ -12,7 +12,7 @@ window.addEventListener("unhandledrejection", (e) => window.__errors.push(`unhan
 window.__missing = new Set();
 window.__SF_TEST = true;   // exposes internal functions to this test only
 </script>
-<script src="../dist/sf-cards.js"></script>
+<script src="i18n-all.js"></script><script src="../dist/sf-cards.js"></script>
 <script src="fixtures.js"></script>
 <script>
 const mount = (tag, cfg, language, states) => {

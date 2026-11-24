@@ -83,6 +83,7 @@ async function sfHomeEnergyReport(hass, states, name) {
   } catch (err) { return null; }   // Energy dashboard not configured
 }
 async function sfHomeBuild(c, hass) {
+  await sfI18nLoad(sfLang(hass));   // the view titles are written once, in the user's language: wait for its texts
   const tr = (k) => sfTr(sfLang(hass), k), { states, ents, ex, G, LC, reg, want, areas, name } = sfHomeScan(c, hass);
   const common = {}; for (const k of ["theme", "look", "accent"]) if (typeof c[k] === "string" && c[k]) common[k] = c[k];
   const sf = (tag, cfg, grid) => ({ type: `custom:${tag}`, ...common, ...cfg, ...(grid ? { grid_options: grid } : {}) });

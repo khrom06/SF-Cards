@@ -313,7 +313,7 @@ class SfBase extends HTMLElement {
     if (this._locRaw !== raw) { this._locRaw = raw; try { this._locVal = Intl.getCanonicalLocales(String(raw).replace(/_/g, "-"))[0] || "en"; } catch (e) { this._locVal = "en"; } }
     return this._locVal;
   }
-  t(key, vars) { return sfTr(this.lang, key, vars); }
+  t(key, vars) { const l = this.lang; sfI18nNeed(l, this); return sfTr(l, key, vars); }
   ago(id) {
     const s = this.st(id); if (!s) return "";
     const m = Math.round((Date.now() - new Date(s.last_changed).getTime()) / 60000);

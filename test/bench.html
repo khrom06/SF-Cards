@@ -12,7 +12,7 @@ let listeners = 0; const _ae = EventTarget.prototype.addEventListener; EventTarg
 const live = { iv: 0 }; const _si = window.setInterval.bind(window), _ci = window.clearInterval.bind(window); const ids = new Set();
 window.setInterval = (f, m, ...a) => { const i = _si(f, m, ...a); ids.add(i); return i; }; window.clearInterval = (i) => { ids.delete(i); _ci(i); };
 </script>
-<script src="../dist/sf-cards.js"></script>
+<script src="i18n-all.js"></script><script src="../dist/sf-cards.js"></script>
 <script>window.__t1 = performance.now();</script>
 <script src="fixtures.js"></script>
 <script>

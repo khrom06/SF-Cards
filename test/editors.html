@@ -17,7 +17,7 @@ window.__errs = [];
 window.addEventListener("error", (e) => window.__errs.push(`${e.message} @${(e.filename || "").split("/").pop()}:${e.lineno}`));
 window.addEventListener("unhandledrejection", (e) => window.__errs.push(`unhandled rejection: ${e.reason && e.reason.message || e.reason}`));
 </script>
-<script src="../dist/sf-cards.js"></script>
+<script src="i18n-all.js"></script><script src="../dist/sf-cards.js"></script>
 <script src="fixtures.js"></script>
 <script>
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));

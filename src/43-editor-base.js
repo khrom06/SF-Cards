@@ -19,7 +19,7 @@ class SfEditorBase extends HTMLElement {
       this.shadowRoot.querySelectorAll("*").forEach((e) => { if (e !== this && e.localName.endsWith("-editor")) e.hass = h; });
     }
   }
-  _t(key) { return sfTr(sfLang(this._hass), key); }
+  _t(key) { const l = sfLang(this._hass); sfI18nNeed(l, this); return sfTr(l, key); }
   // Translates the labels of the drop-down lists of an ha-form schema.
   _trSchema(schema) {
     return (schema || []).map((f) => {

@@ -11,7 +11,7 @@ class FakeIcon extends HTMLElement { connectedCallback() { this.style.cssText = 
 customElements.define("ha-icon", FakeIcon);   // a plain square stands in for the icon font (deterministic, no network)
 window.requestAnimationFrame = (f) => setTimeout(f, 0);
 </script>
-<script src="../dist/sf-cards.js"></script>
+<script src="i18n-all.js"></script><script src="../dist/sf-cards.js"></script>
 <script src="fixtures.js"></script>
 <script>
 const q = new URLSearchParams(location.search), tag = q.get("tag"), theme = q.get("theme") || "dark";
