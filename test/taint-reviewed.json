@@ -1082,6 +1082,31 @@
    "benignSuite": true
   },
   {
+   "key": "25-wallpanel.js|kind#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "25-wallpanel.js|age#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "25-wallpanel.js|L.kind#1",
+   "ctx": "attr",
+   "benignSuite": false
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(L.kind === \"lost\" ? \"mdi:lan-disconnect\" : \"mdi:timer-sand\")#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(txt)#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
    "key": "25-wallpanel.js|this.esc(el.dataset.confirm)#1",
    "ctx": "text",
    "benignSuite": true
@@ -1182,7 +1207,7 @@
    "benignSuite": true
   },
   {
-   "key": "25-wallpanel.js|v ? this.esc(this.own(FR, v.state) ? this.t(this.own(FR, v.state)) : v.state) : \"\"#1",
+   "key": "25-wallpanel.js|v ? this.esc(this.stateText(V.entity, VS)) : \"\"#1",
    "ctx": "text",
    "benignSuite": true
   },
@@ -3125,6 +3150,11 @@
    "key": "44-editor-required.js|SF_RED#2",
    "ctx": "text",
    "benignSuite": true
+  },
+  {
+   "key": "46-validate.js|x.slice(0, 60)#1",
+   "ctx": "text",
+   "benignSuite": false
   },
   {
    "key": "46-validate.js|typeof v#1",

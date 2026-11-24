@@ -10,7 +10,9 @@ class SfEditorBase extends HTMLElement {
     this._build();
   }
   set hass(h) {
+    const first = !this._hass;
     this._hass = h;
+    if (first && this.shadowRoot && this._config) { try { this._banner(); } catch (e) { /* informative only */ } }   // the "does not exist" check needs the states
     if (this.shadowRoot) {
       this.shadowRoot.querySelectorAll("ha-form").forEach((f) => { f.hass = h; });
       // editors of nested cards (a panel's content): they must also follow `hass`, otherwise their selectors keep the original state
@@ -36,7 +38,7 @@ class SfEditorBase extends HTMLElement {
     b.hidden = !miss.length;
     b.textContent = miss.length ? `${this._t("editor.missing_required_fields")} : ${miss.map((m) => this._t(m)).join(" · ")}` : "";
     // probable mistakes (typos, wrong types / ranges): informative only, never blocks saving
-    const warns = sfValidate(sfCanon(this.localName.replace(/-editor$/, "")), this._config || {});
+    const warns = sfValidate(sfCanon(this.localName.replace(/-editor$/, "")), this._config || {}, this._hass && this._hass.states);
     let w = root.querySelector(".warnings");
     if (!w) { w = document.createElement("div"); w.className = "warnings"; const wr = root.querySelector("div"); if (wr) wr.prepend(w); }
     const dep = sfDeprecation(this.localName.replace(/-editor$/, ""));

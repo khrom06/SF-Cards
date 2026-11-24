@@ -192,6 +192,16 @@ class SfBase extends HTMLElement {
   st(id) { return id && this._hass && this._hass.states ? this._hass.states[id] : undefined; }
   ok(id) { const s = this.st(id); return !!s && !["unknown", "unavailable"].includes(s.state); }
   num(id) { if (!this.ok(id)) return null; const n = parseFloat(this.st(id).state); return isNaN(n) ? null : n; }
+  // The state as a person reads it: our own words when we have them (map: state -> text id), then Home Assistant's translation of the
+  // state (it knows every integration's own states: "sweeping", "charging_completed"…), and the raw state only as a last resort.
+  stateText(id, map) {
+    const s = this.st(id); if (!s) return this.t("common.no_data");
+    if (s.state === "unavailable") return this.t("common.unavailable");
+    if (map && Object.prototype.hasOwnProperty.call(map, s.state)) return this.t(map[s.state]);
+    let txt = "";
+    try { txt = this._hass && typeof this._hass.formatEntityState === "function" ? String(this._hass.formatEntityState(s) || "") : ""; } catch (e) { txt = ""; }
+    return txt || String(s.state);
+  }
   unit(id) { const s = this.st(id), u = s && s.attributes.unit_of_measurement; return typeof u === "string" ? u : ""; }   // always a string, whatever an integration publishes
   // A list attribute or option: always an array (an integration may publish a string, a number or nothing).
   arr(v) { return Array.isArray(v) ? v : []; }

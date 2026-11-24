@@ -758,6 +758,23 @@ __SF.SF_HOOK.tr = (lang, key) => {
     // rain: the forecast status message appears in the morning
     { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Matin") }, "en", conn); await wait(80);
       if (!/rain (in|around)|raining/.test(text(el))) fail(`sf-ns-card: rain message missing ('${text(el).slice(0, 140)}')`); el.remove(); }
+    // connection: a closed connection or data that stopped coming are said on the panel, with the age of the data
+    { const st = { ...base, "input_select.ns_mode": S("Jour") }, el = await mk(NS, st, "en");
+      if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: no connection banner while data comes in");
+      const h0 = el._hass; el.hass = { ...h0, connected: false }; await wait(60);
+      const lb = el.shadowRoot.querySelector(".link.lost"); if (!lb || !/Connection to Home Assistant lost · data from 0 min ago/.test(lb.textContent) || lb.getAttribute("role") !== "status") fail("sf-ns-card: 'connection lost' banner expected: " + (lb ? lb.textContent : "none"));
+      el._seen = el.now().getTime() - 20 * 60000; el.hass = { ...el._hass, connected: true }; el._tick(); await wait(60);
+      const ls = el.shadowRoot.querySelector(".link.stale"); if (!ls || !/No update for 20 min/.test(ls.textContent)) fail("sf-ns-card: 'no update for 20 min' banner expected: " + (ls ? ls.textContent : text(el).slice(0, 80)));
+      el.hass = { ...HASS(st, "en") }; await wait(60); if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: new states clear the banner");
+      el.remove();
+      const e0 = await mk({ ...NS, stale_minutes: 0 }, st, "en"); e0._seen = e0.now().getTime() - 600 * 60000; e0._tick(); await wait(60); if (e0.shadowRoot.querySelector(".link")) fail("sf-ns-card: stale_minutes: 0 turns the check off"); e0.remove();
+      const e5 = await mk({ ...NS, stale_minutes: 5 }, st, "fr"); e5._seen = e5.now().getTime() - 6 * 60000; e5._tick(); await wait(60); if (!/Aucune mise à jour depuis 6 min/.test(text(e5))) fail("sf-ns-card: stale_minutes and the French text"); e5.remove(); }
+    // vacuum popup: Home Assistant's own translation of the state, never the raw state when Home Assistant knows better
+    { const st = { ...base, "input_select.ns_mode": S("Jour"), "vacuum.robot": S("sweeping") };
+      const el = await mk(NS, st, "en", { formatEntityState: (o) => (o.state === "sweeping" ? "Sweeping the floor" : "") }); el._pop = "vac"; el._key = null; el._schedule(); await wait(60);
+      const hd = el.shadowRoot.querySelector(".shead .r"); if (!hd || !/Sweeping the floor · 80 %/.test(hd.textContent)) fail("sf-ns-card: vacuum state through formatEntityState: " + (hd ? hd.textContent : "none")); el.remove();
+      const e2 = await mk(NS, { ...st, "vacuum.robot": S("docked") }, "fr", { formatEntityState: () => "Station" }); e2._pop = "vac"; e2._key = null; e2._schedule(); await wait(60);
+      if (!/à la base/.test(e2.shadowRoot.querySelector(".shead .r").textContent)) fail("sf-ns-card: our own words for the states we know"); e2.remove(); }
     // vacuum popup: shortcuts + return to base / stop; a hostile state does not crash
     { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Jour"), "vacuum.robot": S("constructor") }, "en"); el._pop = "vac"; el._key = null; el._render();
       const t = text(el); if (!/Return to base/.test(t) || !/Stop/.test(t) || !/Kitchen/.test(t) || !/Robot/.test(t)) fail(`sf-ns-card : popup aspirateur incomplet (« ${t.slice(0, 160)} »)`);
@@ -1316,6 +1333,12 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (v.getAttribute("look") !== "calm" || v.getAttribute("accent") !== "green") fail("look / accent: the theme variables --sf-look / --sf-accent apply to every card");
     const v2 = document.createElement("sf-machines-card"); v2.setConfig({ ...FULL["sf-machines-card"], accent: "pink" }); host.appendChild(v2); v2.hass = HASS(base, "en"); await wait(50);
     if (v2.getAttribute("accent") !== "pink") fail("accent: the card option wins over the theme variable"); host.remove();
+    { const cfg = { rooms: [{ name: "A", climate: "climate.ghost" }, { name: "B", climate: "climate.real" }] }, has = { "climate.real": S("heat") };
+      const w1 = __SF.sfValidate("sf-climate-card", cfg, has); if (w1.length !== 1 || !/'climate.ghost' does not exist in Home Assistant/.test(w1[0].msg)) fail("validate: an entity that does not exist is reported in the editor: " + JSON.stringify(w1));
+      if (__SF.sfValidate("sf-climate-card", cfg).length) fail("validate: without states (console check), existence is not checked");
+      if (__SF.sfValidate("sf-climate-card", cfg, {}).length) fail("validate: empty states (not loaded yet) are not a reason to report");
+      if (__SF.sfValidate("sf-climate-card", { rooms: [{ name: "B", climate: "climate.real" }] }, has).length) fail("validate: an existing entity is not reported");
+      if (__SF.sfValidate("sf-climate-card", { rooms: [{ climate: "constructor.x" }] }, { "climate.real": S("on") }).length !== 1) fail("validate: prototype names are not entities"); }
     const w = __SF.sfValidate("sf-machines-card", { ...FULL["sf-machines-card"], look: "calm", accent: "amber" }); if (w.length) fail("look / accent must not raise validation warnings");
   }
   // 5u. Media card: what plays, only the supported buttons, services, progress, several players, hostile picture.
@@ -1424,9 +1447,9 @@ __SF.SF_HOOK.tr = (lang, key) => {
         if (!el._draw()) fail("report: no image to share (data not loaded)");
         el._export(); for (let i = 0; i < 30 && !shared.length; i++) await wait(100);
         if (shared.length !== 1 || !(shared[0].files[0] instanceof File) || shared[0].files[0].type !== "image/png" || !/^sf-report-year-\d{4}-\d\d-\d\d\.png$/.test(shared[0].files[0].name) || clicks.length) fail("report: the PNG goes to the share sheet, not to a download: " + JSON.stringify([shared.length, clicks]));
-        setNav(async () => { const e = new Error("closed"); e.name = "AbortError"; throw e; }, () => true); el._export(); await wait(400);
+        let aborted = 0; setNav(async () => { aborted++; const e = new Error("closed"); e.name = "AbortError"; throw e; }, () => true); el._export(); for (let i = 0; i < 30 && !aborted; i++) await wait(100); await wait(100);
         if (clicks.length) fail("report: closing the share sheet must not download the image");
-        setNav(async () => { throw new Error("denied"); }, () => true); el._export(); await wait(400);
+        setNav(async () => { throw new Error("denied"); }, () => true); el._export(); for (let i = 0; i < 30 && !clicks.length; i++) await wait(100);
         if (clicks.length !== 1) fail("report: a failed share falls back to the download");
         setNav(() => { throw new Error("boom"); }, () => { throw new Error("boom"); }); el._lastHtml = null; el.hass = { ...hr }; await wait(60);
         if (el.shadowRoot.querySelector("[data-export]").textContent.trim() !== "Export as an image") fail("report: a throwing canShare means no sharing");

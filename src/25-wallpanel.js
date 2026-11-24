@@ -191,7 +191,11 @@ const SF_NS_CSS = `
 class SfNsCard extends SfBase {
   defaults() { return { rooms: [], fridge: [], cars: [], leaks: [], tiles: [], shortcuts: [], lights_off: [], energy: {}, vacuum: null }; }
   getCardSize() { return 12; }
-  set hass(h) { this._hass = h; this._subFc(); this._loadDay(); this._schedule(); }
+  set hass(h) {
+    // the last time Home Assistant sent new states (a new hass object can also just say "disconnected": that is not news from the house)
+    if (h && h.states !== (this._hass && this._hass.states)) this._seen = this.now().getTime();
+    this._hass = h; this._subFc(); this._loadDay(); this._schedule();
+  }
   connectedCallback() {
     super.connectedCallback();
     this._key = null; clearInterval(this._tk); this._tk = setInterval(() => this._tick(), 15000);
@@ -296,7 +300,22 @@ class SfNsCard extends SfBase {
   }
   _tick() { const d = this.now(), p = (n) => String(n).padStart(2, "0"), el = this.shadowRoot && this.shadowRoot.querySelector(".hm");
     if (el) el.textContent = `${p(d.getHours())}:${p(d.getMinutes())}`;
-    if (this._mode !== this.mode()) this._schedule(); }
+    if (this._mode !== this.mode() || this._linkKey !== this._link().key) this._schedule(); }
+  // A wall panel is looked at from across the room: when it stops receiving data it must say so, instead of showing old values as if
+  // they were live. "lost": Home Assistant reports the connection as closed. "stale": no new state for `stale_minutes` (default 15;
+  // 0 turns the check off) although the connection looks open. The banner gives the age of the data, refreshed every minute.
+  _link() {
+    const h = this._hass, lim = Number(this._config && this._config.stale_minutes), max = Number.isFinite(lim) && lim >= 0 ? lim : 15;
+    const age = this._seen ? Math.max(0, Math.floor((this.now().getTime() - this._seen) / 60000)) : 0;
+    const kind = h && h.connected === false ? "lost" : max > 0 && this._seen && age >= max ? "stale" : "";
+    return { kind, age, key: kind ? `${kind}:${age}` : "" };
+  }
+  linkBanner() {
+    const L = this._link(); this._linkKey = L.key;
+    if (!L.kind) return "";
+    const txt = this.t(L.kind === "lost" ? "wallpanel.link_lost" : "wallpanel.link_stale").replace("{n}", String(L.age));
+    return `<div class="link ${L.kind}" role="status">${this.ic(L.kind === "lost" ? "mdi:lan-disconnect" : "mdi:timer-sand")}<span>${this.esc(txt)}</span></div>`;
+  }
   _call(el, domain, service, data) {
     el.classList.add("sent"); setTimeout(() => el.classList.remove("sent"), 600);
     this._hass.callService(domain, service, data).catch(() => { el.style.boxShadow = "0 0 0 2px var(--sf-red)"; setTimeout(() => (el.style.boxShadow = ""), 2000); });
@@ -519,11 +538,11 @@ class SfNsCard extends SfBase {
   popup() {
     if (this._pop !== "vac") return "";
     const c = this._config, V = this.vac, v = V && this.st(V.entity), bat = V && this.num(V.battery);
-    const FR = { docked: "à la base", cleaning: "nettoie", returning: "retourne à la base", idle: "en attente", paused: "en pause", error: "erreur" };
+    const VS = { docked: "console.docked", cleaning: "console.cleaning", returning: "common.returning_to_base", idle: "common.waiting", paused: "console.paused", error: "console.error" };
     const sh = c.shortcuts.map((x) => `<div class="btn tap big" data-act="toggle" data-e="${this.esc(x.entity)}">${this.ic(x.icon)}<span>${this.esc(x.name)}</span></div>`).join("");
     const ctl = V ? `<div class="btn tap" data-act="vac_home" data-e="${this.esc(V.entity)}">${this.ic("mdi:home-import-outline")}<span>${this.esc(this.t("wallpanel.return_to_base"))}</span></div>
       <div class="btn tap" data-act="vac_stop" data-e="${this.esc(V.entity)}">${this.ic("mdi:stop")}<span>${this.esc(this.t("wallpanel.stop"))}</span></div>` : "";
-    return `<div class="pop" data-act="close"><div class="sheet" data-stop="1"><div class="shead"><span>${this.ic("mdi:robot-vacuum")} ${this.esc((V && V.name) || this.t("wallpanel.vacuum"))}</span><span class="r">${v ? this.esc(this.own(FR, v.state) ? this.t(this.own(FR, v.state)) : v.state) : ""}${bat !== null && bat !== undefined ? ` · ${Math.round(bat)} %` : ""}</span>
+    return `<div class="pop" data-act="close"><div class="sheet" data-stop="1"><div class="shead"><span>${this.ic("mdi:robot-vacuum")} ${this.esc((V && V.name) || this.t("wallpanel.vacuum"))}</span><span class="r">${v ? this.esc(this.stateText(V.entity, VS)) : ""}${bat !== null && bat !== undefined ? ` · ${Math.round(bat)} %` : ""}</span>
       <span class="x tap" data-act="close">${this.ic("mdi:close")}</span></div><div class="btns" style="flex:1 1 auto">${sh}</div><div class="btns" style="flex:0 0 calc(var(--u)*13)">${ctl}</div></div></div>`;
   }
 
@@ -577,12 +596,14 @@ class SfNsCard extends SfBase {
       main = s.html; grid = `grid-template-columns:1fr;grid-template-rows:${s.rows}`;
     }
     const html = `<style>${SF_NS_CSS}.pop{position:absolute;inset:0;z-index:5;background:rgba(2,6,12,.82);display:flex;align-items:center;justify-content:center;padding:calc(var(--u)*3)}
+      .link{display:flex;align-items:center;gap:calc(var(--u)*1.4);padding:calc(var(--u)*1.2) calc(var(--u)*2);border-radius:calc(var(--u)*1.6);border:1px solid var(--sf-amber);background:rgb(255 179 0 / .14);color:var(--sf-amber);font-family:'B612 Mono',monospace;font-size:calc(var(--u)*2.6);line-height:1.2}
+      .link ha-icon{--mdc-icon-size:calc(var(--u)*4);flex:0 0 auto} .link.lost{border-color:var(--sf-red);background:rgb(255 59 48 / .16);color:var(--sf-strong)}
       .sheet{width:100%;height:100%;display:flex;flex-direction:column;gap:calc(var(--u)*2);padding:calc(var(--u)*2.4);border-radius:calc(var(--u)*3);border:1px solid var(--a);background:#06101d;box-shadow:0 0 calc(var(--u)*6) rgb(var(--sf-cyan-rgb) / .25)}
       .shead{display:flex;align-items:center;gap:calc(var(--u)*2);font-family:Orbitron,sans-serif;font-weight:700;font-size:calc(var(--u)*3.4);letter-spacing:.14em;text-transform:uppercase;color:var(--a)}
       .shead ha-icon{--mdc-icon-size:calc(var(--u)*5)} .shead .r{margin-left:auto;font-family:'B612 Mono',monospace;font-weight:400;font-size:calc(var(--u)*2.6);letter-spacing:.04em;text-transform:none;color:#9fc3d9}
       .shead .x{width:calc(var(--u)*8);height:calc(var(--u)*8);display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid rgb(var(--sf-fg-rgb) / .2);color:var(--sf-strong)}
       .btn.big ha-icon{--mdc-icon-size:calc(var(--u)*11)} .btn.big{font-size:calc(var(--u)*2.8)} .nrow{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:calc(var(--u)*1.7);min-height:0} .nrow>.panel{min-height:0}</style>
-      <div class="ns ${mode.toLowerCase()}${this._kiosk ? " full" : ""}${a0 ? " tight" : ""}" style="--a:${M.a};--bg:${M.bg}">${this.hero(mode)}${alerts}<div class="main" style="${grid}">${main}</div>${mode === "Nuit" ? "" : this.dock()}${this.popup()}</div>`;
+      <div class="ns ${mode.toLowerCase()}${this._kiosk ? " full" : ""}${a0 ? " tight" : ""}" style="--a:${M.a};--bg:${M.bg}">${this.hero(mode)}${this.linkBanner()}${alerts}<div class="main" style="${grid}">${main}</div>${mode === "Nuit" ? "" : this.dock()}${this.popup()}</div>`;
     // no rewrite if nothing changed (otherwise animations and long presses would be cut); the time is excluded from the comparison
     const key = html.replace(/<div class="hm">[^<]*<\/div>/, "").replace(/left:[\d.]+%/, "");
     if (key === this._key) { this._tick(); return; }
