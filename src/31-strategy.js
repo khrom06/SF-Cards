@@ -86,6 +86,10 @@ async function sfHomeBuild(c, hass) {
   const tr = (k) => sfTr(sfLang(hass), k), { states, ents, ex, G, LC, reg, want, areas, name } = sfHomeScan(c, hass);
   const common = {}; for (const k of ["theme", "look", "accent"]) if (typeof c[k] === "string" && c[k]) common[k] = c[k];
   const sf = (tag, cfg, grid) => ({ type: `custom:${tag}`, ...common, ...cfg, ...(grid ? { grid_options: grid } : {}) });
+  // The cards of the other SF repositories (SF Heartbeat, Trace, Horizon, Controls, Copilot) are added where they fit, only when they are
+  // installed: their tag is looked up, nothing is imported or requested. `family: false` leaves them out.
+  const fam = (tag, cfg) => (c.family !== false && typeof customElements !== "undefined" && customElements.get(tag) ? { type: "custom:" + tag, ...(common.theme ? { theme: common.theme } : {}), ...cfg } : null);
+  const shown = (dom) => Object.keys(states).filter((id) => id.startsWith(dom + ".") && SF_EID.test(id) && !ex.has(id) && !(ents[id] && (ents[id].hidden || ents[id].entity_category))).sort();
   const head = (text, icon) => ({ type: "heading", heading: text, heading_style: "title", icon });
   const full = { columns: "full" }, roomEx = ex.size ? { exclude: [...ex].filter((x) => SF_EID.test(x)) } : {};
   const sec = (cards, span) => ({ type: "grid", ...(span ? { column_span: span } : {}), cards: cards.filter(Boolean) });
@@ -98,7 +102,8 @@ async function sfHomeBuild(c, hass) {
     if (areas.length) s.push(sec([head(tr("home.rooms"), "mdi:floor-plan"), ...areas.map((a) => sf("sf-room-card", { area: a.id, size: "compact", ...roomEx }, { columns: 6, rows: "auto" }))], 2));
     const daily = [weather ? sf("sf-weather-card", { weather }) : null, G.calendars.length ? sf("sf-agenda-card", { calendars: G.calendars.slice(0, 8) }) : null];
     if (daily.some(Boolean)) s.push(sec([head(tr("home.daily"), "mdi:calendar-today"), ...daily]));
-    const more = [G.media.length ? sf("sf-media-card", { entities: G.media.slice(0, 8) }) : null, G.leaks.length ? sf("sf-alert-card", { leaks: G.leaks.slice(0, 20), hide_sim: true }) : null, ...(Array.isArray(c.home_cards) ? c.home_cards.filter((x) => x && typeof x === "object") : [])];
+    const todo = shown("todo")[0];
+    const more = [G.media.length ? sf("sf-media-card", { entities: G.media.slice(0, 8) }) : null, todo ? fam("sf-todo-card", { entity: todo }) : null, G.leaks.length ? sf("sf-alert-card", { leaks: G.leaks.slice(0, 20), hide_sim: true }) : null, ...(Array.isArray(c.home_cards) ? c.home_cards.filter((x) => x && typeof x === "object") : [])];
     if (more.some(Boolean)) s.push(sec(more));
     V.home = { title: tr("home.home"), path: "home", icon: "mdi:home-variant", sections: s };
   }
@@ -139,6 +144,8 @@ async function sfHomeBuild(c, hass) {
     const th = areas.filter((a) => a.climate), air = areas.filter((a) => a.temp && a.hum).slice(0, 8), s = [];
     if (th.length) s.push(sec([sf("sf-climate-card", { rooms: th.map((a) => ({ name: a.name, climate: a.climate, ...(a.temp ? { temp: a.temp } : {}), ...(a.hum ? { hum: a.hum } : {}) })) }, full)], 2));
     if (air.length && weather) s.push(sec([sf("sf-air-card", { weather, rooms: air.map((a) => ({ name: a.name, temperature: a.temp, humidity: a.hum })) })]));
+    const fans = shown("fan").slice(0, 4).map((id) => fam("sf-fan-card", { entity: id })).filter(Boolean);
+    if (fans.length) s.push(sec(fans));
     if (s.length) V.climate = { title: tr("home.climate"), path: "climate", icon: "mdi:thermometer", sections: s };
   }
   // --- Energy: live flow when the powers are given, and the report from the Energy dashboard settings (or `report:`).
@@ -149,6 +156,10 @@ async function sfHomeBuild(c, hass) {
     let rep = c.report && typeof c.report === "object" ? { ...c.report } : null;
     if (!rep) rep = await sfHomeEnergyReport(hass, states, name);
     if (rep && (SF_EID.test(String(rep.grid || "")) || SF_EID.test(String(rep.solar || "")))) s.push(sec([sf("sf-report-card", rep, full)], 2));
+    // a solar forecast sensor (Forecast.Solar, Open-Meteo Solar Forecast…) carries its curve in a `watts` attribute
+    const fc = (re) => shown("sensor").find((id) => re.test(id) && !/remaining/.test(id) && states[id].attributes && states[id].attributes.watts && typeof states[id].attributes.watts === "object");
+    const today = fc(/today/), hz = today ? fam("sf-horizon-card", { forecast: today, ...(fc(/tomorrow/) ? { forecast_tomorrow: fc(/tomorrow/) } : {}) }) : null;
+    if (hz) s.push(sec([hz]));
     if (s.length) V.energy = { title: tr("home.energy"), path: "energy", icon: "mdi:lightning-bolt", sections: s };
   }
   // --- Security: cameras, what opened and when.
@@ -156,10 +167,12 @@ async function sfHomeBuild(c, hass) {
     const s = [], watch = [...(G.alarm ? [G.alarm] : []), ...G.locks, ...G.openings].slice(0, 16);
     if (G.cameras.length) s.push(sec([sf("sf-camera-card", { cameras: G.cameras.slice(0, 6).map((x) => ({ entity: x, name: name(x) })) }, full)], 2));
     if (watch.length) s.push(sec([sf("sf-timeline-card", { hours: 24, entities: watch })]));
+    const tr2 = watch.length ? fam("sf-trace-card", { hours: 24, entities: watch }) : null;   // who opened, locked or armed it
+    if (tr2) s.push(sec([tr2]));
     if (s.length) V.security = { title: tr("home.security"), path: "security", icon: "mdi:shield-home", sections: s };
   }
   // --- System: sensor batteries and automations.
-  V.system = { title: tr("home.system"), path: "system", icon: "mdi:cog-outline", sections: [sec([sf("sf-cells-card", {})]), sec([sf("sf-automations-card", {})])] };
+  V.system = { title: tr("home.system"), path: "system", icon: "mdi:cog-outline", sections: [sec([sf("sf-cells-card", {}), fam("sf-heartbeat-card", { scan_unavailable: true })]), sec([sf("sf-automations-card", {}), fam("sf-copilot-card", {})])] };
   const order = sfHomeList(c.views).length ? sfHomeList(c.views) : ["home", "rooms", "climate", "energy", "security", "system"];
   const views = order.map((k) => V[k]).filter(Boolean).map((v) => ({ type: "sections", max_columns: 4, ...v }));
   if (Array.isArray(c.extra_views)) views.push(...c.extra_views.filter((x) => x && typeof x === "object"));

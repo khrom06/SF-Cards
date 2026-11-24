@@ -1518,6 +1518,22 @@ __SF.SF_HOOK.tr = (lang, key) => {
           const t3 = collect(await Strat.generate({ views: ["rooms"] }, mkf({ null: { floor_id: "null", name: "Null", level: 0 } })), (x) => x.type === "heading"); if (t3.length) fail("strategy: no floor title for rooms whose floor_id is null or missing");
           const bad = HASS({ "light.la": { state: "on", attributes: null } }, "en"); const nb = await Strat.generate({ views: ["lights"] }, { ...mkf({}), states: bad.states }); if (!nb.views.length) fail("strategy: a state with null attributes must not break the lights view"); }
       }
+      // SF family: the other repositories' cards are added only when their tag is defined; family: false leaves them out.
+      {
+        const tags = ["sf-heartbeat-card", "sf-trace-card", "sf-horizon-card", "sf-fan-card", "sf-todo-card", "sf-copilot-card"];
+        const before = await Strat.generate({}, hs); if (collect(before, (x) => typeof x.type === "string" && tags.includes(x.type.slice(7))).length) fail("family: nothing is added while the cards are not installed");
+        for (const t of tags) if (!customElements.get(t)) customElements.define(t, class extends HTMLElement {});
+        const stF = { ...st, "fan.ceiling": S("off"), "fan.hidden": S("off"), "todo.shopping": S("2"), "sensor.energy_production_today": S(12, { watts: { "2026-11-24T12:00:00": 900 } }), "sensor.energy_production_tomorrow": S(10, { watts: {} }), "sensor.energy_production_today_remaining": S(3, { watts: {} }) };
+        const hF = { ...hs, states: withIds(stF), entities: { ...hs.entities, "fan.hidden": { entity_id: "fan.hidden", hidden: true } } };
+        const fd = await Strat.generate({}, hF), got = (t) => collect(fd, (x) => x.type === "custom:" + t);
+        if (got("sf-heartbeat-card").length !== 1 || got("sf-copilot-card").length !== 1) fail("family: heartbeat and copilot cards on the system view");
+        const trc = got("sf-trace-card"); if (trc.length !== 1 || !trc[0].entities.includes("binary_sensor.rm_win")) fail(`family: trace card on the security view: ${JSON.stringify(trc)}`);
+        const hz = got("sf-horizon-card"); if (hz.length !== 1 || hz[0].forecast !== "sensor.energy_production_today" || hz[0].forecast_tomorrow !== "sensor.energy_production_tomorrow") fail(`family: horizon card from the forecast sensors: ${JSON.stringify(hz)}`);
+        const fn = got("sf-fan-card").map((x) => x.entity); if (fn.join() !== "fan.ceiling") fail(`family: one fan card per visible fan: ${fn}`);
+        if (got("sf-todo-card").map((x) => x.entity).join() !== "todo.shopping") fail("family: to-do card on the home view");
+        const off = await Strat.generate({ family: false }, hF); if (collect(off, (x) => typeof x.type === "string" && tags.includes(x.type.slice(7))).length) fail("family: family: false leaves them out");
+        const th = await Strat.generate({ theme: "light", look: "calm" }, hF), hb = collect(th, (x) => x.type === "custom:sf-heartbeat-card")[0]; if (!hb || hb.theme !== "light" || "look" in hb) fail("family: only the theme is passed on");
+      }
       for (const bad of [[null, null], [undefined, {}], ["x", { states: {} }], [{ areas: 5, views: 7, energy: "x", report: [] }, { states: { "light.a": { state: "on", attributes: {} } }, callWS: async () => { throw new Error("no energy"); } }], [{}, { states: null, areas: null }]]) {
         try { const r = await Strat.generate(bad[0], bad[1]); if (!r || !Array.isArray(r.views) || !r.views.length) fail("strategy: must always return at least one view"); } catch (err) { fail("strategy: generate() threw: " + err.message); } }
     }
