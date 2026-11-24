@@ -302,12 +302,14 @@ class SfNsCard extends SfBase {
     if (el) el.textContent = `${p(d.getHours())}:${p(d.getMinutes())}`;
     if (this._mode !== this.mode() || this._linkKey !== this._link().key) this._schedule(); }
   // A wall panel is looked at from across the room: when it stops receiving data it must say so, instead of showing old values as if
-  // they were live. "lost": Home Assistant reports the connection as closed. "stale": no new state for `stale_minutes` (default 15;
-  // 0 turns the check off) although the connection looks open. The banner gives the age of the data, refreshed every minute.
+  // they were live. "lost": Home Assistant has reported the connection as closed for 30 s or more (a reconnection after a tablet wakes up
+  // takes a few seconds and must not flash a banner). "stale": no new state for `stale_minutes` although the connection looks open; off
+  // unless set (a quiet house can go 15 minutes without any change at night). The banner gives the age of the data, refreshed every minute.
   _link() {
-    const h = this._hass, lim = Number(this._config && this._config.stale_minutes), max = Number.isFinite(lim) && lim >= 0 ? lim : 15;
-    const age = this._seen ? Math.max(0, Math.floor((this.now().getTime() - this._seen) / 60000)) : 0;
-    const kind = h && h.connected === false ? "lost" : max > 0 && this._seen && age >= max ? "stale" : "";
+    const h = this._hass, lim = Number(this._config && this._config.stale_minutes), max = Number.isFinite(lim) && lim > 0 ? lim : 0, now = this.now().getTime();
+    if (h && h.connected === false) { if (!this._lostSince) this._lostSince = now; } else this._lostSince = 0;
+    const age = this._seen ? Math.max(0, Math.floor((now - this._seen) / 60000)) : 0;
+    const kind = this._lostSince && now - this._lostSince >= 30000 ? "lost" : max > 0 && this._seen && age >= max ? "stale" : "";
     return { kind, age, key: kind ? `${kind}:${age}` : "" };
   }
   linkBanner() {

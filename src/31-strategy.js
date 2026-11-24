@@ -87,9 +87,10 @@ async function sfHomeBuild(c, hass) {
   const tr = (k) => sfTr(sfLang(hass), k), { states, ents, ex, G, LC, reg, want, areas, name } = sfHomeScan(c, hass);
   const common = {}; for (const k of ["theme", "look", "accent"]) if (typeof c[k] === "string" && c[k]) common[k] = c[k];
   const sf = (tag, cfg, grid) => ({ type: `custom:${tag}`, ...common, ...cfg, ...(grid ? { grid_options: grid } : {}) });
-  // The cards of the other SF repositories (SF Heartbeat, Trace, Horizon, Controls, Copilot) are added where they fit, only when they are
-  // installed: their tag is looked up, nothing is imported or requested. `family: false` leaves them out.
-  const fam = (tag, cfg) => (c.family !== false && typeof customElements !== "undefined" && customElements.get(tag) ? { type: "custom:" + tag, ...(common.theme ? { theme: common.theme } : {}), ...cfg } : null);
+  // With `family: true`, the cards of the other SF repositories (SF Heartbeat, Trace, Horizon, Controls, Copilot) are added where they fit,
+  // only when they are installed: their tag is looked up, nothing is imported or requested. Off by default, so an existing automatic
+  // dashboard never changes on its own when one of them gets installed.
+  const fam = (tag, cfg) => (c.family === true && typeof customElements !== "undefined" && customElements.get(tag) ? { type: "custom:" + tag, ...(common.theme ? { theme: common.theme } : {}), ...cfg } : null);
   const shown = (dom) => Object.keys(states).filter((id) => id.startsWith(dom + ".") && SF_EID.test(id) && !ex.has(id) && !(ents[id] && (ents[id].hidden || ents[id].entity_category))).sort();
   const head = (text, icon) => ({ type: "heading", heading: text, heading_style: "title", icon });
   const full = { columns: "full" }, roomEx = ex.size ? { exclude: [...ex].filter((x) => SF_EID.test(x)) } : {};

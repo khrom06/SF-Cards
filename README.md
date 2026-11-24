@@ -190,13 +190,13 @@ strategy:
   home_cards:                                # your own cards, added to the home view
     - type: custom:sf-vehicles-card
       cars: [{ name: Car, soc: sensor.car_battery }]
-  family: false                              # leave out the other SF cards (see below), even when they are installed
+  family: true                               # add the other SF cards you installed (see below)
   extra_views:                               # your own views, after the generated ones
     - title: Garden
       cards: []
 ```
 
-**Other SF cards, when installed.** If you also installed cards of [the SF family](#the-sf-family), the automatic dashboard puts them where they fit: SF Heartbeat (silent sensors) and SF Copilot (automations to propose) in the System view, SF Trace (who opened, locked or armed it) in the Security view, SF Horizon in the Energy view when a solar forecast sensor exists, one SF Controls fan card per fan and its to-do card on the Home view. Nothing changes if they are not installed; `family: false` leaves them out.
+**Other SF cards, on request.** With `family: true`, if you also installed cards of [the SF family](#the-sf-family), the automatic dashboard puts them where they fit: SF Heartbeat (silent sensors) and SF Copilot (automations to propose) in the System view, SF Trace (who opened, locked or armed it) in the Security view, SF Horizon in the Energy view when a solar forecast sensor exists, one SF Controls fan card per fan and its to-do card on the Home view. Off by default, so an existing automatic dashboard never changes by itself when you install one of them.
 
 To go further than the options allow, use **⋮ → Take control**: Home Assistant turns the generated dashboard into a normal, editable one (it then stops following the house).
 
@@ -1034,7 +1034,7 @@ Also: one alert line when something is wrong (leak, open lock, fridge too warm),
 
 **Kiosk mode.** Set `hide_header: true` to hide the Home Assistant header on that dashboard (add `?header=1` to the URL to bring it back). Use a dashboard view of type **panel** with this card alone.
 
-**Data that stopped coming.** A panel on a wall is read from across the room, so it never shows old values as if they were live: when Home Assistant reports the connection as lost, or when no new state arrived for `stale_minutes` (default `15`; `0` turns it off), a banner says so with the age of the data ("No update for 18 min").
+**Data that stopped coming.** A panel on a wall is read from across the room, so it never shows old values as if they were live: when Home Assistant has reported the connection as lost for 30 seconds, a banner says so with the age of the data. Add `stale_minutes: 15` to also be warned when no new state arrived for that long while the connection looks open ("No update for 18 min"); it is off by default because a quiet house can go that long without any change at night.
 
 ```yaml
 type: custom:sf-ns-card
@@ -1093,7 +1093,7 @@ The evening tiles (`tiles:`, up to 6) and this `layout` option were both verifie
 
 ## The SF family
 
-Separate repositories in the same look, each installed on its own from the Marketplace. They sit side by side with SF Cards on a dashboard, and the [automatic dashboard](#automatic-dashboard) adds them where they fit when they are installed.
+Separate repositories in the same look, each installed on its own from the Marketplace. They sit side by side with SF Cards on a dashboard, and the [automatic dashboard](#automatic-dashboard) adds them where they fit with `family: true`.
 
 | Repository | What it answers |
 |---|---|

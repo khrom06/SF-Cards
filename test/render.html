@@ -762,11 +762,16 @@ __SF.SF_HOOK.tr = (lang, key) => {
     { const st = { ...base, "input_select.ns_mode": S("Jour") }, el = await mk(NS, st, "en");
       if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: no connection banner while data comes in");
       const h0 = el._hass; el.hass = { ...h0, connected: false }; await wait(60);
+      if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: a reconnection of a few seconds shows no banner");
+      el._lostSince = el.now().getTime() - 31000; el._tick(); await wait(60);
       const lb = el.shadowRoot.querySelector(".link.lost"); if (!lb || !/Connection to Home Assistant lost · data from 0 min ago/.test(lb.textContent) || lb.getAttribute("role") !== "status") fail("sf-ns-card: 'connection lost' banner expected: " + (lb ? lb.textContent : "none"));
       el._seen = el.now().getTime() - 20 * 60000; el.hass = { ...el._hass, connected: true }; el._tick(); await wait(60);
-      const ls = el.shadowRoot.querySelector(".link.stale"); if (!ls || !/No update for 20 min/.test(ls.textContent)) fail("sf-ns-card: 'no update for 20 min' banner expected: " + (ls ? ls.textContent : text(el).slice(0, 80)));
-      el.hass = { ...HASS(st, "en") }; await wait(60); if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: new states clear the banner");
-      el.remove();
+      if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: without stale_minutes, a quiet house shows no banner");
+      el.remove(); const es = await mk({ ...NS, stale_minutes: 15 }, st, "en"); es._seen = es.now().getTime() - 20 * 60000; es._tick(); await wait(60);
+      const el2 = es;
+      const ls = el2.shadowRoot.querySelector(".link.stale"); if (!ls || !/No update for 20 min/.test(ls.textContent)) fail("sf-ns-card: 'no update for 20 min' banner expected with stale_minutes: 15: " + (ls ? ls.textContent : text(el2).slice(0, 80)));
+      el2.hass = { ...HASS(st, "en") }; await wait(60); if (el2.shadowRoot.querySelector(".link")) fail("sf-ns-card: new states clear the banner");
+      el2.remove();
       const e0 = await mk({ ...NS, stale_minutes: 0 }, st, "en"); e0._seen = e0.now().getTime() - 600 * 60000; e0._tick(); await wait(60); if (e0.shadowRoot.querySelector(".link")) fail("sf-ns-card: stale_minutes: 0 turns the check off"); e0.remove();
       const e5 = await mk({ ...NS, stale_minutes: 5 }, st, "fr"); e5._seen = e5.now().getTime() - 6 * 60000; e5._tick(); await wait(60); if (!/Aucune mise à jour depuis 6 min/.test(text(e5))) fail("sf-ns-card: stale_minutes and the French text"); e5.remove(); }
     // vacuum popup: Home Assistant's own translation of the state, never the raw state when Home Assistant knows better
@@ -1568,14 +1573,15 @@ __SF.SF_HOOK.tr = (lang, key) => {
         for (const t of tags) if (!customElements.get(t)) customElements.define(t, class extends HTMLElement {});
         const stF = { ...st, "fan.ceiling": S("off"), "fan.hidden": S("off"), "todo.shopping": S("2"), "sensor.energy_production_today": S(12, { watts: { "2026-11-24T12:00:00": 900 } }), "sensor.energy_production_tomorrow": S(10, { watts: {} }), "sensor.energy_production_today_remaining": S(3, { watts: {} }) };
         const hF = { ...hs, states: withIds(stF), entities: { ...hs.entities, "fan.hidden": { entity_id: "fan.hidden", hidden: true } } };
-        const fd = await Strat.generate({}, hF), got = (t) => collect(fd, (x) => x.type === "custom:" + t);
+        const def = await Strat.generate({}, hF); if (collect(def, (x) => typeof x.type === "string" && tags.includes(x.type.slice(7))).length) fail("family: off by default, even when installed (an existing dashboard never changes on its own)");
+        const fd = await Strat.generate({ family: true }, hF), got = (t) => collect(fd, (x) => x.type === "custom:" + t);
         if (got("sf-heartbeat-card").length !== 1 || got("sf-copilot-card").length !== 1) fail("family: heartbeat and copilot cards on the system view");
         const trc = got("sf-trace-card"); if (trc.length !== 1 || !trc[0].entities.includes("binary_sensor.rm_win")) fail(`family: trace card on the security view: ${JSON.stringify(trc)}`);
         const hz = got("sf-horizon-card"); if (hz.length !== 1 || hz[0].forecast !== "sensor.energy_production_today" || hz[0].forecast_tomorrow !== "sensor.energy_production_tomorrow") fail(`family: horizon card from the forecast sensors: ${JSON.stringify(hz)}`);
         const fn = got("sf-fan-card").map((x) => x.entity); if (fn.join() !== "fan.ceiling") fail(`family: one fan card per visible fan: ${fn}`);
         if (got("sf-todo-card").map((x) => x.entity).join() !== "todo.shopping") fail("family: to-do card on the home view");
         const off = await Strat.generate({ family: false }, hF); if (collect(off, (x) => typeof x.type === "string" && tags.includes(x.type.slice(7))).length) fail("family: family: false leaves them out");
-        const th = await Strat.generate({ theme: "light", look: "calm" }, hF), hb = collect(th, (x) => x.type === "custom:sf-heartbeat-card")[0]; if (!hb || hb.theme !== "light" || "look" in hb) fail("family: only the theme is passed on");
+        const th = await Strat.generate({ family: true, theme: "light", look: "calm" }, hF), hb = collect(th, (x) => x.type === "custom:sf-heartbeat-card")[0]; if (!hb || hb.theme !== "light" || "look" in hb) fail("family: only the theme is passed on");
       }
       for (const bad of [[null, null], [undefined, {}], ["x", { states: {} }], [{ areas: 5, views: 7, energy: "x", report: [] }, { states: { "light.a": { state: "on", attributes: {} } }, callWS: async () => { throw new Error("no energy"); } }], [{}, { states: null, areas: null }]]) {
         try { const r = await Strat.generate(bad[0], bad[1]); if (!r || !Array.isArray(r.views) || !r.views.length) fail("strategy: must always return at least one view"); } catch (err) { fail("strategy: generate() threw: " + err.message); } }
