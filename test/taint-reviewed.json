@@ -2922,12 +2922,12 @@
    "benignSuite": true
   },
   {
-   "key": "29j-report.js|this.icon(\"mdi:image-outline\", 16)#1",
+   "key": "29j-report.js|this.icon(sfCanShareImage() ? \"mdi:share-variant\" : \"mdi:image-outline\", 16)#1",
    "ctx": "text",
    "benignSuite": true
   },
   {
-   "key": "29j-report.js|this.esc(this.t(\"report.export\"))#1",
+   "key": "29j-report.js|this.esc(this.t(sfCanShareImage() ? \"report.share\" : \"report.export\"))#1",
    "ctx": "text",
    "benignSuite": true
   },
@@ -2997,14 +2997,14 @@
    "benignSuite": true
   },
   {
-   "key": "29j-report.js|this._period()#2",
+   "key": "31-strategy.js|from.stat_energy_from#1",
    "ctx": "text",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
-   "key": "29j-report.js|new Date().toISOString().slice(0, 10)#1",
+   "key": "31-strategy.js|from.stat_energy_from#2",
    "ctx": "text",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
    "key": "31-strategy.js|tag#1",
@@ -3018,16 +3018,6 @@
   },
   {
    "key": "31-strategy.js|a.name#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "31-strategy.js|from.stat_energy_from#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "31-strategy.js|from.stat_energy_from#2",
    "ctx": "text",
    "benignSuite": true
   },

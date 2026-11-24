@@ -1412,6 +1412,26 @@ __SF.SF_HOOK.tr = (lang, key) => {
       const yb = document.createElement("sf-report-card"); yb.setConfig({ grid: "sensor.rp_grid", solar: "sensor.rp_solar", period: "year" }); document.body.appendChild(yb); yb.hass = big; await wait(80);
       const yv = [...yb.shadowRoot.querySelectorAll(".kpi .val")].map((x) => x.textContent); if (!/^18[.,]0 MWh$/.test(yv[0] || "") || !/^3600 kWh$/.test(yv[1] || "")) fail("report: 18 000 kWh (grid 14 400 + solar 3600) is shown as 18.0 MWh, 3600 kWh stays in kWh: " + yv.join(" | ")); yb.remove(); }
     if (![...el.shadowRoot.querySelectorAll("[data-per],[data-nav],[data-export]")].every((x) => x.getAttribute("role") === "button")) fail("report: its buttons must be keyboard buttons");
+    // Share: with the Web Share API the image goes to the share sheet; a cancelled sheet does nothing; any other failure downloads it.
+    { const nav = window.navigator, had = { share: nav.share, canShare: nav.canShare }, clicks = [], shared = [], origClick = HTMLAnchorElement.prototype.click;
+      HTMLAnchorElement.prototype.click = function () { clicks.push(this.download); };
+      const setNav = (share, canShare) => { Object.defineProperty(nav, "share", { value: share, configurable: true, writable: true }); Object.defineProperty(nav, "canShare", { value: canShare, configurable: true, writable: true }); };
+      try {
+        if (el.shadowRoot.querySelector("[data-export]").textContent.trim() !== "Export as an image") fail("report: without the Web Share API the button exports");
+        setNav(async (d) => { shared.push(d); }, (d) => !!(d && d.files && d.files[0] instanceof File));
+        el._lastHtml = null; el.hass = { ...hr }; await wait(60);
+        if (!/Share the image/.test(el.shadowRoot.querySelector("[data-export]").textContent)) fail("report: with the Web Share API the button says Share");
+        if (!el._draw()) fail("report: no image to share (data not loaded)");
+        el._export(); for (let i = 0; i < 30 && !shared.length; i++) await wait(100);
+        if (shared.length !== 1 || !(shared[0].files[0] instanceof File) || shared[0].files[0].type !== "image/png" || !/^sf-report-year-\d{4}-\d\d-\d\d\.png$/.test(shared[0].files[0].name) || clicks.length) fail("report: the PNG goes to the share sheet, not to a download: " + JSON.stringify([shared.length, clicks]));
+        setNav(async () => { const e = new Error("closed"); e.name = "AbortError"; throw e; }, () => true); el._export(); await wait(400);
+        if (clicks.length) fail("report: closing the share sheet must not download the image");
+        setNav(async () => { throw new Error("denied"); }, () => true); el._export(); await wait(400);
+        if (clicks.length !== 1) fail("report: a failed share falls back to the download");
+        setNav(() => { throw new Error("boom"); }, () => { throw new Error("boom"); }); el._lastHtml = null; el.hass = { ...hr }; await wait(60);
+        if (el.shadowRoot.querySelector("[data-export]").textContent.trim() !== "Export as an image") fail("report: a throwing canShare means no sharing");
+      } finally { HTMLAnchorElement.prototype.click = origClick; setNav(had.share, had.canShare); if (had.share === undefined) { delete nav.share; delete nav.canShare; } }
+    }
     el.remove();
     let bad = 0; const hb = { ...HASS(base, "en"), callWS: async () => { bad++; throw new Error("no recorder"); } };
     const e2 = document.createElement("sf-report-card"); e2.setConfig({ grid: "sensor.rp_grid" }); document.body.appendChild(e2); e2.hass = hb; await wait(40); for (let i = 0; i < 30; i++) e2.hass = hb; await wait(40);

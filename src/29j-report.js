@@ -15,6 +15,14 @@
  * currency: "€"
  * devices: [{ name: Car, entity: sensor.car_energy, icon: mdi:car-electric }]   # kWh counters
  */
+// Can this browser hand an image file to the system share sheet? (Web Share API level 2; false in most desktop browsers and in old web views.)
+function sfCanShareImage(file) {
+  try {
+    if (typeof navigator === "undefined" || typeof navigator.share !== "function" || typeof navigator.canShare !== "function") return false;
+    const f = file || new File([new Uint8Array(1)], "sf.png", { type: "image/png" });
+    return navigator.canShare({ files: [f] }) === true;
+  } catch (e) { return false; }
+}
 class SfReportCard extends SfBase {
   defaults() { return { period: "week", devices: [] }; }
   static getStubConfig() { return {}; }
@@ -154,7 +162,7 @@ class SfReportCard extends SfBase {
       <div class="bars" style="--bg:${dense ? 2 : 8}px">${bars}</div><div class="xl" style="--bg:${dense ? 2 : 8}px">${xl}</div>
       ${who ? `<div class="lbl" style="margin-bottom:6px">${this.esc(this.t("report.who"))}</div>${who}` : ""}
       ${M.hl.length ? `<div class="hl"><span class="lbl">${this.esc(this.t("report.hl_title"))}</span>${M.hl.map((x) => `<span>${this.esc(x)}</span>`).join("")}</div>` : ""}
-      <div class="ft grow"><span class="btn tile" data-i="5" data-export="1">${this.icon("mdi:image-outline", 16)}${this.esc(this.t("report.export"))}</span></div>`);
+      <div class="ft grow"><span class="btn tile" data-i="5" data-export="1">${this.icon(sfCanShareImage() ? "mdi:share-variant" : "mdi:image-outline", 16)}${this.esc(this.t(sfCanShareImage() ? "report.share" : "report.export"))}</span></div>`);
   }
   layoutKey(w) { return w < 600 ? 2 : 4; }
   afterRender() {
@@ -204,14 +212,24 @@ class SfReportCard extends SfBase {
     text("SF Cards · Home Assistant", W - P, H - 48, mono(16), col("dim"), "right");
     return cv;
   }
+  // On a phone (or any browser that can share files) the image goes to the system share sheet: messages, mail, social apps. Elsewhere, or
+  // if sharing fails for any reason other than the user closing the sheet, it is downloaded as before.
   _export() {
     try {
       const cv = this._draw(); if (!cv) return;
+      const fname = "sf-report-" + this._period() + "-" + new Date().toISOString().slice(0, 10) + ".png";
       cv.toBlob((blob) => {
         if (!blob) return;
-        const url = URL.createObjectURL(blob), a = document.createElement("a");
-        a.href = url; a.download = `sf-report-${this._period()}-${new Date().toISOString().slice(0, 10)}.png`; a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        const save = () => {
+          const url = URL.createObjectURL(blob), a = document.createElement("a");
+          a.href = url; a.download = fname; a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        };
+        let file = null;
+        try { file = typeof File === "function" ? new File([blob], fname, { type: "image/png" }) : null; } catch (e) { file = null; }
+        if (file && sfCanShareImage(file)) {
+          navigator.share({ files: [file], title: this._title() }).catch((err) => { if (!err || err.name !== "AbortError") save(); });
+        } else save();
       }, "image/png");
     } catch (e) { /* drawing is a convenience: a failure must never break the card */ }
   }
