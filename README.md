@@ -1,96 +1,71 @@
 # SF Cards
 
-**Sci‑fi "HUD" cards for Home Assistant** — a set of 30 Lovelace cards with a glowing, cinematic look (or a calm one, your choice): an animated energy core, room dials, a welcome bridge, a full‑frame red alert, popup tiles made for phones… a **dashboard that builds itself from your rooms**, and a **visual editor for every card**, so nobody has to write YAML.
+**A sci‑fi "HUD" look for Home Assistant — and a whole dashboard in two clicks.** 30 cards (energy flow, rooms, climate, weather, agenda, media, alerts, wall panels…) with a glowing, cinematic style or a calm one, a visual editor for every card and 11 languages. Nobody has to write YAML.
 
 [![Marketplace](https://img.shields.io/badge/Marketplace%20%2F%20HACS-default-41BDF5.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Languages](https://img.shields.io/badge/languages-11-00e5ff)
 [![Live demo](https://img.shields.io/badge/live-demo-2bff88)](https://khrom06.github.io/SF-Cards/)
 [![Ideas and feedback](https://img.shields.io/badge/ideas%20%26%20feedback-share%20yours-ffb300)](https://github.com/khrom06/SF-Cards/discussions/categories/ideas)
-[![Add to HACS](https://img.shields.io/badge/HACS-open%20in%20HACS-00e5ff)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 
 <p align="center">
   <img src="assets/anim/reactor.webp" alt="Energy flow card, animated" width="780">
 </p>
 
 > **▶ [Try every card live, with fake data](https://khrom06.github.io/SF-Cards/)** — no install, 11 languages, light / dark.
->
-> **💬 [Share your ideas, wishes and criticism](https://github.com/khrom06/SF-Cards/discussions/categories/ideas)** — propose a card or an option, vote (👍) for the ideas you want most, or just tell us what is confusing or missing. What you post here decides what comes next.
 
-> **🪄 New companion: [SF Copilot](https://github.com/khrom06/SF-Copilot)** — finds what you keep doing by hand and proposes the automation, with a dry run first. Local, no cloud, no AI. [Install it with HACS](https://github.com/khrom06/SF-Copilot#installation) · animated preview inside.
+## Two clicks, a whole dashboard
 
-### New in 1.21: where the battery's power comes from, and how much of the house it covers
+1. Install SF Cards from the **Marketplace** — [Installation](#installation).
+2. **Settings → Dashboards → Add dashboard → SF · Home (automatic)**.
 
-The battery card and the energy card now tell **whether a charging battery is fed by the sun or by the grid**, and **how much of the house a discharging battery covers** — see [sf-battery-card](#sf-battery-card).
-
-### 1.20: a dashboard that builds itself, rooms, daily life and a calm look
+Home Assistant builds it from your areas: a welcome banner, one tile per room (tap = the room in a popup), climate, energy, security and system views. A new lamp or a new room shows up by itself. [Options and details](#automatic-dashboard).
 
 <p align="center">
-  <img src="assets/anim/room.webp" alt="Room card: presence detected, lights turning on one by one, shutters opening" width="330"> <img src="assets/anim/report.webp" alt="Energy report card: this week, the week before, the month and the year" width="460">
-</p>
-<p align="center">
-  <img src="assets/anim/media.webp" alt="Media card: track playing, pause, next track, volume" width="260"> <img src="assets/anim/weather.webp" alt="Weather card: clock, current weather, next hours and days" width="260"> <img src="assets/anim/agenda.webp" alt="Agenda card: timers counting down, waste collection chip, next events" width="260">
+  <img src="assets/anim/room.webp" alt="Room card: presence detected, lights turning on one by one, shutters opening" width="330"> <img src="assets/anim/auto-lights.gif" alt="The Lights view of the automatic dashboard: All off asks to confirm, then every light goes off" width="440">
 </p>
 
-- **[Automatic dashboard](#automatic-dashboard)** — two lines of YAML and Home Assistant builds a whole dashboard of SF cards from your areas: rooms, climate, energy, security, system. A new lamp or room shows up by itself.
-- **[Room](#sf-room-card)** — *"What is going on in the living room?"* Give it a Home Assistant area: it finds the temperature, presence, lights, covers and devices itself. Three sizes, from a tile to a full panel; the tile opens the room in a popup.
-- **[Media](#sf-media-card)**, **[Weather and clock](#sf-weather-card)**, **[Agenda](#sf-agenda-card)** — the everyday cards: what is playing and the remote, the forecast hour by hour and day by day, timers, waste collection and the next events.
-- **[Energy report](#sf-report-card)** — *"How was the week?"* Consumption, solar, autonomy and cost against the week before, who consumes, three facts worth knowing, and an image to share.
-- **[Calm look and accent colours](#look-and-accent)** — `look: calm` removes the glow, brackets and scan lines; `accent: amber` (or any colour) recolours a card. For one card or the whole dashboard.
+## Or pick the cards you want
 
-### From 1.19: four cards that answer everyday questions
+Edit a dashboard → **Add card** → type **SF**. Each card arrives **already filled with your own entities** — your rooms and their thermostats, your lights, your weather, your calendars, your Energy dashboard counters — and every option is in the visual editor.
 
 <p align="center">
-  <img src="assets/anim/upkeep.webp" alt="Upkeep card: when each filter, brush or consumable will be due" width="390"> <img src="assets/anim/air.webp" alt="Fresh air card: should I open the windows, room by room" width="390">
+  <img src="assets/anim/report.webp" alt="Energy report: the week against the week before, who consumes, an image to share" width="400"> <img src="assets/anim/air.webp" alt="Fresh air: should I open the windows, room by room" width="380">
 </p>
 <p align="center">
-  <img src="assets/anim/automations.webp" alt="Automations card: which automations are broken, silent or running" width="390"> <img src="assets/anim/cycles.webp" alt="Appliance cycles card: washing machine and dishwasher cycles, time left and cost" width="390">
+  <img src="assets/anim/weather.webp" alt="Weather and clock" width="255"> <img src="assets/anim/agenda.webp" alt="Agenda: timers, waste collection, next events" width="255"> <img src="assets/anim/media.webp" alt="Media: what is playing and the remote" width="255">
+</p>
+<p align="center">
+  <img src="assets/anim/upkeep.webp" alt="Upkeep: when each filter or consumable will be due" width="380"> <img src="assets/anim/cycles.webp" alt="Appliance cycles: time left and cost of the washing machine" width="380">
 </p>
 
-- **[Upkeep](#sf-upkeep-card)** — *"When do I change that filter?"* Learns how fast each filter, brush or consumable wears from its own history and predicts the date.
-- **[Fresh air](#sf-air-card)** — *"Should I open the windows?"* One verdict per room from indoor / outdoor absolute humidity, CO₂, PM2.5, rain and wind, plus the best hour; window sensors confirm you are airing, or tell you to close.
-- **[Automations](#sf-automations-card)** — *"Is everything still working?"* Broken, failing, silent and disabled automations at a glance, with a 24 h pulse of runs.
-- **[Appliance cycles](#sf-cycles-card)** — *"When will the washing machine be done?"* Detects cycles from a power plug, estimates the time left from past cycles and shows the cost.
-
-### A dashboard for wall panels (square, landscape or portrait: NSPanel 480×320, NSPanel Pro 480×480, 120‑type 1334×750, wall tablets)
-
-`sf-ns-card` fills a whole panel — **square, landscape or portrait** — and **changes with the time of day**:
+On a **phone**, a launcher turns any card into a tile that opens in a bottom sheet ([see it](#on-a-phone)). On a **wall panel or a tablet**, `sf-ns-card` fills the screen and changes with the time of day — and says so when its data stops coming ([see it](#sf-ns-card)).
 
 <p align="center">
-  <img src="assets/ns-morning.png" alt="Morning" width="230"> <img src="assets/ns-day.png" alt="Day" width="230"> <img src="assets/ns-evening.png" alt="Evening" width="230"> <img src="assets/ns-night.png" alt="Night" width="230">
+  <img src="assets/ns-morning.png" alt="Wall panel, morning" width="200"> <img src="assets/ns-day.png" alt="Wall panel, day" width="200"> <img src="assets/ns-evening.png" alt="Wall panel, evening" width="200"> <img src="assets/ns-night.png" alt="Wall panel, night" width="200">
 </p>
-
-Shown here on the square 480×480 NSPanel Pro; it is sized in `vmin`, so it also fills rectangular and larger screens (tested sizes in the [card's section](#sf-ns-card)). The other cards re‑flow from phone to wide desktop dashboards.
-
-[Jump to the card](#sf-ns-card)
-
-> **Made by Claude.** This whole project — the cards, the visual editors, the translations, the documentation and this README — was designed and written by **Claude** (Anthropic's AI, working through Claude Code) from the ideas, requests and feedback of **khrom06**, plus a few ideas of Claude's own. khrom06 steered every design decision, tested everything on a real Home Assistant installation and kept asking for "one more thing" until it looked right. See [Credits](#credits).
 
 ---
 
 ## Contents
 
-- [Features](#features)
-- [Installation](#installation) (Marketplace / HACS or manual)
-- [The cards](#the-cards) · [Automatic dashboard](#automatic-dashboard)
-- [Visual editor](#visual-editor)
-- [Languages](#languages) · [Light theme](#light-theme) · [Look and accent](#look-and-accent) · [Layout](#layout) · [Accessibility](#accessibility) · [Numbers](#numbers)
+- [Features](#features) · [Installation](#installation) (Marketplace / HACS or manual)
+- [The cards](#the-cards) · [Automatic dashboard](#automatic-dashboard) · [The SF family](#the-sf-family)
+- [Visual editor](#visual-editor) · [Languages](#languages) · [Light theme](#light-theme) · [Look and accent](#look-and-accent) · [Layout](#layout) · [Accessibility](#accessibility) · [Numbers](#numbers)
 - [Optional theme](#optional-theme) · [Requirements](#requirements) · [Security](#security) · [Development](#development)
-- [About HACS and Marketplace](#about-hacs-and-marketplace)
-- [Limitations](#limitations)
-- [Ideas and feedback](#ideas-and-feedback)
-- [Credits](#credits) · [License](#license)
+- [About HACS and Marketplace](#about-hacs-and-marketplace) · [Limitations](#limitations) · [Ideas and feedback](#ideas-and-feedback) · [Credits](#credits) · [License](#license)
 
 ## Features
 
 - **30 cards, one look** (neon, or `look: calm`) — cyan / amber / red / green neon on a deep‑blue background, Orbitron + B612 Mono fonts, corner brackets, scan lines, glow.
+- **Cards that arrive filled** — added from the card picker, a card already shows your own rooms, thermostats, lights, weather or Energy dashboard counters; the editor shows what was picked, and flags an entity that no longer exists.
 - **Visual editor for every card** — pick entities from drop‑downs, add / reorder / delete rooms, groups, tiles and devices with buttons. Advanced fields (service data, popup card…) stay editable as embedded YAML, and nothing you typed in YAML is ever lost by the editor.
 - **Made for phones** — `sf-launcher-card` turns any card into a summary tile that opens in a bottom‑sheet popup (the phone's Back button closes it, `#hash` deep links work) — [see it on a phone](#on-a-phone).
 - **Dynamic layouts** — the energy card re‑flows by itself for 2 or 12 devices, on a phone, a wall tablet or a wide desktop dashboard; idle devices can be hidden automatically and the number of displayed devices is capped.
 - **Eleven languages** — English, French, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese and Arabic (right-to-left), picked automatically from each user's Home Assistant profile (English for any other language).
 - **Light or dark** — dark neon by default; `theme: light` or `auto` (follows the Home Assistant theme) per card, or once for all cards with a CSS variable.
 - **Accessible** — keyboard and screen-reader friendly (real buttons, focus ring, Enter / Space), respects *reduce motion*, alert levels are spelled out, popups are proper dialogs.
-- **No dependencies, no external resources** — a single JavaScript file; the two fonts are embedded (SIL OFL).
+- **No dependencies, no external resources** — one JavaScript file plus one small file per extra language, loaded only by the people who use it; the two fonts are embedded (SIL OFL).
 - **Safe by design** — a missing, `unknown` or `unavailable` entity shows a grey "—" / "no data", never a fake "OK".
 
 ## Installation
@@ -117,7 +92,7 @@ resources:
 
 ### Option B — manual
 
-1. Download [`dist/sf-cards.js`](dist/sf-cards.js) and copy it to `/config/www/sf-cards.js`.
+1. Download `sf-cards.js` **and the nine `sf-cards-i18n-*.js` files** from the [latest release](https://github.com/khrom06/SF-Cards/releases/latest) (or from [`dist/`](dist)) and copy them all to `/config/www/`. The language files are small and only loaded by the people who use that language; without them the cards show English (French and English are inside `sf-cards.js`).
 2. **Settings → Dashboards → ⋮ → Resources → Add resource**: URL `/local/sf-cards.js`, type **JavaScript module**.
 3. Reload your browser.
 
@@ -164,7 +139,9 @@ Every card can be configured in the visual editor; the YAML below is just for re
 
 ### Automatic dashboard
 
-**A whole dashboard without placing a single card.** Create a dashboard (Settings → Dashboards → Add dashboard → *New dashboard from scratch*), open it, then **Edit → ⋮ → Raw configuration editor** and replace everything with:
+**A whole dashboard without placing a single card.** Go to **Settings → Dashboards → Add dashboard** and pick **SF · Home (automatic)** in the list. That is all.
+
+The same thing by hand (to add options): create a dashboard *from scratch*, open it, then **Edit → ⋮ → Raw configuration editor** and replace everything with:
 
 ```yaml
 strategy:
@@ -213,10 +190,13 @@ strategy:
   home_cards:                                # your own cards, added to the home view
     - type: custom:sf-vehicles-card
       cars: [{ name: Car, soc: sensor.car_battery }]
+  family: false                              # leave out the other SF cards (see below), even when they are installed
   extra_views:                               # your own views, after the generated ones
     - title: Garden
       cards: []
 ```
+
+**Other SF cards, when installed.** If you also installed cards of [the SF family](#the-sf-family), the automatic dashboard puts them where they fit: SF Heartbeat (silent sensors) and SF Copilot (automations to propose) in the System view, SF Trace (who opened, locked or armed it) in the Security view, SF Horizon in the Energy view when a solar forecast sensor exists, one SF Controls fan card per fan and its to-do card on the Home view. Nothing changes if they are not installed; `family: false` leaves them out.
 
 To go further than the options allow, use **⋮ → Take control**: Home Assistant turns the generated dashboard into a normal, editable one (it then stops following the house).
 
@@ -315,7 +295,7 @@ calendars:
 
 <img src="assets/anim/report.webp" alt="Energy report card, animated: week, previous week, month, year" width="560">
 
-**"How was the week?"** The energy report in plain words: consumption, solar used, autonomy and cost, each **compared with the period before**; one bar per day split into solar and grid, the heaviest day highlighted; who consumes; three facts worth knowing; and **Export as an image** (1080 × 1350, in the colours of your theme) to share or keep. Week (7 days), month (30 days) or year (12 months), with a button to go back in time.
+**"How was the week?"** The energy report in plain words: consumption, solar used, autonomy and cost, each **compared with the period before**; one bar per day split into solar and grid, the heaviest day highlighted; who consumes; three facts worth knowing; and **an image of the report** (1080 × 1350, in the colours of your theme) to keep or send: on a phone the button opens the system **share sheet** (messages, mail…), elsewhere it downloads the PNG. Week (7 days), month (30 days) or year (12 months), with a button to go back in time.
 
 It reads the **long-term statistics** Home Assistant already keeps for energy counters (the same sensors as the Energy dashboard): nothing to install, and years of history are available at once.
 
@@ -1040,6 +1020,8 @@ Also: one alert line when something is wrong (leak, open lock, fridge too warm),
 
 **Kiosk mode.** Set `hide_header: true` to hide the Home Assistant header on that dashboard (add `?header=1` to the URL to bring it back). Use a dashboard view of type **panel** with this card alone.
 
+**Data that stopped coming.** A panel on a wall is read from across the room, so it never shows old values as if they were live: when Home Assistant reports the connection as lost, or when no new state arrived for `stale_minutes` (default `15`; `0` turns it off), a banner says so with the age of the data ("No update for 18 min").
+
 ```yaml
 type: custom:sf-ns-card
 mode_entity: input_select.panel_mode      # optional
@@ -1095,6 +1077,19 @@ The evening tiles (`tiles:`, up to 6) and this `layout` option were both verifie
 
 <p align="center"><img src="assets/ns-evening.png" alt="Evening mode" width="300"></p>
 
+## The SF family
+
+Separate repositories in the same look, each installed on its own from the Marketplace. They sit side by side with SF Cards on a dashboard, and the [automatic dashboard](#automatic-dashboard) adds them where they fit when they are installed.
+
+| Repository | What it answers |
+|---|---|
+| [SF Copilot](https://github.com/khrom06/SF-Copilot) | *"What do I keep doing by hand?"* Finds your routines in the history and proposes the automation, with a dry run first. Local, no cloud, no AI. |
+| [SF Heartbeat](https://github.com/khrom06/SF-Heartbeat) | *"Which sensor went quiet?"* A sensor that keeps its last value for hours never turns `unavailable`: this card and its two blueprints catch it. |
+| [SF Trace](https://github.com/khrom06/SF-Trace) | *"Who or what changed that?"* The origin of each change: a person, an automation, a service, the device itself. |
+| [SF Horizon](https://github.com/khrom06/SF-Horizon) | *"When should I start the dishwasher?"* Solar forecast, off-peak windows and the best time to run a heavy load. |
+| [SF Controls](https://github.com/khrom06/SF-Controls) | A fan card, a bar gauge card and a to-do card. |
+| [SF Flux](https://github.com/khrom06/SF-Flux) | A blueprint that runs your big loads on your solar surplus (priorities, hysteresis, fail-safe). |
+
 ## Visual editor
 
 Edit a dashboard, open any SF card and switch to the **visual editor**:
@@ -1105,7 +1100,9 @@ Edit a dashboard, open any SF card and switch to the **visual editor**:
 - rarely used fields (service data, shortcuts…) are YAML boxes inside the form;
 - the editor changes the configuration in place and never drops a field it doesn't know;
 - **Fill from a device** — in the vehicle, charger and battery editors, pick a Home Assistant *device* and the empty fields are filled with its entities, found from their type (`device_class`, unit, name): battery level, range, power, plug, current… It is a **cautious** best guess: a field is only filled when exactly one entity matches or one matches the expected name (several candidates and no clear winner = left empty); it skips hidden entities, 12 V batteries, odometers, connectivity sensors and *pause / lock / schedule* switches; the sign of a battery's power is not guessed (check `invert`). It **never overwrites** a field you already filled, and a Home Assistant notification tells you how many fields were filled — always check the result. Needs Home Assistant's entity registry (`hass.entities`, Home Assistant 2023.3 or newer);
-- every card has a **Theme** field (dark / light / auto).
+- every card has a **Theme** field (dark / light / auto);
+- an entity id that **does not exist** in Home Assistant (renamed or removed: the usual reason for a card showing "no data") is named in the banner at the top of the editor;
+- a card added from the card picker **arrives filled** with entities of your home (found from your areas, device classes and Energy dashboard settings, like the automatic dashboard), so you start from your house instead of an empty form.
 - **Mandatory fields** are marked with a red bar and a red asterisk (for example the thermostat of a room, the camera of a camera entry). An amber banner at the top of the editor lists what is still missing, and a card with nothing useful to show displays **Card to complete** with the same list instead of an empty frame. The rules are lenient: only a card that would display nothing is flagged.
 
 ## Languages
@@ -1118,7 +1115,9 @@ Texts coming from your own configuration (titles, labels, names) are of course s
 
 > The languages were chosen from available proxies (Home Assistant publishes no usage statistics per language): the countries behind most downloads and website traffic, and the languages of the HA frontend. The translations were written by Claude; **native speakers are very welcome to review and correct them**.
 
-Want another language? Translations live in one table (`SF_T`, near the top of `dist/sf-cards.js`: *key = French text → `[English, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese, Arabic]`*). Pull requests are welcome.
+French and English are inside `sf-cards.js`; each other language is a small file next to it (`sf-cards-i18n-de.js`…), installed with the release and loaded only by the people who use it, so nobody downloads ten languages to read one.
+
+Want another language, or a better translation? All the texts live in one table, [`src/03-i18n-data.js`](src/03-i18n-data.js) (*id → `[French, English, Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese, Arabic]`*). Pull requests are welcome.
 
 ## Light theme
 
@@ -1230,14 +1229,10 @@ Found a bug? Open an [issue](https://github.com/khrom06/SF-Cards/issues/new/choo
 
 ## Credits
 
-- **Written by Claude** (Anthropic — Claude Sonnet 5.5, through Claude Code): the cards, the visual editors, the translations, the screenshots pipeline, this README.
+- **Made with Claude**, Anthropic's AI, through Claude Code: the code, the visual editors, the translations, the screenshots pipeline and this README were written by Claude, from the ideas and requests of khrom06.
 - **Ideas, direction, testing and feedback: [khrom06](https://github.com/khrom06)** — the sci‑fi look, the phone popups, the dynamic energy layout, the "hide what consumes nothing" idea, the languages, and a long list of *"what if we…?"* that shaped every card. Many of the best details here are theirs.
 - Fonts: **Orbitron** (© The Orbitron Project Authors) and **B612 Mono** (© The B612 Project Authors), both under the SIL Open Font License 1.1 — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 - Icons: Home Assistant's Material Design Icons.
-
-## Companion: SF Copilot
-
-[**SF Copilot**](https://github.com/khrom06/SF-Copilot) is a separate card of the SF family. It reads Home Assistant's history, finds what you keep doing by hand and proposes the matching automation, with a dry run first. Local only: no cloud, no AI model. It is installed on its own and does not change SF Cards.
 
 ## License
 
