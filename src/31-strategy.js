@@ -83,7 +83,11 @@ async function sfHomeEnergyReport(hass, states, name) {
   } catch (err) { return null; }   // Energy dashboard not configured
 }
 async function sfHomeBuild(c, hass) {
-  await sfI18nLoad(sfLang(hass));   // the view titles are written once, in the user's language: wait for its texts
+  const later = (ms) => new Promise((r) => setTimeout(r, ms));
+  await Promise.race([sfI18nLoad(sfLang(hass)), later(3000)]);   // the view titles are written once, in the user's language: wait for its texts (3 s at most)
+  // family: the other SF resources may register after this one: give each one a moment to be defined, so the views do not depend on the load order
+  const FAM = ["sf-heartbeat-card", "sf-trace-card", "sf-horizon-card", "sf-fan-card", "sf-todo-card", "sf-copilot-card"];
+  if (c.family === true && typeof customElements !== "undefined") await Promise.race([Promise.all(FAM.map((t) => customElements.whenDefined(t).catch(() => {}))), later(1500)]);
   const tr = (k) => sfTr(sfLang(hass), k), { states, ents, ex, G, LC, reg, want, areas, name } = sfHomeScan(c, hass);
   const common = {}; for (const k of ["theme", "look", "accent"]) if (typeof c[k] === "string" && c[k]) common[k] = c[k];
   const sf = (tag, cfg, grid) => ({ type: `custom:${tag}`, ...common, ...cfg, ...(grid ? { grid_options: grid } : {}) });

@@ -29,7 +29,8 @@ function sfPhoneOn(card) {
   if (!mq) {
     try { mq = card._sfMq = window.matchMedia(SF_PHONE_MQ); } catch (e) { return false; }
     // turning the phone, resizing the window: switch between the tile and the full card
-    card._sfMqH = () => { card._lastHtml = null; card._schedule(); };
+    // HA reads a card's grid size when it creates it: ask it to rebuild the card so the tile / full card gets the right size too
+    card._sfMqH = () => { card._lastHtml = null; card._schedule(); try { card.dispatchEvent(new Event("ll-rebuild", { bubbles: true, composed: true })); } catch (e) { /* outside HA */ } };
     try { mq.addEventListener("change", card._sfMqH); } catch (e) { /* very old browsers: decided at load */ }
   }
   return !!mq.matches;
@@ -49,8 +50,8 @@ function sfPhoneTile(card) {
   const c = card._config, tag = sfCanon(card.localName), inner = sfPhoneInner(card);
   const kind = SF_CARD_NAMES[SF_ALIAS_REV[tag] || tag] || SF_CARD_NAMES[tag];
   const name = [c.phone_name, c.title, c.name].find((x) => typeof x === "string" && x.trim()) || (kind ? card.t(kind) : "SF");
-  let js = ""; try { js = JSON.stringify(inner); } catch (e) { js = tag; }
-  let h = 0; for (let i = 0; i < js.length; i++) h = (h * 31 + js.charCodeAt(i)) | 0;   // a #hash that stays the same for the same card
+  const js = tag + "|" + name;   // a #hash that stays the same while the card is edited (from its kind and its name only)
+  let h = 0; for (let i = 0; i < js.length; i++) h = (h * 31 + js.charCodeAt(i)) | 0;
   const tile = { name, icon: typeof c.phone_icon === "string" && c.phone_icon ? c.phone_icon : SF_PHONE_ICON[tag] || "mdi:open-in-new", summary: SF_PHONE_SUM[tag] || "text",
     hash: "sf-" + tag.replace(/^sf-|-card$/g, "") + "-" + (h >>> 0).toString(36).slice(0, 5), card: inner };
   const L = { tiles: [tile], columns: 1 };

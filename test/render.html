@@ -759,11 +759,16 @@ __SF.SF_HOOK.tr = (lang, key) => {
     { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Matin") }, "en", conn); await wait(80);
       if (!/rain (in|around)|raining/.test(text(el))) fail(`sf-ns-card: rain message missing ('${text(el).slice(0, 140)}')`); el.remove(); }
     // connection: a closed connection or data that stopped coming are said on the panel, with the age of the data
-    { const st = { ...base, "input_select.ns_mode": S("Jour") }, el = await mk(NS, st, "en");
+    { const st = { ...base, "input_select.ns_mode": S("Jour") };
+      { const d0 = await mk(NS, st, "en"); d0.hass = { ...d0._hass, connected: false }; d0._lostSince = d0.now().getTime() - 3600000; d0._tick(); await wait(60);
+        if (d0.shadowRoot.querySelector(".link")) fail("sf-ns-card: without offline_banner an existing panel never shows the banner"); d0.remove(); }
+      const el = await mk({ ...NS, offline_banner: true }, st, "en");
       if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: no connection banner while data comes in");
       const h0 = el._hass; el.hass = { ...h0, connected: false }; await wait(60);
       if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: a reconnection of a few seconds shows no banner");
       el._lostSince = el.now().getTime() - 31000; el._tick(); await wait(60);
+      { const keep = el._lostSince; Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true }); document.dispatchEvent(new Event("visibilitychange"));
+        if (el._lostSince === keep) fail("sf-ns-card: the 30 s restart when the page becomes visible (tablet waking up)"); delete document.visibilityState; el._lostSince = keep; el._tick(); await wait(60); }
       const lb = el.shadowRoot.querySelector(".link.lost"); if (!lb || !/Connection to Home Assistant lost · data from 0 min ago/.test(lb.textContent) || lb.getAttribute("role") !== "status") fail("sf-ns-card: 'connection lost' banner expected: " + (lb ? lb.textContent : "none"));
       el._seen = el.now().getTime() - 20 * 60000; el.hass = { ...el._hass, connected: true }; el._tick(); await wait(60);
       if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: without stale_minutes, a quiet house shows no banner");
@@ -1341,6 +1346,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
     { const cfg = { rooms: [{ name: "A", climate: "climate.ghost" }, { name: "B", climate: "climate.real" }] }, has = { "climate.real": S("heat") };
       const w1 = __SF.sfValidate("sf-climate-card", cfg, has); if (w1.length !== 1 || !/'climate.ghost' does not exist in Home Assistant/.test(w1[0].msg)) fail("validate: an entity that does not exist is reported in the editor: " + JSON.stringify(w1));
       if (__SF.sfValidate("sf-climate-card", cfg).length) fail("validate: without states (console check), existence is not checked");
+      { const w2 = __SF.sfValidate("sf-climate-card", cfg, has, { "climate.ghost": { entity_id: "climate.ghost" } }); if (w2.length !== 1 || !/is disabled in Home Assistant/.test(w2[0].msg)) fail("validate: a disabled entity (in the registry, not in the states) is called disabled: " + JSON.stringify(w2)); }
       if (__SF.sfValidate("sf-climate-card", cfg, {}).length) fail("validate: empty states (not loaded yet) are not a reason to report");
       if (__SF.sfValidate("sf-climate-card", { rooms: [{ name: "B", climate: "climate.real" }] }, has).length) fail("validate: an existing entity is not reported");
       if (__SF.sfValidate("sf-climate-card", { rooms: [{ climate: "constructor.x" }] }, { "climate.real": S("on") }).length !== 1) fail("validate: prototype names are not entities"); }
@@ -1444,10 +1450,13 @@ __SF.SF_HOOK.tr = (lang, key) => {
     { const nav = window.navigator, had = { share: nav.share, canShare: nav.canShare }, clicks = [], shared = [], origClick = HTMLAnchorElement.prototype.click;
       HTMLAnchorElement.prototype.click = function () { clicks.push(this.download); };
       const setNav = (share, canShare) => { Object.defineProperty(nav, "share", { value: share, configurable: true, writable: true }); Object.defineProperty(nav, "canShare", { value: canShare, configurable: true, writable: true }); };
+      const realMM = window.matchMedia; let coarse = false; window.matchMedia = (q) => ({ matches: /pointer: coarse/.test(q) ? coarse : realMM.call(window, q).matches, addEventListener() {}, removeEventListener() {} });
       try {
         if (el.shadowRoot.querySelector("[data-export]").textContent.trim() !== "Export as an image") fail("report: without the Web Share API the button exports");
         setNav(async (d) => { shared.push(d); }, (d) => !!(d && d.files && d.files[0] instanceof File));
         el._lastHtml = null; el.hass = { ...hr }; await wait(60);
+        if (el.shadowRoot.querySelector("[data-export]").textContent.trim() !== "Export as an image") fail("report: a desktop browser that can share keeps the download (no coarse pointer)");
+        coarse = true; el._lastHtml = null; el.hass = { ...hr }; await wait(60);
         if (!/Share the image/.test(el.shadowRoot.querySelector("[data-export]").textContent)) fail("report: with the Web Share API the button says Share");
         if (!el._draw()) fail("report: no image to share (data not loaded)");
         el._export(); for (let i = 0; i < 30 && !shared.length; i++) await wait(100);
@@ -1458,7 +1467,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
         if (clicks.length !== 1) fail("report: a failed share falls back to the download");
         setNav(() => { throw new Error("boom"); }, () => { throw new Error("boom"); }); el._lastHtml = null; el.hass = { ...hr }; await wait(60);
         if (el.shadowRoot.querySelector("[data-export]").textContent.trim() !== "Export as an image") fail("report: a throwing canShare means no sharing");
-      } finally { HTMLAnchorElement.prototype.click = origClick; setNav(had.share, had.canShare); if (had.share === undefined) { delete nav.share; delete nav.canShare; } }
+      } finally { window.matchMedia = realMM; HTMLAnchorElement.prototype.click = origClick; setNav(had.share, had.canShare); if (had.share === undefined) { delete nav.share; delete nav.canShare; } }
     }
     el.remove();
     let bad = 0; const hb = { ...HASS(base, "en"), callWS: async () => { bad++; throw new Error("no recorder"); } };
@@ -1598,8 +1607,11 @@ __SF.SF_HOOK.tr = (lang, key) => {
       // without the option: the full card, even on a narrow screen; the media query is never even asked
       const n0 = mqs.length, plain = await mk("sf-climate-card", FULL["sf-climate-card"]);
       if (plain.shadowRoot.querySelector("sf-launcher-card") || mqs.length !== n0) fail("phone: without `phone: tile` the card is unchanged and never watches the screen size");
-      if (JSON.stringify(plain.getGridOptions()) !== JSON.stringify(customElements.get("sf-climate-card").prototype.getGridOptions.call({ _config: {} })) && plain.getGridOptions().columns === 6) fail("phone: grid options unchanged without the option");
       plain.remove();
+      // without the option, every card returns exactly its original sizes (the functions captured before the phone wrappers)
+      for (const [tag] of __SF.SF_DEFS) { const o = __SF.SF_SIZE_ORIG[tag]; if (!o) continue;
+        const x = await mk(tag, FULL[tag] || {}); const a = JSON.stringify(x.getGridOptions()), b = JSON.stringify(o.gg.call(x));
+        if (a !== b || x.getCardSize() !== o.gs.call(x)) fail("phone: " + tag + " sizes changed without the option: " + a + " vs " + b); x.remove(); }
       // with the option, on a phone: one launcher tile, named and summarised from the card's own configuration
       const el = await mk("sf-climate-card", { ...FULL["sf-climate-card"], phone: "tile", phone_name: "Heating <b>x</b>" });
       const L = el.shadowRoot.querySelector("sf-launcher-card"); if (!L) fail("phone: on a phone the card becomes a launcher tile");
@@ -1618,6 +1630,10 @@ __SF.SF_HOOK.tr = (lang, key) => {
         let sets = 0; const sc = L.setConfig.bind(L); L.setConfig = (c) => { sets++; sc(c); };
         for (let i = 0; i < 5; i++) { el.hass = { ...hc }; await wait(20); } if (sets) fail("phone: the tile is not rebuilt on every hass update (" + sets + ")");
         if (L.hass !== el._hass) fail("phone: the tile follows hass");
+        { const h1 = L._config.tiles[0].hash; el.setConfig({ ...FULL["sf-climate-card"], min: 16, phone: "tile", phone_name: "Heating <b>x</b>" }); await wait(80);
+          if (el.shadowRoot.querySelector("sf-launcher-card")._config.tiles[0].hash !== h1) fail("phone: editing the card keeps its #hash (deep links)"); }
+        { let rb = 0; const onRb = () => rb++; el.addEventListener("ll-rebuild", onRb); flip(false); await wait(40); flip(true); await wait(40); el.removeEventListener("ll-rebuild", onRb);
+          if (rb !== 2) fail("phone: a screen-size change asks Home Assistant to rebuild the card (grid size): " + rb); }
         // back to a wide screen: the full card again, no tile left; and back to a phone
         flip(false); await wait(80);
         if (el.shadowRoot.querySelector("sf-launcher-card") || !el.shadowRoot.querySelector("style") || el.getGridOptions().columns === 6) fail("phone: on a wide screen the full card comes back");
@@ -1626,7 +1642,10 @@ __SF.SF_HOOK.tr = (lang, key) => {
       el.remove(); await wait(20);
       if (mqs.some((mq) => mq._l.size)) fail("phone: a removed card stops watching the screen size");
       // not offered where a tile would hide something urgent, or where the card is already a launcher / a full screen
-      for (const tag of ["sf-alert-card", "sf-launcher-card"]) { const x = await mk(tag, { ...(FULL[tag] || {}), phone: "tile" }); if (x.shadowRoot.querySelector("sf-launcher-card") && tag === "sf-alert-card") fail("phone: " + tag + " ignores phone: tile"); x.remove(); }
+      { const x = await mk("sf-alert-card", { ...FULL["sf-alert-card"], phone: "tile" }); if (x.shadowRoot.querySelector("sf-launcher-card")) fail("phone: the alert card ignores phone: tile"); x.remove(); }
+      { const x = await mk("sf-launcher-card", { ...FULL["sf-launcher-card"], phone: "tile" }); await wait(30);
+        if (x.shadowRoot.querySelectorAll(".tile").length !== FULL["sf-launcher-card"].tiles.length || x.shadowRoot.querySelector("sf-launcher-card")) fail("phone: the launcher ignores phone: tile (its own tiles, no nested launcher)"); x.remove(); }
+      if (!__SF.sfValidate("sf-alert-card", { ...FULL["sf-alert-card"], phone: "tile" }).some((w) => w.path === "phone")) fail("phone: the validator says phone does nothing on the alert card");
       // every other card accepts it (and an alias): a tile, never an error
       for (const tag of ["sf-energy-flow-card", "sf-controls-card", "sf-room-card", "sf-weather-card", "sf-report-card", "sf-cells-card"]) {
         const x = await mk(tag, { ...(FULL[tag] || FULL[{ "sf-energy-flow-card": "sf-reactor-card", "sf-controls-card": "sf-console-card" }[tag]] || {}), phone: "tile" });

@@ -18,6 +18,15 @@ const warns = [], _w = console.warn.bind(console); console.warn = (...a) => { wa
   const until = async (pred, ms = 3000) => { for (let t = 0; t < ms && !pred(); t += 50) await wait(50); return pred(); };
   try {
     const S2 = __SF;
+    // the bundle's address from an error stack, in the three browsers' formats (Home Assistant loads it as a module: no currentScript)
+    for (const [stack, want] of [
+      ["Error\n    at http://ha.local:8123/hacsfiles/SF-Cards/sf-cards.js?hacstag=12345:1:2345\n    at x", "http://ha.local:8123/hacsfiles/SF-Cards/sf-cards.js?hacstag=12345"],
+      ["@https://ha.example.org/hacsfiles/SF-Cards/sf-cards.js?hacstag=9:1:20\n", "https://ha.example.org/hacsfiles/SF-Cards/sf-cards.js?hacstag=9"],
+      ["global code@https://ha.example.org/local/sf-cards.js:1:30", "https://ha.example.org/local/sf-cards.js"],
+      ["at http://127.0.0.1/my.jsdir/x/sf-cards.js?v=1:1:2", "http://127.0.0.1/my.jsdir/x/sf-cards.js?v=1"],
+      ["at https://home.jsmith.net/hacsfiles/SF-Cards/sf-cards.js:3:4", "https://home.jsmith.net/hacsfiles/SF-Cards/sf-cards.js"],
+      ["at https://h/frontend_latest/app.abc.js:1:1\n at https://h/hacsfiles/SF-Cards/sf-cards.js?hacstag=1:1:1", "https://h/hacsfiles/SF-Cards/sf-cards.js?hacstag=1"],
+    ]) { const got = S2.sfI18nUrlFromStack(stack); if (got !== want) fail("stack " + JSON.stringify(stack.slice(0, 60)) + " -> " + got); }
     if (!/\/dist\/sf-cards\.js$/.test(S2.SF_SELF_URL)) fail("the bundle finds its own address: " + S2.SF_SELF_URL);
     if (!S2.sfI18nHas("fr") || !S2.sfI18nHas("en") || S2.sfI18nHas("de")) fail("French and English are embedded, German is not");
     if (S2.SF_T["common.no_data"].length !== 2) fail("the bundle carries two columns of texts");
@@ -49,7 +58,11 @@ const warns = [], _w = console.warn.bind(console); console.warn = (...a) => { wa
     if (warns.filter((w) => /sf-cards-i18n-ru\.js/.test(w)).length !== 1) fail("one console warning names the missing file: " + JSON.stringify(warns));
     const er = document.createElement("sf-cells-card"); er.setConfig({}); document.body.appendChild(er); er.hass = { ...HASS({ ...base }, "ru") }; await wait(60);
     if (!er.shadowRoot.textContent.trim() || /[а-я]/i.test(er.shadowRoot.textContent)) fail("without its file, a Russian user gets the card in English");
-    er.hass = { ...HASS({ ...base }, "ru") }; await wait(60); if (warns.filter((w) => /sf-cards-i18n-ru\.js/.test(w)).length !== 1) fail("a failed language is not retried on every update");
+    er.hass = { ...HASS({ ...base }, "ru") }; await wait(60); if (warns.filter((w) => /sf-cards-i18n-ru\.js/.test(w)).length !== 1 || document.querySelectorAll('script[src*="i18n-ru"]').length !== 1) fail("a failed language is not retried on every update");
+    // a minute later it is tried again (a tablet that booted without Wi-Fi), without a second warning
+    S2.SF_LANG_FAILED_AT.ru = Date.now() - 61000; er.hass = { ...HASS({ ...base }, "ru") }; await wait(30); for (let i = 0; i < 40 && document.querySelectorAll('script[src*="i18n-ru"]').length < 2; i++) await wait(50);
+    if (document.querySelectorAll('script[src*="i18n-ru"]').length !== 2) fail("a failed language is tried again after a minute");
+    await wait(300); if (warns.filter((w) => /sf-cards-i18n-ru\.js/.test(w)).length !== 1) fail("the console says it once, not on every retry");
     er.remove();
     if (await S2.sfI18nLoad("xx") !== false || await S2.sfI18nLoad("fr") !== true) fail("unknown languages are ignored, embedded ones resolve at once");
   } catch (e) { fail("exception: " + (e && e.stack || e)); }

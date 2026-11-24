@@ -203,6 +203,7 @@ class SfNsCard extends SfBase {
   }
   disconnectedCallback() {
     super.disconnectedCallback();
+    if (this._visH) { document.removeEventListener("visibilitychange", this._visH); this._visH = null; }
     clearInterval(this._tk); this._tk = null;
     if (this._kiosk) { try { this._kiosk.remove(); } catch (e) { /* already removed */ } this._kiosk = null; }
     if (this._fcUnsub) { try { this._fcUnsub(); } catch (e) { /* already closed */ } this._fcUnsub = null; }
@@ -301,13 +302,14 @@ class SfNsCard extends SfBase {
   _tick() { const d = this.now(), p = (n) => String(n).padStart(2, "0"), el = this.shadowRoot && this.shadowRoot.querySelector(".hm");
     if (el) el.textContent = `${p(d.getHours())}:${p(d.getMinutes())}`;
     if (this._mode !== this.mode() || this._linkKey !== this._link().key) this._schedule(); }
-  // A wall panel is looked at from across the room: when it stops receiving data it must say so, instead of showing old values as if
-  // they were live. "lost": Home Assistant has reported the connection as closed for 30 s or more (a reconnection after a tablet wakes up
-  // takes a few seconds and must not flash a banner). "stale": no new state for `stale_minutes` although the connection looks open; off
-  // unless set (a quiet house can go 15 minutes without any change at night). The banner gives the age of the data, refreshed every minute.
+  // A wall panel is looked at from across the room: when it stops receiving data it can say so, instead of showing old values as if they
+  // were live. Both checks are opt-in, so an existing panel never changes. `offline_banner: true` — "lost": Home Assistant has reported the
+  // connection as closed for 30 s of visible time (a tablet waking up reconnects in a few seconds: the count restarts when the page becomes
+  // visible). `stale_minutes: N` — "stale": no new state for N minutes although the connection looks open. Refreshed every minute.
   _link() {
-    const h = this._hass, lim = Number(this._config && this._config.stale_minutes), max = Number.isFinite(lim) && lim > 0 ? lim : 0, now = this.now().getTime();
-    if (h && h.connected === false) { if (!this._lostSince) this._lostSince = now; } else this._lostSince = 0;
+    const h = this._hass, c = this._config || {}, lim = Number(c.stale_minutes), max = Number.isFinite(lim) && lim > 0 ? lim : 0, now = this.now().getTime();
+    if (c.offline_banner === true && !this._visH && typeof document !== "undefined") { this._visH = () => { if (document.visibilityState === "visible" && this._lostSince) this._lostSince = this.now().getTime(); }; document.addEventListener("visibilitychange", this._visH); }
+    if (c.offline_banner === true && h && h.connected === false) { if (!this._lostSince) this._lostSince = now; } else this._lostSince = 0;
     const age = this._seen ? Math.max(0, Math.floor((now - this._seen) / 60000)) : 0;
     const kind = this._lostSince && now - this._lostSince >= 30000 ? "lost" : max > 0 && this._seen && age >= max ? "stale" : "";
     return { kind, age, key: kind ? `${kind}:${age}` : "" };

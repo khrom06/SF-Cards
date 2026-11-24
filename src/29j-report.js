@@ -15,10 +15,12 @@
  * currency: "€"
  * devices: [{ name: Car, entity: sensor.car_energy, icon: mdi:car-electric }]   # kWh counters
  */
-// Can this browser hand an image file to the system share sheet? (Web Share API level 2; false in most desktop browsers and in old web views.)
+// Should the report go to the system share sheet? Only on a touch device (a phone, a tablet: coarse pointer) whose browser can share files
+// (Web Share API level 2). Desktop browsers that can share too (Windows, macOS, ChromeOS) keep the plain download, as before.
 function sfCanShareImage(file) {
   try {
     if (typeof navigator === "undefined" || typeof navigator.share !== "function" || typeof navigator.canShare !== "function") return false;
+    if (!(typeof window.matchMedia === "function" && window.matchMedia("(pointer: coarse)").matches)) return false;
     const f = file || new File([new Uint8Array(1)], "sf.png", { type: "image/png" });
     return navigator.canShare({ files: [f] }) === true;
   } catch (e) { return false; }

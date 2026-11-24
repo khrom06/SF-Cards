@@ -295,7 +295,7 @@ calendars:
 
 <img src="assets/anim/report.webp" alt="Energy report card, animated: week, previous week, month, year" width="560">
 
-**"How was the week?"** The energy report in plain words: consumption, solar used, autonomy and cost, each **compared with the period before**; one bar per day split into solar and grid, the heaviest day highlighted; who consumes; three facts worth knowing; and **an image of the report** (1080 × 1350, in the colours of your theme) to keep or send: on a phone the button opens the system **share sheet** (messages, mail…), elsewhere it downloads the PNG. Week (7 days), month (30 days) or year (12 months), with a button to go back in time.
+**"How was the week?"** The energy report in plain words: consumption, solar used, autonomy and cost, each **compared with the period before**; one bar per day split into solar and grid, the heaviest day highlighted; who consumes; three facts worth knowing; and **an image of the report** (1080 × 1350, in the colours of your theme) to keep or send: on a phone or a tablet (touch screen) the button opens the system **share sheet** (messages, mail…); on a computer it downloads the PNG, as before. Week (7 days), month (30 days) or year (12 months), with a button to go back in time.
 
 It reads the **long-term statistics** Home Assistant already keeps for energy counters (the same sensors as the Energy dashboard): nothing to install, and years of history are available at once.
 
@@ -478,7 +478,7 @@ With `mode_entity` (any `input_select` / `select` / `sensor`, e.g. Morning / Day
 
 #### On a phone
 
-**The simplest way: `phone: tile` on the cards themselves.** Keep one dashboard and one configuration per card. On a screen narrower than 768 px (Home Assistant's "mobile" size) the card becomes a summary tile — two per row — that opens the full card in the bottom sheet; on a tablet or a computer it stays the full card. In the visual editor: **On a phone → A tile that opens the card**.
+**The simplest way: `phone: tile` on the cards themselves.** Keep one dashboard and one configuration per card. On a screen narrower than 768 px (the "mobile" size of Home Assistant's screen conditions; most phones held sideways are wider and get the full card) the card becomes a summary tile — two per row — that opens the full card in the bottom sheet; on a tablet or a computer it stays the full card. In the visual editor: **On a phone → A tile that opens the card**.
 
 ```yaml
 type: custom:sf-climate-card
@@ -488,7 +488,7 @@ phone_icon: mdi:thermostat  # optional
 rooms: [ … ]
 ```
 
-The tile shows the same summary as a launcher tile (average temperature, consumption, lights on, cars, motion…), the phone's Back button closes the sheet, and turning the phone or resizing the window switches between the tile and the card. Not offered on the full-frame alert card (an alert must never hide behind a tile), the launcher and the wall-panel card. If you give the card a fixed height in a sections view (`grid_options: { rows: … }`), the tile keeps that height: leave `rows` out, or put the phone layout in its own section.
+The tile shows the same summary as a launcher tile (average temperature, consumption, lights on, cars, motion…), the phone's Back button closes the sheet, and turning the phone or resizing the window switches between the tile and the card (an open sheet closes). Not offered on the full-frame alert card (an alert must never hide behind a tile), the launcher and the wall-panel card. If you give the card a fixed height in a sections view (`grid_options: { rows: … }`), the tile keeps that height: leave `rows` out, or put the phone layout in its own section.
 
 **The launcher**, for a page of tiles you arrange yourself:
 
@@ -1034,7 +1034,7 @@ Also: one alert line when something is wrong (leak, open lock, fridge too warm),
 
 **Kiosk mode.** Set `hide_header: true` to hide the Home Assistant header on that dashboard (add `?header=1` to the URL to bring it back). Use a dashboard view of type **panel** with this card alone.
 
-**Data that stopped coming.** A panel on a wall is read from across the room, so it never shows old values as if they were live: when Home Assistant has reported the connection as lost for 30 seconds, a banner says so with the age of the data. Add `stale_minutes: 15` to also be warned when no new state arrived for that long while the connection looks open ("No update for 18 min"); it is off by default because a quiet house can go that long without any change at night.
+**Data that stopped coming (optional).** A panel on a wall is read from across the room. Add `offline_banner: true` and a banner says when Home Assistant has reported the connection as lost for 30 seconds of visible time (a tablet waking up reconnects in a few seconds and shows nothing), with the age of the data. Add `stale_minutes: 15` to also be warned when no new state arrived for that long while the connection looks open ("No update for 18 min"); a quiet house can go that long without any change at night, so choose the delay accordingly. Both are off by default: an existing panel does not change.
 
 ```yaml
 type: custom:sf-ns-card

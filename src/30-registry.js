@@ -30,8 +30,9 @@ const SF_DEFS = [
   ["sf-report-card", SfReportCard, "SF · Energy report", "The week, month or year in review: consumption, solar, autonomy, cost, who consumes, and an image to share."],
   ["sf-timeline-card", SfTimelineCard, "SF · Timeline", "Latest state changes of the chosen entities, grouped by day, in plain words (read-only)."],
 ];
-// Cards cheap enough to draw a live preview in the card picker: they read hass.states only (no history, logbook or statistics request).
-const SF_PREVIEW = new Set(["sf-bridge-card", "sf-climate-card", "sf-console-card", "sf-room-card", "sf-media-card", "sf-alert-card", "sf-cells-card", "sf-radiators-card"]);
+// Cards cheap enough to draw a live preview in the card picker: they read hass.states only (no history, logbook or statistics request;
+// the room card is left out: its large size reads the temperature history).
+const SF_PREVIEW = new Set(["sf-bridge-card", "sf-climate-card", "sf-console-card", "sf-media-card", "sf-alert-card", "sf-cells-card", "sf-radiators-card"]);
 window.customCards = window.customCards || [];
 for (const [tag, cls, name, description] of SF_DEFS) {
   if (!customElements.get(tag)) customElements.define(tag, cls);
@@ -42,9 +43,11 @@ for (const [tag, cls, name, description] of SF_DEFS) {
 }
 // `phone: tile` (src/22a-phone-tile.js): while a card is a tile, it asks the sections grid for a tile's size (two per row on a phone).
 // Without the option, or on a wide screen, the card's own sizes are returned untouched.
+const SF_SIZE_ORIG = {};   // the sizes before the phone wrappers (tests compare against them)
 for (const [tag, cls] of SF_DEFS) {
   if (SF_PHONE_NO.has(tag)) continue;
   const gg = cls.prototype.getGridOptions, gs = cls.prototype.getCardSize;
+  SF_SIZE_ORIG[tag] = { gg, gs };
   if (typeof gg === "function") cls.prototype.getGridOptions = function () { return this._config && this._config.phone === "tile" && sfPhoneOn(this) ? { columns: 6, rows: "auto", min_columns: 3 } : gg.call(this); };
   if (typeof gs === "function") cls.prototype.getCardSize = function () { return this._config && this._config.phone === "tile" && sfPhoneOn(this) ? 2 : gs.call(this); };
 }
