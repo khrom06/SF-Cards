@@ -25,8 +25,10 @@ const SF_HOME_COVER_RISKY = /garage|portail|portillon|portal|barri(?:er|[eè]re)
 // and Open all / Close all only name the covers that support that service (a cover that only tilts would make Home Assistant refuse the whole call).
 const sfHomeCoverList = (id, dc, name) => dc ? SF_HOME_COVER_LIST.includes(dc) : !SF_HOME_COVER_RISKY.test(id + " " + name);
 function sfHomeList(v) { return (Array.isArray(v) ? v : v ? [v] : []).filter((x) => typeof x === "string" && x); }
-async function sfHomeBuild(c, hass) {
-  const tr = (k) => sfTr(sfLang(hass), k), states = (hass && hass.states) || {}, ents = (hass && hass.entities) || {}, devs = (hass && hass.devices) || {};
+// What the house has, read from hass only (no request): global entities (G), lights and covers by area (LC) and the rooms worth showing (areas).
+// Shared by the automatic dashboard and by the cards' stub configs (src/32-stubs.js).
+function sfHomeScan(c, hass) {
+  const states = (hass && hass.states) || {}, ents = (hass && hass.entities) || {}, devs = (hass && hass.devices) || {};
   const ex = new Set(sfHomeList(c.exclude)), exA = new Set(sfHomeList(c.exclude_areas)), per = {}, G = { weather: "", people: [], cameras: [], calendars: [], media: [], leaks: [], openings: [], locks: [], alarm: "" };
   const LC = { light: Object.create(null), cover: Object.create(null) };   // lights and covers by area ("" = no area), for the "lights" and "covers" views
   for (const id of Object.keys(states).sort()) {
@@ -61,12 +63,33 @@ async function sfHomeBuild(c, hass) {
     });
   // Floors order the rooms (lowest level first, rooms without a floor last) unless the user chose the order with `areas`; the sort is stable.
   if (!want.length && areas.some((a) => a.fl)) areas.sort((x, y) => (x.fl ? x.fl.level : 1e6) - (y.fl ? y.fl.level : 1e6) || (x.fl && y.fl ? x.fl.ix - y.fl.ix : 0));   // same level: the order chosen in Home Assistant
+  const name = (id) => String((states[id] && states[id].attributes && states[id].attributes.friendly_name) || id.split(".")[1].replace(/_/g, " "));
+  return { states, ents, ex, G, LC, reg, want, areas, name };
+}
+// The energy counters of the Energy dashboard settings, in the sf-report-card shape (null when the Energy dashboard is not configured).
+async function sfHomeEnergyReport(hass, states, name) {
+  if (!hass || !hass.callWS) return null;
+  try {
+    const p = await hass.callWS({ type: "energy/get_prefs" }), src = (p && Array.isArray(p.energy_sources) ? p.energy_sources : []), grid = src.find((x) => x && x.type === "grid") || {}, sol = src.find((x) => x && x.type === "solar");
+    const from = (grid.flow_from || [])[0] || {}, to = (grid.flow_to || [])[0] || {};
+    const rep = {};
+    if (from.stat_energy_from) rep.grid = from.stat_energy_from;
+    if (sol && sol.stat_energy_from) { rep.solar = sol.stat_energy_from; if (to.stat_energy_to) rep.export = to.stat_energy_to; }
+    // with a price entity, Home Assistant keeps the cost in a counter named after the energy sensor
+    if (from.stat_cost) rep.cost = from.stat_cost; else if (from.stat_energy_from && states[`${from.stat_energy_from}_cost`]) rep.cost = `${from.stat_energy_from}_cost`; else if (from.entity_energy_price) rep.price = from.entity_energy_price; else if (typeof from.number_energy_price === "number") rep.price = from.number_energy_price;
+    const dv = (p && Array.isArray(p.device_consumption) ? p.device_consumption : []).filter((x) => x && SF_EID.test(String(x.stat_consumption || ""))).slice(0, 12);
+    if (dv.length) rep.devices = dv.map((x) => ({ entity: x.stat_consumption, name: String(x.name || name(x.stat_consumption)) }));
+    return rep;
+  } catch (err) { return null; }   // Energy dashboard not configured
+}
+async function sfHomeBuild(c, hass) {
+  const tr = (k) => sfTr(sfLang(hass), k), { states, ents, ex, G, LC, reg, want, areas, name } = sfHomeScan(c, hass);
   const common = {}; for (const k of ["theme", "look", "accent"]) if (typeof c[k] === "string" && c[k]) common[k] = c[k];
   const sf = (tag, cfg, grid) => ({ type: `custom:${tag}`, ...common, ...cfg, ...(grid ? { grid_options: grid } : {}) });
   const head = (text, icon) => ({ type: "heading", heading: text, heading_style: "title", icon });
   const full = { columns: "full" }, roomEx = ex.size ? { exclude: [...ex].filter((x) => SF_EID.test(x)) } : {};
   const sec = (cards, span) => ({ type: "grid", ...(span ? { column_span: span } : {}), cards: cards.filter(Boolean) });
-  const weather = typeof c.weather === "string" && SF_EID.test(c.weather) ? c.weather : G.weather, name = (id) => String((states[id] && states[id].attributes && states[id].attributes.friendly_name) || id.split(".")[1].replace(/_/g, " "));
+  const weather = typeof c.weather === "string" && SF_EID.test(c.weather) ? c.weather : G.weather;
   const V = {};
   // --- Home: banner, one tile per room (tap = the room in a popup), weather, media, agenda, leaks.
   {
@@ -124,19 +147,7 @@ async function sfHomeBuild(c, hass) {
     for (const k of ["grid", "solar", "battery_soc", "battery_power"]) if (typeof e[k] === "string" && SF_EID.test(e[k])) flow[k] = e[k];
     if (Object.keys(flow).length) s.push(sec([sf("sf-reactor-card", flow)]));
     let rep = c.report && typeof c.report === "object" ? { ...c.report } : null;
-    if (!rep && hass && hass.callWS) {
-      try {
-        const p = await hass.callWS({ type: "energy/get_prefs" }), src = (p && Array.isArray(p.energy_sources) ? p.energy_sources : []), grid = src.find((x) => x && x.type === "grid") || {}, sol = src.find((x) => x && x.type === "solar");
-        const from = (grid.flow_from || [])[0] || {}, to = (grid.flow_to || [])[0] || {};
-        rep = {};
-        if (from.stat_energy_from) rep.grid = from.stat_energy_from;
-        if (sol && sol.stat_energy_from) { rep.solar = sol.stat_energy_from; if (to.stat_energy_to) rep.export = to.stat_energy_to; }
-        // with a price entity, Home Assistant keeps the cost in a counter named after the energy sensor
-        if (from.stat_cost) rep.cost = from.stat_cost; else if (from.stat_energy_from && states[`${from.stat_energy_from}_cost`]) rep.cost = `${from.stat_energy_from}_cost`; else if (from.entity_energy_price) rep.price = from.entity_energy_price; else if (typeof from.number_energy_price === "number") rep.price = from.number_energy_price;
-        const dv = (p && Array.isArray(p.device_consumption) ? p.device_consumption : []).filter((x) => x && SF_EID.test(String(x.stat_consumption || ""))).slice(0, 12);
-        if (dv.length) rep.devices = dv.map((x) => ({ entity: x.stat_consumption, name: String(x.name || name(x.stat_consumption)) }));
-      } catch (err) { rep = null; }   // Energy dashboard not configured
-    }
+    if (!rep) rep = await sfHomeEnergyReport(hass, states, name);
     if (rep && (SF_EID.test(String(rep.grid || "")) || SF_EID.test(String(rep.solar || "")))) s.push(sec([sf("sf-report-card", rep, full)], 2));
     if (s.length) V.energy = { title: tr("home.energy"), path: "energy", icon: "mdi:lightning-bolt", sections: s };
   }
@@ -162,4 +173,4 @@ class SfHomeStrategy extends HTMLElement {
 }
 if (!customElements.get("ll-strategy-dashboard-sf-home")) customElements.define("ll-strategy-dashboard-sf-home", SfHomeStrategy);
 window.customStrategies = window.customStrategies || [];
-if (!window.customStrategies.some((x) => x.type === "sf-home")) window.customStrategies.push({ type: "sf-home", strategyType: "dashboard", name: "SF · Home (automatic)", description: "A whole dashboard of SF cards built from your areas: rooms, climate, energy, security, system." });
+if (!window.customStrategies.some((x) => x.type === "sf-home")) window.customStrategies.push({ type: "sf-home", strategyType: "dashboard", name: "SF · Home (automatic)", description: "A whole dashboard of SF cards built from your areas: rooms, climate, energy, security, system.", documentationURL: "https://github.com/khrom06/SF-Cards#automatic-dashboard" });

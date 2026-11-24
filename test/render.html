@@ -1430,6 +1430,24 @@ __SF.SF_HOOK.tr = (lang, key) => {
         callWS: async (m) => { if (m.type !== "energy/get_prefs") throw new Error("unexpected"); return { energy_sources: [{ type: "grid", flow_from: [{ stat_energy_from: "sensor.rp_grid", stat_cost: "sensor.rp_cost" }], flow_to: [{ stat_energy_to: "sensor.rp_exp" }] }, { type: "solar", stat_energy_from: "sensor.rp_solar" }], device_consumption: [{ stat_consumption: "sensor.rp_car", name: "Car" }, { stat_consumption: "bad id" }] }; } };
       const collect = (root, pred) => { const out = []; const walk = (o) => { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === "object") { if (pred(o)) out.push(o); Object.values(o).forEach(walk); } }; walk(root); return out; };
       const d = await Strat.generate({}, hs), paths = d.views.map((v) => v.path).join();
+      // Stub configs (card picker): each card arrives filled with the house's own entities; without hass, the plain stub, synchronously.
+      {
+        const stub = (tag, h) => customElements.get(tag).getStubConfig(h);
+        const plain = stub("sf-climate-card"); if (!plain || typeof plain.then === "function" || !Array.isArray(plain.rooms) || plain.rooms.length) fail("stub: without hass, the plain stub is returned synchronously");
+        const cl = await stub("sf-climate-card", hs); if (!cl.rooms || cl.rooms.length !== 1 || cl.rooms[0].climate !== "climate.rm" || cl.rooms[0].name !== "Living room" || cl.rooms[0].temp !== "sensor.rm_temp" || cl.rooms[0].hum !== "sensor.rm_hum") fail(`stub: climate rooms from the areas: ${JSON.stringify(cl)}`);
+        const co = await stub("sf-controls-card", hs), items = (co.groups || []).flatMap((g) => g.items || []).map((i) => i.entity);
+        if (!items.includes("light.rm_a") || !items.includes("light.k") || items.includes("light.lamp")) fail(`stub: controls = the lights of the rooms, hidden ones left out: ${JSON.stringify(co)}`);
+        const ro = await stub("sf-room-card", hs); if (ro.area !== "lr") fail(`stub: room = the first area: ${JSON.stringify(ro)}`);
+        const rp = await stub("sf-report-card", hs); if (rp.grid !== "sensor.rp_grid" || rp.solar !== "sensor.rp_solar" || rp.cost !== "sensor.rp_cost") fail(`stub: report from the Energy dashboard settings: ${JSON.stringify(rp)}`);
+        const br = await stub("sf-home-banner-card", hs); if (!(br.people || []).some((p) => p.entity === "person.bob") || !(br.leaks || []).includes("binary_sensor.leak")) fail(`stub: banner people and leaks: ${JSON.stringify(br)}`);
+        const al = await stub("sf-alert-card", hs); if (!al.leaks.includes("binary_sensor.leak") || !al.doors.includes("binary_sensor.rm_win")) fail(`stub: alert leaks and doors: ${JSON.stringify(al)}`);
+        const none = await stub("sf-climate-card", { ...HASS({}, "en"), areas: {}, entities: {}, devices: {} }); if (JSON.stringify(none) !== JSON.stringify(plain)) fail("stub: nothing found = the plain stub");
+        const bad = await stub("sf-report-card", { ...hs, callWS: async () => { throw new Error("no energy"); } }); if (bad.grid) fail("stub: a failing Energy request falls back to the plain stub");
+        const veh = await stub("sf-vehicles-card", hs); if (!Array.isArray(veh.cars) || veh.cars.length) fail("stub: a card without discovery keeps its plain stub");
+        const cc = (window.customCards || []).find((x) => x.type === "sf-controls-card"), cr = (window.customCards || []).find((x) => x.type === "sf-report-card");
+        if (!cc || cc.preview !== true || !String(cc.documentationURL || "").startsWith("https://github.com/khrom06/SF-Cards#")) fail("stub: the controls card is previewed in the card picker, with a documentation link");
+        if (!cr || cr.preview !== false) fail("stub: a card that requests statistics is not previewed live in the card picker");
+      }
       if (paths !== "home,rooms,climate,energy,security,system") fail("strategy: the six views expected, got " + paths);
       const cards = collect(d, (o) => typeof o.type === "string" && /^custom:/.test(o.type));
       for (const c of cards) { const tag = c.type.slice(7); if (!customElements.get(tag)) fail("strategy: unknown card " + c.type); else { const w = __SF.sfValidate(tag, c); if (w.length) fail("strategy: " + tag + " generated with warnings: " + JSON.stringify(w)); const miss = __SF.SF_REQ[tag] ? __SF.SF_REQ[tag](c) : []; if (miss.length) fail("strategy: " + tag + " generated incomplete"); } }
