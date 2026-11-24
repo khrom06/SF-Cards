@@ -39,7 +39,7 @@ Edit a dashboard → **Add card** → type **SF**. Each card arrives **already f
   <img src="assets/anim/upkeep.webp" alt="Upkeep: when each filter or consumable will be due" width="380"> <img src="assets/anim/cycles.webp" alt="Appliance cycles: time left and cost of the washing machine" width="380">
 </p>
 
-On a **phone**, a launcher turns any card into a tile that opens in a bottom sheet ([see it](#on-a-phone)). On a **wall panel or a tablet**, `sf-ns-card` fills the screen and changes with the time of day — and says so when its data stops coming ([see it](#sf-ns-card)).
+On a **phone**, any card can fold itself into a tile that opens it in a bottom sheet — one option, `phone: tile`, no second copy of the card to maintain ([see it](#on-a-phone)). On a **wall panel or a tablet**, `sf-ns-card` fills the screen and changes with the time of day — and says so when its data stops coming ([see it](#sf-ns-card)).
 
 <p align="center">
   <img src="assets/ns-morning.png" alt="Wall panel, morning" width="200"> <img src="assets/ns-day.png" alt="Wall panel, day" width="200"> <img src="assets/ns-evening.png" alt="Wall panel, evening" width="200"> <img src="assets/ns-night.png" alt="Wall panel, night" width="200">
@@ -477,6 +477,20 @@ tiles:
 With `mode_entity` (any `input_select` / `select` / `sensor`, e.g. Morning / Day / Evening / Night) the tiles whose `modes` list the current state move to the front and get a brighter outline; the order changes back when the mode changes. Without `mode_entity`, or when the entity is unavailable or matches no tile, nothing changes.
 
 #### On a phone
+
+**The simplest way: `phone: tile` on the cards themselves.** Keep one dashboard and one configuration per card. On a screen narrower than 768 px (Home Assistant's "mobile" size) the card becomes a summary tile — two per row — that opens the full card in the bottom sheet; on a tablet or a computer it stays the full card. In the visual editor: **On a phone → A tile that opens the card**.
+
+```yaml
+type: custom:sf-climate-card
+phone: tile                 # absent or "card": the full card everywhere (the default, nothing changes)
+phone_name: Climate         # optional (default: the card's title, or its kind)
+phone_icon: mdi:thermostat  # optional
+rooms: [ … ]
+```
+
+The tile shows the same summary as a launcher tile (average temperature, consumption, lights on, cars, motion…), the phone's Back button closes the sheet, and turning the phone or resizing the window switches between the tile and the card. Not offered on the full-frame alert card (an alert must never hide behind a tile), the launcher and the wall-panel card. If you give the card a fixed height in a sections view (`grid_options: { rows: … }`), the tile keeps that height: leave `rows` out, or put the phone layout in its own section.
+
+**The launcher**, for a page of tiles you arrange yourself:
 
 <img src="assets/phone.webp" alt="A phone dashboard: a banner and six summary tiles, and the Climate card open in a bottom sheet" width="560"> <img src="assets/anim/phone.webp" alt="Tapping a tile: the card rises from the bottom, then slides back down" width="270">
 

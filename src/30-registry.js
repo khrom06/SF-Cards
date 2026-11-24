@@ -40,6 +40,14 @@ for (const [tag, cls, name, description] of SF_DEFS) {
   // preview: the card picker draws the card live (filled by getStubConfig) for the cards that only read states; documentationURL: the "?" link of the editor.
   if (!window.customCards.some((c) => c.type === shown)) window.customCards.push({ type: shown, name, description, preview: SF_PREVIEW.has(tag), documentationURL: `https://github.com/khrom06/SF-Cards#${shown}` });
 }
+// `phone: tile` (src/22a-phone-tile.js): while a card is a tile, it asks the sections grid for a tile's size (two per row on a phone).
+// Without the option, or on a wide screen, the card's own sizes are returned untouched.
+for (const [tag, cls] of SF_DEFS) {
+  if (SF_PHONE_NO.has(tag)) continue;
+  const gg = cls.prototype.getGridOptions, gs = cls.prototype.getCardSize;
+  if (typeof gg === "function") cls.prototype.getGridOptions = function () { return this._config && this._config.phone === "tile" && sfPhoneOn(this) ? { columns: 6, rows: "auto", min_columns: 3 } : gg.call(this); };
+  if (typeof gs === "function") cls.prototype.getCardSize = function () { return this._config && this._config.phone === "tile" && sfPhoneOn(this) ? 2 : gs.call(this); };
+}
 for (const [alias, canon] of Object.entries(SF_ALIAS)) {
   const def = SF_DEFS.find((d) => d[0] === canon);
   if (def && !customElements.get(alias)) customElements.define(alias, class extends def[1] {});

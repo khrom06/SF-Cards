@@ -67,7 +67,10 @@ class SfEditorBase extends HTMLElement {
     // Look and accent (see SfBase._applyLook). The radiators card already has its own `accent` field.
     const lookField = sfS("look", [["neon", "Néon (lueur, coins, balayage)"], ["calm", "Calme (sans lueur)"]]);
     const more = this.localName === "sf-radiators-card-editor" ? [themeField, lookField] : [themeField, sfG(lookField, sfT("accent"))];
-    wrap.appendChild(this._form(this._config, (d) => [...(spec.fields ? spec.fields(d) : []), ...more], labels, emit));
+    // `phone: tile` (src/22a-phone-tile.js): one configuration, the full card on a wide screen and a tile that opens it on a phone
+    const tag = sfCanon(this.localName.replace(/-editor$/, ""));
+    const phoneFields = (d) => SF_PHONE_NO.has(tag) ? [] : [sfS("phone", [["card", "Carte complète partout"], ["tile", "Tuile qui ouvre la carte (écran de moins de 768 px)"]]), ...(d.phone === "tile" ? [sfG(sfT("phone_name"), sfI("phone_icon"))] : [])];
+    wrap.appendChild(this._form(this._config, (d) => [...(spec.fields ? spec.fields(d) : []), ...more, ...phoneFields(d)], labels, emit));
     for (const o of spec.objects || []) {
       const h = document.createElement("h3"); h.textContent = this._t(o.title); wrap.appendChild(h);
       if (!this._config[o.key] || typeof this._config[o.key] !== "object") this._config[o.key] = {};

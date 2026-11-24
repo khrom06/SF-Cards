@@ -1,6 +1,7 @@
 class SfBase extends HTMLElement {
   setConfig(config) {
     if (!config) throw new Error(`${this.localName} : config required`);
+    this._sfRaw = config;   // as written by the user (src/22a-phone-tile.js gives it to the popup)
     this._config = sfNormConfig(sfCanon(this.localName), this.defaults ? { ...this.defaults(), ...config } : { ...config });
     // The visual editor and the dashboard re-apply the configuration on every change, often unchanged: `_cfgSame` lets the cards that load data from
     // Home Assistant keep what they already fetched instead of asking again.
@@ -20,6 +21,11 @@ class SfBase extends HTMLElement {
     if (this._raf || !this._hass || !this._config) return;
     this._raf = requestAnimationFrame(() => {
       this._raf = null;
+      // `phone: tile` on a narrow screen: a launcher tile that opens this card (src/22a-phone-tile.js). Without that option: unchanged.
+      if (this._config.phone === "tile") {
+        if (sfPhoneOn(this)) { sfPhoneRender(this); return; }
+        if (this._sfPhoneEl) { try { this._sfPhoneEl.remove(); } catch (e) { /* already gone */ } this._sfPhoneEl = null; this._lastHtml = null; }
+      }
       // HA calls `hass` on every state change of the whole house: the DOM is only
       // rewritten if the render really changed, otherwise the animations
       // (3D rotations, flows) would restart from zero several times per second.
@@ -337,6 +343,7 @@ class SfBase extends HTMLElement {
     return { actif: true, reste: isNaN(fin) ? null : Math.max(1, Math.ceil((fin - Date.now()) / 60000)) };
   }
   disconnectedCallback() {
+    if (this._sfMq) sfPhoneStop(this);
     if (this._ti) { clearInterval(this._ti); this._ti = null; }
     if (this._sfRo) { this._sfRo.disconnect(); this._sfRo = null; }
     if (this._holdTimer) { clearTimeout(this._holdTimer); this._holdTimer = null; }

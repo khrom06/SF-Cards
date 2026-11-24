@@ -7,7 +7,7 @@
  *  - a known option with the wrong type, a number outside its range, an unlisted choice, or a malformed entity id.
  * Options the specs do not describe (YAML-only ones) are never flagged: no false alarm on a valid configuration.
  */
-const SF_COMMON_KEYS = ["type", "theme", "look", "accent", "grid_options", "layout_options", "view_layout", "visibility", "card_mod", "events", "name", "title", "id", "key"];
+const SF_COMMON_KEYS = ["type", "theme", "look", "accent", "grid_options", "layout_options", "view_layout", "visibility", "card_mod", "events", "name", "title", "id", "key", "phone", "phone_name", "phone_icon"];
 const SF_ENTITY_RE = /^[a-z0-9_]+\.[a-z0-9_]+$/i;
 function sfFlatSchema(schema, out = {}) {
   for (const f of schema || []) { if (f && f.type === "grid") sfFlatSchema(f.schema, out); else if (f && typeof f.name === "string" && f.name && f.name[0] !== "_") out[f.name] = f; }

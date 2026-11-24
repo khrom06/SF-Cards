@@ -1581,6 +1581,64 @@ __SF.SF_HOOK.tr = (lang, key) => {
         try { const r = await Strat.generate(bad[0], bad[1]); if (!r || !Array.isArray(r.views) || !r.views.length) fail("strategy: must always return at least one view"); } catch (err) { fail("strategy: generate() threw: " + err.message); } }
     }
   }
+  // Phone tile: `phone: tile` turns a card into a launcher tile on a narrow screen; without it, nothing changes.
+  { const realMM = window.matchMedia, mqs = [];
+    const fakeMM = (narrow) => () => { const mq = { matches: narrow.v, media: "(max-width: 767px)", _l: new Set(), addEventListener: (e, f) => mq._l.add(f), removeEventListener: (e, f) => mq._l.delete(f) }; mqs.push(mq); return mq; };
+    const narrow = { v: true }; window.matchMedia = fakeMM(narrow);
+    const flip = (v) => { narrow.v = v; for (const mq of mqs) { mq.matches = v; for (const f of [...mq._l]) f(); } };
+    const hc = HASS(base, "en");
+    try {
+      const mk = async (tag, cfg) => { const el = document.createElement(tag); el.setConfig(cfg); document.body.appendChild(el); el.hass = hc; await wait(60); return el; };
+      // without the option: the full card, even on a narrow screen; the media query is never even asked
+      const n0 = mqs.length, plain = await mk("sf-climate-card", FULL["sf-climate-card"]);
+      if (plain.shadowRoot.querySelector("sf-launcher-card") || mqs.length !== n0) fail("phone: without `phone: tile` the card is unchanged and never watches the screen size");
+      if (JSON.stringify(plain.getGridOptions()) !== JSON.stringify(customElements.get("sf-climate-card").prototype.getGridOptions.call({ _config: {} })) && plain.getGridOptions().columns === 6) fail("phone: grid options unchanged without the option");
+      plain.remove();
+      // with the option, on a phone: one launcher tile, named and summarised from the card's own configuration
+      const el = await mk("sf-climate-card", { ...FULL["sf-climate-card"], phone: "tile", phone_name: "Heating <b>x</b>" });
+      const L = el.shadowRoot.querySelector("sf-launcher-card"); if (!L) fail("phone: on a phone the card becomes a launcher tile");
+      else {
+        await wait(60);
+        const tl = L.shadowRoot.querySelector(".tile"); if (!tl || !/Heating <b>x<\/b>/.test(tl.textContent) || tl.querySelector("b")) fail("phone: the tile's name is the escaped phone_name");
+        if (!/°/.test(tl.textContent)) fail("phone: the climate tile shows the average temperature: " + (tl && tl.textContent));
+        if (L._config.tiles[0].card.phone !== undefined || L._config.tiles[0].card.phone_name !== undefined || L._config.tiles[0].card.type !== "custom:sf-climate-card") fail("phone: the popup card is the same card without the phone keys");
+        if (!/^sf-climate-[0-9a-z]{1,5}$/.test(L._config.tiles[0].hash)) fail("phone: a stable #hash for the Back button: " + L._config.tiles[0].hash);
+        const go = el.getGridOptions(); if (go.columns !== 6 || go.rows !== "auto" || el.getCardSize() !== 2) fail("phone: a tile asks for a tile's size: " + JSON.stringify(go));
+        // a tap opens the full card in the popup (attached to <body>)
+        tl.click(); await wait(120);
+        const pop = L._pop && L._pop.card; if (!pop || pop.localName !== "sf-climate-card" || pop.shadowRoot.querySelector("sf-launcher-card") || !pop.shadowRoot.querySelector(".room, .rooms, svg")) fail("phone: the popup holds the full card, not another tile");
+        L._close(false); await wait(400);
+        // the same hass reaches the tile on every update, and an unchanged config is not re-applied
+        let sets = 0; const sc = L.setConfig.bind(L); L.setConfig = (c) => { sets++; sc(c); };
+        for (let i = 0; i < 5; i++) { el.hass = { ...hc }; await wait(20); } if (sets) fail("phone: the tile is not rebuilt on every hass update (" + sets + ")");
+        if (L.hass !== el._hass) fail("phone: the tile follows hass");
+        // back to a wide screen: the full card again, no tile left; and back to a phone
+        flip(false); await wait(80);
+        if (el.shadowRoot.querySelector("sf-launcher-card") || !el.shadowRoot.querySelector("style") || el.getGridOptions().columns === 6) fail("phone: on a wide screen the full card comes back");
+        flip(true); await wait(80); if (!el.shadowRoot.querySelector("sf-launcher-card")) fail("phone: back on a phone, the tile again");
+      }
+      el.remove(); await wait(20);
+      if (mqs.some((mq) => mq._l.size)) fail("phone: a removed card stops watching the screen size");
+      // not offered where a tile would hide something urgent, or where the card is already a launcher / a full screen
+      for (const tag of ["sf-alert-card", "sf-launcher-card"]) { const x = await mk(tag, { ...(FULL[tag] || {}), phone: "tile" }); if (x.shadowRoot.querySelector("sf-launcher-card") && tag === "sf-alert-card") fail("phone: " + tag + " ignores phone: tile"); x.remove(); }
+      // every other card accepts it (and an alias): a tile, never an error
+      for (const tag of ["sf-energy-flow-card", "sf-controls-card", "sf-room-card", "sf-weather-card", "sf-report-card", "sf-cells-card"]) {
+        const x = await mk(tag, { ...(FULL[tag] || FULL[{ "sf-energy-flow-card": "sf-reactor-card", "sf-controls-card": "sf-console-card" }[tag]] || {}), phone: "tile" });
+        const y = x.shadowRoot.querySelector("sf-launcher-card"); await wait(30);
+        if (!y || !y.shadowRoot.querySelector(".tile") || /undefined|NaN|\[object/.test(y.shadowRoot.textContent)) fail("phone: " + tag + " as a tile: " + (y ? y.shadowRoot.textContent.slice(0, 80) : "none"));
+        x.remove();
+      }
+      // hostile phone values: ignored, never an error
+      for (const v of [true, 1, "TILE", {}, "<img src=x onerror=alert(1)>"]) { const x = await mk("sf-climate-card", { ...FULL["sf-climate-card"], phone: v, phone_icon: "<b>" }); if (x.shadowRoot.querySelector("sf-launcher-card")) fail("phone: only the exact value 'tile' turns it on: " + v); x.remove(); }
+      if (__SF.sfValidate("sf-climate-card", { ...FULL["sf-climate-card"], phone: "tile", phone_name: "A", phone_icon: "mdi:x" }).length) fail("phone: the phone keys raise no validation warning");
+      // the editor offers it, except on the excluded cards
+      for (const [tag, want] of [["sf-climate-card", true], ["sf-alert-card", false]]) {
+        const ed = document.createElement(tag + "-editor"); ed.hass = hc; ed.setConfig({ ...(FULL[tag] || {}), phone: "tile" }); document.body.appendChild(ed); await wait(40);
+        const has = [...ed.shadowRoot.querySelectorAll("ha-form")].some((f) => JSON.stringify(f.schema || []).includes('"phone_name"'));
+        if (has !== want) fail("phone: editor field on " + tag + " expected " + want); ed.remove();
+      }
+    } finally { window.matchMedia = realMM; }
+  }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`translation problem: ${m}`);
   for (const e of window.__errors) fail(`JavaScript error: ${e}`);

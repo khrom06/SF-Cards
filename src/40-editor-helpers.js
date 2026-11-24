@@ -56,7 +56,7 @@ const sfO = (name) => ({ name, selector: { object: {} } });
 const sfG = (...schema) => ({ type: "grid", name: "", schema });
 
 const SF_LABELS = {
-  _device: "Remplir depuis un appareil (complète les champs vides)", theme: "Thème", look: "Style", accent: "Couleur d'accent (amber, green, pink, red ou #rrggbb)", name: "Nom", label: "Libellé", hold_action: "Appui long", tap_action: "Appui court", navigation_path: "Chemin de la page (ex. /lovelace/0)", icon: "Icône", color: "Couleur (ex. var(--sf-cyan))", title: "Titre", subtitle: "Sous-titre",
+  _device: "Remplir depuis un appareil (complète les champs vides)", phone: "Sur téléphone", phone_name: "Nom de la tuile (téléphone)", phone_icon: "Icône de la tuile (téléphone)", theme: "Thème", look: "Style", accent: "Couleur d'accent (amber, green, pink, red ou #rrggbb)", name: "Nom", label: "Libellé", hold_action: "Appui long", tap_action: "Appui court", navigation_path: "Chemin de la page (ex. /lovelace/0)", icon: "Icône", color: "Couleur (ex. var(--sf-cyan))", title: "Titre", subtitle: "Sous-titre",
   entity: "Entité", sub: "Texte sous le titre", unit: "Unité", digits: "Décimales", warn: "Seuil d'alerte (orange)",
   crit: "Seuil critique (rouge)", max: "Valeur maximale", min: "Minimum", timer: "Minuteur (affiche le temps restant)",
   stop: "Entités coupées par un appui pendant le minuteur", hash: "Lien du panneau (#…)", columns: "Colonnes",
