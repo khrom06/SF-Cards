@@ -110,10 +110,18 @@ class SfBase extends HTMLElement {
     try { data = el.dataset.d ? JSON.parse(el.dataset.d) : {}; } catch (e) { return; }
     el.classList.add("sent");
     setTimeout(() => el.classList.remove("sent"), 600);
-    this._hass.callService(domain, service, data).catch((err) => {
+    // A press that never reaches Home Assistant (a phone whose connection fell asleep, a refused call) must not fail silently: the button
+    // flashes red AND a message says so. A direct `script.<name>` call only answers when the script ends, so it is never timed out.
+    let toast = null, answered = false;
+    const wait = domain === "script" ? null : setTimeout(() => { if (!answered && el.isConnected !== false) toast = sfToast(this, this.t("common.call_timeout")); }, SF_CALL_TIMEOUT);
+    let sent; try { sent = Promise.resolve(this._hass.callService(domain, service, data)); } catch (e) { sent = Promise.reject(e); }
+    sent.then(() => { answered = true; clearTimeout(wait); if (toast) toast.remove(); }, (err) => {
+      answered = true; clearTimeout(wait);
       el.classList.add("fail");
       el.title = String(err && err.message || err);
       setTimeout(() => el.classList.remove("fail"), 2500);
+      if (toast) toast.remove();
+      sfToast(this, this.t("common.call_failed"), String(err && err.message || err || ""));
     });
   }
   // Attributes of a control button, to insert in a tag.

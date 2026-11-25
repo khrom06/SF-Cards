@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+### Fixed
+- **A press that does not reach Home Assistant is no longer silent.** When a button's command is refused, or Home Assistant gives no answer within 10 s (typically a phone whose connection fell asleep), a message appears over the dashboard ("Command not sent", with the reason; "Home Assistant is not answering: check the connection") and closes itself after 7 s or on a tap, in addition to the button flashing red. A command that goes through shows nothing. Direct `script.<name>` calls are never timed out, since Home Assistant only answers them when the script ends. Translated into the 11 languages.
+
 ## [1.27.0] - 2026-11-25
 > **Manual installs (not the Marketplace / HACS): copy the nine new `sf-cards-i18n-*.js` files of the release next to `sf-cards.js`**, or the cards show English instead of Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese or Arabic. French and English need nothing. Marketplace and HACS installs get them automatically.
 

@@ -1664,6 +1664,38 @@ __SF.SF_HOOK.tr = (lang, key) => {
       }
     } finally { window.matchMedia = realMM; }
   }
+  // 5g. A press that does not reach Home Assistant says so (message over the dashboard), never silently; a direct script call is never timed out.
+  {
+    const toast = () => document.getElementById("sf-toast"), tx = () => (toast() && toast().shadowRoot.textContent) || "";
+    const press = async (cs, tag = "sf-climate-card", extras = [{ label: "Dry", entity: "switch.plug" }]) => {
+      const el = document.createElement(tag); el.setConfig({ ...FULL[tag], extras }); document.body.appendChild(el);
+      el.hass = { ...HASS(base, "en"), callService: cs }; await wait(60);
+      const b = el.shadowRoot.querySelector(".extras [data-call]"); if (!b) { fail("toast: the test button was not found"); return null; }
+      b.click(); return { el, b };
+    };
+    document.querySelectorAll("#sf-toast").forEach((x) => x.remove());
+    const r1 = await press(() => Promise.reject(new Error("Not allowed <img src=x onerror=window.__pwn=1>"))); await wait(80);
+    if (!toast()) fail("toast: a refused command shows no message"); else {
+      if (!/Command not sent/.test(tx()) || !/Not allowed/.test(tx())) fail("toast: wrong text for a refused command: " + tx());
+      if (toast().shadowRoot.querySelector("img") || window.__pwn) fail("toast: an error message was read as HTML");
+      if (!toast().shadowRoot.querySelector("[role=alert]")) fail("toast: not announced to screen readers (role=alert)");
+    }
+    if (r1 && !r1.b.classList.contains("fail")) fail("toast: the button no longer flashes red");
+    toast() && toast().remove(); r1 && r1.el.remove();
+    const r2 = await press(() => Promise.resolve()); await wait(120);
+    if (toast()) fail("toast: a command that went through shows a message"); r2 && r2.el.remove();
+    const r3 = await press(() => { throw new Error("sync failure"); }); await wait(80);
+    if (!/sync failure/.test(tx())) fail("toast: a call that throws at once shows no message"); toast() && toast().remove(); r3 && r3.el.remove();
+    __SF.sfCallTimeout(120);
+    const r4 = await press(() => new Promise(() => {})); await wait(60);
+    if (toast()) fail("toast: shown before the delay"); await wait(160);
+    if (!/not answering/.test(tx())) fail("toast: no message when Home Assistant does not answer: " + tx()); toast() && toast().remove(); r4 && r4.el.remove();
+    let late; const r5 = await press(() => new Promise((res) => { late = res; })); await wait(200); late(); await wait(60);
+    if (toast()) fail("toast: still shown after the answer finally came"); r5 && r5.el.remove();
+    const r6 = await press(() => new Promise(() => {}), "sf-climate-card", [{ label: "Run", entity: "script.go" }]); await wait(300);
+    if (toast()) fail("toast: a direct script call must never be timed out (it answers when the script ends)"); r6 && r6.el.remove();
+    __SF.sfCallTimeout(10000);
+  }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`translation problem: ${m}`);
   for (const e of window.__errors) fail(`JavaScript error: ${e}`);
