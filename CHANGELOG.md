@@ -2,7 +2,7 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.27.0] - 2026-11-25
 > **Manual installs (not the Marketplace / HACS): copy the nine new `sf-cards-i18n-*.js` files of the release next to `sf-cards.js`**, or the cards show English instead of Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese or Arabic. French and English need nothing. Marketplace and HACS installs get them automatically.
 
 ### Added

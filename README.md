@@ -480,6 +480,8 @@ With `mode_entity` (any `input_select` / `select` / `sensor`, e.g. Morning / Day
 
 **The simplest way: `phone: tile` on the cards themselves.** Keep one dashboard and one configuration per card. On a screen narrower than 768 px (the "mobile" size of Home Assistant's screen conditions; most phones held sideways are wider and get the full card) the card becomes a summary tile — two per row — that opens the full card in the bottom sheet; on a tablet or a computer it stays the full card. In the visual editor: **On a phone → A tile that opens the card**.
 
+<img src="assets/anim/phone-tile.gif" alt="On a phone: three cards with phone: tile are three summary tiles; a tap opens the Climate card in a bottom sheet, the close button brings the tiles back" width="300">
+
 ```yaml
 type: custom:sf-climate-card
 phone: tile                 # absent or "card": the full card everywhere (the default, nothing changes)
