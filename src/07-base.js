@@ -1,6 +1,7 @@
 class SfBase extends HTMLElement {
   setConfig(config) {
     if (!config) throw new Error(`${this.localName} : config required`);
+    this._sfRaw = config;   // as written by the user (src/22a-phone-tile.js gives it to the popup)
     this._config = sfNormConfig(sfCanon(this.localName), this.defaults ? { ...this.defaults(), ...config } : { ...config });
     // The visual editor and the dashboard re-apply the configuration on every change, often unchanged: `_cfgSame` lets the cards that load data from
     // Home Assistant keep what they already fetched instead of asking again.
@@ -20,6 +21,11 @@ class SfBase extends HTMLElement {
     if (this._raf || !this._hass || !this._config) return;
     this._raf = requestAnimationFrame(() => {
       this._raf = null;
+      // `phone: tile` on a narrow screen: a launcher tile that opens this card (src/22a-phone-tile.js). Without that option: unchanged.
+      if (this._config.phone === "tile") {
+        if (sfPhoneOn(this)) { sfPhoneRender(this); return; }
+        if (this._sfPhoneEl) { try { this._sfPhoneEl.remove(); } catch (e) { /* already gone */ } this._sfPhoneEl = null; this._lastHtml = null; }
+      }
       // HA calls `hass` on every state change of the whole house: the DOM is only
       // rewritten if the render really changed, otherwise the animations
       // (3D rotations, flows) would restart from zero several times per second.
@@ -192,6 +198,16 @@ class SfBase extends HTMLElement {
   st(id) { return id && this._hass && this._hass.states ? this._hass.states[id] : undefined; }
   ok(id) { const s = this.st(id); return !!s && !["unknown", "unavailable"].includes(s.state); }
   num(id) { if (!this.ok(id)) return null; const n = parseFloat(this.st(id).state); return isNaN(n) ? null : n; }
+  // The state as a person reads it: our own words when we have them (map: state -> text id), then Home Assistant's translation of the
+  // state (it knows every integration's own states: "sweeping", "charging_completed"…), and the raw state only as a last resort.
+  stateText(id, map) {
+    const s = this.st(id); if (!s) return this.t("common.no_data");
+    if (s.state === "unavailable") return this.t("common.unavailable");
+    if (map && Object.prototype.hasOwnProperty.call(map, s.state)) return this.t(map[s.state]);
+    let txt = "";
+    try { txt = this._hass && typeof this._hass.formatEntityState === "function" ? String(this._hass.formatEntityState(s) || "") : ""; } catch (e) { txt = ""; }
+    return txt || String(s.state);
+  }
   unit(id) { const s = this.st(id), u = s && s.attributes.unit_of_measurement; return typeof u === "string" ? u : ""; }   // always a string, whatever an integration publishes
   // A list attribute or option: always an array (an integration may publish a string, a number or nothing).
   arr(v) { return Array.isArray(v) ? v : []; }
@@ -303,7 +319,7 @@ class SfBase extends HTMLElement {
     if (this._locRaw !== raw) { this._locRaw = raw; try { this._locVal = Intl.getCanonicalLocales(String(raw).replace(/_/g, "-"))[0] || "en"; } catch (e) { this._locVal = "en"; } }
     return this._locVal;
   }
-  t(key, vars) { return sfTr(this.lang, key, vars); }
+  t(key, vars) { const l = this.lang; sfI18nNeed(l, this); return sfTr(l, key, vars); }
   ago(id) {
     const s = this.st(id); if (!s) return "";
     const m = Math.round((Date.now() - new Date(s.last_changed).getTime()) / 60000);
@@ -327,6 +343,7 @@ class SfBase extends HTMLElement {
     return { actif: true, reste: isNaN(fin) ? null : Math.max(1, Math.ceil((fin - Date.now()) / 60000)) };
   }
   disconnectedCallback() {
+    if (this._sfMq) sfPhoneStop(this);
     if (this._ti) { clearInterval(this._ti); this._ti = null; }
     if (this._sfRo) { this._sfRo.disconnect(); this._sfRo = null; }
     if (this._holdTimer) { clearTimeout(this._holdTimer); this._holdTimer = null; }

@@ -79,7 +79,7 @@ class SfConsoleCard extends SfBase {
       }
       case "vacuum": {
         const st = s ? s.state : "unavailable";
-        const txt = { docked: this.t("console.docked"), cleaning: this.t("console.cleaning"), returning: this.t("console.returning"), paused: this.t("console.paused"), idle: this.t("common.waiting"), error: this.t("console.error") }[st] || this.esc(st);
+        const txt = this.esc(s ? this.stateText(x.entity, { docked: "console.docked", cleaning: "console.cleaning", returning: "console.returning", paused: "console.paused", idle: "common.waiting", error: "console.error" }) : this.t("common.unavailable"));
         const bat = this.num(x.battery);
         return `<div class="it wide ${this.esc(st === "cleaning" ? "on" : "")}" style="--ac:${SF_C.green}"><div class="row">
           <span class="click" data-e="${this.esc(x.entity)}">${ic("mdi:robot-vacuum")}</span>

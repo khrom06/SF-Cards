@@ -744,12 +744,12 @@
   {
    "key": "22-launcher.js|m ? this.esc(m.state.replace(/^[^\\p{L}]+/u, \"\")) : \"\"#1",
    "ctx": "text",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
    "key": "22-launcher.js|act ? this.t(\"launcher.n_room_s_heating_or_cooling\", { n: act }) : this.t(\"common.idle\")#1",
    "ctx": "text",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
    "key": "22-launcher.js|this.esc(x.name)#1",
@@ -1082,6 +1082,31 @@
    "benignSuite": true
   },
   {
+   "key": "25-wallpanel.js|kind#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|age#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|L.kind#1",
+   "ctx": "attr",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.ic(L.kind === \"lost\" ? \"mdi:lan-disconnect\" : \"mdi:timer-sand\")#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "25-wallpanel.js|this.esc(txt)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
    "key": "25-wallpanel.js|this.esc(el.dataset.confirm)#1",
    "ctx": "text",
    "benignSuite": true
@@ -1182,7 +1207,7 @@
    "benignSuite": true
   },
   {
-   "key": "25-wallpanel.js|v ? this.esc(this.own(FR, v.state) ? this.t(this.own(FR, v.state)) : v.state) : \"\"#1",
+   "key": "25-wallpanel.js|v ? this.esc(this.stateText(V.entity, VS)) : \"\"#1",
    "ctx": "text",
    "benignSuite": true
   },
@@ -2922,12 +2947,12 @@
    "benignSuite": true
   },
   {
-   "key": "29j-report.js|this.icon(\"mdi:image-outline\", 16)#1",
+   "key": "29j-report.js|this.icon(sfCanShareImage() ? \"mdi:share-variant\" : \"mdi:image-outline\", 16)#1",
    "ctx": "text",
    "benignSuite": true
   },
   {
-   "key": "29j-report.js|this.esc(this.t(\"report.export\"))#1",
+   "key": "29j-report.js|this.esc(this.t(sfCanShareImage() ? \"report.share\" : \"report.export\"))#1",
    "ctx": "text",
    "benignSuite": true
   },
@@ -2997,14 +3022,14 @@
    "benignSuite": true
   },
   {
-   "key": "29j-report.js|this._period()#2",
+   "key": "31-strategy.js|from.stat_energy_from#1",
    "ctx": "text",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
-   "key": "29j-report.js|new Date().toISOString().slice(0, 10)#1",
+   "key": "31-strategy.js|from.stat_energy_from#2",
    "ctx": "text",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
    "key": "31-strategy.js|tag#1",
@@ -3018,16 +3043,6 @@
   },
   {
    "key": "31-strategy.js|a.name#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "31-strategy.js|from.stat_energy_from#1",
-   "ctx": "text",
-   "benignSuite": true
-  },
-  {
-   "key": "31-strategy.js|from.stat_energy_from#2",
    "ctx": "text",
    "benignSuite": true
   },
@@ -3133,6 +3148,16 @@
   },
   {
    "key": "44-editor-required.js|SF_RED#2",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "46-validate.js|x.slice(0, 60)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "46-validate.js|x.slice(0, 60)#2",
    "ctx": "text",
    "benignSuite": true
   },

@@ -7,7 +7,7 @@
  *  - a known option with the wrong type, a number outside its range, an unlisted choice, or a malformed entity id.
  * Options the specs do not describe (YAML-only ones) are never flagged: no false alarm on a valid configuration.
  */
-const SF_COMMON_KEYS = ["type", "theme", "look", "accent", "grid_options", "layout_options", "view_layout", "visibility", "card_mod", "events", "name", "title", "id", "key"];
+const SF_COMMON_KEYS = ["type", "theme", "look", "accent", "grid_options", "layout_options", "view_layout", "visibility", "card_mod", "events", "name", "title", "id", "key", "phone", "phone_name", "phone_icon"];
 const SF_ENTITY_RE = /^[a-z0-9_]+\.[a-z0-9_]+$/i;
 function sfFlatSchema(schema, out = {}) {
   for (const f of schema || []) { if (f && f.type === "grid") sfFlatSchema(f.schema, out); else if (f && typeof f.name === "string" && f.name && f.name[0] !== "_") out[f.name] = f; }
@@ -32,6 +32,7 @@ function sfCheckValue(path, v, f, out) {
     // Only the id format is checked: the domain filter of a selector is a hint for the picker, cards accept other domains (e.g. any numeric entity).
     for (const x of sel.entity.multiple ? (Array.isArray(v) ? v : [v]) : [v]) {
       if (typeof x !== "string" || !SF_ENTITY_RE.test(x)) bad(`'${String(x).slice(0, 40)}' is not an entity id (expected domain.object_id)`);
+      else if (sfValidateStates && !Object.prototype.hasOwnProperty.call(sfValidateStates, x)) bad(sfValidateReg && Object.prototype.hasOwnProperty.call(sfValidateReg, x) ? `'${x.slice(0, 60)}' is disabled in Home Assistant, or its integration is not loaded` : `'${x.slice(0, 60)}' does not exist in Home Assistant (renamed or removed?)`);
     }
   } else if (sel.number) {
     const n = typeof v === "number" ? v : typeof v === "string" && v.trim() !== "" ? Number(v) : NaN;
@@ -81,14 +82,20 @@ function sfWarnDeprecated(tag) {
     console.warn("SF Cards: " + m);
   } catch (e) { /* never break a card for a warning */ }
 }
-function sfValidate(tag, cfg) {
+// The states of Home Assistant while sfValidate runs from the editor: a well-formed entity id that is not among them is reported (a renamed
+// or removed entity is the most common reason a card shows "no data"). Without states (the console check), existence is not checked.
+let sfValidateStates = null, sfValidateReg = null;   // the entity registry tells a disabled entity (in it, not in the states) from a missing one
+function sfValidate(tag, cfg, states, registry) {
   const spec = SF_SPECS[tag], out = [];
   if (!spec || !cfg || typeof cfg !== "object" || Array.isArray(cfg)) return out;
+  sfValidateStates = states && typeof states === "object" && Object.keys(states).length ? states : null;
+  sfValidateReg = registry && typeof registry === "object" ? registry : null;
+  if (SF_PHONE_NO.has(tag) && cfg.phone !== undefined) out.push({ path: "phone", msg: "not available on this card (it is never folded into a tile)" });
   try {
     let top = []; try { top = (spec.fields ? spec.fields(cfg) : []).slice(); } catch (e) { /* fields may depend on data */ }
     for (const o of spec.objects || []) { if (cfg[o.key] && typeof cfg[o.key] === "object") { try { sfCheckObject(cfg[o.key], o.schema(cfg[o.key]), [], o.key + ".", out); } catch (e) { /* skip */ } } }
     sfCheckObject(cfg, top, (spec.lists || []).map((l) => l.key).concat((spec.objects || []).map((o) => o.key), ["themes"]), "", out);
     sfCheckLists(spec, cfg, "", out);
-  } catch (e) { /* validation must never break a card */ }
+  } catch (e) { /* validation must never break a card */ } finally { sfValidateStates = null; sfValidateReg = null; }
   return out.slice(0, 20);
 }

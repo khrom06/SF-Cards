@@ -12,7 +12,7 @@ window.addEventListener("unhandledrejection", (e) => window.__errors.push(`unhan
 window.__missing = new Set();
 window.__SF_TEST = true;   // exposes internal functions to this test only
 </script>
-<script src="../dist/sf-cards.js"></script>
+<script src="i18n-all.js"></script><script src="../dist/sf-cards.js"></script>
 <script src="fixtures.js"></script>
 <script>
 const mount = (tag, cfg, language, states) => {
@@ -758,6 +758,33 @@ __SF.SF_HOOK.tr = (lang, key) => {
     // rain: the forecast status message appears in the morning
     { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Matin") }, "en", conn); await wait(80);
       if (!/rain (in|around)|raining/.test(text(el))) fail(`sf-ns-card: rain message missing ('${text(el).slice(0, 140)}')`); el.remove(); }
+    // connection: a closed connection or data that stopped coming are said on the panel, with the age of the data
+    { const st = { ...base, "input_select.ns_mode": S("Jour") };
+      { const d0 = await mk(NS, st, "en"); d0.hass = { ...d0._hass, connected: false }; d0._lostSince = d0.now().getTime() - 3600000; d0._tick(); await wait(60);
+        if (d0.shadowRoot.querySelector(".link")) fail("sf-ns-card: without offline_banner an existing panel never shows the banner"); d0.remove(); }
+      const el = await mk({ ...NS, offline_banner: true }, st, "en");
+      if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: no connection banner while data comes in");
+      const h0 = el._hass; el.hass = { ...h0, connected: false }; await wait(60);
+      if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: a reconnection of a few seconds shows no banner");
+      el._lostSince = el.now().getTime() - 31000; el._tick(); await wait(60);
+      { const keep = el._lostSince; Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true }); document.dispatchEvent(new Event("visibilitychange"));
+        if (el._lostSince === keep) fail("sf-ns-card: the 30 s restart when the page becomes visible (tablet waking up)"); delete document.visibilityState; el._lostSince = keep; el._tick(); await wait(60); }
+      const lb = el.shadowRoot.querySelector(".link.lost"); if (!lb || !/Connection to Home Assistant lost · data from 0 min ago/.test(lb.textContent) || lb.getAttribute("role") !== "status") fail("sf-ns-card: 'connection lost' banner expected: " + (lb ? lb.textContent : "none"));
+      el._seen = el.now().getTime() - 20 * 60000; el.hass = { ...el._hass, connected: true }; el._tick(); await wait(60);
+      if (el.shadowRoot.querySelector(".link")) fail("sf-ns-card: without stale_minutes, a quiet house shows no banner");
+      el.remove(); const es = await mk({ ...NS, stale_minutes: 15 }, st, "en"); es._seen = es.now().getTime() - 20 * 60000; es._tick(); await wait(60);
+      const el2 = es;
+      const ls = el2.shadowRoot.querySelector(".link.stale"); if (!ls || !/No update for 20 min/.test(ls.textContent)) fail("sf-ns-card: 'no update for 20 min' banner expected with stale_minutes: 15: " + (ls ? ls.textContent : text(el2).slice(0, 80)));
+      el2.hass = { ...HASS(st, "en") }; await wait(60); if (el2.shadowRoot.querySelector(".link")) fail("sf-ns-card: new states clear the banner");
+      el2.remove();
+      const e0 = await mk({ ...NS, stale_minutes: 0 }, st, "en"); e0._seen = e0.now().getTime() - 600 * 60000; e0._tick(); await wait(60); if (e0.shadowRoot.querySelector(".link")) fail("sf-ns-card: stale_minutes: 0 turns the check off"); e0.remove();
+      const e5 = await mk({ ...NS, stale_minutes: 5 }, st, "fr"); e5._seen = e5.now().getTime() - 6 * 60000; e5._tick(); await wait(60); if (!/Aucune mise à jour depuis 6 min/.test(text(e5))) fail("sf-ns-card: stale_minutes and the French text"); e5.remove(); }
+    // vacuum popup: Home Assistant's own translation of the state, never the raw state when Home Assistant knows better
+    { const st = { ...base, "input_select.ns_mode": S("Jour"), "vacuum.robot": S("sweeping") };
+      const el = await mk(NS, st, "en", { formatEntityState: (o) => (o.state === "sweeping" ? "Sweeping the floor" : "") }); el._pop = "vac"; el._key = null; el._schedule(); await wait(60);
+      const hd = el.shadowRoot.querySelector(".shead .r"); if (!hd || !/Sweeping the floor · 80 %/.test(hd.textContent)) fail("sf-ns-card: vacuum state through formatEntityState: " + (hd ? hd.textContent : "none")); el.remove();
+      const e2 = await mk(NS, { ...st, "vacuum.robot": S("docked") }, "fr", { formatEntityState: () => "Station" }); e2._pop = "vac"; e2._key = null; e2._schedule(); await wait(60);
+      if (!/à la base/.test(e2.shadowRoot.querySelector(".shead .r").textContent)) fail("sf-ns-card: our own words for the states we know"); e2.remove(); }
     // vacuum popup: shortcuts + return to base / stop; a hostile state does not crash
     { const el = await mk(NS, { ...base, "input_select.ns_mode": S("Jour"), "vacuum.robot": S("constructor") }, "en"); el._pop = "vac"; el._key = null; el._render();
       const t = text(el); if (!/Return to base/.test(t) || !/Stop/.test(t) || !/Kitchen/.test(t) || !/Robot/.test(t)) fail(`sf-ns-card : popup aspirateur incomplet (« ${t.slice(0, 160)} »)`);
@@ -1316,6 +1343,13 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (v.getAttribute("look") !== "calm" || v.getAttribute("accent") !== "green") fail("look / accent: the theme variables --sf-look / --sf-accent apply to every card");
     const v2 = document.createElement("sf-machines-card"); v2.setConfig({ ...FULL["sf-machines-card"], accent: "pink" }); host.appendChild(v2); v2.hass = HASS(base, "en"); await wait(50);
     if (v2.getAttribute("accent") !== "pink") fail("accent: the card option wins over the theme variable"); host.remove();
+    { const cfg = { rooms: [{ name: "A", climate: "climate.ghost" }, { name: "B", climate: "climate.real" }] }, has = { "climate.real": S("heat") };
+      const w1 = __SF.sfValidate("sf-climate-card", cfg, has); if (w1.length !== 1 || !/'climate.ghost' does not exist in Home Assistant/.test(w1[0].msg)) fail("validate: an entity that does not exist is reported in the editor: " + JSON.stringify(w1));
+      if (__SF.sfValidate("sf-climate-card", cfg).length) fail("validate: without states (console check), existence is not checked");
+      { const w2 = __SF.sfValidate("sf-climate-card", cfg, has, { "climate.ghost": { entity_id: "climate.ghost" } }); if (w2.length !== 1 || !/is disabled in Home Assistant/.test(w2[0].msg)) fail("validate: a disabled entity (in the registry, not in the states) is called disabled: " + JSON.stringify(w2)); }
+      if (__SF.sfValidate("sf-climate-card", cfg, {}).length) fail("validate: empty states (not loaded yet) are not a reason to report");
+      if (__SF.sfValidate("sf-climate-card", { rooms: [{ name: "B", climate: "climate.real" }] }, has).length) fail("validate: an existing entity is not reported");
+      if (__SF.sfValidate("sf-climate-card", { rooms: [{ climate: "constructor.x" }] }, { "climate.real": S("on") }).length !== 1) fail("validate: prototype names are not entities"); }
     const w = __SF.sfValidate("sf-machines-card", { ...FULL["sf-machines-card"], look: "calm", accent: "amber" }); if (w.length) fail("look / accent must not raise validation warnings");
   }
   // 5u. Media card: what plays, only the supported buttons, services, progress, several players, hostile picture.
@@ -1412,6 +1446,29 @@ __SF.SF_HOOK.tr = (lang, key) => {
       const yb = document.createElement("sf-report-card"); yb.setConfig({ grid: "sensor.rp_grid", solar: "sensor.rp_solar", period: "year" }); document.body.appendChild(yb); yb.hass = big; await wait(80);
       const yv = [...yb.shadowRoot.querySelectorAll(".kpi .val")].map((x) => x.textContent); if (!/^18[.,]0 MWh$/.test(yv[0] || "") || !/^3600 kWh$/.test(yv[1] || "")) fail("report: 18 000 kWh (grid 14 400 + solar 3600) is shown as 18.0 MWh, 3600 kWh stays in kWh: " + yv.join(" | ")); yb.remove(); }
     if (![...el.shadowRoot.querySelectorAll("[data-per],[data-nav],[data-export]")].every((x) => x.getAttribute("role") === "button")) fail("report: its buttons must be keyboard buttons");
+    // Share: with the Web Share API the image goes to the share sheet; a cancelled sheet does nothing; any other failure downloads it.
+    { const nav = window.navigator, had = { share: nav.share, canShare: nav.canShare }, clicks = [], shared = [], origClick = HTMLAnchorElement.prototype.click;
+      HTMLAnchorElement.prototype.click = function () { clicks.push(this.download); };
+      const setNav = (share, canShare) => { Object.defineProperty(nav, "share", { value: share, configurable: true, writable: true }); Object.defineProperty(nav, "canShare", { value: canShare, configurable: true, writable: true }); };
+      const realMM = window.matchMedia; let coarse = false; window.matchMedia = (q) => ({ matches: /pointer: coarse/.test(q) ? coarse : realMM.call(window, q).matches, addEventListener() {}, removeEventListener() {} });
+      try {
+        if (el.shadowRoot.querySelector("[data-export]").textContent.trim() !== "Export as an image") fail("report: without the Web Share API the button exports");
+        setNav(async (d) => { shared.push(d); }, (d) => !!(d && d.files && d.files[0] instanceof File));
+        el._lastHtml = null; el.hass = { ...hr }; await wait(60);
+        if (el.shadowRoot.querySelector("[data-export]").textContent.trim() !== "Export as an image") fail("report: a desktop browser that can share keeps the download (no coarse pointer)");
+        coarse = true; el._lastHtml = null; el.hass = { ...hr }; await wait(60);
+        if (!/Share the image/.test(el.shadowRoot.querySelector("[data-export]").textContent)) fail("report: with the Web Share API the button says Share");
+        if (!el._draw()) fail("report: no image to share (data not loaded)");
+        el._export(); for (let i = 0; i < 30 && !shared.length; i++) await wait(100);
+        if (shared.length !== 1 || !(shared[0].files[0] instanceof File) || shared[0].files[0].type !== "image/png" || !/^sf-report-year-\d{4}-\d\d-\d\d\.png$/.test(shared[0].files[0].name) || clicks.length) fail("report: the PNG goes to the share sheet, not to a download: " + JSON.stringify([shared.length, clicks]));
+        let aborted = 0; setNav(async () => { aborted++; const e = new Error("closed"); e.name = "AbortError"; throw e; }, () => true); el._export(); for (let i = 0; i < 30 && !aborted; i++) await wait(100); await wait(100);
+        if (clicks.length) fail("report: closing the share sheet must not download the image");
+        setNav(async () => { throw new Error("denied"); }, () => true); el._export(); for (let i = 0; i < 30 && !clicks.length; i++) await wait(100);
+        if (clicks.length !== 1) fail("report: a failed share falls back to the download");
+        setNav(() => { throw new Error("boom"); }, () => { throw new Error("boom"); }); el._lastHtml = null; el.hass = { ...hr }; await wait(60);
+        if (el.shadowRoot.querySelector("[data-export]").textContent.trim() !== "Export as an image") fail("report: a throwing canShare means no sharing");
+      } finally { window.matchMedia = realMM; HTMLAnchorElement.prototype.click = origClick; setNav(had.share, had.canShare); if (had.share === undefined) { delete nav.share; delete nav.canShare; } }
+    }
     el.remove();
     let bad = 0; const hb = { ...HASS(base, "en"), callWS: async () => { bad++; throw new Error("no recorder"); } };
     const e2 = document.createElement("sf-report-card"); e2.setConfig({ grid: "sensor.rp_grid" }); document.body.appendChild(e2); e2.hass = hb; await wait(40); for (let i = 0; i < 30; i++) e2.hass = hb; await wait(40);
@@ -1430,6 +1487,24 @@ __SF.SF_HOOK.tr = (lang, key) => {
         callWS: async (m) => { if (m.type !== "energy/get_prefs") throw new Error("unexpected"); return { energy_sources: [{ type: "grid", flow_from: [{ stat_energy_from: "sensor.rp_grid", stat_cost: "sensor.rp_cost" }], flow_to: [{ stat_energy_to: "sensor.rp_exp" }] }, { type: "solar", stat_energy_from: "sensor.rp_solar" }], device_consumption: [{ stat_consumption: "sensor.rp_car", name: "Car" }, { stat_consumption: "bad id" }] }; } };
       const collect = (root, pred) => { const out = []; const walk = (o) => { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === "object") { if (pred(o)) out.push(o); Object.values(o).forEach(walk); } }; walk(root); return out; };
       const d = await Strat.generate({}, hs), paths = d.views.map((v) => v.path).join();
+      // Stub configs (card picker): each card arrives filled with the house's own entities; without hass, the plain stub, synchronously.
+      {
+        const stub = (tag, h) => customElements.get(tag).getStubConfig(h);
+        const plain = stub("sf-climate-card"); if (!plain || typeof plain.then === "function" || !Array.isArray(plain.rooms) || plain.rooms.length) fail("stub: without hass, the plain stub is returned synchronously");
+        const cl = await stub("sf-climate-card", hs); if (!cl.rooms || cl.rooms.length !== 1 || cl.rooms[0].climate !== "climate.rm" || cl.rooms[0].name !== "Living room" || cl.rooms[0].temp !== "sensor.rm_temp" || cl.rooms[0].hum !== "sensor.rm_hum") fail(`stub: climate rooms from the areas: ${JSON.stringify(cl)}`);
+        const co = await stub("sf-controls-card", hs), items = (co.groups || []).flatMap((g) => g.items || []).map((i) => i.entity);
+        if (!items.includes("light.rm_a") || !items.includes("light.k") || items.includes("light.lamp")) fail(`stub: controls = the lights of the rooms, hidden ones left out: ${JSON.stringify(co)}`);
+        const ro = await stub("sf-room-card", hs); if (ro.area !== "lr") fail(`stub: room = the first area: ${JSON.stringify(ro)}`);
+        const rp = await stub("sf-report-card", hs); if (rp.grid !== "sensor.rp_grid" || rp.solar !== "sensor.rp_solar" || rp.cost !== "sensor.rp_cost") fail(`stub: report from the Energy dashboard settings: ${JSON.stringify(rp)}`);
+        const br = await stub("sf-home-banner-card", hs); if (!(br.people || []).some((p) => p.entity === "person.bob") || !(br.leaks || []).includes("binary_sensor.leak")) fail(`stub: banner people and leaks: ${JSON.stringify(br)}`);
+        const al = await stub("sf-alert-card", hs); if (!al.leaks.includes("binary_sensor.leak") || !al.doors.includes("binary_sensor.rm_win")) fail(`stub: alert leaks and doors: ${JSON.stringify(al)}`);
+        const none = await stub("sf-climate-card", { ...HASS({}, "en"), areas: {}, entities: {}, devices: {} }); if (JSON.stringify(none) !== JSON.stringify(plain)) fail("stub: nothing found = the plain stub");
+        const bad = await stub("sf-report-card", { ...hs, callWS: async () => { throw new Error("no energy"); } }); if (bad.grid) fail("stub: a failing Energy request falls back to the plain stub");
+        const veh = await stub("sf-vehicles-card", hs); if (!Array.isArray(veh.cars) || veh.cars.length) fail("stub: a card without discovery keeps its plain stub");
+        const cc = (window.customCards || []).find((x) => x.type === "sf-controls-card"), cr = (window.customCards || []).find((x) => x.type === "sf-report-card");
+        if (!cc || cc.preview !== true || !String(cc.documentationURL || "").startsWith("https://github.com/khrom06/SF-Cards#")) fail("stub: the controls card is previewed in the card picker, with a documentation link");
+        if (!cr || cr.preview !== false) fail("stub: a card that requests statistics is not previewed live in the card picker");
+      }
       if (paths !== "home,rooms,climate,energy,security,system") fail("strategy: the six views expected, got " + paths);
       const cards = collect(d, (o) => typeof o.type === "string" && /^custom:/.test(o.type));
       for (const c of cards) { const tag = c.type.slice(7); if (!customElements.get(tag)) fail("strategy: unknown card " + c.type); else { const w = __SF.sfValidate(tag, c); if (w.length) fail("strategy: " + tag + " generated with warnings: " + JSON.stringify(w)); const miss = __SF.SF_REQ[tag] ? __SF.SF_REQ[tag](c) : []; if (miss.length) fail("strategy: " + tag + " generated incomplete"); } }
@@ -1500,9 +1575,94 @@ __SF.SF_HOOK.tr = (lang, key) => {
           const t3 = collect(await Strat.generate({ views: ["rooms"] }, mkf({ null: { floor_id: "null", name: "Null", level: 0 } })), (x) => x.type === "heading"); if (t3.length) fail("strategy: no floor title for rooms whose floor_id is null or missing");
           const bad = HASS({ "light.la": { state: "on", attributes: null } }, "en"); const nb = await Strat.generate({ views: ["lights"] }, { ...mkf({}), states: bad.states }); if (!nb.views.length) fail("strategy: a state with null attributes must not break the lights view"); }
       }
+      // SF family: the other repositories' cards are added only when their tag is defined; family: false leaves them out.
+      {
+        const tags = ["sf-heartbeat-card", "sf-trace-card", "sf-horizon-card", "sf-fan-card", "sf-todo-card", "sf-copilot-card"];
+        const before = await Strat.generate({}, hs); if (collect(before, (x) => typeof x.type === "string" && tags.includes(x.type.slice(7))).length) fail("family: nothing is added while the cards are not installed");
+        for (const t of tags) if (!customElements.get(t)) customElements.define(t, class extends HTMLElement {});
+        const stF = { ...st, "fan.ceiling": S("off"), "fan.hidden": S("off"), "todo.shopping": S("2"), "sensor.energy_production_today": S(12, { watts: { "2026-11-24T12:00:00": 900 } }), "sensor.energy_production_tomorrow": S(10, { watts: {} }), "sensor.energy_production_today_remaining": S(3, { watts: {} }) };
+        const hF = { ...hs, states: withIds(stF), entities: { ...hs.entities, "fan.hidden": { entity_id: "fan.hidden", hidden: true } } };
+        const def = await Strat.generate({}, hF); if (collect(def, (x) => typeof x.type === "string" && tags.includes(x.type.slice(7))).length) fail("family: off by default, even when installed (an existing dashboard never changes on its own)");
+        const fd = await Strat.generate({ family: true }, hF), got = (t) => collect(fd, (x) => x.type === "custom:" + t);
+        if (got("sf-heartbeat-card").length !== 1 || got("sf-copilot-card").length !== 1) fail("family: heartbeat and copilot cards on the system view");
+        const trc = got("sf-trace-card"); if (trc.length !== 1 || !trc[0].entities.includes("binary_sensor.rm_win")) fail(`family: trace card on the security view: ${JSON.stringify(trc)}`);
+        const hz = got("sf-horizon-card"); if (hz.length !== 1 || hz[0].forecast !== "sensor.energy_production_today" || hz[0].forecast_tomorrow !== "sensor.energy_production_tomorrow") fail(`family: horizon card from the forecast sensors: ${JSON.stringify(hz)}`);
+        const fn = got("sf-fan-card").map((x) => x.entity); if (fn.join() !== "fan.ceiling") fail(`family: one fan card per visible fan: ${fn}`);
+        if (got("sf-todo-card").map((x) => x.entity).join() !== "todo.shopping") fail("family: to-do card on the home view");
+        const off = await Strat.generate({ family: false }, hF); if (collect(off, (x) => typeof x.type === "string" && tags.includes(x.type.slice(7))).length) fail("family: family: false leaves them out");
+        const th = await Strat.generate({ family: true, theme: "light", look: "calm" }, hF), hb = collect(th, (x) => x.type === "custom:sf-heartbeat-card")[0]; if (!hb || hb.theme !== "light" || "look" in hb) fail("family: only the theme is passed on");
+      }
       for (const bad of [[null, null], [undefined, {}], ["x", { states: {} }], [{ areas: 5, views: 7, energy: "x", report: [] }, { states: { "light.a": { state: "on", attributes: {} } }, callWS: async () => { throw new Error("no energy"); } }], [{}, { states: null, areas: null }]]) {
         try { const r = await Strat.generate(bad[0], bad[1]); if (!r || !Array.isArray(r.views) || !r.views.length) fail("strategy: must always return at least one view"); } catch (err) { fail("strategy: generate() threw: " + err.message); } }
     }
+  }
+  // Phone tile: `phone: tile` turns a card into a launcher tile on a narrow screen; without it, nothing changes.
+  { const realMM = window.matchMedia, mqs = [];
+    const fakeMM = (narrow) => () => { const mq = { matches: narrow.v, media: "(max-width: 767px)", _l: new Set(), addEventListener: (e, f) => mq._l.add(f), removeEventListener: (e, f) => mq._l.delete(f) }; mqs.push(mq); return mq; };
+    const narrow = { v: true }; window.matchMedia = fakeMM(narrow);
+    const flip = (v) => { narrow.v = v; for (const mq of mqs) { mq.matches = v; for (const f of [...mq._l]) f(); } };
+    const hc = HASS(base, "en");
+    try {
+      const mk = async (tag, cfg) => { const el = document.createElement(tag); el.setConfig(cfg); document.body.appendChild(el); el.hass = hc; await wait(60); return el; };
+      // without the option: the full card, even on a narrow screen; the media query is never even asked
+      const n0 = mqs.length, plain = await mk("sf-climate-card", FULL["sf-climate-card"]);
+      if (plain.shadowRoot.querySelector("sf-launcher-card") || mqs.length !== n0) fail("phone: without `phone: tile` the card is unchanged and never watches the screen size");
+      plain.remove();
+      // without the option, every card returns exactly its original sizes (the functions captured before the phone wrappers)
+      for (const [tag] of __SF.SF_DEFS) { const o = __SF.SF_SIZE_ORIG[tag]; if (!o) continue;
+        const x = await mk(tag, FULL[tag] || {}); const a = JSON.stringify(x.getGridOptions()), b = JSON.stringify(o.gg.call(x));
+        if (a !== b || x.getCardSize() !== o.gs.call(x)) fail("phone: " + tag + " sizes changed without the option: " + a + " vs " + b); x.remove(); }
+      // with the option, on a phone: one launcher tile, named and summarised from the card's own configuration
+      const el = await mk("sf-climate-card", { ...FULL["sf-climate-card"], phone: "tile", phone_name: "Heating <b>x</b>" });
+      const L = el.shadowRoot.querySelector("sf-launcher-card"); if (!L) fail("phone: on a phone the card becomes a launcher tile");
+      else {
+        await wait(60);
+        const tl = L.shadowRoot.querySelector(".tile"); if (!tl || !/Heating <b>x<\/b>/.test(tl.textContent) || tl.querySelector("b")) fail("phone: the tile's name is the escaped phone_name");
+        if (!/°/.test(tl.textContent)) fail("phone: the climate tile shows the average temperature: " + (tl && tl.textContent));
+        if (L._config.tiles[0].card.phone !== undefined || L._config.tiles[0].card.phone_name !== undefined || L._config.tiles[0].card.type !== "custom:sf-climate-card") fail("phone: the popup card is the same card without the phone keys");
+        if (!/^sf-climate-[0-9a-z]{1,5}$/.test(L._config.tiles[0].hash)) fail("phone: a stable #hash for the Back button: " + L._config.tiles[0].hash);
+        const go = el.getGridOptions(); if (go.columns !== 6 || go.rows !== "auto" || el.getCardSize() !== 2) fail("phone: a tile asks for a tile's size: " + JSON.stringify(go));
+        // a tap opens the full card in the popup (attached to <body>)
+        tl.click(); await wait(120);
+        const pop = L._pop && L._pop.card; if (!pop || pop.localName !== "sf-climate-card" || pop.shadowRoot.querySelector("sf-launcher-card") || !pop.shadowRoot.querySelector(".room, .rooms, svg")) fail("phone: the popup holds the full card, not another tile");
+        L._close(false); await wait(400);
+        // the same hass reaches the tile on every update, and an unchanged config is not re-applied
+        let sets = 0; const sc = L.setConfig.bind(L); L.setConfig = (c) => { sets++; sc(c); };
+        for (let i = 0; i < 5; i++) { el.hass = { ...hc }; await wait(20); } if (sets) fail("phone: the tile is not rebuilt on every hass update (" + sets + ")");
+        if (L.hass !== el._hass) fail("phone: the tile follows hass");
+        { const h1 = L._config.tiles[0].hash; el.setConfig({ ...FULL["sf-climate-card"], min: 16, phone: "tile", phone_name: "Heating <b>x</b>" }); await wait(80);
+          if (el.shadowRoot.querySelector("sf-launcher-card")._config.tiles[0].hash !== h1) fail("phone: editing the card keeps its #hash (deep links)"); }
+        { let rb = 0; const onRb = () => rb++; el.addEventListener("ll-rebuild", onRb); flip(false); await wait(40); flip(true); await wait(40); el.removeEventListener("ll-rebuild", onRb);
+          if (rb !== 2) fail("phone: a screen-size change asks Home Assistant to rebuild the card (grid size): " + rb); }
+        // back to a wide screen: the full card again, no tile left; and back to a phone
+        flip(false); await wait(80);
+        if (el.shadowRoot.querySelector("sf-launcher-card") || !el.shadowRoot.querySelector("style") || el.getGridOptions().columns === 6) fail("phone: on a wide screen the full card comes back");
+        flip(true); await wait(80); if (!el.shadowRoot.querySelector("sf-launcher-card")) fail("phone: back on a phone, the tile again");
+      }
+      el.remove(); await wait(20);
+      if (mqs.some((mq) => mq._l.size)) fail("phone: a removed card stops watching the screen size");
+      // not offered where a tile would hide something urgent, or where the card is already a launcher / a full screen
+      { const x = await mk("sf-alert-card", { ...FULL["sf-alert-card"], phone: "tile" }); if (x.shadowRoot.querySelector("sf-launcher-card")) fail("phone: the alert card ignores phone: tile"); x.remove(); }
+      { const x = await mk("sf-launcher-card", { ...FULL["sf-launcher-card"], phone: "tile" }); await wait(30);
+        if (x.shadowRoot.querySelectorAll(".tile").length !== FULL["sf-launcher-card"].tiles.length || x.shadowRoot.querySelector("sf-launcher-card")) fail("phone: the launcher ignores phone: tile (its own tiles, no nested launcher)"); x.remove(); }
+      if (!__SF.sfValidate("sf-alert-card", { ...FULL["sf-alert-card"], phone: "tile" }).some((w) => w.path === "phone")) fail("phone: the validator says phone does nothing on the alert card");
+      // every other card accepts it (and an alias): a tile, never an error
+      for (const tag of ["sf-energy-flow-card", "sf-controls-card", "sf-room-card", "sf-weather-card", "sf-report-card", "sf-cells-card"]) {
+        const x = await mk(tag, { ...(FULL[tag] || FULL[{ "sf-energy-flow-card": "sf-reactor-card", "sf-controls-card": "sf-console-card" }[tag]] || {}), phone: "tile" });
+        const y = x.shadowRoot.querySelector("sf-launcher-card"); await wait(30);
+        if (!y || !y.shadowRoot.querySelector(".tile") || /undefined|NaN|\[object/.test(y.shadowRoot.textContent)) fail("phone: " + tag + " as a tile: " + (y ? y.shadowRoot.textContent.slice(0, 80) : "none"));
+        x.remove();
+      }
+      // hostile phone values: ignored, never an error
+      for (const v of [true, 1, "TILE", {}, "<img src=x onerror=alert(1)>"]) { const x = await mk("sf-climate-card", { ...FULL["sf-climate-card"], phone: v, phone_icon: "<b>" }); if (x.shadowRoot.querySelector("sf-launcher-card")) fail("phone: only the exact value 'tile' turns it on: " + v); x.remove(); }
+      if (__SF.sfValidate("sf-climate-card", { ...FULL["sf-climate-card"], phone: "tile", phone_name: "A", phone_icon: "mdi:x" }).length) fail("phone: the phone keys raise no validation warning");
+      // the editor offers it, except on the excluded cards
+      for (const [tag, want] of [["sf-climate-card", true], ["sf-alert-card", false]]) {
+        const ed = document.createElement(tag + "-editor"); ed.hass = hc; ed.setConfig({ ...(FULL[tag] || {}), phone: "tile" }); document.body.appendChild(ed); await wait(40);
+        const has = [...ed.shadowRoot.querySelectorAll("ha-form")].some((f) => JSON.stringify(f.schema || []).includes('"phone_name"'));
+        if (has !== want) fail("phone: editor field on " + tag + " expected " + want); ed.remove();
+      }
+    } finally { window.matchMedia = realMM; }
   }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`translation problem: ${m}`);

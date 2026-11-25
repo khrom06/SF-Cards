@@ -45,9 +45,11 @@ jobs:
           mkdir -p ha-config/www
           if [ -n "$SF_REF" ]; then
             git show "$SF_REF:dist/sf-cards.js" > ha-config/www/sf-cards.js
+            # since the language files exist (one sf-cards-i18n-<lang>.js per extra language), they sit next to sf-cards.js
+            for f in $(git ls-tree --name-only "$SF_REF" dist/ | grep 'sf-cards-i18n-' || true); do git show "$SF_REF:$f" > "ha-config/www/$(basename "$f")"; done
             echo "SF-Cards tested: $SF_REF ($(git rev-parse --short "$SF_REF"))"
           else
-            cp dist/sf-cards.js ha-config/www/sf-cards.js
+            cp dist/sf-cards.js dist/sf-cards-i18n-*.js ha-config/www/
           fi
           cat > ha-config/configuration.yaml <<'YAML'
           default_config:

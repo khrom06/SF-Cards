@@ -11,7 +11,7 @@ const liveIv = new Set(), _si = window.setInterval.bind(window), _ci = window.cl
 window.setInterval = (f, ms, ...a) => { const id = _si(f, ms, ...a); liveIv.add(id); return id; };
 window.clearInterval = (id) => { liveIv.delete(id); _ci(id); };
 </script>
-<script src="../dist/sf-cards.js"></script>
+<script src="i18n-all.js"></script><script src="../dist/sf-cards.js"></script>
 <script src="fixtures.js"></script>
 <script>
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));

@@ -3,6 +3,22 @@
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
+> **Manual installs (not the Marketplace / HACS): copy the nine new `sf-cards-i18n-*.js` files of the release next to `sf-cards.js`**, or the cards show English instead of Spanish, German, Dutch, Italian, Portuguese, Polish, Russian, Chinese or Arabic. French and English need nothing. Marketplace and HACS installs get them automatically.
+
+### Added
+- **One configuration for the desktop and the phone: `phone: tile`.** On a screen narrower than 768 px, a card with this option becomes a summary tile (two per row) that opens the full card in a bottom sheet; on a wider screen it stays the full card. No more second copy of each card inside a launcher. Optional `phone_name` and `phone_icon`; in every visual editor under "On a phone". Off by default: a dashboard that does not use it is drawn exactly as before. Not offered on the alert, launcher and wall-panel cards.
+- **Cards arrive filled with your own entities.** A card added from the card picker now starts from your home instead of an empty form: the climate card with your rooms' thermostats, the controls card with the lights of your rooms, the room card with your first area, the weather, media, agenda, alert, camera, timeline, trend, radiators, assistant and energy report cards with what Home Assistant already knows (areas, device classes, Energy dashboard settings). The editor shows what was picked; nothing is ever switched on. Cards that only read states are drawn live in the card picker, and every card has a documentation link.
+- **Automatic dashboard: the other SF cards, on request (`family: true`).** SF Heartbeat and SF Copilot in the System view, SF Trace in the Security view, SF Horizon in the Energy view (when a solar forecast sensor exists), one SF Controls fan card per fan and its to-do card on the Home view. Only their tag is checked: nothing is imported. Off by default, so an existing automatic dashboard does not change.
+- **Energy report: share from a phone.** On a touch screen whose browser can share files, the button reads "Share the image" and opens the system share sheet; on a computer it downloads the PNG as before.
+- **Wall panel: can say when its data stopped coming (opt-in).** `offline_banner: true` shows a banner when Home Assistant has reported the connection as lost for 30 s of visible time; `stale_minutes: N` when no new state arrived for N minutes. Both off by default.
+- **Visual editor: names the entities that do not exist** in Home Assistant (renamed or removed), the usual reason for a card showing "no data".
+
+### Changed
+- **Only the language you use is loaded.** `sf-cards.js` carries French and English; each other language is its own small file, loaded the first time a card is drawn in it. `sf-cards.js` goes from 861 KB to 531 KB (263 KB to 178 KB compressed), which helps tablets and phones. Until the language file arrives (a fraction of a second, started as soon as the bundle runs) the cards show English; a file that cannot be loaded is tried again later.
+- **Vacuum states** (wall panel popup, controls card) use Home Assistant's own translation of the state for the states SF Cards does not word itself, instead of the raw state (`sweeping`, `charging_completed`…); an unavailable vacuum reads "unavailable" in your language. The wall panel's vacuum popup was in French for every language: it is now translated.
+- **Visual editors:** every card except the alert, launcher and wall-panel cards has a new "On a phone" field (default: the full card everywhere).
+- **Automatic dashboard: one click.** The README now points to *Settings → Dashboards → Add dashboard → SF · Home (automatic)*, where it was already listed; the raw configuration editor is only needed for options.
+- **README:** a shorter showcase first (automatic dashboard, cards that arrive filled, phones and wall panels), the SF family in one table, the "made with Claude" note in the credits.
 
 ## [1.26.0] - 2026-11-23
 ### Added

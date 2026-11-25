@@ -75,7 +75,7 @@ page = page.replace("{{BUNDLE}}", "file://" + bundle).replace("{{FIXTURES}}", "f
 fs.writeFileSync(path.join(tmp, "page.html"), page);
 // page 2: the ordinary render suite (benign data, many special configurations) on the same instrumented bundle, only to tell "run with benign data" from "never run"
 let rpage = fs.readFileSync(path.join(root, "test", "render.html"), "utf8");
-rpage = rpage.replace('<script src="../dist/sf-cards.js"></script>', prelude + bundleTag).replace('<script src="fixtures.js"></script>', `<script src="file://${path.join(root, "test", "fixtures.js")}"></script>`)
+rpage = rpage.replace('<script src="i18n-all.js"></script>', "").replace('<script src="../dist/sf-cards.js"></script>', prelude + bundleTag).replace('<script src="fixtures.js"></script>', `<script src="file://${path.join(root, "test", "fixtures.js")}"></script>`)
   .replace("</body>", "") + '\n<script>const __w = setInterval(() => { if (document.getElementById("result")) { clearInterval(__w); window.__dumpCov(); } }, 300);</script>\n';
 fs.writeFileSync(path.join(tmp, "render.html"), rpage);
 const chromeBin = ["google-chrome", "chromium", "chromium-browser"].find((b) => (process.env.PATH || "").split(":").some((d) => fs.existsSync(path.join(d, b))));

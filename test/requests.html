@@ -9,7 +9,7 @@ class FakeIcon extends HTMLElement {} customElements.define("ha-icon", FakeIcon)
 window.requestAnimationFrame = (f) => setTimeout(f, 0);
 window.__SF_TEST = true;
 </script>
-<script src="../dist/sf-cards.js"></script>
+<script src="i18n-all.js"></script><script src="../dist/sf-cards.js"></script>
 <script src="fixtures.js"></script>
 <script>
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));

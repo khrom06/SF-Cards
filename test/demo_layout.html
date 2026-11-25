@@ -7,7 +7,7 @@
 class FakeIcon extends HTMLElement { connectedCallback() { this.style.cssText = "display:inline-block;width:1em;height:1em;background:currentColor;border-radius:3px;opacity:.5;vertical-align:middle"; } }
 customElements.define("ha-icon", FakeIcon);
 </script>
-<script src="../dist/sf-cards.js"></script>
+<script src="i18n-all.js"></script><script src="../dist/sf-cards.js"></script>
 <script src="fixtures.js"></script>
 <script>
 const q = new URLSearchParams(location.search), W = +(q.get("w") || 1000), Hh = +(q.get("h") || 0), theme = q.get("theme") || "dark";

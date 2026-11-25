@@ -10,14 +10,16 @@ class SfEditorBase extends HTMLElement {
     this._build();
   }
   set hass(h) {
+    const first = !this._hass;
     this._hass = h;
+    if (first && this.shadowRoot && this._config) { try { this._banner(); } catch (e) { /* informative only */ } }   // the "does not exist" check needs the states
     if (this.shadowRoot) {
       this.shadowRoot.querySelectorAll("ha-form").forEach((f) => { f.hass = h; });
       // editors of nested cards (a panel's content): they must also follow `hass`, otherwise their selectors keep the original state
       this.shadowRoot.querySelectorAll("*").forEach((e) => { if (e !== this && e.localName.endsWith("-editor")) e.hass = h; });
     }
   }
-  _t(key) { return sfTr(sfLang(this._hass), key); }
+  _t(key) { const l = sfLang(this._hass); sfI18nNeed(l, this); return sfTr(l, key); }
   // Translates the labels of the drop-down lists of an ha-form schema.
   _trSchema(schema) {
     return (schema || []).map((f) => {
@@ -36,7 +38,7 @@ class SfEditorBase extends HTMLElement {
     b.hidden = !miss.length;
     b.textContent = miss.length ? `${this._t("editor.missing_required_fields")} : ${miss.map((m) => this._t(m)).join(" · ")}` : "";
     // probable mistakes (typos, wrong types / ranges): informative only, never blocks saving
-    const warns = sfValidate(sfCanon(this.localName.replace(/-editor$/, "")), this._config || {});
+    const warns = sfValidate(sfCanon(this.localName.replace(/-editor$/, "")), this._config || {}, this._hass && this._hass.states, this._hass && this._hass.entities);
     let w = root.querySelector(".warnings");
     if (!w) { w = document.createElement("div"); w.className = "warnings"; const wr = root.querySelector("div"); if (wr) wr.prepend(w); }
     const dep = sfDeprecation(this.localName.replace(/-editor$/, ""));
@@ -65,7 +67,10 @@ class SfEditorBase extends HTMLElement {
     // Look and accent (see SfBase._applyLook). The radiators card already has its own `accent` field.
     const lookField = sfS("look", [["neon", "Néon (lueur, coins, balayage)"], ["calm", "Calme (sans lueur)"]]);
     const more = this.localName === "sf-radiators-card-editor" ? [themeField, lookField] : [themeField, sfG(lookField, sfT("accent"))];
-    wrap.appendChild(this._form(this._config, (d) => [...(spec.fields ? spec.fields(d) : []), ...more], labels, emit));
+    // `phone: tile` (src/22a-phone-tile.js): one configuration, the full card on a wide screen and a tile that opens it on a phone
+    const tag = sfCanon(this.localName.replace(/-editor$/, ""));
+    const phoneFields = (d) => SF_PHONE_NO.has(tag) ? [] : [sfS("phone", [["card", "Carte complète partout"], ["tile", "Tuile qui ouvre la carte (écran de moins de 768 px)"]]), ...(d.phone === "tile" ? [sfG(sfT("phone_name"), sfI("phone_icon"))] : [])];
+    wrap.appendChild(this._form(this._config, (d) => [...(spec.fields ? spec.fields(d) : []), ...more, ...phoneFields(d)], labels, emit));
     for (const o of spec.objects || []) {
       const h = document.createElement("h3"); h.textContent = this._t(o.title); wrap.appendChild(h);
       if (!this._config[o.key] || typeof this._config[o.key] !== "object") this._config[o.key] = {};
