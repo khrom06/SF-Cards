@@ -111,17 +111,27 @@ class SfBase extends HTMLElement {
     el.classList.add("sent");
     setTimeout(() => el.classList.remove("sent"), 600);
     // A press that never reaches Home Assistant (a phone whose connection fell asleep, a refused call) must not fail silently: the button
-    // flashes red AND a message says so. A direct `script.<name>` call only answers when the script ends, so it is never timed out.
+    // flashes red AND a message says so. A call that is merely slow (a cloud cover, an automation with a delay) is not a failure: after
+    // SF_CALL_TIMEOUT the connection itself is probed (a ping answers at once even while a service is still running) and the message only
+    // appears when the probe fails too. A direct `script.<name>` call only answers when the script ends, so it is never timed out.
     let toast = null, answered = false;
-    const wait = domain === "script" ? null : setTimeout(() => { if (!answered && el.isConnected !== false) toast = sfToast(this, this.t("common.call_timeout")); }, SF_CALL_TIMEOUT);
-    let sent; try { sent = Promise.resolve(this._hass.callService(domain, service, data)); } catch (e) { sent = Promise.reject(e); }
-    sent.then(() => { answered = true; clearTimeout(wait); if (toast) toast.remove(); }, (err) => {
-      answered = true; clearTimeout(wait);
+    const hass = this._hass;
+    const slow = domain === "script" ? null : setTimeout(async () => {
+      if (answered || !this.isConnected) return;
+      const ping = typeof hass.callWS === "function" ? () => hass.callWS({ type: "ping" }) : null;
+      if (ping) { const alive = await Promise.race([Promise.resolve().then(ping).then(() => true, () => false), new Promise((r) => setTimeout(() => r(false), SF_PING_TIMEOUT))]); if (alive) return; }
+      if (!answered) toast = sfToast(this, this.t("common.call_timeout"));
+    }, SF_CALL_TIMEOUT);
+    let sent; try { sent = Promise.resolve(hass.callService(domain, service, data)); } catch (e) { sent = Promise.reject(e); }
+    sent.then(() => { answered = true; clearTimeout(slow); if (toast) toast.remove(); }, (err) => {
+      answered = true; clearTimeout(slow);
       el.classList.add("fail");
-      el.title = String(err && err.message || err);
+      // the WebSocket library rejects an in-flight command with a bare number when the connection drops (3 = connection lost): say so, no detail
+      const msg = err && typeof err.message === "string" ? err.message : typeof err === "string" ? err : "";
+      el.title = msg || this.t("common.call_timeout");
       setTimeout(() => el.classList.remove("fail"), 2500);
       if (toast) toast.remove();
-      sfToast(this, this.t("common.call_failed"), String(err && err.message || err || ""));
+      if (msg) sfToast(this, this.t("common.call_failed"), msg); else sfToast(this, this.t("common.call_timeout"));
     });
   }
   // Attributes of a control button, to insert in a tag.

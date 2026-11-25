@@ -1666,10 +1666,10 @@ __SF.SF_HOOK.tr = (lang, key) => {
   }
   // 5g. A press that does not reach Home Assistant says so (message over the dashboard), never silently; a direct script call is never timed out.
   {
-    const toast = () => document.getElementById("sf-toast"), tx = () => (toast() && toast().shadowRoot.textContent) || "";
-    const press = async (cs, tag = "sf-climate-card", extras = [{ label: "Dry", entity: "switch.plug" }]) => {
+    const toast = () => document.getElementById("sf-toast"), tx = () => (toast() && toast().shadowRoot.querySelector(".t").textContent) || "";
+    const press = async (cs, tag = "sf-climate-card", extras = [{ label: "Dry", entity: "switch.plug" }], ws) => {
       const el = document.createElement(tag); el.setConfig({ ...FULL[tag], extras }); document.body.appendChild(el);
-      el.hass = { ...HASS(base, "en"), callService: cs }; await wait(60);
+      el.hass = { ...HASS(base, "en"), callService: cs, ...(ws ? { callWS: ws } : {}) }; await wait(60);
       const b = el.shadowRoot.querySelector(".extras [data-call]"); if (!b) { fail("toast: the test button was not found"); return null; }
       b.click(); return { el, b };
     };
@@ -1686,7 +1686,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (toast()) fail("toast: a command that went through shows a message"); r2 && r2.el.remove();
     const r3 = await press(() => { throw new Error("sync failure"); }); await wait(80);
     if (!/sync failure/.test(tx())) fail("toast: a call that throws at once shows no message"); toast() && toast().remove(); r3 && r3.el.remove();
-    __SF.sfCallTimeout(120);
+    __SF.sfCallTimeout(120, 150);
     const r4 = await press(() => new Promise(() => {})); await wait(60);
     if (toast()) fail("toast: shown before the delay"); await wait(160);
     if (!/not answering/.test(tx())) fail("toast: no message when Home Assistant does not answer: " + tx()); toast() && toast().remove(); r4 && r4.el.remove();
@@ -1694,7 +1694,24 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (toast()) fail("toast: still shown after the answer finally came"); r5 && r5.el.remove();
     const r6 = await press(() => new Promise(() => {}), "sf-climate-card", [{ label: "Run", entity: "script.go" }]); await wait(300);
     if (toast()) fail("toast: a direct script call must never be timed out (it answers when the script ends)"); r6 && r6.el.remove();
-    __SF.sfCallTimeout(10000);
+    // a service that is merely slow (connection alive: the ping answers) is not a failure
+    const r7 = await press(() => new Promise(() => {}), "sf-climate-card", undefined, () => Promise.resolve({})); await wait(500);
+    if (toast()) fail("toast: a slow service on a live connection shows a false 'not answering' message"); r7 && r7.el.remove();
+    // dead connection: the ping does not answer either
+    const r8 = await press(() => new Promise(() => {}), "sf-climate-card", undefined, () => new Promise(() => {})); await wait(500);
+    if (!/not answering/.test(tx())) fail("toast: no message when neither the service nor the ping answers: " + tx()); toast() && toast().remove(); r8 && r8.el.remove();
+    // the WebSocket library rejects in-flight commands with a bare number when the connection drops (3 = connection lost)
+    const r9 = await press(() => Promise.reject(3)); await wait(80);
+    if (!/not answering/.test(tx()) || /\b3\b/.test(tx().replace(/Home Assistant/, ""))) fail("toast: a numeric rejection shows '" + tx() + "'"); toast() && toast().remove(); r9 && r9.el.remove();
+    // a card removed while its command is pending shows nothing
+    const r10 = await press(() => new Promise(() => {})); r10 && r10.el.remove(); await wait(400);
+    if (toast()) fail("toast: shown for a card that was removed"); 
+    // over Home Assistant's own modal dialogs: a popover when the browser has them; close button and role
+    const r11 = await press(() => Promise.reject(new Error("nope"))); await wait(80);
+    if (toast()) { const t = toast(); if (typeof t.showPopover === "function" && !t.matches(":popover-open")) fail("toast: not in the top layer (popover) although the browser supports it");
+      const x = t.shadowRoot.querySelector("button.x"); if (!x || !x.getAttribute("aria-label")) fail("toast: no labelled close button"); else { x.click(); if (toast()) fail("toast: the close button does not close it"); } }
+    else fail("toast: not shown for the popover check"); r11 && r11.el.remove();
+    __SF.sfCallTimeout(10000, 3000);
   }
   // 6. Traductions manquantes.
   for (const m of window.__missing) fail(`translation problem: ${m}`);
