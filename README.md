@@ -13,6 +13,8 @@
 </p>
 
 > **▶ [Try every card live, with fake data](https://khrom06.github.io/SF-Cards/)** — no install, 11 languages, light / dark.
+>
+> ⭐ **Like it? A star on GitHub is the easiest way to help other Home Assistant users find SF Cards.**
 
 ## Two clicks, a whole dashboard
 
@@ -967,6 +969,10 @@ cameras:
 ### sf-setpoints-card
 
 <img src="assets/anim/setpoints.webp" alt="Setpoints card" width="520">
+
+With `times`, the hour each program starts can be changed right on the card:
+
+<img src="assets/anim/setpoints-times.gif" alt="Setpoints card: changing the hour the day and the night programs start" width="520">
 
 ```yaml
 type: custom:sf-setpoints-card
