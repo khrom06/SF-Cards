@@ -6,6 +6,7 @@
  * columns: [{ label, color }]
  * rows: [{ name, icon, entities: [input_number.x, ...] }]   # in column order
  * Touching a value opens an editor (slider, − / +, bounds and step of the input_number) with a scope: this value, the whole program (column) or the whole room (row).
+ * times: [{ label, entity: input_datetime.x }]   # optional, under the matrix: the time of day each program starts (time picker)
  */
 class SfSetpointsCard extends SfBase {
   defaults() { return { columns: [], rows: [] }; }
@@ -33,7 +34,11 @@ class SfSetpointsCard extends SfBase {
       .ed .acts { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
       .ed button.btn { font:inherit; cursor:pointer; }
       .ed .acts button.btn { min-height:44px; padding:0 18px; }
-      .ed .err { color:${SF_C.red}; font-size:12px; min-height:1em; }`;
+      .ed .err { color:${SF_C.red}; font-size:12px; min-height:1em; }
+      .tms { display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:8px; padding-top:12px; border-top:1px solid rgb(var(--sf-cyan-rgb) / .1); }
+      .tm { display:flex; align-items:center; gap:8px; font-size:12px; color:${SF_C.dim}; }
+      .tm input { font:600 14px Orbitron,sans-serif; color:var(--sf-strong); background:transparent; border:1px solid rgb(var(--sf-cyan-rgb) / .25); border-radius:8px; min-height:40px; padding:0 8px; }
+      .tm input:disabled { opacity:.45; }`;
   }
   _lim(id) {
     const a = (this.st(id) || {}).attributes || {}, mn = parseFloat(a.min), mx = parseFloat(a.max), sp = parseFloat(a.step);
@@ -74,7 +79,13 @@ class SfSetpointsCard extends SfBase {
         ${v === null ? `<b style="${sh}">—</b>` : `<b class="edit" role="button" tabindex="0" data-ed-open="${ri},${i}" aria-label="${this.esc(r.name)} ${this.esc((c.columns[i] || {}).label || "")} ${this.esc(this.nf(v, 1))}°" style="${sh}">${this.nf(v, 1)}°</b>`}
         <span class="btn" ${this.call("input_number.increment", { entity_id: id })}>+</span></div></td>`;
     }).join("")}</tr>`).join("");
-    return this.frame(this.esc(c.title || this.t("setpoints.setpoints")), this.esc(c.subtitle || ""), `<table>${head}${rows}</table>`);
+    const times = (c.times || []).map((x, i) => {
+      const id = x && typeof x.entity === "string" ? x.entity : "", s = id ? this.st(id) : null, m = s && /^(\d{2}:\d{2})/.exec(String(s.state));
+      if (!id) return "";
+      const name = x.label || (s && s.attributes && s.attributes.friendly_name) || id, off = !m || (s.attributes && s.attributes.has_time === false);
+      return `<label class="tm">${x.icon ? this.icon(x.icon, 15, SF_C.dim) : ""}<span>${this.esc(name)}</span><input type="time" data-time="${i}" value="${this.esc(m ? m[1] : "")}" aria-label="${this.esc(name)}"${off ? " disabled" : ""}></label>`;
+    }).join("");
+    return this.frame(this.esc(c.title || this.t("setpoints.setpoints")), this.esc(c.subtitle || ""), `<table>${head}${rows}</table>${times ? `<div class="tms">${times}</div>` : ""}`);
   }
   afterRender() {
     const root = this.shadowRoot;
@@ -88,6 +99,12 @@ class SfSetpointsCard extends SfBase {
       el.addEventListener("click", open);
       el.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); open(ev); } });
     });
+    root.querySelectorAll("[data-time]").forEach((inp) => inp.addEventListener("change", () => {
+      const x = (this._config.times || [])[Number(inp.dataset.time)], v = inp.value;
+      if (!x || !/^\d{2}:\d{2}$/.test(v)) return;
+      Promise.resolve().then(() => this._hass.callService("input_datetime", "set_datetime", { entity_id: x.entity, time: v + ":00" }))
+        .catch((err) => { this._lastHtml = null; this._schedule(); sfToast(this, this.t("common.call_failed"), String((err && err.message) || (typeof err === "string" ? err : ""))); });
+    }));
     const e = this._ed; if (!e) return;
     const out = root.querySelector("[data-ed-out]"), rng = root.querySelector("[data-ed-range]"), id = this._config.rows[e.r].entities[e.i];
     const show = () => { out.textContent = `${this.nf(e.v, 1)}°`; rng.value = e.v; };

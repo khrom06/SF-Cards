@@ -975,7 +975,12 @@ subtitle: Heating                  # optional
 columns: [{ label: Day, color: "#ffb300" }, { label: Night, color: "#4fc3f7" }]
 rows:
   - { name: Living room, icon: "mdi:sofa", entities: [input_number.living_day, input_number.living_night] }
+times:                             # optional: when each program starts, under the matrix (time pickers)
+  - { label: Day starts, entity: input_datetime.day_start }      # an input_datetime with "time" only
+  - { label: Night starts, entity: input_datetime.night_start }
 ```
+
+`times` only edits the entities; whatever switches between the programs (an automation, a Node-RED flow) must read them.
 
 ### sf-ledger-card
 

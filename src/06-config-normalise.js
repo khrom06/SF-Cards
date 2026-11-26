@@ -23,10 +23,10 @@ function sfNormConfig(tag, c) {
     const lo = Number(c.min), hi = Number(c.max);
     if (!isFinite(lo) || !isFinite(hi) || hi <= lo || hi - lo > 100 || Math.abs(lo) > 1000) { c.min = 15; c.max = 30; }
   }
-  const keys = tag === "sf-setpoints-card" ? [...SF_LIST_KEYS, "columns"] : SF_LIST_KEYS;
+  const keys = tag === "sf-setpoints-card" ? [...SF_LIST_KEYS, "columns", "times"] : SF_LIST_KEYS;
   for (const k of keys) if (k in c) { const v = c[k]; c[k] = Array.isArray(v) ? v.filter((x) => x !== null && x !== undefined && x !== "") : (v === null || v === undefined || v === "" ? [] : [v]); }
   for (const k of ["charger", "flows", "energy"]) if (k in c && (!c[k] || typeof c[k] !== "object" || Array.isArray(c[k]))) c[k] = {};
-  for (const k of ["chargers", "cars", "batteries", "radiators", "people", "rooms", "devices", "tiles", "rows", "groups", "cameras", "extras", "hc_windows", "fridge", "shortcuts"]) if (Array.isArray(c[k])) c[k] = c[k].filter((x) => x && typeof x === "object");
+  for (const k of ["chargers", "cars", "batteries", "radiators", "people", "rooms", "devices", "tiles", "rows", "times", "groups", "cameras", "extras", "hc_windows", "fridge", "shortcuts"]) if (Array.isArray(c[k])) c[k] = c[k].filter((x) => x && typeof x === "object");
   if (c.charger && typeof c.charger === "object") for (const k of ["connected_states", "charging_states"]) if (k in c.charger && !Array.isArray(c.charger[k])) c.charger = { ...c.charger, [k]: c.charger[k] ? [c.charger[k]] : [] };
   return c;
 }

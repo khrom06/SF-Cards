@@ -110,6 +110,22 @@ __SF.SF_HOOK.tr = (lang, key) => {
     calls.length = 0; q('[data-ed-open="1,0"]').click(); await wait(60); q('[data-ed-scope="row"]').click(); q('[data-ed="dec"]').click(); q('[data-ed="ok"]').click(); await wait(80);
     if (calls.map((c) => `${c[2].entity_id}=${c[2].value}`).sort().join(",") !== "input_number.b1=17.5,input_number.b2=17.5") fail("setpoints: 'room' scope expected on the row");
     el.remove(); }
+  // 5b3. Setpoints: optional start times (input_datetime) under the matrix; a change sets the time, a refusal is shown.
+  { const T = (v, extra) => ({ state: v, attributes: { has_time: true, has_date: false, friendly_name: "Day starts", ...(extra || {}) } });
+    const stt = { "input_number.a1": { state: "19", attributes: { min: 15, max: 25, step: 0.5 } }, "input_datetime.day": T("08:00:00"), "input_datetime.night": T("20:00:00"), "input_datetime.off": T("unavailable") };
+    const cfg = { columns: [{ label: "Day" }], rows: [{ name: "Living", entities: ["input_number.a1"] }], times: [{ label: "Day from", entity: "input_datetime.day" }, { entity: "input_datetime.night" }, { entity: "input_datetime.off" }, { entity: "" }, null] };
+    const calls = []; let refuse = false; const el = mount("sf-setpoints-card", cfg, "en");
+    el.hass = { ...HASS(stt, "en"), callService: (d, s, data) => { calls.push([d, s, data]); return refuse ? Promise.reject(new Error("Refused <b>x</b>")) : Promise.resolve(); } }; await wait(60);
+    const ins = [...el.shadowRoot.querySelectorAll("[data-time]")];
+    if (ins.length !== 3) fail("setpoints times: expected 3 pickers (blank entries skipped), got " + ins.length);
+    if (ins[0].value !== "08:00" || ins[1].value !== "20:00") fail("setpoints times: pickers must show the entity's time");
+    if (!ins[2].disabled) fail("setpoints times: an unavailable entity must be disabled");
+    if (!/Day from/.test(el.shadowRoot.querySelector(".tm").textContent)) fail("setpoints times: label missing");
+    ins[0].value = "07:30"; ins[0].dispatchEvent(new Event("change")); await wait(40);
+    if (calls.length !== 1 || calls[0][0] !== "input_datetime" || calls[0][1] !== "set_datetime" || calls[0][2].entity_id !== "input_datetime.day" || calls[0][2].time !== "07:30:00") fail("setpoints times: expected input_datetime.set_datetime time=07:30:00, got " + JSON.stringify(calls));
+    refuse = true; ins[1].value = "21:00"; ins[1].dispatchEvent(new Event("change")); await wait(60);
+    const tt = document.getElementById("sf-toast"); if (!tt || !/Command not sent/.test(tt.shadowRoot.textContent)) fail("setpoints times: a refused change must show the failure message"); if (tt && tt.shadowRoot.querySelector("b")) fail("setpoints times: error text must stay text"); if (tt) tt.remove();
+    el.remove(); }
   // 5c. Arabic: reversed writing direction on the card; the other languages stay left to right.
   { const ar = mount("sf-machines-card", FULL["sf-machines-card"], "ar"); const en = mount("sf-machines-card", FULL["sf-machines-card"], "en"); await wait(40);
     if (ar.dir !== "rtl") fail("arabic: the card should be rtl"); if (en.dir !== "ltr") fail("english: the card should be ltr");
