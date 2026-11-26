@@ -2,7 +2,7 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.28.0] - 2026-11-26
 ### Added
 - **Setpoints card: the time each program starts (`times`).** Optional, under the matrix: one time picker per `input_datetime` (time only), e.g. when "Day" and "Night" begin. A change calls `input_datetime.set_datetime`; a refusal shows the "Command not sent" message. Also in the visual editor. Nothing changes for a card without `times`.
 
