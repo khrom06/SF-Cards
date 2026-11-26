@@ -182,14 +182,14 @@ const SF_NS_CSS = `
   @keyframes breathe { 50% { opacity:.55; transform:scale(.96); } }
   .dots { display:flex; flex-wrap:wrap; justify-content:center; gap:calc(var(--u)*1.2) calc(var(--u)*2.4); }
   .dt { display:flex; align-items:center; gap:calc(var(--u)*.9); font-size:calc(var(--u)*2.2); color:#9a8883; }
-  .dt i { width:calc(var(--u)*1.8); height:calc(var(--u)*1.8); border-radius:50%; background:var(--sf-green); box-shadow:0 0 calc(var(--u)*1.6) var(--sf-green); } .dt.bad i { background:var(--sf-red); box-shadow:0 0 calc(var(--u)*2) var(--sf-red); }
+  .dt i { width:calc(var(--u)*1.8); height:calc(var(--u)*1.8); border-radius:50%; background:var(--sf-green); box-shadow:0 0 calc(var(--u)*1.6) var(--sf-green); } .dt.bad i { background:var(--sf-red); box-shadow:0 0 calc(var(--u)*2) var(--sf-red); } .dt.warn i { background:var(--sf-amber); box-shadow:0 0 calc(var(--u)*2) var(--sf-amber); }
   .goodnight { display:flex; align-items:center; justify-content:center; text-align:center; font-family:Orbitron, sans-serif; font-weight:700; font-size:calc(var(--u)*3); letter-spacing:.1em; padding:0 calc(var(--u)*1);
     text-transform:uppercase; color:#ffd9cf; border-color:rgba(217,87,63,.55) !important; background:rgba(217,87,63,.14) !important; }
 `;
 
 
 class SfNsCard extends SfBase {
-  defaults() { return { rooms: [], fridge: [], cars: [], leaks: [], tiles: [], shortcuts: [], lights_off: [], energy: {}, vacuum: null }; }
+  defaults() { return { rooms: [], fridge: [], cars: [], leaks: [], doors: [], tiles: [], shortcuts: [], lights_off: [], energy: {}, vacuum: null }; }
   getCardSize() { return 12; }
   set hass(h) {
     // the last time Home Assistant sent new states (a new hass object can also just say "disconnected": that is not news from the house)
@@ -229,6 +229,7 @@ class SfNsCard extends SfBase {
   cur() { const E = this._config.energy || {}, u = String(E.currency || (this.st(E.price) && this.st(E.price).attributes.unit_of_measurement) || "").split("/")[0].trim(); return u && u.length <= 4 ? u : "€"; }
 
   get leaks() { const l = this._config.leaks; return Array.isArray(l) ? l.filter((x) => x && typeof x === "object") : []; }
+  get doors() { const l = this._config.doors; return Array.isArray(l) ? l.filter((x) => x && typeof x === "object" && x.entity) : []; }
   get vac() { const v = this._config.vacuum; return v && typeof v === "object" && v.entity ? v : null; }
   dateTxt(d) { try { return d.toLocaleDateString(this.locLatn, { weekday: "long", day: "numeric", month: "long" }); } catch (e) { return d.toDateString(); } }
 
@@ -375,6 +376,8 @@ class SfNsCard extends SfBase {
   alerts() {
     const c = this._config, out = [];
     for (const l of this.leaks) if (this.st(l.entity) && this.st(l.entity).state === "on") out.push({ i: "mdi:water-alert", t: `${this.t("common.water_leak")} · ${l.name}`, e: l.entity });
+    // a door or window left open: a notice, not an emergency (amber, after the red alerts)
+    for (const d of this.doors) if (this.st(d.entity) && this.st(d.entity).state === "on") out.push({ i: typeof d.icon === "string" && d.icon ? d.icon : "mdi:door-open", t: this.t("wallpanel.n_open", { n: d.name || d.entity }), e: d.entity, warn: true });
     for (const car of c.cars) {
       if (car.lock && this.st(car.lock) && this.st(car.lock).state === "unlocked") out.push({ i: "mdi:car-door-lock-open", t: this.t("wallpanel.n_unlocked", { n: car.name }), e: car.lock, warn: true });
       const s = this.num(car.soc); if (s !== null && s < (car.low || 0)) out.push({ i: "mdi:battery-alert", t: this.t("wallpanel.n_battery_p", { n: car.name, p: Math.round(s) }), e: car.soc, warn: true });
@@ -520,6 +523,7 @@ class SfNsCard extends SfBase {
   sentinel() {
     const c = this._config, bad = this.alerts().filter((a) => !a.warn);
     const dots = this.leaks.map((l) => `<span class="dt ${this.st(l.entity) && this.st(l.entity).state === "on" ? "bad" : ""}"><i></i>${this.esc(l.name)}</span>`).join("")
+      + this.doors.map((d) => `<span class="dt ${this.st(d.entity) && this.st(d.entity).state === "on" ? "warn" : ""}"><i></i>${this.esc(d.name || d.entity)}</span>`).join("")
       + c.cars.filter((x) => x.lock).map((x) => `<span class="dt ${this.st(x.lock) && this.st(x.lock).state === "unlocked" ? "bad" : ""}"><i></i>${this.esc(x.name)}</span>`).join("");
     const r0 = c.rooms[0];
     const main = this.panel(`<div class="sentRow ${bad.length ? "bad" : ""}">${this.ic(bad.length ? "mdi:shield-alert" : "mdi:shield-check")}<div><div class="big">${this.esc(this.t(bad.length ? "ALERTE" : "R.A.S."))}</div><div class="sub">${this.esc(this.t(bad.length ? "voir la bande rouge" : "la maison veille"))}</div></div></div><div class="dots">${dots}</div>`, "sentP");

@@ -263,6 +263,7 @@ const SF_SPECS = {
       { key: "cars", title: "Voitures (3 maximum)", add: "Ajouter une voiture", item: "Voiture", itemTitle: (c) => c.name, new: () => ({}), max: 3,
         schema: () => [sfG(sfT("name"), sfT("color")), sfE("soc", "sensor"), sfE("range", "sensor"), sfE("lock", "lock"), sfE("charging"), sfN("low", 0, 100)] },
       { key: "leaks", title: "Capteurs de fuite", add: "Ajouter un capteur", item: "Capteur", itemTitle: (l) => l.name, new: () => ({}), schema: () => [sfT("name"), sfE("entity", "binary_sensor")] },
+      { key: "doors", title: "Portes et fenêtres (alerte orange si ouvertes)", add: "Ajouter une porte", item: "Porte", itemTitle: (d) => d.name, new: () => ({}), schema: () => [sfG(sfT("name"), sfI("icon")), sfE("entity", "binary_sensor")] },
       { key: "tiles", title: "Tuiles", add: "Ajouter une tuile", item: "Tuile", itemTitle: (t) => t.name, new: () => ({ icon: "mdi:lightbulb-outline", color: "var(--sf-amber)" }), max: 6,
         schema: () => [sfG(sfT("name"), sfI("icon")), sfT("color"), sfE("entity")] },
       { key: "shortcuts", title: "Raccourcis (boutons du matin et fenêtre aspirateur)", add: "Ajouter un raccourci", item: "Raccourci", itemTitle: (x) => x.name, new: () => ({ icon: "mdi:flash" }), schema: () => [sfG(sfT("name"), sfI("icon")), sfE("entity")] },

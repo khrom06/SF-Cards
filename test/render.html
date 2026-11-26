@@ -759,6 +759,16 @@ __SF.SF_HOOK.tr = (lang, key) => {
     // an active alert (leak + unlocked car): the red line slots in without overwriting anything
     for (const m of MODES) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(m), "binary_sensor.leak": S("on"), "lock.car": S("unlocked"), "sensor.fridge": U(9, "°C") }, "de", conn);
       if (!el.shadowRoot.querySelector(".alert")) fail(`sf-ns-card [${m}]: the leak alert does not appear`); overflow(el, `sf-ns-card alerte [${m}]`); el.remove(); }
+    // doors and windows: an open one is an amber notice (never the red alert), a closed one nothing; the evening / night screen lists them
+    { const D = { ...NS, doors: [{ name: "Garage", icon: "mdi:garage", entity: "binary_sensor.door" }, { name: "Cellar <b>x</b>", entity: "binary_sensor.window" }, { name: "Nothing" }, null] };
+      for (const m of MODES) {
+        const open = await mk(D, { ...base, "input_select.ns_mode": S(m), "binary_sensor.door": S("on"), "binary_sensor.window": S("off") }, "en");
+        const al = open.shadowRoot.querySelector(".alert"); if (!al || !al.classList.contains("warn") || !/Open: Garage/.test(al.textContent)) fail(`sf-ns-card [${m}]: an open door must show 'Open: Garage' as an amber notice`);
+        if ([...open.shadowRoot.querySelectorAll("b")].some((x) => x.textContent === "x")) fail(`sf-ns-card [${m}]: a door name must stay text`); overflow(open, `sf-ns-card door [${m}]`); open.remove();
+        const shut = await mk(D, { ...base, "input_select.ns_mode": S(m), "binary_sensor.door": S("off"), "binary_sensor.window": S("off") }, "en");
+        if (shut.shadowRoot.querySelector(".alert")) fail(`sf-ns-card [${m}]: closed doors must not raise an alert`); shut.remove(); }
+      const night = await mk(D, { ...base, "input_select.ns_mode": S("Nuit"), "binary_sensor.door": S("on") }, "en");
+      if (night.shadowRoot.querySelectorAll(".dt.warn").length !== 1 || night.shadowRoot.querySelectorAll(".dt").length < 2) fail("sf-ns-card [Nuit]: doors must be listed, the open one marked amber"); night.remove(); }
     // mode: French AND English names accepted; an unknown / hostile name falls back to the time without crashing
     for (const [v, want] of [["Evening", "soir"], ["night", "nuit"], ["Matin", "matin"]]) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(v) }, "en"); if (!el.shadowRoot.querySelector(".ns." + want)) fail(`sf-ns-card: mode '${v}' should give .${want}`); el.remove(); }
     for (const v of ["constructor", "__proto__", "toString", ""]) { const el = await mk(NS, { ...base, "input_select.ns_mode": S(v), "weather.home": S(v, { temperature: "<b>x</b>" }) }, "en"); if (!el.shadowRoot.querySelector(".ns")) fail(`sf-ns-card: state '${v}' crashes the card`); el.remove(); }

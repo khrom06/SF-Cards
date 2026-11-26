@@ -83,7 +83,7 @@ const FULL = {
   "sf-camera-card": { cameras: [{ entity: "camera.front", name: "Front" }] },
   "sf-setpoints-card": { columns: [{ label: "Day" }], rows: [{ name: "Living", entities: ["input_number.target"] }], times: [{ label: "Day from", icon: "mdi:weather-sunny", entity: "input_datetime.day" }] },
   "sf-ledger-card": { total_cost: "sensor.eur", solar_fraction: "sensor.fossil", avg_price: "sensor.price", devices: [{ name: "EV", total: "sensor.kwh", edf: "sensor.kwh", solar: "sensor.kwh", cost: "sensor.eur" }] },
-  "sf-ns-card": { weather: "weather.home", outdoor: "sensor.out", mode_entity: "input_select.ns_mode", cover: "cover.shutter", scene_dim: "scene.dim", lights_off: ["light.lamp"],
+  "sf-ns-card": { doors: [{ name: "Garage", icon: "mdi:garage", entity: "binary_sensor.door" }, { name: "Cellar", entity: "binary_sensor.window" }, { name: "No entity" }, null], weather: "weather.home", outdoor: "sensor.out", mode_entity: "input_select.ns_mode", cover: "cover.shutter", scene_dim: "scene.dim", lights_off: ["light.lamp"],
     rooms: [{ name: "Living room", icon: "mdi:sofa", entity: "sensor.temp", min: 15 }, { name: "Bedroom", icon: "mdi:bed", entity: "sensor.temp" }],
     fridge: [{ name: "Fridge", icon: "mdi:fridge", entity: "sensor.fridge", max: 6 }, { name: "Freezer", icon: "mdi:snowflake", entity: "sensor.freezer", max: -15 }],
     cars: [{ name: "Car A", color: "#00e5ff", soc: "sensor.car_soc", range: "sensor.car_range", lock: "lock.car", charging: "binary_sensor.charging", low: 20 }, { name: "Car B", color: "#ff3bd4", soc: "sensor.bat_soc" }],
