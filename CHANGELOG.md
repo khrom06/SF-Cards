@@ -2,7 +2,7 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.27.1] - 2026-11-26
 ### Fixed
 - **A press that does not reach Home Assistant is no longer silent.** When a button's command is refused, or Home Assistant gives no answer within 10 s and a ping to it fails too (typically a phone whose connection fell asleep), a message appears over the dashboard, above Home Assistant's own dialogs: "Command not sent" with the reason, or "Home Assistant is not answering: check the connection". It closes itself after 7 s, on a tap or with its close button, in addition to the button flashing red. A command that goes through shows nothing, and neither does a slow one on a live connection (a cloud cover, an automation with a delay); direct `script.<name>` calls are never timed out. Translated into the 11 languages.
 
