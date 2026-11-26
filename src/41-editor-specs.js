@@ -218,6 +218,8 @@ const SF_SPECS = {
         schema: () => [sfT("label"), sfT("color")] },
       { key: "rows", title: "Pièces", add: "Ajouter une pièce", item: "Pièce", itemTitle: (r) => r.name, new: () => ({ icon: "mdi:home", entities: [] }),
         schema: () => [sfG(sfT("name"), sfI("icon")), sfEs("entities", "input_number")] },
+      { key: "times", title: "Heures de début des programmes (optionnel)", add: "Ajouter une heure", item: "Heure", itemTitle: (x) => x.label, new: () => ({}),
+        schema: () => [sfT("label"), sfE("entity", "input_datetime")] },
     ],
   },
   "sf-ledger-card": {
