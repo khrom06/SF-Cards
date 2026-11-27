@@ -1041,7 +1041,11 @@ A full‑screen card for wall panels and tablets, tuned for the **Sonoff NSPanel
 | Evening | 18 – 22 | big ambience tiles (lights, shutters, TV, scenes), **today's consumption, cost, solar share and comparison with yesterday**, vehicles |
 | Night | 22 – 06 | "all clear" sentinel (leaks, locks), indoor / outdoor temperature, a "Good night" button that switches everything off |
 
-Also: one alert line when something is wrong (leak, open lock, fridge too warm), a popup for a robot vacuum (shortcuts, return to base, stop), long‑press on any tile for the entity's history, confirmation on "turn everything off".
+Also: one alert line when something is wrong (leak, open lock, **open door or window**, fridge too warm), a popup for a robot vacuum (shortcuts, return to base, stop), long‑press on any tile for the entity's history, confirmation on "turn everything off".
+
+With `doors`, an open door or window shows up as an amber notice, and the night screen lists them all:
+
+<p align="center"><img src="assets/anim/ns-doors.gif" alt="Wall panel at night: the garage door opens, an amber notice appears, then the cellar garage door opens too, then both close" width="360"></p>
 
 **Which mode?** Give it an `input_select` with the options `Morning / Day / Evening / Night` (or the French `Matin / Jour / Soir / Nuit`) and an automation of your choice — or leave `mode_entity` out and the mode simply follows the clock. Add `?mode=Evening` to the URL to preview a mode without changing anything.
 
@@ -1059,6 +1063,9 @@ rooms:
   - { name: Living, icon: mdi:sofa, entity: sensor.living_temperature, min: 17 }
 fridge:
   - { name: Fridge, icon: mdi:fridge, entity: sensor.fridge_temperature, max: 6 }
+doors:                                    # optional: an open one is an amber notice; the night screen lists them all
+  - { name: Front door, icon: mdi:door-open, entity: binary_sensor.front_door }
+  - { name: Garage, icon: mdi:garage-open, entity: binary_sensor.garage_door }
 cars:
   - { name: Car A, color: "#00e5ff", soc: sensor.car_a_soc, range: sensor.car_a_range, lock: lock.car_a, charging: binary_sensor.car_a_charging, low: 20 }
 tiles:                                    # up to 6, evening mode

@@ -2,6 +2,10 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.29.0] - 2026-11-26
+### Added
+- **Wall panel: doors and windows (`doors`).** Optional list of door / window sensors: an open one shows in the alert line as an amber notice ("Open: Garage") after the red alerts, and the night screen lists every door with the open ones in amber. A closed door shows nothing on the other screens. Also in the visual editor. Nothing changes for a card without `doors`.
+
 ## [1.28.0] - 2026-11-26
 ### Added
 - **Setpoints card: the time each program starts (`times`).** Optional, under the matrix: one time picker per `input_datetime` (time only), e.g. when "Day" and "Night" begin. A change calls `input_datetime.set_datetime`; a refusal shows the "Command not sent" message. Also in the visual editor. Nothing changes for a card without `times`.
