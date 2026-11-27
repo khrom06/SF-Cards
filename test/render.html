@@ -618,7 +618,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
     const withColors = JSON.parse(JSON.stringify(FULL));
     withColors["sf-machines-card"].tiles[0].color = "#ffb300"; withColors["sf-reactor-card"].devices[0].color = "#2bff88"; withColors["sf-console-card"].groups[0].items[0].color = "#b388ff";
     withColors["sf-setpoints-card"].columns[0].color = "#ffb300"; withColors["sf-launcher-card"].tiles[0].color = "#ff7043"; withColors["sf-bridge-card"].people[0].color = "#00e5ff";
-    withColors["sf-hangar-card"].cars[0].color = "#00e5ff"; withColors["sf-radar-card"].people[0].color = "#00e5ff";
+    withColors["sf-hangar-card"].cars[0].color = "#00e5ff";
     const cfgs = { ...withColors, "sf-radiators-card": { ...FULL["sf-radiators-card"], accent: "#e07a4f" }, "sf-console-card": { ...withColors["sf-console-card"], groups: [{ ...withColors["sf-console-card"].groups[0], span: 2 }] } };
     const colorLeaf = (o, path = []) => (o && typeof o === "object") ? Object.entries(o).flatMap(([k, v]) => colorLeaf(v, [...path, k])) : (["color", "accent", "span"].includes(path[path.length - 1]) ? [path] : []);
     const setAt = (o, path, v) => { let c = o; path.slice(0, -1).forEach((k) => { c = c[k]; }); c[path[path.length - 1]] = v; };
@@ -1202,7 +1202,7 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (window.__errors.length > before) fail(`config-less start: ${window.__errors.slice(before).join(" | ")}`); }
   // 5m. Friendly tag names: each alias is a real element that renders exactly like the original tag, has its editor, shows in the card picker
   // instead of the original name, and works as the type of a card embedded in a launcher tile (original names keep working there too).
-  { const AL = { "sf-energy-flow-card": "sf-reactor-card", "sf-vehicles-card": "sf-hangar-card", "sf-home-banner-card": "sf-bridge-card", "sf-controls-card": "sf-console-card", "sf-presence-card": "sf-radar-card" };
+  { const AL = { "sf-energy-flow-card": "sf-reactor-card", "sf-vehicles-card": "sf-hangar-card", "sf-home-banner-card": "sf-bridge-card", "sf-controls-card": "sf-console-card" };
     for (const [alias, canon] of Object.entries(AL)) {
       if (!customElements.get(alias)) { fail(`alias ${alias}: element not defined`); continue; }
       const a = mount(alias, FULL[canon], "fr"), c = mount(canon, FULL[canon], "fr"); await wait(30);

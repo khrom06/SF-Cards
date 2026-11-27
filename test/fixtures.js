@@ -70,7 +70,6 @@ const FULL = {
   "sf-hangar-card": { cars: [{ name: "Car", soc: "sensor.car_soc", range: "sensor.car_range", target: "sensor.car_target", charging: "binary_sensor.charging" }],
     charger: { connected: "binary_sensor.connected", charging: "binary_sensor.charging", power: "sensor.ev", current: "number.current" }, mode: "input_select.mode",
     flows: { solar: "sensor.solar", home: "sensor.pac", surplus: "sensor.grid" } },
-  "sf-radar-card": { people: [{ name: "Alice", person: "person.alice", color: "#00e5ff" }], rooms: [{ label: "Living", entity: "binary_sensor.door" }] },
   "sf-machines-card": { title: "Equipment", tiles: [{ label: "A", entity: "sensor.temp", kind: "value", warn: 30, spark: 24 }, { label: "B", entity: "switch.plug", kind: "toggle" }, { label: "C", entity: "binary_sensor.net", kind: "binary" }, { label: "D", entity: "weather.home", kind: "text" }] },
   "sf-bridge-card": { weather: "weather.home", outdoor: "sensor.out", price: "sensor.price", hc_price: "sensor.price", mode: "input_select.mode", solar_left: "sensor.solar_left",
     internet: "binary_sensor.net", leaks: ["binary_sensor.leak"], doors: ["binary_sensor.door"], people: [{ name: "Alice", entity: "person.alice" }] },

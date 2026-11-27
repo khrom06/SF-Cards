@@ -16,7 +16,7 @@
 >
 > ⭐ **Like it? A star on GitHub is the easiest way to help other Home Assistant users find SF Cards.**
 
-## Two clicks, a whole dashboard
+## Install once, then two clicks: a whole dashboard
 
 1. Install SF Cards from the **Marketplace** — [Installation](#installation).
 2. **Settings → Dashboards → Add dashboard → SF · Home (automatic)**.
@@ -26,6 +26,44 @@ Home Assistant builds it from your areas: a welcome banner, one tile per room (t
 <p align="center">
   <img src="assets/anim/room.webp" alt="Room card: presence detected, lights turning on one by one, shutters opening" width="330"> <img src="assets/anim/auto-lights.gif" alt="The Lights view of the automatic dashboard: All off asks to confirm, then every light goes off" width="440">
 </p>
+
+## Which card do I need?
+
+New to Home Assistant? Start from what you want to see. Every card arrives **already filled with your own entities** when you add it from the card picker, and every option is in the visual editor — you never have to write YAML.
+
+<p align="center"><img src="assets/anim/card-picker.gif" alt="The card picker before and after version 1.30: plain-language names and descriptions, then the same list in French, German, Spanish, Chinese and Arabic" width="420"></p>
+
+<p align="center"><sub>The card picker, before and after 1.30, then in other languages (an illustration drawn from the real texts, not a screenshot of Home Assistant).</sub></p>
+
+| I want to… | Use this card | Good to know |
+|---|---|---|
+| Have **everything built for me**, no card to place | The **SF · Home (automatic)** dashboard — [see how](#automatic-dashboard) | It is a *dashboard*, not a card: **Settings → Dashboards → Add dashboard** |
+| See a **graph of temperatures** (or power, or any sensor) over the last hours or days | [`sf-trend-card`](#sf-trend-card) — *SF · Trend graph* | Pick one or several sensors; buttons switch the period |
+| See the **temperature, lights and covers of one room** | [`sf-room-card`](#sf-room-card) — *SF · Room* | Give it a Home Assistant *area*, it finds the rest |
+| See **who is at home**, the weather and the tariff at a glance | [`sf-home-banner-card`](#sf-home-banner-card) — *SF · Welcome banner* | A banner for the top of a dashboard |
+| Watch **solar, grid and home power** live | [`sf-energy-flow-card`](#sf-energy-flow-card) — *SF · Energy flow* | Set up **Settings → Dashboards → Energy** first (see [Words you may meet](#words-you-may-meet)), or give it the sensors yourself |
+| Read the **week, month or year** of energy, cost and solar | [`sf-report-card`](#sf-report-card) — *SF · Energy report* | Needs the **Energy dashboard** set up first; also makes an image to share |
+| Know **which device uses the most** | [`sf-ledger-card`](#sf-ledger-card) — *SF · Energy by device* | Shows the energy and cost you already measure for each device: needs an energy sensor and a cost sensor per device, and a drop-down helper for the period (**Settings → Devices & services → Helpers → Create helper → Dropdown**) |
+| Switch **lights, shutters, scripts, the vacuum** | [`sf-controls-card`](#sf-controls-card) — *SF · Controls* (buttons you choose and group yourself: lights, shutters, scripts, vacuum) | One list of buttons. For lights room by room, use *Room* below or the automatic dashboard's *Lights* view ([how to turn it on](#automatic-dashboard)) |
+| See **one room at a time** (temperature, lights, shutters) | [`sf-room-card`](#sf-room-card) — *SF · Room* (one card per room) | Give it the room's *area* |
+| See the **weather and the clock** | [`sf-weather-card`](#sf-weather-card) — *SF · Weather and clock* | Needs one `weather` entity |
+| Watch your **cameras** | [`sf-camera-card`](#sf-camera-card) — *SF · Cameras* | |
+| Follow an **electric car and its charger** | [`sf-vehicles-card`](#sf-vehicles-card) — *SF · Vehicles (EV charging)* | |
+| Set the **heating by room**, or see **every room's temperature** | [`sf-climate-card`](#sf-climate-card) — *SF · Climate* · [`sf-radiators-card`](#sf-radiators-card) — *SF · Radiators* | *Climate* is for thermostats and air conditioners: it shows each room's temperature; its ± target buttons need one number (a *helper*) per room. *Radiators* is for heaters that offer presets such as eco / comfort and often have no temperature probe |
+| Edit **day / night target temperatures** in one table | [`sf-setpoints-card`](#sf-setpoints-card) — *SF · Target temperatures table* | Advanced: you first create one number (a *helper*) per temperature — see [Words you may meet](#words-you-may-meet) |
+| Be **warned loudly** (water leak, doorbell, alarm, power cut) | [`sf-alert-card`](#sf-alert-card) — *SF · Alert* | Calm and green when all is well; big red and pulsing on a leak, doorbell, alarm or power cut (to hide it when all is well, wrap it in a *Conditional* card from the card picker) |
+| Find **weak batteries** | [`sf-cells-card`](#sf-cells-card) — *SF · Device batteries* | Finds your battery sensors by itself |
+| See my **solar storage battery** | [`sf-battery-card`](#sf-battery-card) — *SF · Home battery* | |
+| Know **if I should open the windows** | [`sf-air-card`](#sf-air-card) — *SF · Fresh air* | |
+| Know **when a filter or a consumable** is due | [`sf-upkeep-card`](#sf-upkeep-card) — *SF · Upkeep* | |
+| Follow a **washing machine** cycle | [`sf-cycles-card`](#sf-cycles-card) — *SF · Appliance cycles* | Needs a smart plug that measures power |
+| See **what is playing** and control it | [`sf-media-card`](#sf-media-card) — *SF · Media* | |
+| See **timers, reminders and the calendar** | [`sf-agenda-card`](#sf-agenda-card) — *SF · Agenda* | |
+| Read the **latest events** of the house | [`sf-timeline-card`](#sf-timeline-card) — *SF · Timeline* | Doors, motion, leaks… in plain words |
+| Check that my **automations** are healthy | [`sf-automations-card`](#sf-automations-card) — *SF · Automations* | |
+| Monitor a **computer or a server** | [`sf-host-card`](#sf-host-card) — *SF · Server monitor* | |
+| Use a **wall tablet** (Sonoff NSPanel Pro…) | [`sf-ns-card`](#sf-ns-card) — *SF · Wall tablet screen* | Changes with the time of day — see *Kiosk mode* there |
+| Make any card a **small tile on my phone** | [`sf-launcher-card`](#sf-launcher-card) — *SF · Popup tiles*, or `phone: tile` on any card — [see it](#on-a-phone) | |
 
 ## Or pick the cards you want
 
@@ -41,16 +79,34 @@ Edit a dashboard → **Add card** → type **SF**. Each card arrives **already f
   <img src="assets/anim/upkeep.webp" alt="Upkeep: when each filter or consumable will be due" width="380"> <img src="assets/anim/cycles.webp" alt="Appliance cycles: time left and cost of the washing machine" width="380">
 </p>
 
-On a **phone**, any card can fold itself into a tile that opens it in a bottom sheet — one option, `phone: tile`, no second copy of the card to maintain ([see it](#on-a-phone)). On a **wall panel or a tablet**, `sf-ns-card` fills the screen and changes with the time of day — and says so when its data stops coming ([see it](#sf-ns-card)).
+On a **phone**, any card can fold itself into a tile that opens it in a bottom sheet — no second copy of the card to maintain ([see it](#on-a-phone)). On a **wall panel or a tablet**, `sf-ns-card` fills the screen and changes with the time of day — and says so when its data stops coming ([see it](#sf-ns-card)).
 
 <p align="center">
   <img src="assets/ns-morning.png" alt="Wall panel, morning" width="200"> <img src="assets/ns-day.png" alt="Wall panel, day" width="200"> <img src="assets/ns-evening.png" alt="Wall panel, evening" width="200"> <img src="assets/ns-night.png" alt="Wall panel, night" width="200">
 </p>
 
+**Card empty, or showing “—”?** That means Home Assistant gave it no value for that entity (not set up, or offline) — see [Limitations](#limitations).
+
+## Words you may meet
+
+- **Entity** — one thing Home Assistant knows about: a lamp (`light.living_room`), a temperature sensor (`sensor.living_temperature`), a person… The visual editor lists them in drop-downs.
+- **Area** — a room as defined in **Settings → Areas**. Cards such as *Room* and the automatic dashboard use them to find your devices.
+- **Sensor** — an entity that measures something: a temperature, a power, a battery level.
+- **Cover** — a shutter, blind, curtain, awning or garage door. **Scene** — a saved mood (several lights at once). **Preset** — a named heating setting such as eco or comfort. **Target temperature** (also *setpoint*) — the temperature you want.
+- **Energy dashboard** — **Settings → Dashboards → Energy**, where you tell Home Assistant about your solar panels, grid meter and so on. Energy cards read it.
+- **Helper** — a small value you create yourself, for the few cards that store a setting in one. To make a **Number** helper: **Settings → Devices & services → Helpers → Create helper → Number**, give it a name (for example *Living room target*, minimum 5, maximum 30), then, in the card's visual editor, open the room and choose the helper in its **Setpoint (input_number)** field. Set *Step* to 0.5 if your thermostat uses half degrees. One helper per room or per temperature.
+- **Dashboard** and **card** — a dashboard is a page; a card is a block on that page. *SF · Home (automatic)* builds a whole dashboard; the other SF cards are blocks you add.
+- **Visual editor / YAML** — every SF card can be set up by clicking in the visual editor. YAML is the same configuration written as text; the examples in this document use it only for reference.
+- **Tile / popup** — a *tile* is a small summary square; tapping it can open a *popup* (a panel that slides up from the bottom of a phone).
+- **Kiosk mode** — hiding Home Assistant's own top bar so a dashboard fills a wall tablet. See [`sf-ns-card`](#sf-ns-card).
+- **Phone app / hard refresh** — the *Home Assistant app* is the official phone app. A *hard refresh* (Ctrl + Shift + R on a computer) makes the browser reload the cards after an update.
+- **Marketplace** — Home Assistant's store for custom cards and integrations (**HACS** on older versions).
+
 ---
 
 ## Contents
 
+- [Which card do I need?](#which-card-do-i-need) · [Words you may meet](#words-you-may-meet)
 - [Features](#features) · [Installation](#installation) (Marketplace / HACS or manual)
 - [The cards](#the-cards) · [Automatic dashboard](#automatic-dashboard) · [The SF family](#the-sf-family)
 - [Visual editor](#visual-editor) · [Languages](#languages) · [Light theme](#light-theme) · [Look and accent](#look-and-accent) · [Layout](#layout) · [Accessibility](#accessibility) · [Numbers](#numbers)
@@ -74,11 +130,13 @@ On a **phone**, any card can fold itself into a tile that opens it in a bottom s
 
 ### Option A — Marketplace (Home Assistant 2026.11 and later) or HACS
 
+> On a Home Assistant older than 2026.11 there is no Marketplace: install **HACS** first (see [hacs.xyz](https://hacs.xyz)), then follow the same steps.
+
 SF Cards is in the default catalogue, so there is nothing to add by hand:
 
 1. Open **Marketplace** (or **HACS** on older versions).
 2. Search for **SF Cards** and click **Download** (or **Install**).
-3. **Reload your browser** (hard refresh, or restart the companion app). The dashboard resource is registered for you.
+3. **Reload your browser** (hard refresh, or close and reopen the Home Assistant app). Home Assistant loads the cards for you.
 
 [![Open in Home Assistant](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 
@@ -98,46 +156,77 @@ resources:
 2. **Settings → Dashboards → ⋮ → Resources → Add resource**: URL `/local/sf-cards.js`, type **JavaScript module**.
 3. Reload your browser.
 
-Then edit a dashboard → **Add card** → search for **"SF ·"**.
+Then edit a dashboard → **Add card** → type **SF**.
 
 ## The cards
 
 Every card can be configured in the visual editor; the YAML below is just for reference. Optional entities that you leave out are simply not displayed. Entity ids are placeholders.
 
+**Home and rooms**
+
 | Card | What it is |
 |---|---|
-| [`sf-home-banner-card`](#sf-home-banner-card) | Welcome banner: clock, weather, tariff (peak / off‑peak + countdown), house mode, solar left, anomalies, presence |
-| [`sf-energy-flow-card`](#sf-energy-flow-card) | Energy flow around an animated core: solar, grid, devices |
-| [`sf-climate-card`](#sf-climate-card) | Room dials with target temperature, house mode, extra buttons |
-| [`sf-controls-card`](#sf-controls-card) | Grouped controls: lights, dimmers, covers, vacuum, scripts, sensors |
-| [`sf-launcher-card`](#sf-launcher-card) | Summary tiles that open any card (SF, standard Home Assistant or custom) in a popup — made for phones |
-| [`sf-alert-card`](#sf-alert-card) | Full‑frame red alert: water leaks, doorbell, alarm, power cut |
-| [`sf-vehicles-card`](#sf-vehicles-card) | EV(s) + shared charger, charge‑mode selector, energy flows |
-| [`sf-machines-card`](#sf-machines-card) | Status tiles: values with thresholds, on/off, toggles with timers |
-| [`sf-cells-card`](#sf-cells-card) | Weakest sensor batteries first, discovered automatically |
-| [`sf-assistant-card`](#sf-assistant-card) | State of an assistant: phase, last request, action, result, reply — works out of the box with Assist satellites (read-only) |
-| [`sf-health-card`](#sf-health-card) | Overview of your own checks: overall verdict and anomalies by severity, grouped by subsystem |
-| [`sf-host-card`](#sf-host-card) | Monitoring of a computer or server: CPU / GPU / memory gauges, VRAM, disk and swap bars, live network curve, power draw (read-only) |
+| [`sf-home-banner-card`](#sf-home-banner-card) | Welcome banner: clock, weather, electricity price (expensive / cheap hours + countdown), house mode, solar left, alerts, who is home |
+| [`sf-room-card`](#sf-room-card) | one room from its Home Assistant area: temperature, presence, lights, covers, scenes, devices — tile, standard or large |
+| [`sf-weather-card`](#sf-weather-card) | large clock, current weather, the next hours and days |
+| [`sf-agenda-card`](#sf-agenda-card) | running timers, pinned reminders (waste collection…), next calendar events by day |
+| [`sf-media-card`](#sf-media-card) | what is playing and the remote: artwork, progress, transport, volume, several players |
 | [`sf-timeline-card`](#sf-timeline-card) | Latest state changes of the chosen entities, grouped by day, in plain words (read-only) |
-| [`sf-trend-card`](#sf-trend-card) | History curves (read-only): range buttons, several series on one chart or one line each, hover / touch readout |
-| [`sf-battery-card`](#sf-battery-card) | Home battery: level, flow, estimated time, daily energy, mode — only shows what you configure |
-| [`sf-radiators-card`](#sf-radiators-card) | Radiators: preset, setpoint, heating state and daily energy — works without a temperature probe |
-| [`sf-camera-card`](#sf-camera-card) | Camera mosaic with motion / person overlay |
-| [`sf-setpoints-card`](#sf-setpoints-card) | Setpoint matrix per room; tap a value to edit (slider, scope: value / program / room) |
-| [`sf-ledger-card`](#sf-ledger-card) | Consumption per device and period |
-| [`sf-presence-card`](#sf-presence-card) | Presence from three never‑merged sources (advanced) |
-| [`sf-room-card`](#sf-room-card) | **New** · one room from its Home Assistant area: temperature, presence, lights, covers, scenes, devices — tile, standard or large |
-| [`sf-media-card`](#sf-media-card) | **New** · what is playing and the remote: artwork, progress, transport, volume, several players |
-| [`sf-weather-card`](#sf-weather-card) | **New** · large clock, current weather, the next hours and days |
-| [`sf-agenda-card`](#sf-agenda-card) | **New** · running timers, pinned reminders (waste collection…), next calendar events by day |
-| [`sf-report-card`](#sf-report-card) | **New** · energy report of the week / month / year: consumption, solar, autonomy, cost, who consumes, exportable image |
-| [`sf-upkeep-card`](#sf-upkeep-card) | maintenance forecast: filters, brushes, consumables, service dates — learns the wear rate, one-tap reset |
-| [`sf-air-card`](#sf-air-card) | "should I open the windows?" — one verdict per room, window sensors, best hour of the next 12 |
-| [`sf-automations-card`](#sf-automations-card) | health of your automations: broken, failing, silent, disabled, running, 24 h pulse (read-only) |
-| [`sf-cycles-card`](#sf-cycles-card) | appliance cycles from a power plug: live progress, time left, cost, last 7 days |
-| [`sf-ns-card`](#sf-ns-card) | **Full‑screen dashboard for wall panels and tablets** (square, landscape or portrait — NSPanel 480×320, Pro 480×480, 1334×750…): morning / day / evening / night modes, kiosk mode |
 
-> **Friendly names (1.13).** Five cards were renamed with plainer names: `sf-reactor-card` → `sf-energy-flow-card`, `sf-hangar-card` → `sf-vehicles-card`, `sf-bridge-card` → `sf-home-banner-card`, `sf-console-card` → `sf-controls-card`, `sf-radar-card` → `sf-presence-card`. **The original names keep working forever** (same card, same options, same editor); the card picker and this documentation just use the new ones.
+**Energy**
+
+| Card | What it is |
+|---|---|
+| [`sf-energy-flow-card`](#sf-energy-flow-card) | Solar, grid, battery and devices around a glowing centre, with live power |
+| [`sf-report-card`](#sf-report-card) | energy report of the week / month / year: consumption, solar, autonomy, cost, who consumes, exportable image |
+| [`sf-ledger-card`](#sf-ledger-card) | Energy by device: consumption and cost per device and period |
+| [`sf-battery-card`](#sf-battery-card) | Home battery: level, flow, estimated time, daily energy, mode — only shows what you configure |
+| [`sf-vehicles-card`](#sf-vehicles-card) | EV(s) + shared charger, charge‑mode selector, energy flows |
+
+**Heating and air**
+
+| Card | What it is |
+|---|---|
+| [`sf-climate-card`](#sf-climate-card) | Room dials with target temperature, house mode, extra buttons |
+| [`sf-radiators-card`](#sf-radiators-card) | Radiators: preset, setpoint, heating state and daily energy — works without a temperature probe |
+| [`sf-setpoints-card`](#sf-setpoints-card) | Target temperatures table: one value per room and program (day / night); tap a value to edit |
+| [`sf-air-card`](#sf-air-card) | "should I open the windows?" — one verdict per room, window sensors, best hour of the next 12 |
+
+**Controls and security**
+
+| Card | What it is |
+|---|---|
+| [`sf-controls-card`](#sf-controls-card) | Grouped controls: lights, dimmers, covers, vacuum, scripts, sensors |
+| [`sf-alert-card`](#sf-alert-card) | Full‑frame red alert: water leaks, doorbell, alarm, power cut |
+| [`sf-camera-card`](#sf-camera-card) | Several cameras side by side, with a motion / person marker |
+
+**Maintenance and system**
+
+| Card | What it is |
+|---|---|
+| [`sf-cells-card`](#sf-cells-card) | Device batteries: the weakest sensor and remote batteries first, found automatically |
+| [`sf-upkeep-card`](#sf-upkeep-card) | maintenance forecast: filters, brushes, bulbs, service dates — learns the wear rate, one-tap reset |
+| [`sf-cycles-card`](#sf-cycles-card) | appliance cycles from a power plug: live progress, time left, cost, last 7 days |
+| [`sf-automations-card`](#sf-automations-card) | health of your automations: broken, failing, silent, disabled, running, 24 h pulse (read-only) |
+| [`sf-health-card`](#sf-health-card) | Health checks: one overall verdict from the checks you define, problems listed by importance |
+| [`sf-host-card`](#sf-host-card) | Server monitor: CPU / GPU / memory gauges, disk bars, live network curve, power draw (read-only) |
+| [`sf-assistant-card`](#sf-assistant-card) | State of an assistant: phase, last request, action, result, reply — works out of the box with Assist satellites (read-only) |
+| [`sf-machines-card`](#sf-machines-card) | Device tiles: a value with warning thresholds, on/off, toggles with timers |
+
+**Phones and wall tablets**
+
+| Card | What it is |
+|---|---|
+| [`sf-launcher-card`](#sf-launcher-card) | Small tiles that each open a card (SF, standard Home Assistant or custom) in a popup — made for phones |
+| [`sf-ns-card`](#sf-ns-card) | **Wall tablet screen** — full-screen dashboard for wall panels and tablets (square, landscape or portrait — NSPanel 480×320, Pro 480×480, 1334×750…): morning / day / evening / night modes, kiosk mode |
+
+**Graphs**
+
+| Card | What it is |
+|---|---|
+| [`sf-trend-card`](#sf-trend-card) | Trend graph: history curves (read-only), range buttons, several sensors on one chart or one line each, hover / touch readout |
+
+> **Friendly names (1.13).** Four cards were renamed with plainer names: `sf-reactor-card` → `sf-energy-flow-card`, `sf-hangar-card` → `sf-vehicles-card`, `sf-bridge-card` → `sf-home-banner-card`, `sf-console-card` → `sf-controls-card`. **The original names keep working forever** (same card, same options, same editor); the card picker and this documentation just use the new ones.
 
 ### Automatic dashboard
 
@@ -161,7 +250,15 @@ Home Assistant then asks SF Cards for the dashboard every time it is opened, so 
 | **Security** | Cameras and the log of doors, windows, locks and alarm | `camera`, opening sensors, `lock`, `alarm_control_panel` |
 | **System** | Sensor batteries and the health of your automations | found automatically |
 
-Two more views are **available on request** (they are not in the default list, so an existing dashboard does not change): add them to `views`.
+Two more views are **available on request** (they are not in the default list, so an existing dashboard does not change). To turn them on, build the dashboard the manual way: **Settings → Dashboards → Add dashboard → New dashboard from scratch**, open it, then **✎ Edit → ⋮ → Raw configuration editor**, select all the text, delete it, paste the block below and **Save**. (Do not use *Take control* on a dashboard made from the list: it would freeze it.) It keeps following your house.
+
+```yaml
+strategy:
+  type: custom:sf-home
+  views: [home, rooms, lights, covers, climate, energy, security, system]
+```
+
+Remove a name from `views` to hide that view.
 
 | View | What it shows | Built from |
 |---|---|---|
@@ -606,7 +703,7 @@ Other tile options: `unit` (force the unit), `invert: true` (alert when the valu
 
 ### sf-cells-card
 
-<img src="assets/anim/cells.webp" alt="Sensor batteries card" width="640">
+<img src="assets/anim/cells.webp" alt="Device batteries card" width="640">
 
 ```yaml
 type: custom:sf-cells-card
@@ -968,7 +1065,7 @@ cameras:
 
 ### sf-setpoints-card
 
-<img src="assets/anim/setpoints.webp" alt="Setpoints card" width="520">
+<img src="assets/anim/setpoints.webp" alt="Target temperatures table card" width="520">
 
 With `times`, the hour each program starts can be changed right on the card:
 
@@ -990,7 +1087,7 @@ times:                             # optional: when each program starts, under t
 
 ### sf-ledger-card
 
-<img src="assets/anim/ledger.webp" alt="Energy summary card" width="520">
+<img src="assets/anim/ledger.webp" alt="Energy by device card" width="520">
 
 ```yaml
 type: custom:sf-ledger-card
@@ -1005,20 +1102,6 @@ devices:
     edf: sensor.ev_kwh_grid       # part bought from the grid ("edf" is the historical key name)
     solar: sensor.ev_kwh_solar    # part supplied by solar
     cost: sensor.ev_cost
-```
-
-### sf-presence-card
-
-> **Deprecated.** This card (also `sf-radar-card`) will be removed in a future release, not before 2026-11-27. It keeps working until it is removed, and the console and the editor say so. If you use it, please [tell us](https://github.com/khrom06/SF-Cards/issues) so that it can be kept. `sf-setpoints-card` is not affected.
-
-<img src="assets/anim/radar.webp" alt="Presence card" width="520">
-
-Advanced and opinionated: three rings, three sources that are **never merged** (home/away from `person.*`, last camera that recognised a face, anonymous room occupancy).
-
-```yaml
-type: custom:sf-presence-card
-people: [{ name: Alice, person: person.alice, face: sensor.alice_last_camera, color: "#00e5ff" }]
-rooms:  [{ label: Living room, entity: binary_sensor.living_room_occupancy }]
 ```
 
 ### sf-ns-card
@@ -1049,7 +1132,7 @@ With `doors`, an open door or window shows up as an amber notice, and the night 
 
 **Which mode?** Give it an `input_select` with the options `Morning / Day / Evening / Night` (or the French `Matin / Jour / Soir / Nuit`) and an automation of your choice — or leave `mode_entity` out and the mode simply follows the clock. Add `?mode=Evening` to the URL to preview a mode without changing anything.
 
-**Kiosk mode.** Set `hide_header: true` to hide the Home Assistant header on that dashboard (add `?header=1` to the URL to bring it back). Use a dashboard view of type **panel** with this card alone.
+**Kiosk mode.** Turn on **Hide the Home Assistant top bar** in the card's visual editor (YAML: `hide_header: true`) to hide Home Assistant's top bar on the wall panel. An administrator opening the dashboard from a normal browser still sees the bar (with the edit pencil); the panel itself is recognised when it runs in Fully Kiosk Browser or when its address ends with `?kiosk=1` (use that for any other kiosk browser). People who are not administrators never see the bar. Add `?header=1` to the address to bring it back anywhere. For the best result, set the view to **Panel (1 card)**: ✎ Edit → the pencil next to the view's name → *View type* → *Panel (1 card)*, with this card alone in it.
 
 **Data that stopped coming (optional).** A panel on a wall is read from across the room. Add `offline_banner: true` and a banner says when Home Assistant has reported the connection as lost for 30 seconds of visible time (a tablet waking up reconnects in a few seconds and shows nothing), with the age of the data. Add `stale_minutes: 15` to also be warned when no new state arrived for that long while the connection looks open ("No update for 18 min"); a quiet house can go that long without any change at night, so choose the delay accordingly. Both are off by default: an existing panel does not change.
 
@@ -1248,7 +1331,6 @@ Sources: [Matter Alpha — "Home Assistant embraces HACS into core as the market
 - Screenshots use fictional demo data.
 - Not validated on real hardware yet: a physical battery (the solar / grid split of the battery origin was tested with simulated values, and is shown with "≈" because it is estimated), low-power tablets, Safari / iOS beyond the companion app's web view, and real screen readers (accessibility is checked by automated tests only). Reports from these setups are very welcome.
 - Automated render tests (`./test/run.sh`, headless Chrome) cover every card, the visual editors (with a mock `ha-form`) and the 11 languages; everything was also tried on real installations. A real Home Assistant is driven by the end-to-end workflow on the versions listed under [Requirements](#requirements).
-- `sf-presence-card` and the Frigate‑related options are tied to a specific setup and are documented as advanced.
 
 ## Ideas and feedback
 

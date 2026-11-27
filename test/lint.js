@@ -76,7 +76,7 @@ lines.forEach((l, i) => { if (/subscribe(Message|Events)\(/.test(l) && !/_fcFail
   const tags = [...reg.matchAll(/\["(sf-[a-z0-9-]+-card)", Sf/g)].map((m) => m[1]);
   const alias = {}; for (const m of (rules.match(/const SF_ALIAS = \{([^}]*)\}/) || ["", ""])[1].matchAll(/"([a-z0-9-]+)": "([a-z0-9-]+)"/g)) alias[m[2]] = m[1];
   const noConfigNeeded = ["sf-bridge-card", "sf-cells-card", "sf-automations-card"];   // they show something useful with an empty configuration
-  if (tags.length < 30) bad.push(`registry: expected at least 30 cards, found ${tags.length}`);
+  if (tags.length < 29) bad.push(`registry: expected at least 29 cards, found ${tags.length}`);
   for (const t of tags) {
     const names = [t, alias[t]].filter(Boolean);
     if (!new RegExp(`"${t}"\\s*:`).test(fx)) bad.push(`${t}: no full fixture in test/fixtures.js (FULL)`);

@@ -231,17 +231,6 @@ const SF_SPECS = {
     lists: [{ key: "devices", title: "Appareils", add: "Ajouter un appareil", item: "Appareil", itemTitle: (d) => d.name, new: () => ({ icon: "mdi:flash" }),
       schema: () => [sfG(sfT("name"), sfI("icon")), sfE("total", "sensor"), sfG(sfE("edf", "sensor"), sfE("solar", "sensor")), sfE("cost", "sensor")] }],
   },
-  "sf-radar-card": {
-    title: "Radar de présence",
-    stub: { people: [], rooms: [] },
-    labels: { person: "Personne (suivi du téléphone)", face: "Dernière caméra où la personne a été reconnue", label: "Libellé" },
-    lists: [
-      { key: "people", title: "Personnes", add: "Ajouter une personne", item: "Personne", itemTitle: (x) => x.name, new: () => ({}),
-        schema: () => [sfG(sfT("name"), sfT("color")), sfE("person", "person"), sfE("face", "sensor")] },
-      { key: "rooms", title: "Pièces (capteurs de présence)", add: "Ajouter une pièce", item: "Pièce", itemTitle: (x) => x.label, new: () => ({}),
-        schema: () => [sfT("label"), sfE("entity", "binary_sensor")] },
-    ],
-  },
   "sf-ns-card": {
     title: "Écran plein format",
     stub: { rooms: [], tiles: [] },
