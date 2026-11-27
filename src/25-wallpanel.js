@@ -557,6 +557,10 @@ class SfNsCard extends SfBase {
   // ---------------------------------------------------------------- rendu
   _hideHeader() {
     if (!this._config.hide_header || new URLSearchParams(location.search).get("header") === "1" || this._kiosk) return;
+    // An administrator on a normal browser keeps the bar (the pencil and the ⋮ menu live in it): it is hidden on the wall panel itself,
+    // recognised by Fully Kiosk or by `?kiosk=1` in its address, and for everyone who is not an administrator.
+    const u = this._hass && this._hass.user, q = new URLSearchParams(location.search), wall = q.get("kiosk") === "1" || !!window.fully || /FullyKiosk/i.test(navigator.userAgent || "");
+    if (u && u.is_admin === true && !wall) return;
     try {
       const r = document.querySelector("home-assistant").shadowRoot.querySelector("home-assistant-main").shadowRoot.querySelector("ha-panel-lovelace").shadowRoot.querySelector("hui-root").shadowRoot;
       const st = document.createElement("style"); st.id = "sf-ns-kiosk";

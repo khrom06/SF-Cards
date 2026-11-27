@@ -19,7 +19,6 @@
  *   custom:sf-camera-card    — camera mosaic with motion / person overlay
  *   custom:sf-setpoints-card — setpoint matrix per room (+ / −)
  *   custom:sf-ledger-card    — consumption per device and period
- *   custom:sf-radar-card     — presence from three never-merged sources (advanced)
  *   custom:sf-ns-card        — full-screen panel for a wall tablet / NSPanel Pro (480 x 480) that changes with the time of day
  *   custom:sf-room-card      — one room found from its Home Assistant area: temperature, presence, lights, covers, scenes (3 sizes)
  *   custom:sf-media-card     — what is playing and the remote (several players)

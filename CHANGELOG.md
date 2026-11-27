@@ -2,6 +2,21 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.30.0] - 2026-11-27
+**A release for people who are new to Home Assistant.** A reader told us it took a while to find the temperature graphs, and that it was the *Trend* card. So the card picker, the README and the wall-panel header now try to be understandable on the first visit, without YAML and without knowing the vocabulary. Three beginners' read-throughs and a fact-check against the code shaped the wording.
+
+### Changed
+- **Clearer card names and descriptions in the card picker** (the type names used in YAML do **not** change, and no dashboard is affected). The picker now says what each card does in plain words, and says what you must set up first:
+  - *Trend* → **Trend graph** ("Line graph of temperature, power or any sensor over the last hours or days"), *Summary* → **Energy by device**, *Equipment* → **Device tiles**, *Popups* → **Popup tiles**, *Batteries* → **Device batteries**, *Battery* → **Home battery**, *Host* → **Server monitor**, *Health* → **Health checks**, *Assistant* → **Assistant status**, *Setpoints* → **Target temperatures table**, *Full-screen panel* → **Wall tablet screen**, *Vehicles* → **Vehicles (EV charging)**.
+  - Descriptions no longer use jargon ("core", "reticle", "mosaic", "phase"), and a card that needs something first says so: a Number helper per room for *Climate*'s target, an energy and a cost sensor for *Energy by device*, the Energy dashboard for *Energy flow*…
+  - *SF · Welcome banner* now points to the whole automatic dashboard (**Settings → Dashboards → Add dashboard → SF · Home (automatic)**), which cannot appear in the card picker because it is a dashboard, not a card.
+  - **The picker texts are translated** into the 11 languages, following your Home Assistant language (English until that language's file is loaded).
+- **A new README start.** Right after the install steps, a **"Which card do I need?"** table (what you want to see → which card → what to know), a **"Words you may meet"** glossary (entity, area, helper, sensor, cover, preset, Energy dashboard…), and the cards list grouped by theme (home, energy, heating, controls, maintenance, phones and tablets). Step-by-step instructions were added where a beginner got stuck: creating a Number helper, turning on the automatic dashboard's *Lights* and *Covers* views, older Home Assistant versions without the Marketplace. Corrections found by checking each sentence against the code are included (for example, the *Alert* card is calm and green when all is well, *Setpoints* only stores values, *Energy by device* does not compute anything by itself).
+- **Wall panel: the Home Assistant header is no longer hidden from administrators on a normal browser.** With `hide_header: true` the header (with the edit pencil and the ⋮ menu) used to disappear everywhere, leaving no way to edit the dashboard. It is now hidden only on the wall panel itself (Fully Kiosk Browser, or `?kiosk=1` in the address) and for people who are not administrators. `?header=1` still brings it back anywhere. A kiosk that is not Fully Kiosk Browser must add `?kiosk=1` to its address to keep the header hidden.
+
+### Removed
+- **Breaking: the presence radar card is gone (`sf-radar-card`, also known as `sf-presence-card`).** It was announced as deprecated in 1.21.3. A dashboard that still uses it shows Home Assistant's "Custom element doesn't exist" error for that card: remove the card, or replace it with `sf-room-card` (presence per room) or `sf-bridge-card` / `sf-home-banner-card` (people at home). The `radar.*` translations and the demo image went with it. No other card is affected.
+
 ## [1.29.0] - 2026-11-26
 ### Added
 - **Wall panel: doors and windows (`doors`).** Optional list of door / window sensors: an open one shows in the alert line as an amber notice ("Open: Garage") after the red alerts, and the night screen lists every door with the open ones in amber. A closed door shows nothing on the other screens. Also in the visual editor. Nothing changes for a card without `doors`.

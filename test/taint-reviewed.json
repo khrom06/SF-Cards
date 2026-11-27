@@ -7,6 +7,26 @@
    "benignSuite": false
   },
   {
+   "key": "04-config-rules.js|al#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "04-config-rules.js|tag#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "04-config-rules.js|d.earliest#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
+   "key": "04-config-rules.js|also#1",
+   "ctx": "text",
+   "benignSuite": false
+  },
+  {
    "key": "06-config-normalise.js|src.slice(0, 60)#1",
    "ctx": "text",
    "benignSuite": true
@@ -222,36 +242,6 @@
    "benignSuite": false
   },
   {
-   "key": "12-radar.js|this.esc(p.face)#1",
-   "ctx": "attr",
-   "benignSuite": false
-  },
-  {
-   "key": "12-radar.js|this.esc(col)#5",
-   "ctx": "style-attr",
-   "benignSuite": false
-  },
-  {
-   "key": "12-radar.js|this.esc(p.name)#2",
-   "ctx": "text",
-   "benignSuite": false
-  },
-  {
-   "key": "12-radar.js|this.esc(cam)#1",
-   "ctx": "text",
-   "benignSuite": false
-  },
-  {
-   "key": "12-radar.js|this.ago(p.face)#1",
-   "ctx": "text",
-   "benignSuite": false
-  },
-  {
-   "key": "12-radar.js|seen ? `${this.esc(cam)} · ${this.ago(p.face)}` : this.t(\"radar.never_seen\")#1",
-   "ctx": "text",
-   "benignSuite": false
-  },
-  {
    "key": "13-machines.js|x.id#1",
    "ctx": "text",
    "benignSuite": true
@@ -424,22 +414,22 @@
   {
    "key": "16-climate.js|this.esc(tm.actif || this.isOn(x.entity) ? \"on\" : \"\")#1",
    "ctx": "attr",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
    "key": "16-climate.js|act#1",
    "ctx": "tag",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
    "key": "16-climate.js|this.icon(x.icon || \"mdi:toggle-switch\", 15)#1",
    "ctx": "text",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
    "key": "16-climate.js|this.esc(x.label)#1",
    "ctx": "text",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
    "key": "16-climate.js|tm.reste#1",
@@ -449,12 +439,12 @@
   {
    "key": "16-climate.js|tm.actif && tm.reste ? ` · ${tm.reste} min` : \"\"#1",
    "ctx": "text",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
    "key": "16-climate.js|extras#1",
    "ctx": "text",
-   "benignSuite": false
+   "benignSuite": true
   },
   {
    "key": "17-console.js|this.esc(x.sub)#1",

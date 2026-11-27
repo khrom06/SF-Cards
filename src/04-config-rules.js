@@ -4,11 +4,11 @@
 // Friendly tag names (1.13): the original themed names stay valid forever; each friendly tag is a subclass registered under its own name
 // (see 30-registry.js) and shares the spec / required-field rules of its original tag.
 const SF_ALIAS = { "sf-energy-flow-card": "sf-reactor-card", "sf-vehicles-card": "sf-hangar-card", "sf-home-banner-card": "sf-bridge-card",
-  "sf-controls-card": "sf-console-card", "sf-presence-card": "sf-radar-card" };
+  "sf-controls-card": "sf-console-card" };
 const SF_ALIAS_REV = Object.fromEntries(Object.entries(SF_ALIAS).map(([a, c]) => [c, a]));
 const sfCanon = (tag) => SF_ALIAS[tag] || tag;
 // Cards announced for removal: the card keeps working as configured, the console and the editor say so. `earliest` = no removal before this date. Message in English only: it is a developer-facing notice, like the configuration warnings.
-const SF_DEPRECATED = { "sf-radar-card": { earliest: "2026-11-27" } };
+const SF_DEPRECATED = {};   // none at the moment (the radar card was removed in 1.30.0)
 function sfDeprecation(tag) {
   const d = SF_DEPRECATED[sfCanon(tag)]; if (!d) return "";
   const al = SF_ALIAS_REV[sfCanon(tag)], also = al && al !== tag ? ` (Also known as ${al}.)` : "";   // the editor of an alias is the one of the canonical card
@@ -42,7 +42,6 @@ const SF_REQ = {
   "sf-report-card": (c) => (c.grid || c.solar) ? [] : ["report.need"],
   "sf-host-card": (c) => ["cpu", "gpu", "ram", "disk", "gpu_vram"].some((k) => c[k]) ? [] : ["host.need"],
   "sf-assistant-card": (c) => ["state", "request", "action", "result", "reply"].some((k) => c[k]) ? [] : ["Au moins une entité : état, demande, action, résultat ou réponse"],
-  "sf-radar-card": (c) => (sfHas(c.people) || sfHas(c.rooms)) ? [] : ["Au moins une personne ou une pièce"],
   "sf-ns-card": (c) => { const e = c.energy || {}; return (c.weather || c.outdoor || e.solar || e.grid || e.home || ["rooms", "fridge", "cars", "tiles", "shortcuts", "leaks"].some((k) => sfHas(c[k]))) ? [] : ["Au moins un élément : météo, énergie, pièce, voiture, tuile ou raccourci"]; },
 };
 const SF_HOOK = {};   // test hook: called for every translation requested

@@ -65,25 +65,22 @@ async function run(label, tag, cfg, hass, then, rawCheck) {
   for (const tag of tags()) await run("language / theme / entities change", tag, FULL[tag], mkHass(base), async (el) => {
     for (const lang of ["ar", "zh-Hans", "pt_BR", "xx-invalid", "fr"]) { const h = mkHass(base); h.locale = { language: lang }; h.language = lang; h.themes = { theme: "t" + lang, darkMode: lang === "ar" }; el.hass = h; await wait(15); }
     el.hass = mkHass({}); await wait(15); el.hass = mkHass(base); await wait(15); el.setConfig({ ...FULL[tag], theme: "light" }); await wait(15); });
-  // Deprecation notice: the radar card (and its alias) keep working but announce their removal, once per tag in the console and in the editor; no other card does.
-  { const dep = (tag) => window.__warns.filter((m) => m.includes(tag + " is deprecated"));
-    const el = document.createElement("sf-presence-card"); el.setConfig({ people: [{ name: "A", person: "person.a" }] }); document.body.appendChild(el); el.hass = mkHass(base); await wait(60);
-    const el2 = document.createElement("sf-presence-card"); el2.setConfig({ rooms: [{ label: "R", entity: "binary_sensor.r" }] }); document.body.appendChild(el2); await wait(30);
-    if (!el.shadowRoot || !el.shadowRoot.innerHTML.length) fails.push("deprecated radar card no longer renders");
-    if (dep("sf-radar-card").length !== 1) fails.push(`radar deprecation: expected one console notice for sf-radar-card, got ${dep("sf-radar-card").length}`);
-    if (dep("sf-presence-card").length !== 1) fails.push(`radar deprecation: expected one console notice for the alias sf-presence-card, got ${dep("sf-presence-card").length}`);
-    if (!window.__warns.some((m) => m.includes("not before 2026-11-27"))) fails.push("radar deprecation: the notice does not give the earliest removal date");
-    const others = window.__warns.filter((m) => m.includes("is deprecated") && !m.includes("sf-radar-card") && !m.includes("sf-presence-card"));
-    if (others.length) fails.push("deprecation notice for a card that is not deprecated: " + others[0].slice(0, 80));
-    el.remove(); el2.remove();
-    const ed = document.createElement("sf-radar-card-editor"), ed2 = document.createElement("sf-climate-card-editor");
-    for (const e of [ed, ed2]) { e.hass = mkHass(base); e.setConfig(e === ed ? FULL["sf-radar-card"] : FULL["sf-climate-card"]); document.body.appendChild(e); }
-    await wait(60);
-    const bannerOf = (e) => { const w = e.shadowRoot && e.shadowRoot.querySelector(".warnings"); return w && !w.hidden ? w.textContent : ""; };
-    if (!/deprecated/.test(bannerOf(ed))) fails.push("radar deprecation: no notice in the visual editor");
-    else if (!bannerOf(ed).includes("Also known as sf-presence-card")) fails.push("radar deprecation: the editor notice does not mention the alias (users of the alias get the editor of the canonical card)");
-    if (/deprecated/.test(bannerOf(ed2))) fails.push("deprecation notice in the editor of a card that is not deprecated");
-    ed.remove(); ed2.remove(); }
+  // The radar card (and its alias) were removed in 1.30.0: their tags are gone, and no card announces a deprecation any more.
+  { for (const tag of ["sf-radar-card", "sf-presence-card"]) if (customElements.get(tag)) fails.push(tag + " is still defined (removed in 1.30.0)");
+    if (window.__warns.some((m) => m.includes("is deprecated"))) fails.push("a deprecation notice appeared although no card is deprecated"); }
+  // Card picker: name and description follow the language of the Home Assistant profile (English when unknown / not loaded yet).
+  { const cc = (window.customCards || []).find((x) => x.type === "sf-trend-card");
+    if (!cc) fails.push("picker: sf-trend-card is not listed");
+    else {
+      if (cc.name !== "SF · Trend graph") fails.push("picker: English name expected without a Home Assistant element, got " + cc.name);
+      const ha = document.createElement("home-assistant"); ha.hass = { language: "fr", locale: { language: "fr" } }; document.body.appendChild(ha);
+      if (cc.name !== "SF · Graphique de tendance") fails.push("picker: French name expected, got " + cc.name);
+      if (!/^Courbe de température/.test(cc.description)) fails.push("picker: French description expected, got " + cc.description);
+      ha.hass = { language: "xx", locale: { language: "xx" } };
+      if (cc.name !== "SF · Trend graph") fails.push("picker: unknown language must fall back to English, got " + cc.name);
+      ha.remove();
+    }
+    for (const x of window.customCards) if (/^sf-/.test(x.type) && (typeof x.name !== "string" || !x.name.startsWith("SF · ") || typeof x.description !== "string" || !x.description)) fails.push("picker: bad entry " + x.type); }
   // Normalisation of the configuration (the one place every card relies on)
   { const N = window.__SF.sfNormConfig; const need = (c, m) => { if (!c) fails.push("normalise: " + m); };
     const r = N("sf-machines-card", { tiles: [null, "", { label: "a" }, 5, undefined], exclude: "sensor.x", lights_off: [null, "", "light.a", undefined], color: "red; background:url(//x)", accent: "#abc", span: 9 });
