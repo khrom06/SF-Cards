@@ -364,7 +364,10 @@ weather: weather.home
 # clock: true
 # forecast: both        # both | hourly | daily | none
 # hours: 8              days: 5
+# frost_below: 0        # °C: "Frost expected" when the next 14 hours go down to this (0 by default)
 ```
+
+**Feels like** is the value your weather entity gives; when it gives none, the card computes it (Steadman apparent temperature) from the temperature, humidity and wind. **Winter line:** *Frost expected* (amber) when the next 14 hours reach `frost_below`, and *Risk of black ice* when it is 1 °C or less now and raining or sleeting.
 
 ### sf-agenda-card
 
@@ -812,9 +815,9 @@ items:
 - **Open-plan spaces.** One sensor often covers several rooms (living room + kitchen + dining): list them in `areas` and they are shown under the room name.
 - **Window sensors.** Add the room's window / door contacts in `openings`: the card confirms *airing* when it is the right time, says *close it* once a quick airing has lasted long enough, and *close it!* when the window should not be open at all.
 - Thresholds can be set for the whole card or per room (a bathroom can tolerate more humidity).
-<img src="assets/anim/winter.gif" alt="Winter warnings: frost expected on the Weather card, then heat lost through an open window and a mold risk on the Fresh air card" width="420">
+- **Winter warnings.** Add `heating: climate.living_room` to a room: if one of its `openings` stays open for 10 minutes (`heating_open_min`) while that thermostat is heating, the room shows **Heat lost**. And when a room's humidity stays at or above 65 % (`mold_max`) for 4 hours in a row (`mold_after_h`), the card says **mold risk** and for how long (read from the humidity sensor's history, one request every 10 minutes and only while the humidity is that high). Both only inform: nothing is switched. The duration is a minimum (for example *28 h+*) when the whole history the card looked at is above the limit. A bathroom or a kitchen needs a higher `mold_max` (for example 75), otherwise every shower would warn.
 
-- **Winter warnings.** Add `heating: climate.living_room` to a room: if one of its `openings` stays open for 10 minutes (`heating_open_min`) while that thermostat is heating, the room shows **Heat lost**. And when a room's humidity stays at or above 65 % (`mold_max`) for 4 hours in a row (`mold_after_h`), the card says **mold risk** and for how long (read from the humidity sensor's history, one request every 10 minutes and only while the humidity is that high). Both only inform: nothing is switched. A bathroom or a kitchen needs a higher `mold_max` (for example 75), otherwise every shower would warn.
+<img src="assets/anim/winter.gif" alt="Winter warnings: frost expected on the Weather card, then heat lost through an open window and a mold risk on the Fresh air card" width="420">
 
 ```yaml
 type: custom:sf-air-card

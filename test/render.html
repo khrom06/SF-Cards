@@ -923,6 +923,12 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (calls !== 1) fail(`air mold: one history request per room every 10 minutes (got ${calls})`); el.remove();
     el = await run({ mold_after_h: 8 }, { "sensor.air_hi": { state: "80", attributes: {} } }, hist(6)); await wait(60);
     if (/mold risk/.test(el.shadowRoot.textContent)) fail("air mold: mold_after_h moves the delay"); el.remove();
+    el = await run({}, { "sensor.air_hi": { state: "80", attributes: {} } }, async () => ({})); await wait(60);
+    if (/mold risk/.test(el.shadowRoot.textContent)) fail("air mold: an empty history must not produce a warning"); el.remove();
+    el = await run({}, { "sensor.air_hi": { state: "80", attributes: {} } }, async () => ({ "sensor.air_hi": [{ s: "80", lu: (Date.now() - 20 * 3600000) / 1000 }] })); await wait(60);
+    if (!/damp for 2\d h\+/.test(el.shadowRoot.textContent)) fail("air mold: all the history above the limit shows a minimum like 28 h+, got " + el.shadowRoot.textContent.slice(0, 200)); el.remove();
+    el = await run({ heating_open_min: "" }, { "binary_sensor.air_hw": op(3), "climate.air_c": cl("heating") });
+    if (/Heat lost/.test(el.shadowRoot.textContent)) fail("air heating: an empty heating_open_min falls back to 10 minutes"); el.remove();
     calls = 0; el = await run({}, { "sensor.air_hi": { state: "50", attributes: {} } }, counted(hist(6))); await wait(60);
     if (calls !== 0 || /mold risk/.test(el.shadowRoot.textContent)) fail("air mold: under the limit nothing is asked and nothing is shown"); el.remove(); }
   // 5f. Connect / disconnect cycles (HA moves cards in edit mode): timers do not stack, everything is cleaned up at the end;

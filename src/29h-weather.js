@@ -2,7 +2,7 @@
 /*
  * The weather with the time: a large clock and the date, the current conditions, then the next hours and the next days (the forecasts
  * Home Assistant already has for the weather entity; nothing is fetched from outside).
- * Winter line: "Frost expected -2°" when the next 14 hours go down to `frost_below` (°C, default 0), "Risk of black ice" when it is already freezing and raining.
+ * Winter line: "Frost expected -2°" when the next 14 hours go down to `frost_below` (°C, default 0), "Risk of black ice" when it is 1 °C or less now and raining or sleeting.
  *
  * type: custom:sf-weather-card
  * title: Weather
@@ -57,14 +57,14 @@ class SfWeatherCard extends SfBase {
   // Frost: the lowest forecast temperature of the next 14 hours (else today's low) is at or under `frost_below` (°C, default 0); "ice" when it is
   // freezing now and it is raining or sleeting. Null when nothing freezes. Values are read in the entity's unit and compared in °C.
   _frost(tv, tu, cond, hourly, daily) {
-    const f = /f/i.test(String(tu)), c = (v) => (f ? (Number(v) - 32) / 1.8 : Number(v)), lim = isFinite(Number(this._config.frost_below)) && this._config.frost_below !== "" && this._config.frost_below !== null ? Number(this._config.frost_below) : 0;
+    const f = /f/i.test(String(tu)), c = (v) => (f ? (Number(v) - 32) / 1.8 : Number(v)), lim = sfAirNum(this._config.frost_below, 0);
     const vals = hourly.map((x) => x.temperature).concat(hourly.length ? [] : [daily[0] && daily[0].templow]).filter((v) => v !== null && v !== undefined && v !== "" && isFinite(Number(v)));
     if (tv !== null && isFinite(Number(tv))) vals.push(tv);
     if (!vals.length) return null;
     const min = Math.min(...vals.map(c));
     if (min > lim) return null;
-    const now = tv !== null && isFinite(Number(tv)) ? c(tv) : null;
-    return { min: f ? min * 1.8 + 32 : min, ice: now !== null && now <= Math.max(lim, 0) + 1 && ["rainy", "pouring", "snowy-rainy", "hail", "lightning-rainy"].includes(String(cond)) };
+    const now = tv !== null && isFinite(Number(tv)) ? c(tv) : null, low = f ? min * 1.8 + 32 : min;
+    return { min: Math.abs(low) < 0.5 ? 0 : low, ice: now !== null && now <= 1 && ["rainy", "pouring", "snowy-rainy", "hail", "lightning-rainy"].includes(String(cond)) };
   }
   _deg(v) { const n = Number(v); return v === null || v === undefined || !isFinite(n) ? "—" : `${this.nf(n, 0)}°`; }
   css() {

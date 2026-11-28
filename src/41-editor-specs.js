@@ -326,9 +326,9 @@ const SF_SPECS = {
   "sf-weather-card": {
     title: "Météo et horloge",
     stub: {},
-    labels: { weather: "Météo (entité weather)", temperature: "Température extérieure (capteur, facultatif)", clock: "Afficher l'horloge et la date", forecast: "Prévisions", hours: "Nombre d'heures", days: "Nombre de jours" },
+    labels: { frost_below: "Gel : prévenir à partir de (°C)", weather: "Météo (entité weather)", temperature: "Température extérieure (capteur, facultatif)", clock: "Afficher l'horloge et la date", forecast: "Prévisions", hours: "Nombre d'heures", days: "Nombre de jours" },
     fields: () => [sfT("title"), sfE("weather", "weather"), sfE("temperature", "sensor"), sfB("clock"),
-      sfS("forecast", [["both", "Heures et jours"], ["hourly", "Heures seulement"], ["daily", "Jours seulement"], ["none", "Aucune prévision"]]), sfG(sfN("hours", 1, 24), sfN("days", 1, 10))],
+      sfS("forecast", [["both", "Heures et jours"], ["hourly", "Heures seulement"], ["daily", "Jours seulement"], ["none", "Aucune prévision"]]), sfG(sfN("hours", 1, 24), sfN("days", 1, 10)), sfN("frost_below", -20, 10, 0.5)],
   },
   "sf-agenda-card": {
     title: "Agenda",
