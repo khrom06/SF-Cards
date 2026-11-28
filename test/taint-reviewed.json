@@ -1722,6 +1722,16 @@
    "benignSuite": false
   },
   {
+   "key": "29c-air.js|this.nf(mold.h, 0)#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29c-air.js|mold.lower ? \"+\" : \"\"#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
    "key": "29c-air.js|f === b.best ? \"best\" : !b.ok(f) ? \"no\" : \"\"#1",
    "ctx": "attr",
    "benignSuite": false
@@ -2458,6 +2468,11 @@
   },
   {
    "key": "29h-weather.js|id#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
+   "key": "29h-weather.js|this.esc(this.t(\"weather.ice\"))#1",
    "ctx": "text",
    "benignSuite": true
   },

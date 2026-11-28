@@ -2,6 +2,20 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [1.31.0] - 2026-11-28
+**Winter is coming: three small helpers.** The Weather card warns about frost and black ice and computes "Feels like" itself when your weather entity does not provide it, and the Fresh air card warns when heat is being lost through an open window or when a room stays damp for hours. Nothing is switched: these cards only inform. No configuration changes are needed, everything is optional.
+
+### Added
+- **Weather card: "Feels like" is computed when your entity does not provide it.** When your weather entity does not provide `apparent_temperature`, the card computes it itself (Steadman apparent temperature, from the temperature, humidity and wind). The value your entity provides is still used first. Works in °C and °F, and with wind in km/h, m/s, mph, knots or ft/s. Nothing is shown if the humidity or the wind is missing.
+- **Weather card: a winter line.** When the next 14 hours (today's low if only a daily forecast is used) go down to freezing, the card shows **Frost expected** with the lowest temperature, in amber. If it is 1 °C or less now and raining or sleeting, it shows **Risk of black ice**. The limit is `frost_below` (in °C, default `0`, also in the card editor). Translated in the 11 languages.
+- **Fresh air card: two winter warnings.**
+  - **Heat lost:** add `heating: climate.xxx` to a room. When one of its window or door sensors stays open for `heating_open_min` minutes (default 10) while that thermostat is heating, the room says so.
+  - **Mold risk:** when a room's humidity stays at or above `mold_max` (default 65 %) for `mold_after_h` hours in a row (default 4), the card warns and shows for how long (as a minimum, like "28 h+", when the whole history it looked at is above the limit). The duration comes from the humidity sensor's history, with one request per room every 10 minutes and only while the humidity is that high. A bathroom or kitchen can have its own, higher `mold_max`.
+  - Both only inform, nothing is switched. Settings are in the card editor, texts translated in the 11 languages.
+
+### Changed
+- README: on the Home Assistant mobile app, if a card still shows its old name or look after an update, use **Settings → Companion app → Debugging → Reset frontend cache** (iOS; *Troubleshooting* on Android).
+
 ## [1.30.0] - 2026-11-27
 **A release for people who are new to Home Assistant.** A reader told us it took a while to find the temperature graphs, and that it was the *Trend* card. So the card picker, the README and the wall-panel header now try to be understandable on the first visit, without YAML and without knowing the vocabulary. Three beginners' read-throughs and a fact-check against the code shaped the wording.
 

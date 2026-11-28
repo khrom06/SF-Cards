@@ -16,8 +16,15 @@
  * outdoor_temperature: sensor.out_temp        outdoor_humidity: sensor.out_hum        outdoor_pm25: sensor.out_pm25
  * wind: sensor.wind_speed                     rain_chance: sensor.rain_chance         weather: weather.home   # weather: fallbacks + hourly forecast
  * comfort_min: 19   comfort_max: 24   humidity_max: 60   co2_max: 1000   pm25_max: 25   pm25_in_max: 15   wind_max: 40   # km/h
+ * Winter warnings (both only inform, nothing is switched):
+ *   heating: climate.living      # the room's thermostat (in each room of `rooms:`, or at the top level for a single room); with an `openings` contact open for
+ *                                # heating_open_min (default 10) minutes while it heats: "heat lost"
+ *   mold_max: 65   mold_after_h: 4   # humidity at or above mold_max (%) for mold_after_h hours in a row: "mold risk" (read from the history of the humidity sensor;
+ *                                    # both can also be set per room; the duration is a lower bound, "48 h+", when the history window is all above the limit)
  */
 const sfAirList = (v) => (Array.isArray(v) ? v : [v]).filter((x) => typeof x === "string" && x.trim()).map((x) => x.trim());
+// A number from the configuration: "", null, booleans and text that is not a number give the default (Number("") would be 0).
+const sfAirNum = (v, d) => (v === null || v === undefined || v === "" || typeof v === "boolean" || !isFinite(Number(v)) ? d : Number(v));
 const SF_AIR_RANK = { open: 0, short: 1, none: 2, free: 3, closed: 4 };
 const SF_AIR_WET = ["rainy", "pouring", "lightning-rainy", "snowy", "snowy-rainy", "hail", "lightning"];
 // Absolute humidity in g/m³ (Magnus formula).
@@ -26,9 +33,9 @@ function sfAbsHum(t, rh) {
   return (6.112 * Math.exp((17.67 * t) / (t + 243.5)) * rh * 2.1674) / (273.15 + t);
 }
 class SfAirCard extends SfBase {
-  defaults() { return { comfort_min: 19, comfort_max: 24, humidity_max: 60, co2_max: 1000, pm25_max: 25, pm25_in_max: 15, wind_max: 40 }; }
+  defaults() { return { comfort_min: 19, comfort_max: 24, humidity_max: 60, co2_max: 1000, pm25_max: 25, pm25_in_max: 15, wind_max: 40, mold_max: 65, mold_after_h: 4, heating_open_min: 10 }; }
   static getStubConfig() { return {}; }
-  set hass(h) { this._hass = h; this._subFc(); this._schedule(); }
+  set hass(h) { this._hass = h; this._subFc(); this._moldCheck(); this._schedule(); }
   get hass() { return this._hass; }
   setConfig(config) { const w = this._config && this._config.weather; super.setConfig(config); if (w !== this._config.weather) this._unsubFc(); this._subFc(); }
   connectedCallback() { super.connectedCallback(); this._subFc(); }
@@ -47,6 +54,40 @@ class SfAirCard extends SfBase {
     } catch (e) { this._fc = null; this._fcFail = Date.now(); }
     this._fcBusy = false;
   }
+  // Mold risk: a room whose humidity is at or above mold_max asks the recorder how long it has been so (one request per room every 10 minutes,
+  // and only while the humidity is that high; nothing is asked otherwise). The result is the time the humidity first rose above the limit.
+  _moldLimit(r) { const v = (k, d) => sfAirNum(r && r[k], sfAirNum(this._config[k], d)); return { max: v("mold_max", 65), hours: Math.min(72, Math.max(1, v("mold_after_h", 4))) }; }
+  _moldCheck() {
+    const h = this._hass; if (!h || typeof h.callWS !== "function" || !this.isConnected || !this._config) return;
+    const M = this._mold || (this._mold = {});
+    for (const r of this._rooms()) {
+      const id = r && typeof r.humidity === "string" && SF_EID.test(r.humidity) ? r.humidity : "";
+      if (!id) continue;
+      const now = this.num(id), lim = this._moldLimit(r), cur = M[id];
+      if (now === null || now < lim.max) { if (cur) cur.since = null; continue; }   // the throttle time is kept, so a sensor hovering around the limit cannot cause a request per update
+      if (cur && Date.now() - cur.at < 600000) continue;
+      const slot = (M[id] = { at: Date.now(), since: cur ? cur.since : null, lower: cur ? cur.lower : false }), span = Math.min(96, lim.hours + 24) * 3600000, from = Date.now() - span;
+      h.callWS({ type: "history/history_during_period", start_time: new Date(from).toISOString(), end_time: new Date().toISOString(), entity_ids: [id], minimal_response: true, no_attributes: true, significant_changes_only: false })
+        .then((res) => {
+          const rows = (res && Array.isArray(res[id]) ? res[id] : Array.isArray(res) && Array.isArray(res[0]) ? res[0] : []).filter((e) => e && typeof e === "object");
+          const at = (e) => (e.lu !== undefined ? Number(e.lu) * 1000 : Date.parse(e.last_updated || e.last_changed)), pts = rows.map((e) => ({ t: at(e), v: Number(e.s !== undefined ? e.s : e.state) })).filter((p) => isFinite(p.t) && isFinite(p.v));
+          if (!pts.length) { slot.since = null; slot.lower = false; return; }   // no history (sensor not recorded, brand new): no duration, no warning
+          let since = null; for (let i = pts.length - 1; i >= 0; i--) if (pts[i].v < lim.max) { since = pts[i + 1] ? pts[i + 1].t : Date.now(); break; }
+          slot.lower = since === null; slot.since = since === null ? from : since;   // all of the window is above the limit: at least that long
+        }).catch(() => { slot.since = null; }).then(() => this._schedule());
+    }
+  }
+  _moldFor(r) {
+    const id = r && typeof r.humidity === "string" ? r.humidity : "", slot = this._mold && this._mold[id], lim = this._moldLimit(r), now = id ? this.num(id) : null;
+    if (!slot || slot.since === null || now === null || now < lim.max) return null;
+    const h = (Date.now() - slot.since) / 3600000;
+    return h >= lim.hours ? { h, lower: slot.lower } : null;
+  }
+  // Heat lost: a window or door of the room open for heating_open_min minutes while its thermostat is heating.
+  _heating(r) {
+    for (const id of sfAirList(r && r.heating)) { const s = this.st(id); if (s && s.attributes && s.attributes.hvac_action ? s.attributes.hvac_action === "heating" : s && s.state === "heat") return true; }
+    return false;
+  }
   _wx() { const s = this.st(this._config.weather); return s ? s.attributes || {} : {}; }
   _windKmh(v, unit) {
     if (v === null || !isFinite(v)) return null;
@@ -58,7 +99,7 @@ class SfAirCard extends SfBase {
   _rooms() {
     const c = this._config;
     if (this._multi()) return c.rooms.filter((r) => r && typeof r === "object");
-    return [{ name: c.room || "", temperature: c.indoor_temperature, humidity: c.indoor_humidity, co2: c.co2, pm25: c.indoor_pm25, openings: c.openings }];
+    return [{ name: c.room || "", temperature: c.indoor_temperature, humidity: c.indoor_humidity, co2: c.co2, pm25: c.indoor_pm25, openings: c.openings, heating: c.heating }];
   }
   _readRoom(r) { const n = (id) => (typeof id === "string" && id ? this.num(id) : null); return { Ti: n(r.temperature), RHi: n(r.humidity), co2: n(r.co2), pmi: n(r.pm25) }; }
   _read() {
@@ -97,6 +138,8 @@ class SfAirCard extends SfBase {
       if (m.To < m.Ti - 6 && m.Ti <= cMax) { chill = true; why.push(["warn", "air.why_chill", { v: `${this.nf(m.Ti - m.To, 0)} °C` }]); }
       if (m.To > m.Ti + 1 && m.Ti >= cMax - 1) { heat = true; why.push(["warn", "air.why_heat", { v: `${this.nf(m.To - m.Ti, 1)} °C` }]); }
     }
+    const mold = this._moldFor(r);
+    if (mold !== null) why.unshift(["warn", "air.why_mold", { v: `${this.nf(mold.h, 0)} h${mold.lower ? "+" : ""}` }]);
     const v = block ? "closed" : gain >= 2 && !chill && !heat ? "open" : gain >= 1 ? "short" : chill || heat ? "none" : "free";
     return { v, why, AHi, AHo, gain, cool: m.Ti !== null && m.Ti > cMax };
   }
@@ -216,7 +259,8 @@ class SfAirCard extends SfBase {
   // What an open window means for the verdict: airing (good), enough (aired long enough, close it), close (it should not be open).
   _status(r, d) {
     const o = this._opened(r); if (!o) return null;
-    const v = { v: this.ago(o.id) };
+    const v = { v: this.ago(o.id) }, hm = sfAirNum(this._config.heating_open_min, 10);
+    if (o.min >= hm && this._heating(r)) return { k: "heat", tone: SF_C.red, why: ["bad", "air.why_open_heating", v] };
     if (d.v === "closed" || d.v === "none") return { k: "close", tone: SF_C.red, why: ["bad", "air.why_open_bad", v] };
     const max = d.v === "short" ? 10 : d.v === "open" && !d.cool ? 20 : Infinity;
     if (o.min > max) return { k: "enough", tone: SF_C.amber, why: ["warn", "air.why_open_long", v] };
