@@ -7,6 +7,8 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 ### Added
 - **Weather card: "Feels like" is now always available.** When your weather entity does not provide `apparent_temperature`, the card computes it itself (Steadman apparent temperature, from the temperature, humidity and wind). The value your entity provides is still used first. Works in °C and °F, and with wind in km/h, m/s, mph, knots or ft/s. Nothing is shown if the humidity or the wind is missing.
 
+- **Weather card: a winter line.** When the next 14 hours go down to freezing, the card shows **Frost expected** with the lowest temperature, in amber. If it is already freezing and raining, it shows **Risk of black ice**. The limit is `frost_below` (in °C, default `0`). Translated in the 11 languages.
+
 ### Changed
 - README: on the Home Assistant mobile app, if a card still shows its old name or look after an update, use **App settings → Troubleshooting → Reset frontend cache**.
 

@@ -912,6 +912,8 @@ const SF_T = {
   "weather.need": ["Une entité météo","A weather entity","Una entidad meteorológica","Eine Wetter-Entität","Een weerentiteit","Un'entità meteo","Uma entidade meteorológica","Encja pogody","Сущность погоды","一个天气实体","كيان طقس"],
   "weather.wind": ["Vent","Wind","Viento","Wind","Wind","Vento","Vento","Wiatr","Ветер","风","الرياح"],
   "weather.feels": ["Ressenti","Feels like","Sensación","Gefühlt","Gevoel","Percepita","Sensação","Odczuwalna","Ощущается","体感","المحسوسة"],
+  "weather.frost": ["Gel prévu","Frost expected","Helada prevista","Frost erwartet","Vorst verwacht","Gelo previsto","Geada prevista","Przymrozek","Ожидаются заморозки","预计结冰","متوقع صقيع"],
+  "weather.ice": ["Risque de verglas","Risk of black ice","Riesgo de hielo","Glatteisgefahr","Kans op gladheid","Rischio di ghiaccio","Risco de gelo na estrada","Ryzyko gołoledzi","Риск гололёда","有路面结冰风险","خطر الجليد على الطرق"],
   "weather.no_forecast": ["Prévisions indisponibles","Forecast unavailable","Previsión no disponible","Vorhersage nicht verfügbar","Verwachting niet beschikbaar","Previsioni non disponibili","Previsão indisponível","Prognoza niedostępna","Прогноз недоступен","预报不可用","التوقعات غير متاحة"],
   "weather_ed.title": ["Météo et horloge","Weather and clock","Tiempo y reloj","Wetter und Uhr","Weer en klok","Meteo e orologio","Tempo e relógio","Pogoda i zegar","Погода и часы","天气与时钟","الطقس والساعة"],
   "weather_ed.weather": ["Météo (entité weather)","Weather (weather entity)","Tiempo (entidad weather)","Wetter (weather-Entität)","Weer (weather-entiteit)","Meteo (entità weather)","Tempo (entidade weather)","Pogoda (encja weather)","Погода (сущность weather)","天气（weather 实体）","الطقس (كيان weather)"],

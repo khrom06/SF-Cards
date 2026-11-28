@@ -1412,6 +1412,13 @@ __SF.SF_HOOK.tr = (lang, key) => {
     cbs.hourly({ forecast: fc(true) }); cbs.daily({ forecast: [...fc(false), null, { datetime: "nope" }, 5] }); await wait(40);
     const strips = el.shadowRoot.querySelectorAll(".st"); if (strips.length !== 2 || !strips[0].children.length || !strips[1].children.length) fail("weather: the hourly and daily strips are expected");
     if (el.shadowRoot.querySelector("img")) fail("weather: hostile forecast text must be escaped");
+    if (el.shadowRoot.querySelector(".fr")) fail("weather: no frost line when nothing freezes");
+    { const ef = document.createElement("sf-weather-card"), cf = {}; ef.setConfig({ weather: "weather.wx", forecast: "hourly" }); document.body.appendChild(ef); ef.hass = { ...HASS(base, "en"), connection: { subscribeMessage: async (cb, m) => { cf.cb = cb; return () => {}; } } }; await wait(30);
+      cf.cb({ forecast: [{ datetime: new Date(Date.now() + 3 * 3600000).toISOString(), condition: "cloudy", temperature: -2 }] }); await wait(40);
+      const fr = ef.shadowRoot.querySelector(".fr"); if (!fr || !/Frost expected/.test(fr.textContent) || !/-2|\u22122/.test(fr.textContent)) fail("weather: a forecast under 0 shows the frost line with the lowest value");
+      ef.setConfig({ weather: "weather.wx", forecast: "hourly", frost_below: -5 }); await wait(40); if (ef.shadowRoot.querySelector(".fr")) fail("weather: frost_below moves the threshold"); 
+      const wet = { ...base, "weather.wx": { ...base["weather.wx"], state: "rainy", attributes: { ...base["weather.wx"].attributes, temperature: -1 } } }; ef.setConfig({ weather: "weather.wx", forecast: "hourly", temperature: "sensor.none" }); ef.hass = { ...HASS(wet, "en"), connection: { subscribeMessage: async () => () => {} } }; await wait(40);
+      if (!/black ice/.test((ef.shadowRoot.querySelector(".fr") || {}).textContent || "")) fail("weather: freezing and raining shows the black ice warning"); ef.remove(); }
     if (!/11[.,]2/.test(el.shadowRoot.textContent) || !/71 %/.test(el.shadowRoot.textContent)) fail("weather: current temperature and humidity expected");
     if (!el.shadowRoot.querySelector(".ck .tm")) fail("weather: the clock is shown by default");
     el.setConfig({ weather: "weather.wx", clock: false, forecast: "none" }); await wait(40); if (el.shadowRoot.querySelector(".ck") || el.shadowRoot.querySelector(".st")) fail("weather: clock: false / forecast: none hide those parts");

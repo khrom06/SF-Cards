@@ -2462,6 +2462,11 @@
    "benignSuite": true
   },
   {
+   "key": "29h-weather.js|this.esc(this.t(\"weather.ice\"))#1",
+   "ctx": "text",
+   "benignSuite": true
+  },
+  {
    "key": "29h-weather.js|this._deg(daily[0].temperature)#1",
    "ctx": "text",
    "benignSuite": true
