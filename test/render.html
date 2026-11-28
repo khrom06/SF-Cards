@@ -904,6 +904,27 @@ __SF.SF_HOOK.tr = (lang, key) => {
     if (pills.some((p) => p !== "Closed")) fail(`air rooms: dirty outside air must close every room, pills = ${pills.join(", ")}`);
     if (sr.querySelectorAll(".why span").length !== 1) fail(`air rooms: the shared outside reason must be shown once (${sr.querySelectorAll(".why span").length} chips)`);
     el.remove(); }
+  // 5g2. Winter warnings of the Air card: heat lost (window open while the thermostat heats) and mold risk (humidity high for hours, from the history).
+  { const ago = (m) => new Date(Date.now() - m * 60000).toISOString(), op = (m) => ({ state: "on", attributes: {}, last_changed: ago(m) });
+    const rm = { name: "Living", temperature: "sensor.air_ti", humidity: "sensor.air_hi", openings: "binary_sensor.air_hw", heating: "climate.air_c" };
+    const cl = (a) => ({ state: "heat", attributes: { hvac_action: a } });
+    const run = async (cfg, st, ws) => { const el = mount("sf-air-card", { ...FULL["sf-air-card"], rooms: [rm], ...cfg }, "en", { ...base, ...st }); el.hass = { ...HASS({ ...base, ...st }, "en"), callWS: ws || (async () => ({})) }; await wait(40); return el; };
+    let el = await run({}, { "binary_sensor.air_hw": op(30), "climate.air_c": cl("heating") });
+    if (!/while the heating is on/.test(el.shadowRoot.textContent) || !/Heat lost/.test(el.shadowRoot.textContent)) fail("air heating: a window open for 30 min while heating must warn"); el.remove();
+    el = await run({}, { "binary_sensor.air_hw": op(3), "climate.air_c": cl("heating") });
+    if (/Heat lost/.test(el.shadowRoot.textContent)) fail("air heating: 3 minutes is only airing, no warning"); el.remove();
+    el = await run({}, { "binary_sensor.air_hw": op(30), "climate.air_c": cl("idle") });
+    if (/Heat lost/.test(el.shadowRoot.textContent)) fail("air heating: a thermostat that is not heating gives no warning"); el.remove();
+    const hist = (h) => async (m) => ({ "sensor.air_hi": [{ s: "50", lu: (Date.now() - 10 * 3600000) / 1000 }, { s: "70", lu: (Date.now() - h * 3600000) / 1000 }, { s: "80", lu: (Date.now() - 3600000) / 1000 }] });
+    let calls = 0; const counted = (f) => async (m) => { calls++; return f(m); };
+    el = await run({}, { "sensor.air_hi": { state: "80", attributes: {} } }, counted(hist(6))); await wait(60);
+    if (!/damp for 6 h/.test(el.shadowRoot.textContent)) fail("air mold: humidity over 65 % for 6 h (limit 4 h) must warn, got " + el.shadowRoot.textContent.slice(0, 200));
+    for (let i = 0; i < 20; i++) el.hass = { ...HASS({ ...base, "sensor.air_hi": { state: "80", attributes: {} } }, "en"), callWS: counted(hist(6)) }; await wait(40);
+    if (calls !== 1) fail(`air mold: one history request per room every 10 minutes (got ${calls})`); el.remove();
+    el = await run({ mold_after_h: 8 }, { "sensor.air_hi": { state: "80", attributes: {} } }, hist(6)); await wait(60);
+    if (/mold risk/.test(el.shadowRoot.textContent)) fail("air mold: mold_after_h moves the delay"); el.remove();
+    calls = 0; el = await run({}, { "sensor.air_hi": { state: "50", attributes: {} } }, counted(hist(6))); await wait(60);
+    if (calls !== 0 || /mold risk/.test(el.shadowRoot.textContent)) fail("air mold: under the limit nothing is asked and nothing is shown"); el.remove(); }
   // 5f. Connect / disconnect cycles (HA moves cards in edit mode): timers do not stack, everything is cleaned up at the end;
   // and a nested editor receives the `hass` updates.
   { const live = new Set(), si = window.setInterval, ci = window.clearInterval;

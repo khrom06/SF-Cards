@@ -812,6 +812,7 @@ items:
 - **Open-plan spaces.** One sensor often covers several rooms (living room + kitchen + dining): list them in `areas` and they are shown under the room name.
 - **Window sensors.** Add the room's window / door contacts in `openings`: the card confirms *airing* when it is the right time, says *close it* once a quick airing has lasted long enough, and *close it!* when the window should not be open at all.
 - Thresholds can be set for the whole card or per room (a bathroom can tolerate more humidity).
+- **Winter warnings.** Add `heating: climate.living_room` to a room: if one of its `openings` stays open for 10 minutes (`heating_open_min`) while that thermostat is heating, the room shows **Heat lost**. And when a room's humidity stays at or above 65 % (`mold_max`) for 4 hours in a row (`mold_after_h`), the card says **mold risk** and for how long (read from the humidity sensor's history, one request every 10 minutes and only while the humidity is that high). Both only inform: nothing is switched. A bathroom or a kitchen needs a higher `mold_max` (for example 75), otherwise every shower would warn.
 
 ```yaml
 type: custom:sf-air-card
@@ -830,10 +831,12 @@ rooms:
     co2: sensor.living_co2                        # optional
     pm25: sensor.air_purifier_pm25                # optional: indoor fine particles
     openings: [binary_sensor.living_window, binary_sensor.patio_door]   # optional
+    heating: climate.living_room                  # optional: warns if a window stays open while it heats
   - name: Bathroom
     temperature: sensor.bathroom_temperature
     humidity: sensor.bathroom_humidity
     humidity_max: 70                              # per-room threshold (also comfort_min / comfort_max)
+    mold_max: 75                                  # per-room mold limit (default 65 %)
     openings: binary_sensor.bathroom_window
 comfort_min: 19          # °C
 comfort_max: 24
@@ -842,9 +845,12 @@ co2_max: 1000            # ppm
 pm25_max: 25             # µg/m³ outside
 pm25_in_max: 15          # µg/m³ inside
 wind_max: 40             # km/h
+mold_max: 65             # %: humidity from which the mold clock starts
+mold_after_h: 4          # hours in a row before the warning
+heating_open_min: 10     # minutes a window may stay open while the room heats
 ```
 
-For a single room you can skip `rooms:` and use `indoor_temperature`, `indoor_humidity`, `co2`, `indoor_pm25` and `openings` at the top level.
+For a single room you can skip `rooms:` and use `indoor_temperature`, `indoor_humidity`, `co2`, `indoor_pm25` and `openings` (and `heating`) at the top level.
 
 ### sf-automations-card
 

@@ -8,6 +8,10 @@ All notable changes to SF Cards. Versions follow [semantic versioning](https://s
 - **Weather card: "Feels like" is now always available.** When your weather entity does not provide `apparent_temperature`, the card computes it itself (Steadman apparent temperature, from the temperature, humidity and wind). The value your entity provides is still used first. Works in °C and °F, and with wind in km/h, m/s, mph, knots or ft/s. Nothing is shown if the humidity or the wind is missing.
 
 - **Weather card: a winter line.** When the next 14 hours go down to freezing, the card shows **Frost expected** with the lowest temperature, in amber. If it is already freezing and raining, it shows **Risk of black ice**. The limit is `frost_below` (in °C, default `0`). Translated in the 11 languages.
+- **Fresh air card: two winter warnings.**
+  - **Heat lost:** add `heating: climate.xxx` to a room. When one of its window or door sensors stays open for `heating_open_min` minutes (default 10) while that thermostat is heating, the room says so.
+  - **Mold risk:** when a room's humidity stays at or above `mold_max` (default 65 %) for `mold_after_h` hours in a row (default 4), the card warns and shows for how long. The duration comes from the humidity sensor's history, with one request per room every 10 minutes and only while the humidity is that high. A bathroom or kitchen can have its own, higher `mold_max`.
+  - Both only inform, nothing is switched. Settings are in the card editor, texts translated in the 11 languages.
 
 ### Changed
 - README: on the Home Assistant mobile app, if a card still shows its old name or look after an update, use **App settings → Troubleshooting → Reset frontend cache**.
