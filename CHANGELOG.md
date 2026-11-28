@@ -2,6 +2,14 @@
 
 All notable changes to SF Cards. Versions follow [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Weather card: "Feels like" is now always available.** When your weather entity does not provide `apparent_temperature`, the card computes it itself (Steadman apparent temperature, from the temperature, humidity and wind). The value your entity provides is still used first. Works in °C and °F, and with wind in km/h, m/s, mph, knots or ft/s. Nothing is shown if the humidity or the wind is missing.
+
+### Changed
+- README: on the Home Assistant mobile app, if a card still shows its old name or look after an update, use **App settings → Troubleshooting → Reset frontend cache**.
+
 ## [1.30.0] - 2026-11-27
 **A release for people who are new to Home Assistant.** A reader told us it took a while to find the temperature graphs, and that it was the *Trend* card. So the card picker, the README and the wall-panel header now try to be understandable on the first visit, without YAML and without knowing the vocabulary. Three beginners' read-throughs and a fact-check against the code shaped the wording.
 

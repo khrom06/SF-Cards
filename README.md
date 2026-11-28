@@ -136,7 +136,7 @@ SF Cards is in the default catalogue, so there is nothing to add by hand:
 
 1. Open **Marketplace** (or **HACS** on older versions).
 2. Search for **SF Cards** and click **Download** (or **Install**).
-3. **Reload your browser** (hard refresh, or close and reopen the Home Assistant app). Home Assistant loads the cards for you.
+3. **Reload your browser** (hard refresh, or close and reopen the Home Assistant app). Home Assistant loads the cards for you. On the mobile app, if an old version still shows after an update: **App settings → Troubleshooting → Reset frontend cache**.
 
 [![Open in Home Assistant](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 

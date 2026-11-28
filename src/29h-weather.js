@@ -45,6 +45,14 @@ class SfWeatherCard extends SfBase {
   layoutKey(w) { return `${this._cols(w)}${w < 280 ? "n" : ""}`; }
   _wx(cond) { const e = SF_WEATHER[String(cond)]; return e ? { label: this.t(e[0]), icon: e[1] } : { label: cond ? String(cond) : "", icon: "mdi:weather-cloudy" }; }
   _fmt(d, o) { try { return new Intl.DateTimeFormat(this.locLatn, o).format(d); } catch (e) { return ""; } }
+  // Steadman apparent temperature: AT = T + 0.33 e - 0.70 v - 4.00 (T in °C, v in m/s, e = water vapour pressure in hPa). Null when an input is missing.
+  _steadman(t, tu, hum, wind, wu) {
+    if (t === null || hum === null || hum === undefined || wind === null || wind === undefined || !isFinite(Number(t)) || !isFinite(Number(hum)) || !isFinite(Number(wind))) return null;
+    const f = /f/i.test(String(tu)), T = f ? (Number(t) - 32) / 1.8 : Number(t), u = String(wu || "km/h").toLowerCase();
+    const k = u.includes("m/s") ? 1 : u.includes("mph") || u.includes("mi") ? 0.44704 : u.includes("kn") ? 0.514444 : u.includes("ft") ? 0.3048 : 1 / 3.6;   // to m/s (default km/h, Home Assistant's unit)
+    const e = (Math.min(100, Math.max(0, Number(hum))) / 100) * 6.105 * Math.exp((17.27 * T) / (237.7 + T)), at = T + 0.33 * e - 0.7 * Number(wind) * k - 4;
+    return f ? at * 1.8 + 32 : at;
+  }
   _deg(v) { const n = Number(v); return v === null || v === undefined || !isFinite(n) ? "—" : `${this.nf(n, 0)}°`; }
   css() {
     return `
@@ -79,7 +87,9 @@ class SfWeatherCard extends SfBase {
     const kp = [];
     if (ok && a.humidity !== null && isFinite(Number(a.humidity))) kp.push(`${this.esc(this.t("room.humidity"))} <b>${this.nf(a.humidity, 0)} %</b>`);
     if (ok && a.wind_speed !== null && isFinite(Number(a.wind_speed))) kp.push(`${this.esc(this.t("weather.wind"))} <b>${this.nf(a.wind_speed, 0)} ${this.esc(a.wind_speed_unit || "km/h")}</b>`);
-    if (ok && a.apparent_temperature !== null && isFinite(Number(a.apparent_temperature))) kp.push(`${this.esc(this.t("weather.feels"))} <b>${this._deg(a.apparent_temperature)}</b>`);
+    // "Feels like": the value the weather entity gives, else computed here (Steadman apparent temperature) from the temperature, humidity and wind
+    const feels = ok && a.apparent_temperature !== null && a.apparent_temperature !== undefined && isFinite(Number(a.apparent_temperature)) ? Number(a.apparent_temperature) : ok ? this._steadman(tv, tu, a.humidity, a.wind_speed, a.wind_speed_unit) : null;
+    if (feels !== null) kp.push(`${this.esc(this.t("weather.feels"))} <b>${this._deg(feels)}</b>`);
     if (daily[0]) kp.push(`<b>↑ ${this._deg(daily[0].temperature)}</b> <b>↓ ${this._deg(daily[0].templow)}</b>`);
     const cell = (x, top, low) => { const w = this._wx(x.condition), r = Number(x.precipitation_probability);
       return `<div class="${sunny(x.condition)}" title="${this.esc(w.label)}"><span class="h">${this.esc(top)}</span>${this.icon(w.icon, 20)}<span class="v">${this._deg(x.temperature)}</span>${low ? `<span class="lo">${this._deg(x.templow)}</span>` : `<span class="r">${isFinite(r) && r >= 10 ? `${this.nf(r, 0)} %` : ""}</span>`}</div>`; };
