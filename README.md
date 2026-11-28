@@ -136,7 +136,7 @@ SF Cards is in the default catalogue, so there is nothing to add by hand:
 
 1. Open **Marketplace** (or **HACS** on older versions).
 2. Search for **SF Cards** and click **Download** (or **Install**).
-3. **Reload your browser** (hard refresh, or close and reopen the Home Assistant app). Home Assistant loads the cards for you. On the mobile app, if an old version still shows after an update: **App settings → Troubleshooting → Reset frontend cache**.
+3. **Reload your browser** (hard refresh, or close and reopen the Home Assistant app). Home Assistant loads the cards for you. On the mobile app, if an old version still shows after an update: **Settings → Companion app → Debugging → Reset frontend cache** on iOS (**Troubleshooting** instead of *Debugging* on Android; the label can vary with the app version).
 
 [![Open in Home Assistant](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=khrom06&repository=SF-Cards&category=dashboard)
 
@@ -812,6 +812,8 @@ items:
 - **Open-plan spaces.** One sensor often covers several rooms (living room + kitchen + dining): list them in `areas` and they are shown under the room name.
 - **Window sensors.** Add the room's window / door contacts in `openings`: the card confirms *airing* when it is the right time, says *close it* once a quick airing has lasted long enough, and *close it!* when the window should not be open at all.
 - Thresholds can be set for the whole card or per room (a bathroom can tolerate more humidity).
+<img src="assets/anim/winter.gif" alt="Winter warnings: frost expected on the Weather card, then heat lost through an open window and a mold risk on the Fresh air card" width="420">
+
 - **Winter warnings.** Add `heating: climate.living_room` to a room: if one of its `openings` stays open for 10 minutes (`heating_open_min`) while that thermostat is heating, the room shows **Heat lost**. And when a room's humidity stays at or above 65 % (`mold_max`) for 4 hours in a row (`mold_after_h`), the card says **mold risk** and for how long (read from the humidity sensor's history, one request every 10 minutes and only while the humidity is that high). Both only inform: nothing is switched. A bathroom or a kitchen needs a higher `mold_max` (for example 75), otherwise every shower would warn.
 
 ```yaml
